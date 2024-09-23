@@ -8,7 +8,7 @@ function App() {
   // Función para manejar el clic en los iconos
   const handleClick = (section) => {
     alert(`Navegando a la sección: ${section}`);
-    // Aquí puedes implementar la lógica de navegación o interacción
+    // Aquí puedes implementar la lógica de navegación o interacción.
   };
 
   return (
