@@ -1,9 +1,15 @@
-import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Menu from './MenuPrincipal';
+import Anteproyectos from './Anteproyectos';
+import Asignaciones from './Asignaciones';
+import GestionPerfiles from './GestionPerfiles';
+// Otras importaciones de componentes
 import './App.css';
 import { Link, Route, Routes } from 'react-router-dom';
 import anteproyectos from './pages/anteproyectos';
 
 function App() {
+<<<<<<< Updated upstream
 
   // Función para manejar el clic en los iconos
   const handleClick = (section) => {
@@ -55,6 +61,18 @@ function App() {
         <p>Instituto Tecnológico de Costa Rica<br/>2024</p>
       </footer>
     </div>
+=======
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Menu />} />  {/* Ruta para la página principal */}
+        <Route path="/anteproyectos" element={<Anteproyectos />} />  {/* Ruta para anteproyectos */}
+        <Route path="/asignaciones" element={<Asignaciones />} />
+        <Route path="/gestion-perfiles" element={<GestionPerfiles />} />
+        {/* Otras rutas para más secciones */}
+      </Routes>
+    </Router>
+>>>>>>> Stashed changes
   );
 }
 

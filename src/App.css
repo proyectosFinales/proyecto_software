@@ -28,7 +28,7 @@ h1 {
   grid-gap: 30px;
   justify-items: center;
   align-items: center;
-  padding: 50px;
+  padding: 250px;
 }
 
 .menu-item {
@@ -38,7 +38,9 @@ h1 {
   justify-content: center;
   font-size: 18px;
   cursor: pointer; /* Hacemos que se vea como botón */
+  text-decoration: none;
   transition: transform 0.2s ease-in-out;
+  color: #002855; /* Color de texto */
 }
 
 .menu-item:hover {
