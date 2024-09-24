@@ -4,13 +4,8 @@ import './MenuPrincipal.css';
 
 const Menu = () => {
   return (
-    <div className='App'>
-      <header className='App-header'>
+    <div>
       <h1>Inicio</h1>
-      <div className="settings-icon">
-            <i className="fas fa-cog"></i>
-          </div>
-      </header>
       <div className="menu-grid">
         <Link to="/anteproyectos" className="menu-item">
           <i className="fas fa-folder"></i>
@@ -37,9 +32,7 @@ const Menu = () => {
           <p>Citas</p>
         </Link>
       </div>
-      <footer className="App-footer">
-          <p>Instituto Tecnológico de Costa Rica<br/>2024</p>
-        </footer>
+      <footer>Instituto Tecnológico de Costa Rica 2024</footer>
     </div>
   );
 };
