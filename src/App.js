@@ -1,8 +1,8 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import Menu from './MenuPrincipal';
-import Anteproyectos from './Anteproyectos';
-import Asignaciones from './Asignaciones';
-import GestionPerfiles from './GestionPerfiles';
+import Menu from './pages/MenuPrincipal';
+import Anteproyectos from './pages/Anteproyectos';
+import Asignaciones from './pages/Asignaciones';
+import GestionPerfiles from './pages/GestionPerfiles';
 // Otras importaciones de componentes
 
 function App() {

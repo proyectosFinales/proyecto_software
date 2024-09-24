@@ -1,9 +1,12 @@
-import React from "react";
+import React from 'react';
 
-function anteproyectos(){
-    return(
-        <div>Anteproyectos</div>
-    )
-}
+const Anteproyectos = () => {
+  return (
+    <div>
+      <h1>Anteproyectos</h1>
+      <p>Esta es la sección de Anteproyectos.</p>
+    </div>
+  );
+};
 
-export default anteproyectos
+export default Anteproyectos;
