@@ -4,7 +4,7 @@ import '../styles/AnteproyectosEstudiante.css';
 const AnteproyectosEstudiante = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [anteproyectos, setAnteproyectos] = useState([
-    { id: 1, name: "Deutch Center for management" },
+    { id: 1, name: "Deutch Center for management Deutch Center for management Deutch Center for management" },
     { id: 2, name: "Otro anteproyecto" }
   ]);
 
@@ -35,7 +35,6 @@ const AnteproyectosEstudiante = () => {
             &#9776;
           </button>
           <h1>Anteproyectos</h1>
-          <button className="settings-icon">&#9881;</button>
         </div>
       </header>
       
@@ -71,9 +70,11 @@ const AnteproyectosEstudiante = () => {
                   <tr key={proyecto.id}>
                     <td>{proyecto.name}</td>
                     <td>
-                      <button onClick={() => handleEdit(proyecto.id)} className="btn edit">Editar</button>
-                      <button onClick={() => handleDownload(proyecto.id)} className="btn download">Descargar</button>
-                      <button onClick={() => handleDelete(proyecto.id)} className="btn delete">Eliminar</button>
+                        <div class="button-container">
+                            <button onClick={() => handleEdit(proyecto.id)} className="btn edit">Editar</button>
+                            <button onClick={() => handleDownload(proyecto.id)} className="btn download">Descargar</button>
+                            <button onClick={() => handleDelete(proyecto.id)} className="btn delete">Eliminar</button>
+                        </div>
                     </td>
                   </tr>
                 ))}

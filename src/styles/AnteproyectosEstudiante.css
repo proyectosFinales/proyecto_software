@@ -16,16 +16,23 @@ html, body {
     background-color: #f1f1f1;
     padding: 10px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    border-bottom: 1px solid #000;
+    border-bottom: 2px solid #000;
+  }
+  h1 {
+    background-color: inherit; /* Para asegurarse de que el fondo sea transparente */
+    margin: 0; /* Elimina cualquier margen alrededor del h1 */
+    padding: 0; /* Elimina cualquier padding */
   }
   
   .menu-icon {
-    font-size: 24px;
+    font-size: 35px;
     background: none;
     border: none;
     cursor: pointer;
+    position: absolute;
+    left: 20px; /* Ajusta el valor según lo que necesites */
   }
   
   .settings-icon {
@@ -73,42 +80,59 @@ html, body {
     border: none;
     cursor: pointer;
     margin-bottom: 20px;
+    border-radius: 5px;
   }
   
   .project-list {
-    width: 100%;
+    width: 60%;
   }
   
   .project-table {
     width: 100%;
     border-collapse: collapse;
+    background-color: #d9d9d9;
+  }
+  td:first-child {
+    width: 65%; /* La primera columna será el 70% del ancho */
+  }
+  
+  td:last-child {
+    width: 35%; /* La segunda columna será el 30% del ancho */
   }
   
   .project-table th, .project-table td {
-    border: 1px solid #000;
+    border: 0px solid #000;
     padding: 10px;
+    background-color: #ffffff;
   }
   
   .project-table .btn {
-    margin-right: 10px;
-    padding: 5px 10px;
+    margin-right: 5px;
+    padding: 10px 15px;
     border: none;
     cursor: pointer;
+  }
+
+  .button-container{
+    text-align: right;
   }
   
   .project-table .edit {
     background-color: #4CAF50;
     color: white;
+    border-radius: 5px;
   }
   
   .project-table .download {
     background-color: #3b3b3b;
     color: white;
+    border-radius: 5px;
   }
   
   .project-table .delete {
-    background-color: #f44336;
+    background-color: #BD3737;
     color: white;
+    border-radius: 5px;
   }
   
   footer {
