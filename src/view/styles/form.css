@@ -36,16 +36,28 @@ border-radius: 5px 5px 0 0;
     background: var(--background1);
 }
 
-.dark-button {
-    background-color: var(--primary1);
-    color: var(--background1);
+.button {
     font-size: 18px;
-    padding: 15px 20px;
+    padding: 10px 50px;
     border-radius: 10px;
-    width: 50%;
     cursor: pointer;
 }
 
-.dark-button:hover {
+.button-dark {
+    background-color: var(--primary1);
+    color: var(--background1);
+}
+
+.button-dark:hover {
     background-color: var(--primary2);   
+}
+
+.button-light {
+    background-color: var(--background1);
+    color: var(--primary1);
+    border: 2px solid var(--primary1);
+}
+
+.button-light:hover {
+    background-color: var(--secondary1);   
 }

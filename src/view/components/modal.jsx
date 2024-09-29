@@ -33,7 +33,7 @@ const Modal = ({ modalRef = {}, title, footer, children }) => {
                 </main>
                 <footer>
                     {footer}
-                    <Button type="light" onClick={close} className={styles.closeButton}>Cerrar</Button>
+                    <Button type="light" onClick={close}>Cerrar</Button>
                 </footer>
             </section>
         </div>

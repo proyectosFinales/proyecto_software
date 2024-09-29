@@ -12,7 +12,7 @@
 }
 
 .modal .dialog {
-    background-color: #1c1b22;
+    background-color: var(--background1);
     width: 80%;
     display: flex;
     flex-direction: column;
@@ -23,7 +23,7 @@
     display: flex;
     justify-content: space-between;
     padding: 10px 15px 15px 15px;
-    border-bottom: 1px solid #525157;
+    border-bottom: 1px solid var(--secondary1);
     font-size: 24px;
     align-items: center;
 }
@@ -33,7 +33,7 @@
     border-color: transparent;
     cursor: pointer;
     font-size: 50px;
-    color: #ffffff;
+    color: var(--primary1);
 }
 
 .modal main {
@@ -46,7 +46,7 @@
     justify-content: flex-end;
     margin-top: auto;
     padding: 15px;
-    border-top: 1px solid #525157;
+    border-top: 1px solid var(--secondary1);
 }
 
 .closeButton {
