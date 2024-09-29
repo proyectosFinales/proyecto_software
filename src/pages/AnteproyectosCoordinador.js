@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate
-import '../styles/AnteproyectosEstudiante.css';
+import '../styles/AnteproyectosCoordinador.css';
 
-const AnteproyectosEstudiante = () => {
+const AnteproyectosCoordinador = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [anteproyectos, setAnteproyectos] = useState([
-    { id: 1, name: "Deutch Center for management Deutch Center for management Deutch Center for management" },
-    { id: 2, name: "Otro anteproyecto" }
+    { id: 1, name: "Deutch Center for management Deutch Center for management Deutch Center for management", studentName: "Ana Victoria Castro"},
+    { id: 2, name: "Otro anteproyecto", studentName: "Otro estudiante" }
   ]);
 
   const navigate = useNavigate(); // Hook para redireccionar
@@ -15,19 +15,14 @@ const AnteproyectosEstudiante = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleEdit = (id) => {
-    console.log(`Editando anteproyecto con id ${id}`);
+  const handleRevisar = (id) => {
+    navigate('/formulario-coordinador')
     // Lógica para editar
   };
 
-  const handleDownload = (id) => {
+  const handleReporte = (id) => {
     console.log(`Descargando anteproyecto con id ${id}`);
     // Lógica para descargar
-  };
-
-  const handleDelete = (id) => {
-    setAnteproyectos(anteproyectos.filter(proyecto => proyecto.id !== id));
-    console.log(`Eliminando anteproyecto con id ${id}`);
   };
 
   const handleCreateProject = () => {
@@ -64,23 +59,24 @@ const AnteproyectosEstudiante = () => {
         
         <main>
           <div className="project-list">
-            <button className="create-project" onClick={handleCreateProject}>Crear anteproyecto</button>
+            <button className="create-project" onClick={handleCreateProject}>Generar reporte de anteproyectos</button>
             <table className="project-table">
               <thead>
                 <tr>
-                  <th>Anteproyectos creados</th>
+                  <th>Estudiantes</th>
+                  <th>Propuesta de proyecto</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {anteproyectos.map((proyecto) => (
                   <tr key={proyecto.id}>
+                    <td>{proyecto.studentName}</td>
                     <td>{proyecto.name}</td>
                     <td>
                         <div className="button-container">
-                            <button onClick={() => handleEdit(proyecto.id)} className="btn edit">Editar</button>
-                            <button onClick={() => handleDownload(proyecto.id)} className="btn download">Descargar</button>
-                            <button onClick={() => handleDelete(proyecto.id)} className="btn delete">Eliminar</button>
+                            <button onClick={() => handleRevisar(proyecto.id)} className="btn revisar">Revisar</button>
+                            <button onClick={() => handleReporte(proyecto.id)} className="btn reporte">Reporte</button>
                         </div>
                     </td>
                   </tr>
@@ -98,4 +94,4 @@ const AnteproyectosEstudiante = () => {
   );
 };
 
-export default AnteproyectosEstudiante;
+export default AnteproyectosCoordinador;
