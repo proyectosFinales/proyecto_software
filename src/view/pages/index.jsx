@@ -19,10 +19,10 @@ function Inicio() {
 					<i className="fas fa-folder"></i>
 					<p>Anteproyectos</p>
 				</div>
-				<div className="menu-item" onClick={() => handleClick('Asignaciones')}>
+				<a className="menu-item" href="/asignaciones">
 					<i className="fas fa-users"></i>
 					<p>Asignaciones</p>
-				</div>
+				</a>
 				<div className="menu-item" onClick={() => handleClick('Gestión de perfiles')}>
 					<i className="fas fa-user-circle"></i>
 					<p>Gestión de perfiles</p>
