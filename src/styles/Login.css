@@ -1,0 +1,115 @@
+/* Estilos generales para el contenedor */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f4f4f4; /* Color de fondo */
+}
+
+/* Caja de inicio de sesión */
+.login-box {
+  width: 400px;
+  height: 600px; /* Altura del contenedor */
+  padding: 40px;
+  background-color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+}
+
+/* Título */
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: #002060; /* Color azul oscuro */
+}
+
+/* Estilo para los campos de entrada */
+.input-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 40px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #002060; /* Color azul oscuro para los iconos */
+}
+
+/* Estilo para el enlace de contraseña olvidada */
+.forgot-password {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.forgot-password a {
+  color: #002060; /* Cambiado a azul oscuro */
+  font-size: 12px;
+  text-decoration: none;
+}
+
+/* Botón de inicio de sesión */
+.btn-login {
+  width: 100%;
+  padding: 10px;
+  background-color: #002060; /* Azul oscuro */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.btn-login:hover {
+  background-color: #003080; /* Azul más oscuro para hover */
+}
+
+/* Botón de registrarse */
+/* Estilo del enlace de registro */
+.btn-register {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  background-color: #ddd; /* Color de fondo similar */
+  color: black;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none; /* Quita el subrayado del enlace */
+  margin-top: 10px; /* Añade un margen */
+}
+
+.btn-register:hover {
+  background-color: #bbb; /* Efecto hover */
+}
+
+
+/* Pie de página */
+.login-footer {
+  position: fixed; /* Fijar en la parte inferior */
+  bottom: 0;
+  left: 0;
+  right: 0; /* Abarca todo el ancho */
+  text-align: center;
+  font-size: 12px;
+  color: #002060; /* Color azul oscuro */
+  background-color: #f4f4f4; /* Color de fondo del pie de página */
+  padding: 10px 0; /* Espaciado */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
