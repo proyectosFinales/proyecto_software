@@ -1,14 +1,12 @@
 @import "bootstrap/dist/css/bootstrap.min.css";
 
-.citas-container {
-    /* display: flex; */
-    /* flex-direction: row; */
+.citas-form {
     padding: 20px;
 }
 
 .cita-form {
     flex: 1;
-    padding: 20px;
+    padding: 20px 50px;
     border: 1px solid #000;
     background-color: #f9f9f9;
 }
