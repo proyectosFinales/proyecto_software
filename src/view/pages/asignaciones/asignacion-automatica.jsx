@@ -1,9 +1,13 @@
 import Button from "../../components/button";
+import Layout from "../../components/layout";
 
 const AsignacionAutomatica = () => {
     return <>
-        <h1>Asignación Automática de profesores a proyectos</h1>
-        <Button>Realizar asignación</Button>
+        <Layout title="Asignación Automática de profesores a proyectos">
+            <center>
+                <Button>Inicializar asignación</Button>
+            </center>
+        </Layout>
     </>;
 }
 

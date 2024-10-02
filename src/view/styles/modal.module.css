@@ -47,8 +47,15 @@
     margin-top: auto;
     padding: 15px;
     border-top: 1px solid var(--secondary1);
+    gap: 5px;
 }
 
 .closeButton {
     margin-left: 15px;
+}
+
+@media (max-width: 1000px){
+    .modal footer {
+        flex-direction: column;
+    }
 }

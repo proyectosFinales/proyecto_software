@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 function Inicio() {
 	// Función para manejar el clic en los iconos
 	const handleClick = (section) => {
@@ -15,14 +17,14 @@ function Inicio() {
 			</header>
 
 			<div className="menu-grid">
-				<div className="menu-item" onClick={() => handleClick('Anteproyectos')}>
+				<Link className="menu-item" to="/anteproyectos">
 					<i className="fas fa-folder"></i>
 					<p>Anteproyectos</p>
-				</div>
-				<a className="menu-item" href="/asignaciones">
+				</Link>
+				<Link className="menu-item" to="/asignaciones">
 					<i className="fas fa-users"></i>
 					<p>Asignaciones</p>
-				</a>
+				</Link>
 				<div className="menu-item" onClick={() => handleClick('Gestión de perfiles')}>
 					<i className="fas fa-user-circle"></i>
 					<p>Gestión de perfiles</p>
@@ -31,10 +33,10 @@ function Inicio() {
 					<i className="fas fa-folder-open"></i>
 					<p>Proyectos</p>
 				</div>
-				<a className="menu-item" href="/carga-datos">
+				<Link className="menu-item" to="/carga-datos">
 					<i className="fas fa-database"></i>
 					<p>Cargar datos</p>
-				</a>
+				</Link>
 				<div className="menu-item" onClick={() => handleClick('Citas')}>
 					<i className="fas fa-clock"></i>
 					<p>Citas</p>

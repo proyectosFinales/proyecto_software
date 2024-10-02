@@ -1,5 +1,7 @@
+import styles from "../styles/input.module.css"
+
 const FloatInput = ({ text, children }) => <>
-    <label className="float-input">
+    <label className={styles.floatInput}>
         <span>{text}</span>
         {children}
     </label>

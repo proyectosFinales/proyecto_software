@@ -61,3 +61,39 @@ h1 {
   font-size: 14px;
   color: #333;
 }
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid var(--primary1);
+  margin: 5px 0 15px 0;
+}
+
+.table thead tr {
+  background-color: var(--secondary2);
+  text-align: left;
+}
+
+.table th {
+  padding: 10px 20px;
+}
+
+.table td {
+  padding: 0 20px;
+}
+
+.table tr:nth-child(even) {
+  background-color: var(--secondary2);
+}
+
+.table tr {
+  font-weight: bold;
+}
+
+.table-buttons {
+  text-align: center;
+}
+
+.table-buttons button {
+  margin: 5px;
+}

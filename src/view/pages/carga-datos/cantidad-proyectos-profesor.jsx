@@ -3,10 +3,11 @@ import * as XLSX from "xlsx";
 import Button from "../../components/button";
 import Modal from "../../components/modal";
 import { FloatInput } from "../../components/input";
+import Layout from "../../components/layout";
 
 const CantidadProyectosProfesor = () => {
     const modalRef = useRef();
-    const [excelData, setExcelData] = useState({titles: [], data: []});
+    const [excelData, setExcelData] = useState({titles: [], data: [], uploaded: false});
 
     const handleExcelChange = event => {
         const file = event.target.files[0];
@@ -22,7 +23,8 @@ const CantidadProyectosProfesor = () => {
                 const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
                 setExcelData({
                     titles: data[0],
-                    data: data.slice(1).filter(d => d.length > 0)
+                    data: data.slice(1).filter(d => d.length > 0),
+                    uploaded: true
                 });
             };
             // Leer el archivo como binario
@@ -31,15 +33,16 @@ const CantidadProyectosProfesor = () => {
     }
 
     return <>
-        <h1 style={{textAlign: "center"}}>Asignación de cantidad de proyectos por profesor</h1>
-        <div style={{ textAlign: "center" }}>
+        <Layout title="Asignación de cantidad de proyectos por profesor">
             <FloatInput text="Ingrese el archivo de excel">
                 <input type="file" accept=".xlsx" onChange={handleExcelChange} />
             </FloatInput>
-            <Button onClick={() => modalRef.open()} type="dark">Subir datos</Button>
-        </div>
-        <Modal title="Subir datos de cantidad de proyectos por profesor?" modalRef={modalRef}>
-            <div>Cantidad de filas: {excelData.data.length}</div>
+            <center>
+                <Button onClick={() => modalRef.open()} type="dark">Subir datos</Button>
+            </center>
+            {excelData.uploaded && 
+                <div style={{marginTop: "20px"}}>Cantidad de filas: {excelData.data.length}</div>
+            }
             <section>
                 {excelData.data.map((row, i) =>
                     <ul key={`row-${i}`}>
@@ -52,6 +55,15 @@ const CantidadProyectosProfesor = () => {
                     </ul>
                 )}
             </section>
+        </Layout>
+        <Modal
+            title="Confirmación"
+            modalRef={modalRef}
+            footer={<Button type="dark">Confirmar</Button>}
+        >
+            <b style={{fontSize: "20px", margin: "0"}}>
+                Está seguro de subir los datos de cantidad de proyectos por profesor en el archivo especificado?
+            </b>
         </Modal>
     </>;
 }

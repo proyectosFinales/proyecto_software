@@ -1,12 +1,12 @@
+import './styles/index.css';
+import './styles/app.css';
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Inicio from "./pages";
 import InicioCargaDatos from "./pages/carga-datos";
 import CantidadProyectosProfesor from "./pages/carga-datos/cantidad-proyectos-profesor";
-import './styles/index.css';
-import './styles/app.css';
-import './styles/form.css';
 import InicioAsignaciones from "./pages/asignaciones";
 import AsignacionAutomatica from "./pages/asignaciones/asignacion-automatica";
+import Anteproyectos from "./pages/anteproyectos";
 
 const App = () => {
     return <Rutas/>;
@@ -24,6 +24,7 @@ const Rutas = () =>
 				<Route index element={<InicioAsignaciones/>}/>
 				<Route path="automatica" element={<AsignacionAutomatica/>}/>
 			</Route>
+			<Route path="/anteproyectos" element={<Anteproyectos/>}></Route>
 		</Routes>
 	</BrowserRouter>
 
