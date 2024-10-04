@@ -8,7 +8,7 @@ const InicioAsignaciones = () => <>
                 <i className="fa-solid fa-laptop-code" style={{color: "var(--primary1)"}}></i>
                 <p>Asignación automática</p>
             </Link>
-            <Link className="menu-item" to="/carga-datos/cantidad-proyectos-profesor" style={{textDecoration: "none", color: "var(--primary1)"}}>
+            <Link className="menu-item" to="/asignaciones/manual" style={{textDecoration: "none", color: "var(--primary1)"}}>
                 <i className="fa-solid fa-laptop-file" style={{color: "var(--primary1)"}}></i>
                 <p>Asignación manual</p>
             </Link>

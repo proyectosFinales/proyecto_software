@@ -1,5 +1,6 @@
 import Button from "../../components/button";
 import Layout from "../../components/layout";
+import styles from "../../styles/table.module.css";
 
 const Anteproyectos = () => {
     const anteproyectos = Array(10).fill({
@@ -10,7 +11,7 @@ const Anteproyectos = () => {
     return <>
         <Layout title="Anteproyectos">
             <Button>Generar reporte de anteproyectos</Button>
-            <table className="table">
+            <table className={styles.table}>
                 <thead>
                     <tr>
                         <th>Estudiante</th>
@@ -23,7 +24,7 @@ const Anteproyectos = () => {
                         <tr key={`anteproyecto-${index}`}>
                             <td>{ap.estudiante.nombre}</td>
                             <td>{ap.anteproyecto.nombre}</td>
-                            <td className="table-buttons">
+                            <td className={styles.tableButtons}>
                                 <Button>Revisar</Button>
                                 <Button>Reporte</Button>
                             </td>
