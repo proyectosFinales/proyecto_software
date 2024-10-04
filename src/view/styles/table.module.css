@@ -33,3 +33,7 @@
 .tableButtons button {
     margin: 5px;
 }
+
+.table td label {
+    margin-top: 10px;
+}
