@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/FormularioEstudiante.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import {Cliente} from '../controlador/Cliente';
+import {supabase} from '../controlador/Cliente';
 
 const EstudianteForm = () => {
   const [nombre, setNombre] = useState('');
@@ -31,14 +31,49 @@ const EstudianteForm = () => {
   const [tipoProyecto, setProyecto] = useState('');
 
   const navigate = useNavigate();
-  const [infoVisible, setInfoVisible] = useState({}); 
+  const [infoVisible, setInfoVisible] = useState({});
 
-
-  const handleSubmit = (e) => {
+  async function insertarAnteproyecto(e) {
     e.preventDefault();
-    // Aquí puedes agregar la lógica para enviar los datos
-    console.log({ nombre, carnet, telefono, correo, sede });
-  };
+    try {
+      const { data, error } = await supabase
+        .from('anteproyectos')
+        .insert({nombre:nombre,
+          carnet:carnet,
+          telefono:telefono,
+          correo:correo,
+          sede:sede,
+          tipoEmpresa:tipoEmpresa,
+          nombreEmpresa:nombreEmpresa,
+          actividadEmpresa:actividadEmpresa,
+          distritoEmpresa:distritoEmpresa,
+          cantonEmpresa:cantonEmpresa,
+          provinciaEmpresa:provinciaEmpresa,
+          nombreAsesor:nombreAsesor,
+          puestoAsesor:puestoAsesor,
+          telefonoContacto:telefonoContacto,
+          correoContacto:correoContacto,
+          nombreHR:nombreHR,
+          telefonoHR:telefonoHR,
+          correoHR:correoHR,
+          tipoEmpresa:tipoEmpresa,
+          contexto:contexto,
+          justificacion:justificacion,
+          sintomas:sintomas,
+          impacto:impacto,
+          nombreDepartamento:nombreDepartamento,
+          tipoProyecto:tipoProyecto
+        });
+      if (error) {
+        console.error('Error al insertar anteproyecto:', error);
+        return;
+      }
+
+      console.log('Anteproyecto insertado:', data);
+    } catch (error) {
+      console.error('Error al insertar anteproyecto:', error);
+    }
+  }
 
   const handleGoBack = () => {
     navigate(-1); // Navega a la página anterior
@@ -55,7 +90,7 @@ const EstudianteForm = () => {
         <h1>Crear anteproyecto</h1>
         </header>
 
-    <form className='form' onSubmit={handleSubmit}>
+    <form className='form' onSubmit={insertarAnteproyecto}>
       <h2>Datos del estudiante</h2>
       
       <div className="form-group">
@@ -163,7 +198,7 @@ const EstudianteForm = () => {
             <input
               type="radio"
               name="tipoEmpresa"
-              value="Regimen definitivo"
+              value="Régimen definitivo"
               onChange={(e) => setEmpresa(e.target.value)}
             />
             Régimen definitivo

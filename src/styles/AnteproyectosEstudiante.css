@@ -1,3 +1,10 @@
+:root {
+  --azul: #060953;
+  --blanco: #ffffff;
+  --rojo: #BD3737;
+  --gris_oscuro: #2C2C2C;
+  --gris_claro: #D9D9D9;
+}
 /* General */
 html, body {
     margin: 0;
@@ -118,19 +125,19 @@ html, body {
   }
   
   .project-table .edit {
-    background-color: #4CAF50;
+    background-color: var(--azul);
     color: white;
     border-radius: 5px;
   }
   
   .project-table .download {
-    background-color: #3b3b3b;
+    background-color: var(--azul);
     color: white;
     border-radius: 5px;
   }
   
   .project-table .delete {
-    background-color: #BD3737;
+    background-color: var(--rojo);
     color: white;
     border-radius: 5px;
   }
