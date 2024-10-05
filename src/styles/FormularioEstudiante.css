@@ -28,13 +28,26 @@ form {
     font-weight: bold;
   }
   
-  input[type="text"],
-  input[type="email"] {
+  .form-group input[type="text"],
+  .form-group input[type="email"] {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
+    resize: vertical;
+    overflow-y: auto;
+  }
+
+  .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    min-height: 5px;
+    resize: vertical;
+    overflow-y: auto;
   }
   
   input[type="radio"] {
@@ -85,4 +98,17 @@ form {
     border-top: 1px solid #000;
     width: 100%;
   }
+  
+  .info-icon {
+    cursor: pointer;
+    margin-left: 5px;
+    color: #007bff; /* Puedes cambiar el color */
+  }
+  
+  .info-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }
+  
   

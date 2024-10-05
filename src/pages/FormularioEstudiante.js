@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/FormularioEstudiante.css'
+import { AiOutlineInfoCircle } from 'react-icons/ai';
+import {Cliente} from '../controlador/Cliente';
 
 const EstudianteForm = () => {
   const [nombre, setNombre] = useState('');
@@ -28,7 +30,8 @@ const EstudianteForm = () => {
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setProyecto] = useState('');
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const [infoVisible, setInfoVisible] = useState({}); 
 
 
   const handleSubmit = (e) => {
@@ -41,6 +44,9 @@ const EstudianteForm = () => {
     navigate(-1); // Navega a la página anterior
   };
 
+  const toggleInfo = (field) => {
+    setInfoVisible((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
   return (
     <div>
@@ -53,13 +59,20 @@ const EstudianteForm = () => {
       <h2>Datos del estudiante</h2>
       
       <div className="form-group">
-        <label>1. Nombre del estudiante: *</label>
+        <label>1. Nombre del estudiante: *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('nombre')} 
+              title="Ingrese su nombre completo."
+            />
+        </label>
         <input
           type="text"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
           required
         />
+        {infoVisible.nombre && <p className="info-text">El nombre debe incluir sus apellidos.</p>}
       </div>
 
       <div className="form-group">

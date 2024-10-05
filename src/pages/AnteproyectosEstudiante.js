@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 import '../styles/AnteproyectosEstudiante.css';
+import { supabase } from '../controlador/Cliente';
 
 const AnteproyectosEstudiante = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [anteproyectos, setAnteproyectos] = useState([
-    { id: 1, name: "Deutch Center for management Deutch Center for management Deutch Center for management" },
-    { id: 2, name: "Otro anteproyecto" }
-  ]);
+  const [anteproyectos, setAnteproyectos] = useState([]);
 
   const navigate = useNavigate(); // Hook para redireccionar
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  useEffect(() => {
+    consultarAnteproyectos(); // Llamada a la función para consultar anteproyectos
+  }, []);
 
   const handleEdit = (id) => {
     console.log(`Editando anteproyecto con id ${id}`);
@@ -33,6 +35,23 @@ const AnteproyectosEstudiante = () => {
   const handleCreateProject = () => {
     navigate('/formulario-estudiantes'); // Redirecciona a la página de creación de anteproyectos
   };
+
+  async function consultarAnteproyectos() {
+    try {
+      const { data, error } = await supabase
+        .from('anteproyectos')
+        .select('*');
+
+      if (error) {
+        console.error('Error al consultar anteproyectos 1:', error);
+        return;
+      }
+
+      setAnteproyectos(data);
+    } catch (error) {
+      console.error('Error al consultar anteproyectos 2:', error);
+    }
+  }
 
   return (
     <div className="app-container">
@@ -73,14 +92,14 @@ const AnteproyectosEstudiante = () => {
                 </tr>
               </thead>
               <tbody>
-                {anteproyectos.map((proyecto) => (
-                  <tr key={proyecto.id}>
-                    <td>{proyecto.name}</td>
+                {anteproyectos.map((anteproyecto) => (
+                  <tr key={anteproyecto.id}>
+                    <td>{anteproyecto.nombre}</td>
                     <td>
                         <div className="button-container">
-                            <button onClick={() => handleEdit(proyecto.id)} className="btn edit">Editar</button>
-                            <button onClick={() => handleDownload(proyecto.id)} className="btn download">Descargar</button>
-                            <button onClick={() => handleDelete(proyecto.id)} className="btn delete">Eliminar</button>
+                            <button onClick={() => handleEdit(anteproyecto.id)} className="btn edit">Editar</button>
+                            <button onClick={() => handleDownload(anteproyecto.id)} className="btn download">Descargar</button>
+                            <button onClick={() => handleDelete(anteproyecto.id)} className="btn delete">Eliminar</button>
                         </div>
                     </td>
                   </tr>
