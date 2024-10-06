@@ -13,9 +13,17 @@ const Citas = () => {
       return;
     }
     setError('');
+
+    const addOneHour = (time) => {
+      const [hours, minutes] = time.split(':');
+      let endHour = parseInt(hours, 10) + 1;
+      if (endHour === 24) endHour = 0;
+      return `${endHour.toString().padStart(2, '0')}:${minutes}`;
+    };
+
     const newAppointment = {
       date,
-      startTime,
+      timeRange: `${startTime} - ${addOneHour(startTime)}`,
       student: 'N/A',
       lector1: 'N/A',
       lector2: 'N/A',
@@ -25,6 +33,10 @@ const Citas = () => {
     setAppointments([...appointments, newAppointment]);
     setDate('');
     setStartTime('');
+  };
+
+  const createReport = () => {
+    //descargar pdf
   };
 
   return (
@@ -61,7 +73,7 @@ const Citas = () => {
             </div>
 
             <div className="col-12 d-flex justify-content-center">
-              <button className="w-50" onClick={handleAsignar}>Guardar cita</button>
+              <button className="cita-btn w-50" onClick={handleAsignar}>Guardar cita</button>
             </div>
 
             <div className="col-12">
@@ -74,13 +86,19 @@ const Citas = () => {
 
       {/* Table */}
       <div className="cita-table row justify-content-center">
-        <h2 className="w-auto">Lista de citas</h2>
+        <div className="row justify-content-center mb-3">
+          <h2 className="col-5 w-auto m-0">Lista de citas</h2>
+        </div>
+
+        <div className="row d-flex justify-content-center mb-3">
+          <button className="cita-btn col-2" onClick={createReport}>Generar reporte</button>
+        </div>
 
         <table>
           <thead>
             <tr>
               <th>Día</th>
-              <th>Hora</th>
+              <th>Hora</th> {/* Single column for time range */}
               <th>Estudiante</th>
               <th>Lector 1</th>
               <th>Lector 2</th>
@@ -99,7 +117,7 @@ const Citas = () => {
               appointments.map((appointment, index) => (
                 <tr key={index}>
                   <td>{appointment.date}</td>
-                  <td>{appointment.startTime}</td>
+                  <td>{appointment.timeRange}</td>
                   <td>{appointment.student}</td>
                   <td>{appointment.lector1}</td>
                   <td>{appointment.lector2}</td>

@@ -26,19 +26,26 @@
     margin-top: 5px;
 }
 
-.cita-form button {
+.cita-btn {
     display: block;
-    width: 100%;
     padding: 10px;
     background-color: #002855;
     color: white;
-    border: none;
+    border: solid 1px #002855;
     cursor: pointer;
+    border-radius: 10px;
 }
 
-.cita-form button:hover {
-    background-color: #001f61;
+.cita-btn-secondary {
+    display: block;
+    padding: 10px;
+    background-color: white;
+    color: #002855;
+    border: solid 1px #002855;
+    cursor: pointer;
+    border-radius: 10px;
 }
+
 
 .cita-table {
     flex: 2;
