@@ -34,12 +34,22 @@ const CitasUsuario = () => {
   };
 
   return (
-    <div className="container">
+    <div className="container cita-table">
       {/* Tabla de citas */}
-      <div className="cita-table row justify-content-center">
+      <div className="row justify-content-center">
         <h2 className="mb-5 w-auto">Lista de citas</h2>
 
-        <table>
+        {/* Botones para seleccionar/deseleccionar */}
+        <div className="row justify-content-center mb-4">
+          <div className="col-auto">
+            <button className="cita-btn" onClick={selectAll}>Seleccionar todos</button>
+          </div>
+          <div className="col-auto">
+            <button className="cita-btn-secondary" onClick={deselectAll}>Deseleccionar todos</button>
+          </div>
+        </div>
+
+        <table className="mb-4">
           <thead>
             <tr>
               <th>Día</th>
@@ -66,13 +76,13 @@ const CitasUsuario = () => {
         </table>
       </div>
 
-      {/* Botones para seleccionar/deseleccionar */}
-      <div className="row justify-content-center mt-3">
+      {/* Botones para guardar/vovler */}
+      <div className="row justify-content-center">
         <div className="col-auto">
-          <button className="btn btn-primary" onClick={selectAll}>Seleccionar todos</button>
+          <button className="cita-btn" onClick={selectAll}>Guardar</button>
         </div>
         <div className="col-auto">
-          <button className="btn btn-secondary" onClick={deselectAll}>Deseleccionar todos</button>
+          <button className="cita-btn-secondary" onClick={deselectAll}>Vovler</button>
         </div>
       </div>
     </div>
