@@ -4,6 +4,7 @@ import Anteproyectos from './pages/Anteproyectos';
 import Asignaciones from './pages/Asignaciones';
 import GestionPerfiles from './pages/GestionPerfiles';
 import Citas from './pages/Citas';
+import CitasUsuario from './pages/CitasUsuario';
 // Otras importaciones de componentes
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Route path="/asignaciones" element={<Asignaciones />} />
         <Route path="/gestion-perfiles" element={<GestionPerfiles />} />
         <Route path="/citas" element={<Citas />} />
+        <Route path="/citas-usuario" element={<CitasUsuario />} />
         {/* Otras rutas para más secciones */}
       </Routes>
     </Router>
