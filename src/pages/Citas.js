@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
 import '../styles/Citas.css';
+import Modal from './components/Modal'; // Import the modal component
 
 const Citas = () => {
   const [date, setDate] = useState('');
   const [startTime, setStartTime] = useState('');
   const [appointments, setAppointments] = useState([]);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
+
+  const lecturers = ['Profesor A', 'Profesor B', 'Profesor C']; // Example lecturers
 
   const handleAsignar = () => {
     if (!date || !startTime) {
@@ -35,9 +40,21 @@ const Citas = () => {
     setStartTime('');
   };
 
-  const createReport = () => {
-    //descargar pdf
+  const handleRowClick = (appointment) => {
+    setSelectedAppointment(appointment);
+    setShowModal(true);
   };
+
+  const updateAppointment = (modifiedAppointment) => {
+    const updatedAppointments = appointments.map((appt) =>
+      appt === selectedAppointment ? modifiedAppointment : appt
+    );
+    
+    setAppointments(updatedAppointments); // Update the appointment in the state
+    setSelectedAppointment(null); // Clear the selected appointment
+    setShowModal(false); // Close the modal
+  };
+  
 
   return (
     <div className="citas-form container">
@@ -90,15 +107,11 @@ const Citas = () => {
           <h2 className="col-5 w-auto m-0">Lista de citas</h2>
         </div>
 
-        <div className="row d-flex justify-content-center mb-3">
-          <button className="cita-btn col-2" onClick={createReport}>Generar reporte</button>
-        </div>
-
         <table>
           <thead>
             <tr>
               <th>Día</th>
-              <th>Hora</th> {/* Single column for time range */}
+              <th>Hora</th>
               <th>Estudiante</th>
               <th>Lector 1</th>
               <th>Lector 2</th>
@@ -115,7 +128,7 @@ const Citas = () => {
               </tr>
             ) : (
               appointments.map((appointment, index) => (
-                <tr key={index}>
+                <tr key={index} onClick={() => handleRowClick(appointment)}>
                   <td>{appointment.date}</td>
                   <td>{appointment.timeRange}</td>
                   <td>{appointment.student}</td>
@@ -128,6 +141,73 @@ const Citas = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Modal */}
+      <Modal show={showModal} onClose={() => setShowModal(false)}>
+        {selectedAppointment && (
+          <>
+            <h2>Editar Cita</h2>
+            <p><strong>Estudiante:</strong> {selectedAppointment.student}</p>
+
+            <label>
+              Profesor lector 1:
+              <select
+                name="lector1"
+                value={selectedAppointment.lector1}
+                onChange={(e) => {
+                  const updatedAppt = { ...selectedAppointment, lector1: e.target.value };
+                  setSelectedAppointment(updatedAppt);
+                }}
+              >
+                {lecturers.map((lecturer, index) => (
+                  <option key={index} value={lecturer}>
+                    {lecturer}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Profesor lector 2:
+              <select
+                name="lector2"
+                value={selectedAppointment.lector2}
+                onChange={(e) => {
+                  const updatedAppt = { ...selectedAppointment, lector2: e.target.value };
+                  setSelectedAppointment(updatedAppt);
+                }}
+              >
+                {lecturers.map((lecturer, index) => (
+                  <option key={index} value={lecturer}>
+                    {lecturer}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <label>
+              Hora de la cita:
+              <input
+                type="time"
+                name="timeRange"
+                value={selectedAppointment.timeRange.split(' - ')[0]} // Start time
+                onChange={(e) => {
+                  const endTime = selectedAppointment.timeRange.split(' - ')[1];
+                  const updatedAppt = {
+                    ...selectedAppointment,
+                    timeRange: `${e.target.value} - ${endTime}`,
+                  };
+                  setSelectedAppointment(updatedAppt);
+                }}
+              />
+            </label>
+
+            <div className="modal-actions">
+              <button onClick={() => updateAppointment(selectedAppointment)}>Guardar</button>
+            </div>
+          </>
+        )}
+      </Modal>
     </div>
   );
 };
