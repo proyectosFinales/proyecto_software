@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Menu from './pages/MenuPrincipal';
+import Anteproyectos from './pages/anteproyectos';
 import Asignaciones from './pages/Asignaciones';
 import GestionPerfiles from './pages/GestionPerfiles';
 import FormularioEstudiantes from './pages/FormularioEstudiante';
@@ -8,6 +9,9 @@ import AnteproyectosEstudiante from './pages/AnteproyectosEstudiante';
 import AnteproyectosCoordinador from './pages/AnteproyectosCoordinador';
 import Citas from './pages/Citas';
 import CitasUsuario from './pages/CitasUsuario';
+import Login from './pages/Login';
+import Registro from './pages/Registro';
+import './App.css'
 // Otras importaciones de componentes
 
 function App() {
@@ -15,6 +19,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Menu />} />  {/* Ruta para la página principal */}
+        <Route path="/login" element={<Login />} />  {/* Ruta para login */}
+        <Route path="/registro" element={<Registro />} />  {/* Ruta para registrarse */}
         <Route path="/anteproyectosEstudiante" element={<AnteproyectosEstudiante />} />  {/* Ruta para anteproyectos */}
         <Route path="/anteproyectosCoordinador" element={<AnteproyectosCoordinador />} />  {/* Ruta para anteproyectos */}
         <Route path="/asignaciones" element={<Asignaciones />} />

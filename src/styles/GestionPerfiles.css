@@ -1,0 +1,139 @@
+h1 {
+  padding: 20px;
+}
+
+.gestion-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 220px;
+  background-color: var(--gris_oscuro);
+  padding: 20px;
+  color: var(--blanco);
+}
+
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar ul li {
+  padding: 30px 0;
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+  padding: 10px;
+  background-color: var(--gris_claro);
+}
+
+.gestion-perfiles {
+  display: flex;
+  justify-content: space-between;
+  height: 80vh;  /* Reducir la altura del contenedor principal en un 20% */
+}
+
+.users-list {
+  width: 48%;
+  background-color: var(--blanco);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;  /* Añadir scroll si el contenido excede la altura */
+}
+
+.users-list ul {
+  list-style: none;
+  padding: 0;
+}
+
+.users-list ul li {
+  padding: 10px;
+  border-bottom: 1px solid var(--gris_claro);
+  cursor: pointer;
+}
+
+.even-row {
+  background-color: var(--blanco); /* Fondo blanco para filas pares */
+}
+
+.odd-row {
+  background-color: var(--gris_claro); /* Fondo gris claro para filas impares */
+}
+
+.info-container {
+  width: 48%;
+  background-color: transparent; /* Fondo igual al de la página */
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Alinear el contenido al inicio */
+}
+
+.user-info {
+  width: 100%;
+  height: 70%;  /* Reducir la altura en un 20% */
+  background-color: var(--blanco);
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;  /* Añadir scroll si el contenido excede la altura */
+  border-radius: 20px;
+}
+
+.user-info h2 {
+  margin-bottom: 20px;
+  color: var(--azul);
+}
+
+.user-info label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.user-info input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid var(--gris_claro);
+  border-radius: 5px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
+  gap: 20%;
+  padding: 10%;
+}
+
+.btn-delete, .btn-edit {
+  color: var(--blanco);
+  padding: 15px 30px; /* Botones más grandes */
+  font-size: 16px;    /* Texto más grande */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease; /* Transición suave para el hover */
+}
+
+.btn-delete {
+  background-color: var(--rojo);
+}
+
+.btn-delete:hover {
+  background-color: darkred; /* Efecto hover en eliminar */
+}
+
+.btn-edit {
+  background-color: var(--azul);
+}
+
+.btn-edit:hover {
+  background-color: darkblue; /* Efecto hover en editar */
+}
