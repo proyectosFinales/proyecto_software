@@ -1,30 +1,30 @@
-/* Estilos generales para el contenedor */
+
 .login-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #f4f4f4; /* Color de fondo */
+  background-color: var(--gris_claro);
 }
 
 /* Caja de inicio de sesión */
 .login-box {
   width: 400px;
-  height: 600px; /* Altura del contenedor */
+  height: 600px;
   padding: 40px;
-  background-color: white;
+  background-color: var(--blanco);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   text-align: center;
-  border: 1px solid #ddd;
+  border: 1px solid var(--gris_claro);
 }
 
 /* Título */
 h2 {
   font-size: 24px;
   margin-bottom: 20px;
-  color: #002060; /* Color azul oscuro */
+  color: var(--azul); /* Color azul oscuro */
 }
 
 /* Estilo para los campos de entrada */
@@ -37,7 +37,7 @@ h2 {
   width: 100%;
   padding: 10px 40px;
   font-size: 16px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--gris_claro);
   border-radius: 5px;
 }
 
@@ -46,7 +46,7 @@ h2 {
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: #002060; /* Color azul oscuro para los iconos */
+  color: var(--azul); /* Color azul oscuro para los iconos */
 }
 
 /* Estilo para el enlace de contraseña olvidada */
@@ -56,7 +56,7 @@ h2 {
 }
 
 .forgot-password a {
-  color: #002060; /* Cambiado a azul oscuro */
+  color: var(--azul); /* Cambiado a azul oscuro */
   font-size: 12px;
   text-decoration: none;
 }
@@ -65,8 +65,8 @@ h2 {
 .btn-login {
   width: 100%;
   padding: 10px;
-  background-color: #002060; /* Azul oscuro */
-  color: white;
+  background-color: var(--azul); /* Azul oscuro */
+  color: var(--blanco);
   border: none;
   border-radius: 5px;
   font-size: 16px;
@@ -84,8 +84,8 @@ h2 {
   display: inline-block;
   width: 100%;
   padding: 10px;
-  background-color: #ddd; /* Color de fondo similar */
-  color: black;
+  background-color: var(--gris_claro); /* Color de fondo similar */
+  color: var(--gris_oscuro);
   border: none;
   border-radius: 5px;
   font-size: 16px;
@@ -96,20 +96,6 @@ h2 {
 }
 
 .btn-register:hover {
-  background-color: #bbb; /* Efecto hover */
+  background-color: var(--gris_oscuro); /* Efecto hover */
 }
 
-
-/* Pie de página */
-.login-footer {
-  position: fixed; /* Fijar en la parte inferior */
-  bottom: 0;
-  left: 0;
-  right: 0; /* Abarca todo el ancho */
-  text-align: center;
-  font-size: 12px;
-  color: #002060; /* Color azul oscuro */
-  background-color: #f4f4f4; /* Color de fondo del pie de página */
-  padding: 10px 0; /* Espaciado */
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil */
-}
