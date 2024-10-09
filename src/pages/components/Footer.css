@@ -1,0 +1,13 @@
+.login-footer {
+    position: fixed; /* Fijar en la parte inferior */
+    bottom: 0;
+    left: 0;
+    right: 0; /* Abarca todo el ancho */
+    text-align: center;
+    font-size: 12px;
+    color: var(--azul); /* Color azul oscuro */
+    background-color: var(--blanco); /* Color de fondo del pie de página */
+    padding: 10px 0; /* Espaciado */
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  }
+  
