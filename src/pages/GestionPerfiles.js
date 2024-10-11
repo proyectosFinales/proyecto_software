@@ -36,11 +36,14 @@ const GestionPerfiles = () => {
     "Sebastian Delgado",
   ];
 
-  const handleUserClick = (userName) => {
-    // Aquí debes manejar la lógica para cambiar la información del usuario seleccionado
+  const handleUserClick = (nombre, carne, correo, telefono, estado) => {
     setSelectedUser({
       ...selectedUser,
-      nombre: userName,
+      nombre: nombre,
+      carne: carne,
+      correo: correo,
+      telefono: telefono,
+      estado: estado
     });
   };
 
@@ -64,9 +67,13 @@ const GestionPerfiles = () => {
           <div className="users-list">
             <ul>
               {users.map((user, index) => (
-                <li key={user} className={index % 2 === 0 ? "even-row" : "odd-row"}
-                onClick={() => handleUserClick(user)}>
-                  {user}
+                <li
+                  key={user}
+                  className={index % 2 === 0 ? "even-row" : "odd-row"}
+                  onClick={() => handleUserClick(user)}
+                >
+                  <span className="user-name">{user}</span>
+                  <input type="checkbox" className="user-checkbox" />
                 </li>
               ))}
             </ul>

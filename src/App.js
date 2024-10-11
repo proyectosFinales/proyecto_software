@@ -12,6 +12,7 @@ import CitasUsuario from './pages/CitasUsuario';
 import Login from './pages/Login';
 import Registro from './pages/Registro';
 import './App.css'
+import EditarPerfil from './pages/EditarPerfil';
 // Otras importaciones de componentes
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
         <Route path="/citas" element={<Citas />} />
         <Route path="/citas-usuario" element={<CitasUsuario />} />
+        <Route path="/editar-perfil" element={<EditarPerfil />} />
         {/* Otras rutas para más secciones */}
       </Routes>
     </Router>
