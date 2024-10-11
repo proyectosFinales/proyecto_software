@@ -46,12 +46,49 @@ h1 {
 .users-list ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .users-list ul li {
   padding: 10px;
   border-bottom: 1px solid var(--gris_claro);
   cursor: pointer;
+}
+
+.users-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--gris_claro);
+}
+
+.user-name {
+  flex-grow: 1; /* El nombre ocupa el espacio restante */
+}
+
+.user-checkbox {
+  appearance: none; /* Eliminamos el estilo por defecto */
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--gris_oscuro);
+  border-radius: 5px; /* Bordes redondeados si lo deseas */
+  cursor: pointer;
+  background-color: var(--blanco); /* Fondo por defecto */
+}
+
+.user-checkbox:checked {
+  background-color: var(--azul); /* Fondo cuando está seleccionado */
+  border-color: var(--azul); /* Bordes del color del fondo cuando está seleccionado */
+}
+
+.user-checkbox:checked::before {
+  content: "✔"; /* Icono de check */
+  color: var(--blanco); /* Color del check */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
 }
 
 .even-row {
