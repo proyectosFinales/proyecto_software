@@ -1,11 +1,5 @@
 import supabase from "../model/supabase";
-
-class Usuario {
-    constructor(id, nombre){
-        this.id = id;
-        this.nombre = nombre;
-    }
-}
+import Usuario from "./usuario";
 
 class Profesor extends Usuario {
     nombre;
@@ -19,10 +13,10 @@ class Profesor extends Usuario {
     }
 
     static async obtenerTodos() {
-        const datos = await supabase
+        const { data } = await supabase
             .from("profesores")
             .select("id, cantidadProyectos, usuario:usuarios(id, nombre)");
-        return datos.data.map(p => new Profesor(p.usuario.id, p.usuario.nombre, p.cantidadProyectos));
+        return data.map(p => new Profesor(p.usuario.id, p.usuario.nombre, p.cantidadProyectos));
     }
 
     async actualizarCantidadProyectos() {

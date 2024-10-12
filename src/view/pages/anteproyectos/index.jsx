@@ -1,12 +1,15 @@
+import { useEffect, useState } from "react";
 import Button from "../../components/button";
 import Layout from "../../components/layout";
 import styles from "../../styles/table.module.css";
+import Anteproyecto from "../../../controller/anteproyecto";
 
 const Anteproyectos = () => {
-    const anteproyectos = Array(10).fill({
-        estudiante: {nombre: "Brayan Enrique Campos"},
-        anteproyecto: {nombre: "Dauch Center for the Managm..."}
-    });
+    const [anteproyectos, setAnteproyectos] = useState([]);
+
+    useEffect(() => {
+        Anteproyecto.obtenerTodos().then(setAnteproyectos);
+    }, []);
 
     return <>
         <Layout title="Anteproyectos">
@@ -23,7 +26,7 @@ const Anteproyectos = () => {
                     {anteproyectos.map((ap, index) =>
                         <tr key={`anteproyecto-${index}`}>
                             <td>{ap.estudiante.nombre}</td>
-                            <td>{ap.anteproyecto.nombre}</td>
+                            <td>{ap.nombre}</td>
                             <td className={styles.tableButtons}>
                                 <Button>Revisar</Button>
                                 <Button>Reporte</Button>
