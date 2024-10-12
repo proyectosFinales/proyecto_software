@@ -6,7 +6,7 @@ import {supabase} from '../controlador/Cliente';
 
 const EstudianteForm = () => {
   const [nombre, setNombre] = useState('');
-  const [carnet, setCarnet] = useState(''); 
+  const [carnet, setCarnet] = useState('');
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
   const [sede, setSede] = useState('');

@@ -1,0 +1,114 @@
+form {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  form{
+    margin-top: 40px;
+    margin-bottom: 40px;
+  }
+  
+  .form-group {
+    margin-bottom: 20px;
+    margin-top: 20px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+  }
+  
+  .form-group input[type="text"],
+  .form-group input[type="email"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    resize: vertical;
+    overflow-y: auto;
+  }
+
+  .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    min-height: 5px;
+    resize: vertical;
+    overflow-y: auto;
+  }
+  
+  input[type="radio"] {
+    margin-right: 10px;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 10px; /* Añade un espacio entre los botones */
+    margin-top: 20px; /* Añade margen superior para separación con el formulario */
+  }
+  
+  .button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  .enviar{
+    background-color: #001f61;
+    color:white;
+  }
+  .cancelar{
+    background-color: #BD3737;
+    color:white;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  header {
+    background-color: #f1f1f1;
+    padding: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 2px solid #000;
+  }
+
+  footer {
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 10px;
+    border-top: 1px solid #000;
+    width: 100%;
+  }
+  
+  .info-icon {
+    cursor: pointer;
+    margin-left: 5px;
+    color: #007bff; /* Puedes cambiar el color */
+  }
+  
+  .info-text {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }
+  
+  
