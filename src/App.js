@@ -6,6 +6,8 @@ import FormularioEstudiantes from './pages/FormularioEstudiante';
 import FormularioCoordinador from './pages/FormularioCoordinador';
 import AnteproyectosEstudiante from './pages/AnteproyectosEstudiante';
 import AnteproyectosCoordinador from './pages/AnteproyectosCoordinador';
+import Citas from './pages/Citas';
+import CitasUsuario from './pages/CitasUsuario';
 // Otras importaciones de componentes
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
         <Route path="/gestion-perfiles" element={<GestionPerfiles />} />
         <Route path="/formulario-estudiantes" element={<FormularioEstudiantes />} />
         <Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
+        <Route path="/citas" element={<Citas />} />
+        <Route path="/citas-usuario" element={<CitasUsuario />} />
         {/* Otras rutas para más secciones */}
       </Routes>
     </Router>
