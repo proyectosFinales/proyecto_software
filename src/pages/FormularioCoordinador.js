@@ -67,7 +67,6 @@ const CoordinadorForm = () => {
 
       setAnteproyectos(data);
       setNombre(data[0].nombre);
-
     } catch (error) {
       console.error('Error al consultar anteproyectos 2:', error);
     }
