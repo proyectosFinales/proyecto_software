@@ -1,0 +1,31 @@
+.layout {
+    max-width: 1000px;
+    margin: auto;
+    padding: 0 15px;
+    min-height: 75vh;
+}
+
+.title {
+    border-bottom: 2px solid var(--primary1);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.title i {
+    font-size: 25px;
+}
+
+.footer {
+    border-top: 1px solid var(--secondary1);
+    padding: 15px 0;
+}
+
+.footer p {
+    margin: 0;
+    text-align: center;
+    font-weight: bold;
+}
