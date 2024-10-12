@@ -1,0 +1,26 @@
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Menu from './pages/MenuPrincipal';
+import Anteproyectos from './pages/Anteproyectos';
+import Asignaciones from './pages/Asignaciones';
+import GestionPerfiles from './pages/GestionPerfiles';
+import Citas from './pages/Citas';
+import CitasUsuario from './pages/CitasUsuario';
+// Otras importaciones de componentes
+
+function App() {
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<Menu />} />  {/* Ruta para la página principal */}
+        <Route path="/anteproyectos" element={<Anteproyectos />} />  {/* Ruta para anteproyectos */}
+        <Route path="/asignaciones" element={<Asignaciones />} />
+        <Route path="/gestion-perfiles" element={<GestionPerfiles />} />
+        <Route path="/citas" element={<Citas />} />
+        <Route path="/citas-usuario" element={<CitasUsuario />} />
+        {/* Otras rutas para más secciones */}
+      </Routes>
+    </Router>
+  );
+}
+
+export default App;
