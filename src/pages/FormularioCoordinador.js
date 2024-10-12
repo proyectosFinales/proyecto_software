@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/FormularioCoordinador.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { supabase } from '../controlador/Cliente';
+import { supabase } from '../controller/Cliente';
 
 const CoordinadorForm = () => {
   const [nombre, setNombre] = useState('');
