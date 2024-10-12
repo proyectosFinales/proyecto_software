@@ -95,11 +95,6 @@ const EstudianteForm = () => {
       
       <div className="form-group">
         <label>1. Nombre del estudiante: *
-        <AiOutlineInfoCircle 
-              className="info-icon" 
-              onClick={() => toggleInfo('nombre')} 
-              title="Ingrese su nombre completo."
-            />
         </label>
         <input
           type="text"
@@ -107,7 +102,6 @@ const EstudianteForm = () => {
           onChange={(e) => setNombre(e.target.value)}
           required
         />
-        {infoVisible.nombre && <p className="info-text">El nombre debe incluir sus apellidos.</p>}
       </div>
 
       <div className="form-group">
@@ -339,43 +333,78 @@ const EstudianteForm = () => {
       <h2>Datos del proyecto a realizar</h2>
 
       <div className="form-group">
-        <label>19. Contexto: *</label>
+        <label>19. Contexto: *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('contexto')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={contexto}
           onChange={(e) => setContexto(e.target.value)}
           required
         />
+         {infoVisible.contexto && <p className="info-text">Que ha pasado en la empresa, cuales son las circunstancias que rodean al hecho
+          o a interpretar la situación que desea abordar.</p>}
       </div>
 
       <div className="form-group">
-        <label>20. Justitificación del trabajo a realizar: *</label>
+        <label>20. Justitificación del trabajo a realizar: *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('justificacion')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={justificacion}
           onChange={(e) => setJustificacion(e.target.value)}
           required
         />
+        {infoVisible.justificacion && <p className="info-text">La razón por la cual debe de realizarse el proyecto y el 
+          porqué es necesario e importante para la empresa. Se debe tener claro que la justificación no es el análisis del
+           problema, sino la que indica que hay un problema que amerita ser resuelta.</p>}
       </div>
 
       <div className="form-group">
-        <label>21. Síntomas principales (a lo sumo 3): *</label>
+        <label>21. Síntomas principales (a lo sumo 3): *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('sintomas')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={sintomas}
           onChange={(e) => setSintomas(e.target.value)}
           required
         />
+        {infoVisible.sintomas && <p className="info-text">Cuáles son los indicios, que indican que algo está ocurriendo
+          y no está funcionando bien.</p>}
       </div>
 
       <div className="form-group">
-        <label>22. Efectos o impactos para la empresa: *</label>
+        <label>22. Efectos o impactos para la empresa: *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('impacto')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={impacto}
           onChange={(e) => setImpacto(e.target.value)}
           required
         />
+        {infoVisible.impacto && <p className="info-text">Cuáles son los efectos o resultados no conformes que 
+          alertan sobre la necesidad de desarrollar el proyecto. Tome en cuenta que esta sección es parte de un 
+          trabajo de ingeniería, por lo tanto, debe mostrarse la dimensión (cuantificación) de los efectos 
+          (incluir cifras, métricas, indicadores que evidencien lo que está ocurriendo y por ende justifiquen el estudio).</p>}
       </div>
 
       <div className="form-group">

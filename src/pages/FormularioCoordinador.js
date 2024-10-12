@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/FormularioCoordinador.css'
+import { AiOutlineInfoCircle } from 'react-icons/ai';
+import { supabase } from '../controlador/Cliente';
 
 const CoordinadorForm = () => {
   const [nombre, setNombre] = useState('');
@@ -29,8 +31,14 @@ const CoordinadorForm = () => {
   const [tipoProyecto, setProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
 
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
+  const [infoVisible, setInfoVisible] = useState({}); 
+  const [anteproyectos, setAnteproyectos] = useState([]);
 
+
+  useEffect(() => {
+    consultarAnteproyectos(); // Llamada a la función para consultar anteproyectos
+  }, []);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -42,6 +50,27 @@ const CoordinadorForm = () => {
     navigate(-1); // Navega a la página anterior
   };
 
+  const toggleInfo = (field) => {
+    setInfoVisible((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
+
+  async function consultarAnteproyectos() {
+    try {
+      const { data, error } = await supabase
+        .from('anteproyectos')
+        .select('*');
+
+      if (error) {
+        console.error('Error al consultar anteproyectos 1:', error);
+        return;
+      }
+
+      setAnteproyectos(data);
+      setNombre(data[0].nombre);
+    } catch (error) {
+      console.error('Error al consultar anteproyectos 2:', error);
+    }
+  }
 
   return (
     <div>
@@ -57,7 +86,7 @@ const CoordinadorForm = () => {
         <label>1. Nombre del estudiante: *</label>
         <input
           type="text"
-          value={"nombre"}
+          value={nombre}
           readOnly
         />
       </div>
@@ -290,43 +319,78 @@ const CoordinadorForm = () => {
       <h2>Datos del proyecto a realizar</h2>
 
       <div className="form-group">
-        <label>19. Contexto: *</label>
+        <label>19. Contexto: *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('contexto')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={contexto}
           onChange={(e) => setContexto(e.target.value)}
           required
         />
+         {infoVisible.contexto && <p className="info-text">Que ha pasado en la empresa, cuales son las circunstancias que rodean al hecho
+          o a interpretar la situación que desea abordar.</p>}
       </div>
 
       <div className="form-group">
-        <label>20. Justitificación del trabajo a realizar: *</label>
+        <label>20. Justitificación del trabajo a realizar: *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('justificacion')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={justificacion}
           onChange={(e) => setJustificacion(e.target.value)}
           required
         />
+        {infoVisible.justificacion && <p className="info-text">La razón por la cual debe de realizarse el proyecto y el 
+          porqué es necesario e importante para la empresa. Se debe tener claro que la justificación no es el análisis del
+           problema, sino la que indica que hay un problema que amerita ser resuelta.</p>}
       </div>
 
       <div className="form-group">
-        <label>21. Síntomas principales (a lo sumo 3): *</label>
+        <label>21. Síntomas principales (a lo sumo 3): *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('sintomas')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={sintomas}
           onChange={(e) => setSintomas(e.target.value)}
           required
         />
+        {infoVisible.sintomas && <p className="info-text">Cuáles son los indicios, que indican que algo está ocurriendo
+          y no está funcionando bien.</p>}
       </div>
 
       <div className="form-group">
-        <label>22. Efectos o impactos para la empresa: *</label>
+        <label>22. Efectos o impactos para la empresa: *
+        <AiOutlineInfoCircle 
+              className="info-icon" 
+              onClick={() => toggleInfo('impacto')} 
+              title="contexto_info"
+            />
+        </label>
         <input
           type="text"
           value={impacto}
           onChange={(e) => setImpacto(e.target.value)}
           required
         />
+        {infoVisible.impacto && <p className="info-text">Cuáles son los efectos o resultados no conformes que 
+          alertan sobre la necesidad de desarrollar el proyecto. Tome en cuenta que esta sección es parte de un 
+          trabajo de ingeniería, por lo tanto, debe mostrarse la dimensión (cuantificación) de los efectos 
+          (incluir cifras, métricas, indicadores que evidencien lo que está ocurriendo y por ende justifiquen el estudio).</p>}
       </div>
 
       <div className="form-group">
