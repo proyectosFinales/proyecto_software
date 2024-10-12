@@ -1,0 +1,36 @@
+.floatInput {
+    display: block;
+    position: relative;
+    margin: 0 auto 10px auto;
+    box-sizing: border-box;
+    color: var(--secondary1);
+    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--background1);
+    border: 2px solid var(--secondary1);
+}
+
+.floatInput span {
+    position: absolute;
+    top: 55%;
+    transform: translateY(-180%) scale(1);
+    font-weight: bold;
+    font-size: 16px;
+    background-color: var(--background1);
+    padding: 0 5px;
+    border-radius: 5px 5px 0 0;
+}
+
+.floatInput input, .floatInput select {
+    background-color: transparent;
+    border-color: transparent;
+    outline: none;
+    font-size: 16px;
+    color: var(--primary1);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.floatInput option {
+    background: var(--background1);
+}
