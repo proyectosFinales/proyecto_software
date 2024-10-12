@@ -1,0 +1,101 @@
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--gris_claro);
+}
+
+/* Caja de inicio de sesión */
+.login-box {
+  width: 400px;
+  height: 600px;
+  padding: 40px;
+  background-color: var(--blanco);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid var(--gris_claro);
+}
+
+/* Título */
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: var(--azul); /* Color azul oscuro */
+}
+
+/* Estilo para los campos de entrada */
+.input-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 40px;
+  font-size: 16px;
+  border: 1px solid var(--gris_claro);
+  border-radius: 5px;
+}
+
+.icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--azul); /* Color azul oscuro para los iconos */
+}
+
+/* Estilo para el enlace de contraseña olvidada */
+.forgot-password {
+  text-align: right;
+  margin-bottom: 20px;
+}
+
+.forgot-password a {
+  color: var(--azul); /* Cambiado a azul oscuro */
+  font-size: 12px;
+  text-decoration: none;
+}
+
+/* Botón de inicio de sesión */
+.btn-login {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--azul); /* Azul oscuro */
+  color: var(--blanco);
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.btn-login:hover {
+  background-color: #003080; /* Azul más oscuro para hover */
+}
+
+/* Botón de registrarse */
+/* Estilo del enlace de registro */
+.btn-register {
+  display: inline-block;
+  width: 100%;
+  padding: 10px;
+  background-color: var(--gris_claro); /* Color de fondo similar */
+  color: var(--gris_oscuro);
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none; /* Quita el subrayado del enlace */
+  margin-top: 10px; /* Añade un margen */
+}
+
+.btn-register:hover {
+  background-color: var(--gris_oscuro); /* Efecto hover */
+}
+
