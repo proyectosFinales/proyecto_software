@@ -3,6 +3,7 @@ import Button from "../../components/button";
 import Layout from "../../components/layout";
 import styles from "../../styles/table.module.css";
 import Anteproyecto from "../../../controller/anteproyecto";
+import GenerarPDFAnteproyecto from "./pdf";
 
 const Anteproyectos = () => {
     const [anteproyectos, setAnteproyectos] = useState([]);
@@ -29,7 +30,7 @@ const Anteproyectos = () => {
                             <td>{ap.nombre}</td>
                             <td className={styles.tableButtons}>
                                 <Button>Revisar</Button>
-                                <Button>Reporte</Button>
+                                <GenerarPDFAnteproyecto anteproyecto={ap}/>
                             </td>
                         </tr>
                     )}
