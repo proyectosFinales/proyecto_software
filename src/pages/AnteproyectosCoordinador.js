@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 import '../styles/AnteproyectosCoordinador.css';
 import * as XLSX from 'xlsx'; // Importa xlsx para generar el archivo Excel
-import { supabase } from '../controller/Cliente';
+import { supabase } from '../model/Cliente';
 
 const AnteproyectosCoordinador = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
