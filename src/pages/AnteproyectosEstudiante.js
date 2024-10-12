@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // Importa useNavigate
 import '../styles/AnteproyectosEstudiante.css';
-import { supabase } from '../controller/Cliente';
+import { supabase } from '../model/Cliente';
 
 const AnteproyectosEstudiante = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
