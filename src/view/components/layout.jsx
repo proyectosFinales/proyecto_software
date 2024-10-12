@@ -1,4 +1,5 @@
 import styles from "../styles/layout.module.css";
+import ToastContainer from "./toast";
 
 const Layout = ({ title, children }) => {
     return (<>
@@ -7,6 +8,7 @@ const Layout = ({ title, children }) => {
             {children}
         </main>
         <Footer/>
+        <ToastContainer/>
     </>);
 }
 

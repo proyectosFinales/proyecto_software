@@ -1,38 +1,31 @@
-// import * as XLSX from "xlsx";
+import { useCallback, useEffect, useState } from "react";
 import Button from "../../components/button";
 import Layout from "../../components/layout";
-import styles from "../../styles/table.module.css";
 import { FloatInput } from "../../components/input";
-
-// const handleExcelChange = event => {
-//     const file = event.target.files[0];
-//     if (file) {
-//         const reader = new FileReader();
-//         reader.onload = (event) => {
-//             const binaryStr = event.target.result;
-//             // Leer el archivo Excel como binario
-//             const workbook = XLSX.read(binaryStr, {type: "binary"});
-//             // Leer la primera hoja del archivo
-//             const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-//             // Convertir los datos a JSON
-//             const data = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
-//             setExcelData({
-//                 titles: data[0],
-//                 data: data.slice(1).filter(d => d.length > 0),
-//                 uploaded: true
-//             });
-//         };
-//         // Leer el archivo como binario
-//         reader.readAsBinaryString(file);
-//     }
-// }
+import styles from "../../styles/table.module.css";
+import Profesor from "../../../controller/profesor";
+import { loadToast } from "../../components/toast";
 
 const CantidadProyectosProfesor = () => {
-    const profesores = Array(10).fill({ nombre: "Johanna Madrigal", cantidadProyectos: 3})
+    const [profesores, setProfesores] = useState([]);
+
+    useEffect(() => {
+        Profesor.obtenerTodos().then(setProfesores);
+    }, []);
+
+    const actualizarCantidad = useCallback((indice, evento) => {
+        profesores[indice].cantidadProyectos = Number(evento.target.value);
+        setProfesores([...profesores]);
+    }, [profesores]);
+
+    const guardarCambios = useCallback(() => {
+        const guardado = Promise.allSettled(profesores.map(p => p.actualizarCantidadProyectos()));
+        loadToast(guardado, "Guardando cambios...", "Cambios guardados.", "Error en guardado de cambios");
+    }, [profesores]);
 
     return <>
         <Layout title="Asignación de cantidad de proyectos por profesor">
-            <Button type="dark">Guardar cambios</Button>
+            <Button type="dark" onClick={guardarCambios}>Guardar cambios</Button>
             <table className={styles.table}>
                 <thead>
                     <tr>
@@ -46,7 +39,11 @@ const CantidadProyectosProfesor = () => {
                             <td>{profesor.nombre}</td>
                             <td>
                                 <FloatInput text="">
-                                    <input type="number" value={profesor.cantidadProyectos} onChange={()=>{}}/>
+                                    <input
+                                        type="number"
+                                        value={profesor.cantidadProyectos}
+                                        onChange={evento => actualizarCantidad(i, evento)}
+                                    />
                                 </FloatInput>
                             </td>
                         </tr>
