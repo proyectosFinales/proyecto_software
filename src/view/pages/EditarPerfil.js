@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from "react";
 import "../styles/EditarPerfil.css"
-import Footer from "./components/Footer"
-import { getUserInfo, updateUserInfo } from "./components/userInfo";
+import Footer from "../components/Footer"
+import { getUserInfo, updateUserInfo } from "../components/userInfo";
 import { useNavigate } from "react-router-dom";
 
 var id = "1"
