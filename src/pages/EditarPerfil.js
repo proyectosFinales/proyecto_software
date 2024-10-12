@@ -1,15 +1,23 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import "../styles/EditarPerfil.css"
 import Footer from "./components/Footer"
+import { getUserInfo, updateUserInfo } from "./components/userInfo";
+import { useNavigate } from "react-router-dom";
+
+var id = "1"
 
 const EditarPerfil = () => {
+
   const [userData, setUserData] = useState({
-    nombre: "Ana Catalina Siles",
-    carne: "2019527194",
-    correo: "anacatsiles@itcr.ac.cr",
-    telefono: "84193253",
-    estado: "Aprobado",
+    id: 0,
+    nombre: "",
+    carne: 0,
+    correo: "",
+    telefono: 0,
+    password: "",
   });
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -20,12 +28,36 @@ const EditarPerfil = () => {
   };
 
   const handleSave = () => {
-    console.log("Información guardada:", userData);
+    updateUserInfo(userData);
+    alert("Se ha modificado la información con éxito.");
+    navigate("/");
   };
 
   const handleCancel = () => {
-    console.log("Edición cancelada");
+    navigate("/")
   };
+
+  useEffect(() => {
+    const obtenerInfoUsuario = async () => {
+      try {
+        const data = await getUserInfo(id);
+        setUserData({
+          id: data.id,
+          nombre: data.Nombre,
+          carne: data.Carné,
+          correo: data.Correo,
+          telefono: data.Telefono,
+          password: data.Contraseña,
+        });
+      } catch (error) {
+        console.error('Error al obtener la información del usuario:', error.message);
+      }
+    };
+
+    if (id) {
+      obtenerInfoUsuario();
+    }
+  }, [id]);
 
   return (
     <div className="center-container">
@@ -69,11 +101,11 @@ const EditarPerfil = () => {
             />
           </label>
           <label>
-            Estado
+            Contraseña
             <input
               type="text"
-              name="estado"
-              value={userData.estado}
+              name="password"
+              value={userData.password}
               onChange={handleChange}
             />
           </label>
@@ -87,7 +119,7 @@ const EditarPerfil = () => {
           </button>
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 };
