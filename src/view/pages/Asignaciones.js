@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from './components/Header';
-import Assignations from './components/Assignations';
+import Header from '../components/Header';
+import Assignations from '../components/Assignations';
 import '../styles/Asignacion.css';
 
 function Asignacion() {
