@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/FormularioEstudiante.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import {supabase} from '../controlador/Cliente';
+import {supabase} from '../controller/Cliente';
 
 const EstudianteForm = () => {
   const [nombre, setNombre] = useState('');
