@@ -1,0 +1,93 @@
+/* Estilos generales para el contenedor */
+.register-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: var(--gris_claro); /* Color de fondo */
+}
+
+/* Caja de registro */
+.register-box {
+  width: 500px; /* Aumentar el ancho */
+  height: auto; /* Altura automática */
+  padding: 40px;
+  background-color: var(--blanco); /* Fondo blanco */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid var(--gris_claro); /* Gris claro */
+}
+
+/* Título */
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  color: var(--azul); /* Azul oscuro */
+}
+
+/* Estilo para los campos de entrada */
+.input-container {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 40px;
+  font-size: 16px;
+  border: 1px solid var(--gris_claro); /* Borde gris claro */
+  border-radius: 5px;
+}
+
+.icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--azul); /* Azul oscuro para los iconos */
+}
+
+/* Botón de registrarse */
+.btn-register {
+  width: 100%;
+  padding: 10px;
+  background-color: var(--azul); /* Azul oscuro */
+  color: var(--blanco); /* Blanco */
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.btn-register:hover {
+  background-color: #003080; /* Azul más oscuro para hover */
+}
+
+/* Enlaces de pie de página */
+.footer-links {
+  margin-top: 15px;
+  font-size: 14px;
+}
+
+.footer-links a {
+  color: var(--azul); /* Azul oscuro */
+  text-decoration: none;
+  margin-left: 5px;
+}
+
+/* Pie de página */
+.register-footer {
+  position: fixed; /* Fijar en la parte inferior */
+  bottom: 0;
+  left: 0;
+  right: 0; /* Abarca todo el ancho */
+  text-align: center;
+  font-size: 12px;
+  color: var(--azul); /* Azul oscuro */
+  background-color: var(--gris_claro); /* Fondo gris claro */
+  padding: 10px 0; /* Espaciado */
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}

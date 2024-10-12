@@ -1,0 +1,69 @@
+/* Contenedor principal */
+.edit-user-container {
+    width: 50%;
+    background-color: var(--blanco);
+    padding: 30px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  
+  /* Nueva clase para centrar vertical y horizontalmente */
+  .center-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Hace que ocupe toda la altura de la ventana */
+    background-color: var(--gris_claro); /* Puedes ajustar el fondo si lo deseas */
+  }
+  
+  .edit-user-info {
+    margin-bottom: 30px;
+  }
+  
+  .edit-user-info h2 {
+    margin-bottom: 20px;
+    color: var(--azul);
+  }
+  
+  .edit-user-info label {
+    display: block;
+    margin-bottom: 10px;
+  }
+  
+  .edit-user-info input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid var(--gris_claro);
+    border-radius: 5px;
+  }
+  
+  .edit-actions {
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .btn-cancel,
+  .btn-save {
+    width: 45%;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .btn-cancel {
+    background-color: var(--gris_claro);
+    color: var(--negro);
+  }
+  
+  .btn-save {
+    background-color: var(--azul);
+    color: var(--blanco);
+  }
+  
