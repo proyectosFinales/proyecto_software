@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/Citas.css';
-import Modal from './components/Modal'; // Import the modal component
+import Modal from './components/Modal';
 
 const Citas = () => {
   const [date, setDate] = useState('');
@@ -10,13 +10,25 @@ const Citas = () => {
   const [showModal, setShowModal] = useState(false);
   const [error, setError] = useState('');
 
-  const lecturers = [null, 'Profesor A', 'Profesor B', 'Profesor C']; // Use null as the first option
+  const lecturers = [null, 'Profesor A', 'Profesor B', 'Profesor C'];
 
   const addOneHour = (time) => {
     const [hours, minutes] = time.split(':');
     let endHour = parseInt(hours, 10) + 1;
     if (endHour === 24) endHour = 0;
     return `${endHour.toString().padStart(2, '0')}:${minutes}`;
+  };
+
+  const formatTimeAMPM = (time) => {
+    let [hour, minute] = time.split(':');
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
+  };
+
+  const formatDateDDMMYYYY = (date) => {
+    const [year, month, day] = date.split('-');
+    return `${day}/${month}/${year}`;
   };
 
   const handleAsignar = () => {
@@ -27,13 +39,14 @@ const Citas = () => {
     setError('');
 
     const newAppointment = {
-      id: appointments.length + 1, // Assign a simple incremental id
-      date,
-      timeRange: `${startTime} - ${addOneHour(startTime)}`,
-      student: 'N/A',
-      lector1: null, // Store null instead of 'N/A'
-      lector2: null, // Store null instead of 'N/A'
-      project: 'N/A',
+      id: appointments.length + 1,
+      date: formatDateDDMMYYYY(date),
+      timeRange: `${formatTimeAMPM(startTime)} - ${formatTimeAMPM(addOneHour(startTime))}`,
+      student: null,
+      lector1: null,
+      lector2: null,
+      projectName: null,
+      projectDescription: 'Lorem ipsum dolor sit amet...',
     };
 
     setAppointments([...appointments, newAppointment]);
@@ -51,9 +64,9 @@ const Citas = () => {
       appt.id === modifiedAppointment.id ? modifiedAppointment : appt
     );
 
-    setAppointments(updatedAppointments); // Update the appointment in the state
-    setSelectedAppointment(null); // Clear the selected appointment
-    setShowModal(false); // Close the modal
+    setAppointments(updatedAppointments);
+    setSelectedAppointment(null);
+    setShowModal(false);
   };
 
   return (
@@ -71,6 +84,7 @@ const Citas = () => {
                 Fecha:
                 <input
                   type="date"
+                  className="styled-input"
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
                 />
@@ -82,6 +96,7 @@ const Citas = () => {
                 Hora:
                 <input
                   type="time"
+                  className="styled-input"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
                   step="300" // 300 seconds = 5 minutes
@@ -94,7 +109,7 @@ const Citas = () => {
             </div>
 
             <div className="col-12">
-              {error && <p style={{ color: 'red' }}>{error}</p>} {/* Display error message */}
+              {error && <p style={{ color: 'red' }}>{error}</p>}
             </div>
 
           </div>
@@ -131,10 +146,10 @@ const Citas = () => {
                 <tr key={appointment.id} onClick={() => handleRowClick(appointment)}>
                   <td>{appointment.date}</td>
                   <td>{appointment.timeRange}</td>
-                  <td>{appointment.student}</td>
+                  <td>{appointment.student ? appointment.student : 'N/A'}</td>
                   <td>{appointment.lector1 ? appointment.lector1 : 'N/A'}</td>
                   <td>{appointment.lector2 ? appointment.lector2 : 'N/A'}</td>
-                  <td>{appointment.project}</td>
+                  <td>{appointment.projectName ? appointment.projectName : 'N/A'}</td>
                 </tr>
               ))
             )}
@@ -147,19 +162,22 @@ const Citas = () => {
         {selectedAppointment && (
           <>
             <h2>Editar Cita</h2>
-            <p><strong>Estudiante:</strong> {selectedAppointment.student}</p>
+            <p><strong>Estudiante:</strong> {selectedAppointment.student ? selectedAppointment.student : 'N/A'}</p>
+
+            <p><strong>Descripción del proyecto:</strong> {selectedAppointment.projectDescription}</p>
 
             <label>
               Profesor lector 1:
               <select
                 name="lector1"
-                value={selectedAppointment.lector1 || ''} // Set empty string if null
+                className="styled-input"
+                value={selectedAppointment.lector1 || ''}
                 onChange={(e) => {
-                  const updatedAppt = { ...selectedAppointment, lector1: e.target.value || null }; // Store null if empty
+                  const updatedAppt = { ...selectedAppointment, lector1: e.target.value || null };
                   setSelectedAppointment(updatedAppt);
                 }}
               >
-                <option value="">N/A</option> {/* Add N/A option */}
+                <option value="">N/A</option>
                 {lecturers.map((lecturer, index) => (
                   <option key={index} value={lecturer}>
                     {lecturer}
@@ -172,13 +190,14 @@ const Citas = () => {
               Profesor lector 2:
               <select
                 name="lector2"
-                value={selectedAppointment.lector2 || ''} // Set empty string if null
+                className="styled-input"
+                value={selectedAppointment.lector2 || ''}
                 onChange={(e) => {
-                  const updatedAppt = { ...selectedAppointment, lector2: e.target.value || null }; // Store null if empty
+                  const updatedAppt = { ...selectedAppointment, lector2: e.target.value || null };
                   setSelectedAppointment(updatedAppt);
                 }}
               >
-                <option value="">N/A</option> {/* Add N/A option */}
+                <option value="">N/A</option>
                 {lecturers.map((lecturer, index) => (
                   <option key={index} value={lecturer}>
                     {lecturer}
@@ -192,13 +211,14 @@ const Citas = () => {
               <input
                 type="time"
                 name="timeRange"
-                value={selectedAppointment.timeRange.split(' - ')[0]} // Start time
+                className="styled-input"
+                value={selectedAppointment.timeRange.split(' - ')[0]}
                 onChange={(e) => {
                   const newStartTime = e.target.value;
-                  const newEndTime = addOneHour(newStartTime); // Update end time
+                  const newEndTime = addOneHour(newStartTime);
                   const updatedAppt = {
                     ...selectedAppointment,
-                    timeRange: `${newStartTime} - ${newEndTime}`,
+                    timeRange: `${formatTimeAMPM(newStartTime)} - ${formatTimeAMPM(newEndTime)}`,
                   };
                   setSelectedAppointment(updatedAppt);
                 }}
@@ -206,7 +226,8 @@ const Citas = () => {
             </label>
 
             <div className="modal-actions">
-              <button onClick={() => updateAppointment(selectedAppointment)}>Guardar</button>
+              <button className="cita-btn w-25" onClick={() => updateAppointment(selectedAppointment)}>Guardar</button>
+              <button className="cita-btn-secondary w-25" onClick={() => setShowModal(false)}>Cerrar</button>
             </div>
           </>
         )}

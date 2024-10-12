@@ -1,5 +1,5 @@
 import React from 'react';
-import './Modal.css'; // Add any necessary styles
+import './Modal.css';
 
 const Modal = ({ show, onClose, children }) => {
   if (!show) {
@@ -7,7 +7,6 @@ const Modal = ({ show, onClose, children }) => {
   }
 
   const handleOverlayClick = (e) => {
-    // If the click target is the overlay (not the modal content), close the modal
     if (e.target.classList.contains('modal-overlay')) {
       onClose();
     }
@@ -18,11 +17,6 @@ const Modal = ({ show, onClose, children }) => {
       <div className="modal-container">
         <div className="modal-content">
           {children} {/* The content will be passed here */}
-          <div className="modal-actions">
-            <button className="modal-close-btn" onClick={onClose}>
-              Cerrar
-            </button>
-          </div>
         </div>
       </div>
     </div>
