@@ -1,51 +1,42 @@
-import { React, useState } from "react";
+import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
 import Footer from './components/Footer';
+import { getAllUsers, getUserInfo } from "./components/userInfo";
 
 const GestionPerfiles = () => {
-  const [selectedUser, setSelectedUser] = useState({
-    nombre: "Ana Catalina Siles",
-    carne: "2019527194",
-    correo: "anacatsiles@itcr.ac.cr",
-    telefono: "84193253",
-    estado: "Aprobado / Reprobado",
-  });
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState({});
 
-  const users = [
-    "Ana Catalina Siles",
-    "Balaam Brenes",
-    "Biljhana Farah",
-    "Brayan Lopez",
-    "Diogenes Álvarez",
-    "Esteban Daniels",
-    "Esteban Lemaitre",
-    "Fabian Matamoros",
-    "Harold Matamoros",
-    "Jary Brenes",
-    "Johanna Blanco",
-    "Johanna Madrigal",
-    "Leonel Fonseca",
-    "Mario Zeledon",
-    "Mauricio Espinoza",
-    "Natalia Redondo",
-    "Nuria Zeledon",
-    "Oscar Boza",
-    "Pablo Hernandez",
-    "Raul Elizondo",
-    "Sebastian Delgado",
-  ];
 
-  const handleUserClick = (nombre, carne, correo, telefono, estado) => {
-    setSelectedUser({
-      ...selectedUser,
-      nombre: nombre,
-      carne: carne,
-      correo: correo,
-      telefono: telefono,
-      estado: estado
-    });
+  const handleUserClick = async (id) => {
+    try {
+      const data = await getUserInfo(id);
+      console.log(data);
+      setSelectedUser({
+        nombre: data.Nombre,
+        carne: data.Carné,
+        correo: data.Correo,
+        telefono: data.Telefono,
+        estado: data.Estado,
+      });
+    } catch (error) {
+      console.error('Error al obtener la información del usuario:', error.message);
+    }
   };
+
+  useEffect(() => {
+    const getAllUsersInfo = async () => {
+      try {
+        const data = await getAllUsers();
+        setUsers(data.data);
+        console.log(users);
+      } catch (error) {
+        console.error('Error al obtener la información del usuario:', error.message);
+      }
+    };
+    getAllUsersInfo();
+  }, []);
 
   return (
     <div className="gestion-container">
@@ -61,55 +52,63 @@ const GestionPerfiles = () => {
           <li>Modificar información</li>
         </ul>
       </div>
+
       <div className="content">
         <h1>Gestión de perfiles</h1>
+
         <div className="gestion-perfiles">
           <div className="users-list">
             <ul>
-              {users.map((user, index) => (
-                <li
-                  key={user}
-                  className={index % 2 === 0 ? "even-row" : "odd-row"}
-                  onClick={() => handleUserClick(user)}
-                >
-                  <span className="user-name">{user}</span>
-                  <input type="checkbox" className="user-checkbox" />
-                </li>
-              ))}
+              {users.length > 0 ? (
+                users.map((user, index) => (
+                  <li
+                    key={user.id || index}
+                    className={index % 2 === 0 ? "even-row" : "odd-row"}
+                    onClick={() => handleUserClick(user.id)}  // Ahora se pasa el objeto user completo
+                  >
+                    <span className="user-name">{user.Nombre}</span> {/* Muestra el nombre del usuario */}
+                    <input type="checkbox" className="user-checkbox" />
+                  </li>
+                ))
+              ) : (
+                <p>No hay usuarios disponibles.</p>
+              )}
             </ul>
           </div>
+
           <div className="info-container">
             <div className="user-info">
               <h2>Información</h2>
               <label>
                 Nombre
-                <input type="text" value={selectedUser.nombre} readOnly />
+                <input type="text" value={selectedUser.nombre || ""} readOnly />
               </label>
               <label>
                 Carné
-                <input type="text" value={selectedUser.carne} readOnly />
+                <input type="text" value={selectedUser.carne || ""} readOnly />
               </label>
               <label>
                 Correo electrónico
-                <input type="email" value={selectedUser.correo} readOnly />
+                <input type="email" value={selectedUser.correo || ""} readOnly />
               </label>
               <label>
                 Teléfono
-                <input type="text" value={selectedUser.telefono} readOnly />
+                <input type="text" value={selectedUser.telefono || ""} readOnly />
               </label>
               <label>
                 Estado
-                <input type="text" value={selectedUser.estado} readOnly />
+                <input type="text" value={selectedUser.estado || ""} readOnly />
               </label>
             </div>
+
             <div className="actions">
               <button className="btn-delete">Borrar usuario</button>
               <button className="btn-edit">Editar usuario</button>
             </div>
           </div>
-
         </div>
       </div>
+
       <Footer />
     </div>
   );

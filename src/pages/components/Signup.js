@@ -16,6 +16,7 @@ export async function signUpNewUser(fullName, carnet, number, email, password) {
                 Telefono: number,
                 Correo: email,
                 Contraseña: password,
+                Estado: "Pendiente"
             },
         ]);
 
