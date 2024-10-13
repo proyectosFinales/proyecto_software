@@ -6,7 +6,7 @@ import InicioCargaDatos from "./pages/carga-datos";
 import CantidadProyectosProfesor from "./pages/carga-datos/cantidad-proyectos-profesor";
 import InicioAsignaciones from "./pages/asignacion-proyectos";
 import AsignacionAutomatica from "./pages/asignacion-proyectos/asignacion-automatica";
-import Anteproyectos from "./pages/anteproyectos";
+import Anteproyectos from "./pages/Anteproyectos";
 import EdicionAsignacionProyectos from './pages/asignacion-proyectos/edicion';
 
 const App = () => {
