@@ -1,14 +1,9 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = 'https://wuqbfddlwitkszlakvmj.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1cWJmZGRsd2l0a3N6bGFrdm1qIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjY3Nzg0MjgsImV4cCI6MjA0MjM1NDQyOH0.1C7P4EffAD_SBFke5MWEmKkzAnJYSkez43U4rS66D3s';
-const supabase = createClient(supabaseUrl, supabaseKey);
-
+import supabase from "../model/supabase";
 
 
 export async function getUserInfo(id) {
     const { data, error } = await supabase
-        .from('Usuarios')
+        .from('usuarios')
         .select('*')
         .eq('id', id)
         .single();
@@ -26,7 +21,7 @@ export async function getUserInfo(id) {
 
 export async function updateUserInfo(userData) {
     const { response, error } = await supabase
-      .from('Usuarios')
+      .from('usuarios')
       .update({
         Nombre: userData.nombre,
         Correo: userData.correo,
@@ -45,8 +40,8 @@ export async function updateUserInfo(userData) {
 
   export async function getAllUsers() {
     const { data, error } = await supabase
-      .from('Usuarios')
-      .select("id, Nombre");
+      .from('usuarios')
+      .select("id, nombre");
   
     if (error) {
       console.error('Error al actualizar el usuario:', error.message);
