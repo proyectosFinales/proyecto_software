@@ -35,13 +35,38 @@ const EstudianteForm = () => {
 
   async function insertarAnteproyecto(e) {
     e.preventDefault();
+    const confirmarEnvio=window.confirm("¿Está seguro que desea enviar el anteproyecto?");
+
+    if(!confirmarEnvio){return;}
+
     try {
-      const { data, error } = await supabase
+      const { data1, error1 } = await supabase
+        .from('estudiantes')
+        .insert({
+          nombre: nombre,
+          carnet: carnet,
+          telefono: telefono,
+          correo: correo
+        });
+      
+      if (error1) throw error1;
+
+      const { data:estudianteID } = await supabase
+        .from('estudiantes')
+        .select("id")
+        .eq('carnet', carnet);
+
+      if (!estudianteID|| estudianteID.length === 0) {
+        throw new Error('No se pudo obtener el ID del estudiante insertado.');
+      }
+
+      console.log('ID del estudiante insertado', estudianteID[0].id);
+
+      console.log('Inserción en tabla estudiante exitosa', data1);
+
+      const { data2, error2 } = await supabase
         .from('anteproyectos')
-        .insert({nombre:nombre,
-          carnet:carnet,
-          telefono:telefono,
-          correo:correo,
+        .insert({
           sede:sede,
           tipoEmpresa:tipoEmpresa,
           nombreEmpresa:nombreEmpresa,
@@ -62,14 +87,16 @@ const EstudianteForm = () => {
           sintomas:sintomas,
           impacto:impacto,
           nombreDepartamento:nombreDepartamento,
-          tipoProyecto:tipoProyecto
+          tipoProyecto:tipoProyecto,
+          idEstudiante:estudianteID[0].id
         });
-      if (error) {
-        console.error('Error al insertar anteproyecto:', error);
-        return;
-      }
 
-      console.log('Anteproyecto insertado:', data);
+      if (error2) throw error2;
+
+      console.log('Inserción en tabla anteproyecto exitosa', data2);
+
+      navigate('/anteproyectosEstudiante');
+
     } catch (error) {
       console.error('Error al insertar anteproyecto:', error);
     }
@@ -340,7 +367,7 @@ const EstudianteForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={contexto}
           onChange={(e) => setContexto(e.target.value)}
@@ -358,7 +385,7 @@ const EstudianteForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={justificacion}
           onChange={(e) => setJustificacion(e.target.value)}
@@ -377,7 +404,7 @@ const EstudianteForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={sintomas}
           onChange={(e) => setSintomas(e.target.value)}
@@ -395,7 +422,7 @@ const EstudianteForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={impacto}
           onChange={(e) => setImpacto(e.target.value)}

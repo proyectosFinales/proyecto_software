@@ -7,7 +7,7 @@ const Menu = () => {
     <div>
       <h1>Inicio</h1>
       <div className="menu-grid">
-        <Link to="/anteproyectos" className="menu-item">
+        <Link to="/anteproyectosCoordinador" className="menu-item">
           <i className="fas fa-folder"></i>
           <p>Anteproyectos</p>
         </Link>
