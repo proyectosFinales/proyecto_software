@@ -21,7 +21,7 @@ import EdicionAsignacionProyectos from './view/pages/asignacion-proyectos/edicio
 import RecuperarContraseña from './view/pages/RecuperarContraseña';
 // Otras importaciones de componentes
 import InicioAsignaciones from './view/pages/asignacion-proyectos';
-import Anteproyectos from './view/pages/anteproyectos/index.jsx';
+import Anteproyectos from './view/pages/anteproyectos';
 
 function App() {
 	return (
