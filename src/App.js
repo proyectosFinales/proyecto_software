@@ -1,7 +1,5 @@
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Menu from './view/pages/MenuPrincipal';
-import Anteproyectos from './view/pages/Anteproyectos';
-import Asignaciones from './view/pages/Asignaciones';
 import GestionPerfiles from './view/pages/GestionPerfiles';
 import FormularioEstudiantes from './view/pages/FormularioEstudiante';
 import FormularioCoordinador from './view/pages/FormularioCoordinador';
@@ -13,6 +11,11 @@ import Login from './view/pages/Login';
 import Registro from './view/pages/Registro';
 import './App.css'
 import EditarPerfil from './view/pages/EditarPerfil';
+import InicioCargaDatos from "./view/pages/carga-datos";
+import CantidadProyectosProfesor from "./view/pages/carga-datos/cantidad-proyectos-profesor";
+import Asignaciones from "./view/pages/asignacion-proyectos";
+import AsignacionAutomatica from "./view/pages/asignacion-proyectos/asignacion-automatica";
+import EdicionAsignacionProyectos from './view/pages/asignacion-proyectos/edicion';
 // Otras importaciones de componentes
 
 function App() {
@@ -31,6 +34,10 @@ function App() {
         <Route path="/citas" element={<Citas />} />
         <Route path="/citas-usuario" element={<CitasUsuario />} />
         <Route path="/editar-perfil" element={<EditarPerfil />} />
+        <Route path="/carga-datos" element={<InicioCargaDatos />} />
+        <Route path="/carga-datos/cantidad-proyectos-profesor" element={<CantidadProyectosProfesor />} />
+        <Route path="/asignaciones/automatica" element={<AsignacionAutomatica />} />
+        <Route path="/asignaciones/manual" element={<EdicionAsignacionProyectos />} />
         {/* Otras rutas para más secciones */}
       </Routes>
     </Router>

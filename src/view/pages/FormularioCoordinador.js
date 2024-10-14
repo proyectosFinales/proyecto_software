@@ -9,7 +9,7 @@ const CoordinadorForm = () => {
   const [carnet, setCarnet] = useState('');
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
-  const sede="Cartago";
+  const [sede, setSede] = useState('');
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [actividadEmpresa, setActividadEmpresa] = useState('');
   const [distritoEmpresa, setDistritoEmpresa] = useState('');
@@ -22,13 +22,13 @@ const CoordinadorForm = () => {
   const [nombreHR, setNombreHR] = useState('');
   const [telefonoHR, setTelefonoHR] = useState('');
   const [correoHR, setCorreoHR] = useState('');
-  const [tipoEmpresa, setEmpresa] = useState('');
+  const [tipoEmpresa, setTipoEmpresa] = useState('');
   const [contexto, setContexto] = useState('');
   const [justificacion, setJustificacion] = useState('');
   const [sintomas, setSintomas] = useState('');
   const [impacto, setImpacto] = useState('');
   const [nombreDepartamento, setNombreDepartamento] = useState('');
-  const [tipoProyecto, setProyecto] = useState('');
+  const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
 
   const navigate = useNavigate();
@@ -37,14 +37,54 @@ const CoordinadorForm = () => {
 
 
   useEffect(() => {
-    consultarAnteproyectos(); // Llamada a la función para consultar anteproyectos
+    consultarAnteproyectos();
   }, []);
 
-  const handleSubmit = (e) => {
+  async function aprobarAnteproyecto(e) {
     e.preventDefault();
-    // Aquí puedes agregar la lógica para enviar los datos
-    console.log({ nombre, carnet, telefono, correo, sede });
-  };
+    const confirmAprobar=window.confirm("¿Está seguro de APROBAR el anteproyecto?");
+
+    if(!confirmAprobar){return;}
+
+    try {
+      const { data, error } = await supabase
+        .from('anteproyectos')
+        .update({observaciones:observaciones, estado:"Aprobado"})
+        .eq('id', "9");
+      if (error) {
+        console.error('Error al actualizar anteproyecto:', error);
+        return;
+      }
+
+      console.log('Anteproyecto actualizado:', data);
+      navigate('/anteproyectosCoordinador');
+    } catch (error) {
+      console.error('Error al actualizar anteproyecto:', error);
+    }
+  }
+
+  async function reprobarAnteproyecto (e) {
+    e.preventDefault();
+    const confirmReprobar=window.confirm("¿Está seguro de REPROBAR el anteproyecto?");
+
+    if(!confirmReprobar){return;}
+
+    try {
+      const { data, error } = await supabase
+        .from('anteproyectos')
+        .update({observaciones:observaciones, estado:"Reprobado"})
+        .eq('id', "9");
+      if (error) {
+        console.error('Error al actualizar anteproyecto:', error);
+        return;
+      }
+
+      console.log('Anteproyecto actualizado:', data);
+      navigate('/anteproyectosCoordinador');
+    } catch (error) {
+      console.error('Error al actualizar anteproyecto:', error);
+    }
+  }
 
   const handleGoBack = () => {
     navigate(-1); // Navega a la página anterior
@@ -54,21 +94,69 @@ const CoordinadorForm = () => {
     setInfoVisible((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  async function consultarAnteproyectos() {
+  async function consultarAnteproyectos(id) {
     try {
       const { data, error } = await supabase
         .from('anteproyectos')
-        .select('*');
+        .select(`sede,
+          tipoEmpresa,
+          nombreEmpresa,
+          actividadEmpresa,
+          distritoEmpresa,
+          cantonEmpresa,
+          provinciaEmpresa,
+          nombreAsesor,
+          puestoAsesor,
+          telefonoContacto,
+          correoContacto,
+          nombreHR,
+          telefonoHR,
+          correoHR,
+          tipoEmpresa,
+          contexto,
+          justificacion,
+          sintomas,
+          impacto,
+          nombreDepartamento,
+          tipoProyecto,
+          observaciones,
+          idEstudiante,
+          estudiantes(id, nombre, carnet, telefono, correo)`)
+        .eq('id', "9");
 
       if (error) {
-        console.error('Error al consultar anteproyectos 1:', error);
+        console.error('Error al consultar anteproyectos:', error);
         return;
       }
 
       setAnteproyectos(data);
-      setNombre(data[0].nombre);
+      setNombre(data[0].estudiantes.nombre);
+      setCarnet(data[0].estudiantes.carnet);
+      setTelefono(data[0].estudiantes.telefono);
+      setCorreo(data[0].estudiantes.correo);
+      setSede(data[0].sede);
+      setTipoEmpresa(data[0].tipoEmpresa);
+      setNombreEmpresa(data[0].nombreEmpresa);
+      setActividadEmpresa(data[0].actividadEmpresa);
+      setDistritoEmpresa(data[0].distritoEmpresa);
+      setCantonEmpresa(data[0].cantonEmpresa);
+      setProvinciaEmpresa(data[0].provinciaEmpresa);
+      setNombreAsesor(data[0].nombreAsesor);
+      setPuestoAsesor(data[0].puestoAsesor);
+      setTelefonoContacto(data[0].telefonoContacto);
+      setCorreoContacto(data[0].correoContacto);
+      setNombreHR(data[0].nombreHR);
+      setTelefonoHR(data[0].telefonoHR);
+      setCorreoHR(data[0].correoHR);
+      setContexto(data[0].contexto);
+      setJustificacion(data[0].justificacion);
+      setSintomas(data[0].sintomas);
+      setImpacto(data[0].impacto);
+      setNombreDepartamento(data[0].nombreDepartamento);
+      setTipoProyecto(data[0].tipoProyecto);
+      setObservaciones(data[0].observaciones);
     } catch (error) {
-      console.error('Error al consultar anteproyectos 2:', error);
+      console.error('Error al consultar setear variables:', error);
     }
   }
 
@@ -79,7 +167,7 @@ const CoordinadorForm = () => {
         <h1>Crear anteproyecto</h1>
         </header>
 
-    <form className='form' onSubmit={handleSubmit}>
+    <form className='form' onSubmit={aprobarAnteproyecto}>
       <h2>Datos del estudiante</h2>
       
       <div className="form-group">
@@ -126,7 +214,7 @@ const CoordinadorForm = () => {
               type="radio"
               name="sede"
               value="Cartago"
-              defaultChecked={sede === "Cartago"}
+              checked={sede === "Cartago" || sede === " "}
               disabled
             />
             Cartago
@@ -138,7 +226,7 @@ const CoordinadorForm = () => {
               type="radio"
               name="sede"
               value="San Carlos"
-              defaultChecked={sede === "San Carlos"}
+              checked={sede === "San Carlos" || sede === " "}
               disabled
             />
             San Carlos
@@ -150,7 +238,7 @@ const CoordinadorForm = () => {
               type="radio"
               name="sede"
               value="Limón"
-              defaultChecked={sede === "Limón"}
+              checked={sede === "Limón" || sede === " "}
               disabled
             />
             Limón
@@ -167,8 +255,8 @@ const CoordinadorForm = () => {
               type="radio"
               name="tipoEmpresa"
               value="Zona franca"
-              onChange={(e) => setEmpresa(e.target.value)}
-              required
+              checked={tipoEmpresa === "Zona franca" || tipoEmpresa === " "}
+              disabled
             />
             Zona franca
           </label>
@@ -178,8 +266,9 @@ const CoordinadorForm = () => {
             <input
               type="radio"
               name="tipoEmpresa"
-              value="Regimen definitivo"
-              onChange={(e) => setEmpresa(e.target.value)}
+              value="Régimen definitivo"
+              checked={tipoEmpresa === "Régimen definitivo" || tipoEmpresa === " "}
+              disabled
             />
             Régimen definitivo
           </label>
@@ -190,7 +279,8 @@ const CoordinadorForm = () => {
               type="radio"
               name="tipoEmpresa"
               value="Perfeccionamiento activo"
-              onChange={(e) => setEmpresa(e.target.value)}
+              checked={tipoEmpresa === "Perfeccionamiento activo" || tipoEmpresa === " "}
+              disabled
             />
             Perfeccionamiento activo
           </label>
@@ -202,7 +292,7 @@ const CoordinadorForm = () => {
           type="text"
           value={nombreEmpresa}
           onChange={(e) => setNombreEmpresa(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -212,7 +302,7 @@ const CoordinadorForm = () => {
           type="text"
           value={actividadEmpresa}
           onChange={(e) => setActividadEmpresa(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -222,7 +312,7 @@ const CoordinadorForm = () => {
           type="text"
           value={distritoEmpresa}
           onChange={(e) => setDistritoEmpresa(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -232,7 +322,7 @@ const CoordinadorForm = () => {
           type="text"
           value={cantonEmpresa}
           onChange={(e) => setCantonEmpresa(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -242,7 +332,7 @@ const CoordinadorForm = () => {
           type="text"
           value={provinciaEmpresa}
           onChange={(e) => setProvinciaEmpresa(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -252,7 +342,7 @@ const CoordinadorForm = () => {
           type="text"
           value={nombreAsesor}
           onChange={(e) => setNombreAsesor(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -262,7 +352,7 @@ const CoordinadorForm = () => {
           type="text"
           value={puestoAsesor}
           onChange={(e) => setPuestoAsesor(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -272,7 +362,7 @@ const CoordinadorForm = () => {
           type="text"
           value={telefonoContacto}
           onChange={(e) => setTelefonoContacto(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -282,7 +372,7 @@ const CoordinadorForm = () => {
           type="email"
           value={correoContacto}
           onChange={(e) => setCorreoContacto(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -292,7 +382,7 @@ const CoordinadorForm = () => {
           type="text"
           value={nombreHR}
           onChange={(e) => setNombreHR(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -302,7 +392,7 @@ const CoordinadorForm = () => {
           type="text"
           value={telefonoHR}
           onChange={(e) => setTelefonoHR(e.target.value)}
-          required
+          readOnly
         />
       </div>
       
@@ -312,7 +402,7 @@ const CoordinadorForm = () => {
           type="email"
           value={correoHR}
           onChange={(e) => setCorreoHR(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -326,11 +416,11 @@ const CoordinadorForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={contexto}
           onChange={(e) => setContexto(e.target.value)}
-          required
+          readOnly
         />
          {infoVisible.contexto && <p className="info-text">Que ha pasado en la empresa, cuales son las circunstancias que rodean al hecho
           o a interpretar la situación que desea abordar.</p>}
@@ -344,11 +434,11 @@ const CoordinadorForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={justificacion}
           onChange={(e) => setJustificacion(e.target.value)}
-          required
+          readOnly
         />
         {infoVisible.justificacion && <p className="info-text">La razón por la cual debe de realizarse el proyecto y el 
           porqué es necesario e importante para la empresa. Se debe tener claro que la justificación no es el análisis del
@@ -363,11 +453,11 @@ const CoordinadorForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={sintomas}
           onChange={(e) => setSintomas(e.target.value)}
-          required
+          readOnly
         />
         {infoVisible.sintomas && <p className="info-text">Cuáles son los indicios, que indican que algo está ocurriendo
           y no está funcionando bien.</p>}
@@ -381,11 +471,11 @@ const CoordinadorForm = () => {
               title="contexto_info"
             />
         </label>
-        <input
+        <textarea
           type="text"
           value={impacto}
           onChange={(e) => setImpacto(e.target.value)}
-          required
+          readOnly
         />
         {infoVisible.impacto && <p className="info-text">Cuáles son los efectos o resultados no conformes que 
           alertan sobre la necesidad de desarrollar el proyecto. Tome en cuenta que esta sección es parte de un 
@@ -399,7 +489,7 @@ const CoordinadorForm = () => {
           type="text"
           value={nombreDepartamento}
           onChange={(e) => setNombreDepartamento(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -410,9 +500,9 @@ const CoordinadorForm = () => {
             <input
               type="radio"
               name="tipoProyecto"
-              value="Extension"
-              onChange={(e) => setProyecto(e.target.value)}
-              required
+              value="Extensión"
+              checked={tipoProyecto === "Extensión" || tipoProyecto === " "}
+              disabled
             />
             Extensión
           </label>
@@ -423,7 +513,8 @@ const CoordinadorForm = () => {
               type="radio"
               name="tipoProyecto"
               value="Investigación"
-              onChange={(e) => setProyecto(e.target.value)}
+              checked={tipoProyecto === "Investigación" || tipoProyecto === " "}
+              disabled
             />
             Investigación
           </label>
@@ -434,7 +525,8 @@ const CoordinadorForm = () => {
               type="radio"
               name="tipoProyecto"
               value="Aplicado a empresa"
-              onChange={(e) => setProyecto(e.target.value)}
+              checked={tipoProyecto === "Aplicado a empresa" || tipoProyecto === " "}
+              disabled
             />
             Aplicado a empresa
           </label>
@@ -445,7 +537,8 @@ const CoordinadorForm = () => {
               type="radio"
               name="tipoProyecto"
               value="Aplicado a PYME"
-              onChange={(e) => setProyecto(e.target.value)}
+              checked={tipoProyecto === "Aplicado a PYME" || tipoProyecto === " "}
+              disabled
             />
             Aplicado a PYME
           </label>
@@ -454,18 +547,17 @@ const CoordinadorForm = () => {
     </div>
 
     <div className="form-group">
-        <label>Observaciones del profesor *</label>
+        <label>Observaciones del profesor </label>
         <input
           type="text"
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
-          required
         />
       </div>
 
     <div className='button-container'>
       <button type="submit" className='button aprobar'>Aprobar</button>
-      <button type="submit" className='button reprobar'>Reprobar</button>
+      <button type="submit" className='button reprobar' onClick={reprobarAnteproyecto}>Reprobar</button>
       <button type="button" className='button cancelar' onClick={handleGoBack}>Cancelar</button>
     </div>
 
