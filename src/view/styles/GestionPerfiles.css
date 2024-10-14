@@ -4,43 +4,52 @@ h1 {
 
 .gestion-container {
   display: flex;
+  flex-direction: column; /* Para que el header esté arriba */
   min-height: 100vh;
-}
-
-.sidebar {
-  width: 220px;
-  background-color: var(--gris_oscuro);
-  padding: 20px;
-  color: var(--blanco);
-}
-
-.sidebar ul {
-  list-style: none;
-  padding: 0;
-}
-
-.sidebar ul li {
-  padding: 30px 0;
-  cursor: pointer;
 }
 
 .content {
   flex: 1;
   padding: 10px;
   background-color: var(--gris_claro);
+  display: flex;
+  flex-direction: column;
 }
 
 .gestion-perfiles {
   display: flex;
   justify-content: space-between;
-  height: 80vh;  /* Reducir la altura del contenedor principal en un 20% */
+  height: calc(100vh - 150px);  /* Ocupa el espacio restante bajo el header */
+  padding: 40px;
+  padding-top: 80px;
+}
+
+.btn-volver-menu {
+  background-color: var(--azul); /* Fondo blanco para que se vea limpio */
+  color: var(--blanco); /* Usamos la variable azul para la flecha */
+  border: 1px solid var(--gris_claro); /* Borde gris claro para que combine */
+  border-radius: 5px; /* Borde redondeado */
+  padding: 5px 10px; /* Tamaño pequeño */
+  font-size: 18px; /* Ajustamos el tamaño de la flecha */
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  position: absolute;
+  top: 80px;
+  left: 50px;
+}
+
+.btn-volver-menu:hover {
+  background-color: darkblue; /* Efecto hover */
+}
+
+.users-list, .info-container {
+  width: 48%; /* Ambos ocupan el 50% de la pantalla con un pequeño margen */
 }
 
 .users-list {
-  width: 48%;
   background-color: var(--blanco);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  overflow-y: auto;  /* Añadir scroll si el contenido excede la altura */
+  overflow-y: auto;
 }
 
 .users-list ul {
@@ -63,60 +72,23 @@ h1 {
   border: 1px solid var(--gris_claro);
 }
 
-.user-name {
-  flex-grow: 1; /* El nombre ocupa el espacio restante */
-}
-
-.user-checkbox {
-  appearance: none; /* Eliminamos el estilo por defecto */
-  width: 20px;
-  height: 20px;
-  border: 2px solid var(--gris_oscuro);
-  border-radius: 5px; /* Bordes redondeados si lo deseas */
-  cursor: pointer;
-  background-color: var(--blanco); /* Fondo por defecto */
-}
-
-.user-checkbox:checked {
-  background-color: var(--azul); /* Fondo cuando está seleccionado */
-  border-color: var(--azul); /* Bordes del color del fondo cuando está seleccionado */
-}
-
-.user-checkbox:checked::before {
-  content: "✔"; /* Icono de check */
-  color: var(--blanco); /* Color del check */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-}
-
-.even-row {
-  background-color: var(--blanco); /* Fondo blanco para filas pares */
-}
-
-.odd-row {
-  background-color: var(--gris_claro); /* Fondo gris claro para filas impares */
-}
-
 .info-container {
-  width: 48%;
-  background-color: transparent; /* Fondo igual al de la página */
+  background-color: transparent;
   padding: 10px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Alinear el contenido al inicio */
+  align-items: flex-start;
 }
 
 .user-info {
   width: 100%;
-  height: 70%;  /* Reducir la altura en un 20% */
+  height: 80%;
   background-color: var(--blanco);
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
-  overflow-y: auto;  /* Añadir scroll si el contenido excede la altura */
+  overflow-y: auto;
   border-radius: 20px;
 }
 
@@ -146,17 +118,16 @@ h1 {
   width: 100%;
   margin-top: 20px;
   gap: 20%;
-  padding: 10%;
 }
 
 .btn-delete, .btn-edit {
   color: var(--blanco);
-  padding: 15px 30px; /* Botones más grandes */
-  font-size: 16px;    /* Texto más grande */
+  padding: 15px 30px;
+  font-size: 16px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  transition: background-color 0.3s ease; /* Transición suave para el hover */
+  transition: background-color 0.3s ease;
 }
 
 .btn-delete {
@@ -164,7 +135,7 @@ h1 {
 }
 
 .btn-delete:hover {
-  background-color: darkred; /* Efecto hover en eliminar */
+  background-color: darkred;
 }
 
 .btn-edit {
@@ -172,5 +143,5 @@ h1 {
 }
 
 .btn-edit:hover {
-  background-color: darkblue; /* Efecto hover en editar */
+  background-color: darkblue;
 }

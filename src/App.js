@@ -18,6 +18,8 @@ import CantidadProyectosProfesor from "./view/pages/carga-datos/cantidad-proyect
 import Asignaciones from "./view/pages/asignacion-proyectos";
 import AsignacionAutomatica from "./view/pages/asignacion-proyectos/asignacion-automatica";
 import EdicionAsignacionProyectos from './view/pages/asignacion-proyectos/edicion';
+import RecuperarContraseña from './view/pages/RecuperarContraseña';
+// Otras importaciones de componentes
 import InicioAsignaciones from './view/pages/asignacion-proyectos';
 import Anteproyectos from './view/pages/anteproyectos/index.jsx';
 
@@ -51,6 +53,7 @@ function App() {
 					<Route path="manual" element={<EdicionAsignacionProyectos />} />
 				</Route>
 				<Route path="/anteproyectos" element={<Anteproyectos />}></Route>
+				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />}></Route>
 			</Routes>
 		</Router>
 	);
