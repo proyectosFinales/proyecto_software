@@ -34,11 +34,38 @@ const AnteproyectosCoordinador = () => {
   // Función para obtener los datos de la base de datos
   useEffect(() => {
     const fetchAnteproyectos = async () => {
-      const { data, error } = await supabase.from('anteproyectos').select('*');
+      const { data, error } = await supabase
+      .from('anteproyectos')
+      .select(`sede,
+          tipoEmpresa,
+          nombreEmpresa,
+          actividadEmpresa,
+          distritoEmpresa,
+          cantonEmpresa,
+          provinciaEmpresa,
+          nombreAsesor,
+          puestoAsesor,
+          telefonoContacto,
+          correoContacto,
+          nombreHR,
+          telefonoHR,
+          correoHR,
+          tipoEmpresa,
+          contexto,
+          justificacion,
+          sintomas,
+          impacto,
+          nombreDepartamento,
+          tipoProyecto,
+          observaciones,
+          estado,
+          idEstudiante,
+          estudiantes(id, nombre, carnet, telefono, correo)`);
       if (error) {
         console.error('Error al obtener anteproyectos:', error);
       } else {
         setAnteproyectos(data);
+        
       }
     };
     fetchAnteproyectos();
@@ -54,19 +81,31 @@ const AnteproyectosCoordinador = () => {
     // Preparamos los datos para el archivo Excel
     const dataToExport = anteproyectos.map((proyecto) => ({
       'ID': proyecto.id,
-      'Nombre del Estudiante': proyecto.nombre,
-      'Carnet': proyecto.carnet,
-      'Teléfono': proyecto.telefono,
-      'Correo': proyecto.correo,
+      'Nombre del Estudiante': proyecto.estudiantes.nombre,
+      'Carnet': proyecto.estudiantes.carnet,
+      'Teléfono': proyecto.estudiantes.telefono,
+      'Correo': proyecto.estudiantes.correo,
       'Sede': proyecto.sede,
       'Nombre de la Empresa': proyecto.nombreEmpresa,
       'Tipo de Empresa': proyecto.tipoEmpresa,
-      'Asesor Industrial': proyecto.nombreAsesor,
+      'Actividad de la empresa': proyecto.actividadEmpresa,
+      'Distrito': proyecto.distritoEmpresa,
+      'Cantón': proyecto.cantonEmpresa,
+      'Provincia': proyecto.provinciaEmpresa,
+      'Nombre del asesor industrial': proyecto.nombreAsesor,
       'Puesto del Asesor': proyecto.puestoAsesor,
       'Teléfono de Contacto': proyecto.telefonoContacto,
       'Correo del Contacto': proyecto.correoContacto,
+      'Nombre del contacto de recursos humanos': proyecto.nombreHR,
+      'Teléfono del contacto de recursos humanos': proyecto.telefonoHR,
+      'Correo del contacto de recursos humanos': proyecto.correoHR,
+      'Contexto': proyecto.contexto,
+      'Justificación del trabajo': proyecto.justificacion,
+      'Síntomas principales (a lo sumo 3)': proyecto.sintomas,
+      'Efectos o impactos para la empresa': proyecto.impacto,
       'Departamento': proyecto.nombreDepartamento,
-      'Tipo de Proyecto': proyecto.tipoProyecto
+      'Tipo de Proyecto': proyecto.tipoProyecto,
+      'Estado del proyecto': proyecto.estado
     }));
 
     // Creamos un nuevo libro de trabajo
@@ -79,7 +118,7 @@ const AnteproyectosCoordinador = () => {
   };
 
   return (
-    <div className="app-container">
+    <div className="anteproyectos_coordinador_contenedor">
       <header>
         <div className="header">
           <button className="menu-icon" onClick={toggleMenu}>
@@ -89,7 +128,7 @@ const AnteproyectosCoordinador = () => {
         </div>
       </header>
       
-      <div className="content">
+      <div className="contenido_anteproyecto_coordinador">
         {/* Menú lateral */}
         {isMenuOpen && (
           <nav className="sidebar">
@@ -107,25 +146,27 @@ const AnteproyectosCoordinador = () => {
         )}
         
         <main>
-          <div className="project-list">
-            <button className="create-project" onClick={handleGenerateReport}>Generar reporte de anteproyectos</button>
-            <table className="project-table">
+          <div className="lista_anteproyectos_coordinador">
+            <button className="generar_reporte" onClick={handleGenerateReport}>Generar reporte de anteproyectos</button>
+            <table className="tabla_anteproyectos_coordinador">
               <thead>
                 <tr>
-                  <th>Estudiantes</th>
+                  <th>Estudiante</th>
                   <th>Propuesta de proyecto</th>
+                  <th>Estado del proyecto</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {anteproyectos.map((proyecto) => (
                   <tr key={proyecto.id}>
-                    <td>{proyecto.id}</td>
-                    <td>{proyecto.nombre}</td>
+                    <td>{proyecto.estudiantes ? proyecto.estudiantes.nombre : 'Sin estudiante asignado'}</td>
+                    <td>{proyecto.nombreEmpresa}</td>
+                    <td>{proyecto.estado}</td>
                     <td>
-                        <div className="button-container">
+                        <div className="contenedor_botones_anteproyectos_coordinador">
                             <button onClick={() => handleRevisar(proyecto.id)} className="btn revisar">Revisar</button>
-                            <button onClick={() => handleReporte(proyecto.id)} className="btn reporte">Reporte</button>
+                            <button onClick={() => handleReporte(proyecto.id)} className="btn descargar">Descargar</button>
                         </div>
                     </td>
                   </tr>

@@ -555,7 +555,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-    <div className='button-container'>
+    <div className='contenedor_botones_formCoordinador'>
       <button type="submit" className='button aprobar'>Aprobar</button>
       <button type="submit" className='button reprobar' onClick={reprobarAnteproyecto}>Reprobar</button>
       <button type="button" className='button cancelar' onClick={handleGoBack}>Cancelar</button>

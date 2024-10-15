@@ -54,7 +54,7 @@ form {
     margin-right: 10px;
   }
 
-  .button-container {
+  .contenedor_botones_formEstudiante{
     display: flex;
     justify-content: flex-end; /* Alinea los botones a la derecha */
     gap: 10px; /* Añade un espacio entre los botones */
