@@ -36,7 +36,7 @@ h1 {
   grid-gap: 30px;
   justify-items: center;
   align-items: center;
-  padding: 250px;
+  padding: 100px 0 270px 0;
 }
 
 .menu-item {

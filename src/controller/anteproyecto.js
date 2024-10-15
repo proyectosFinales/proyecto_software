@@ -15,11 +15,11 @@ class Anteproyecto {
     static async obtenerTodos() {
         const { data } = await supabase
             .from("anteproyectos")
-            .select("id, nombre, estudiante:estudiantes(id, usuario:usuarios(nombre))");
+            .select("id, nombreEmpresa, estudiante:estudiantes(id, nombre)");
         const anteproyectos = data.map(a => new Anteproyecto(
             a.id,
-            a.nombre,
-            new Estudiante(a.estudiante?.id, a.estudiante?.usuario?.nombre)
+            a.nombreEmpresa,
+            new Estudiante(a.estudiante?.id, a.estudiante?.nombre)
         ));
         return anteproyectos;
     }

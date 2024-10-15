@@ -1,7 +1,7 @@
 import { React, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import "../styles/Login.css"; // Importamos el archivo CSS para los estilos
-import { signIn } from '../components/Signin';
+import "../styles/Login.css";
+import { signIn } from '../../controller/Signin';
 import { FaUser, FaLock } from "react-icons/fa";
 import Footer from '../components/Footer'
 

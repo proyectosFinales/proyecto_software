@@ -23,7 +23,7 @@ const Menu = () => {
           <i className="fas fa-folder-open"></i>
           <p>Proyectos</p>
         </Link>
-        <Link to="/cargar-datos" className="menu-item">
+        <Link to="/carga-datos" className="menu-item">
           <i className="fas fa-database"></i>
           <p>Cargar datos</p>
         </Link>

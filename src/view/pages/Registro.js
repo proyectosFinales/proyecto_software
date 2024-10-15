@@ -1,7 +1,7 @@
 import { React, useState } from 'react';
 import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock } from 'react-icons/fa';
-import '../styles/Registro.css'; // Asegúrate de crear este archivo CSS
-import { signUpNewUser } from '../components/Signup';
+import '../styles/Registro.css';
+import { signUpNewUser } from '../../controller/Signup';
 import { useNavigate } from 'react-router-dom';
 
 const Registro = () => {

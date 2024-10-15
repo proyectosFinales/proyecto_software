@@ -81,6 +81,10 @@
     background-color: #f5f5f5;
 }
 
+.cita-table tr.appointment-row {
+    cursor: pointer;
+}
+
 .styled-input {
     padding: 8px;
     border-radius: 4px;

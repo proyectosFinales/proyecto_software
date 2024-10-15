@@ -12,6 +12,7 @@ const Citas = () => {
 
   const lecturers = [null, 'Profesor A', 'Profesor B', 'Profesor C'];
 
+  // Function to add one hour to the start time to get the end time
   const addOneHour = (time) => {
     const [hours, minutes] = time.split(':');
     let endHour = parseInt(hours, 10) + 1;
@@ -19,18 +20,13 @@ const Citas = () => {
     return `${endHour.toString().padStart(2, '0')}:${minutes}`;
   };
 
-  const formatTimeAMPM = (time) => {
-    let [hour, minute] = time.split(':');
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    hour = hour % 12 || 12;
-    return `${hour}:${minute} ${ampm}`;
-  };
-
+  // Format the date in dd/mm/yyyy format
   const formatDateDDMMYYYY = (date) => {
     const [year, month, day] = date.split('-');
     return `${day}/${month}/${year}`;
   };
 
+  // Handle the creation of a new appointment
   const handleAsignar = () => {
     if (!date || !startTime) {
       setError('Por favor complete todos los campos antes de asignar la cita.');
@@ -41,7 +37,8 @@ const Citas = () => {
     const newAppointment = {
       id: appointments.length + 1,
       date: formatDateDDMMYYYY(date),
-      timeRange: `${formatTimeAMPM(startTime)} - ${formatTimeAMPM(addOneHour(startTime))}`,
+      startTime,
+      endTime: addOneHour(startTime),
       student: null,
       lector1: null,
       lector2: null,
@@ -54,11 +51,17 @@ const Citas = () => {
     setStartTime('');
   };
 
+  // Open the modal and pass the selected appointment
   const handleRowClick = (appointment) => {
-    setSelectedAppointment(appointment);
+    setSelectedAppointment({
+      ...appointment,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+    });
     setShowModal(true);
   };
 
+  // Update the selected appointment and close the modal
   const updateAppointment = (modifiedAppointment) => {
     const updatedAppointments = appointments.map((appt) =>
       appt.id === modifiedAppointment.id ? modifiedAppointment : appt
@@ -93,7 +96,7 @@ const Citas = () => {
 
             <div className="col-12">
               <label>
-                Hora:
+                Hora de inicio:
                 <input
                   type="time"
                   className="styled-input"
@@ -143,9 +146,9 @@ const Citas = () => {
               </tr>
             ) : (
               appointments.map((appointment) => (
-                <tr key={appointment.id} onClick={() => handleRowClick(appointment)}>
+                <tr className='appointment-row' key={appointment.id} onClick={() => handleRowClick(appointment)}>
                   <td>{appointment.date}</td>
-                  <td>{appointment.timeRange}</td>
+                  <td>{`${appointment.startTime} - ${appointment.endTime}`}</td> {/* Display both times in a single column */}
                   <td>{appointment.student ? appointment.student : 'N/A'}</td>
                   <td>{appointment.lector1 ? appointment.lector1 : 'N/A'}</td>
                   <td>{appointment.lector2 ? appointment.lector2 : 'N/A'}</td>
@@ -207,18 +210,19 @@ const Citas = () => {
             </label>
 
             <label>
-              Hora de la cita:
+              Hora de inicio:
               <input
                 type="time"
-                name="timeRange"
+                name="startTime"
                 className="styled-input"
-                value={selectedAppointment.timeRange.split(' - ')[0]}
+                value={selectedAppointment.startTime} // Show the start time
                 onChange={(e) => {
                   const newStartTime = e.target.value;
-                  const newEndTime = addOneHour(newStartTime);
+                  const newEndTime = addOneHour(newStartTime); // Recalculate end time
                   const updatedAppt = {
                     ...selectedAppointment,
-                    timeRange: `${formatTimeAMPM(newStartTime)} - ${formatTimeAMPM(newEndTime)}`,
+                    startTime: newStartTime, // Update start time
+                    endTime: newEndTime, // Update end time
                   };
                   setSelectedAppointment(updatedAppt);
                 }}
