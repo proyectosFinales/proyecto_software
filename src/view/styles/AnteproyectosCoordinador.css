@@ -6,19 +6,19 @@ html, body {
     font-family: Arial, sans-serif;
   }
   
-  .app-container {
+  .anteproyectos_coordinador_contenedor {
     display: flex;
     flex-direction: column;
     min-height: 100vh;
   }
   
   header {
-    background-color: #f1f1f1;
+    background-color: var(--blanco);
     padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom: 2px solid #000;
+    border-bottom: 2px solid var(--negro);
   }
   h1 {
     background-color: inherit; /* Para asegurarse de que el fondo sea transparente */
@@ -42,14 +42,14 @@ html, body {
     cursor: pointer;
   }
   
-  .content {
+  .contenido_anteproyecto_coordinador {
     display: flex;
     flex: 1;
   }
   
   .sidebar {
     width: 250px;
-    background-color: #636363;
+    background-color: var(--gris_claro);
     color: white;
     padding-top: 20px;
   }
@@ -65,7 +65,7 @@ html, body {
   }
   
   .sidebar li:hover {
-    background-color: #424242;
+    background-color: var(--gris_claro);
   }
   
   main {
@@ -73,8 +73,8 @@ html, body {
     padding: 20px;
   }
   
-  .create-project {
-    background-color: #3b3b3b;
+  .generar_reporte {
+    background-color: var(--gris_claro);
     color: white;
     padding: 10px 20px;
     border: none;
@@ -83,14 +83,14 @@ html, body {
     border-radius: 5px;
   }
   
-  .project-list {
-    width: 60%;
+  .lista_anteproyectos_coordinador {
+    width: 100%;
   }
   
-  .project-table {
+  .tabla_anteproyectos_coordinador {
     width: 100%;
     border-collapse: collapse;
-    background-color: #d9d9d9;
+    background-color: var(--blanco);
   }
   td:first-child {
     width: 20%; /* La primera columna será el 70% del ancho */
@@ -100,31 +100,31 @@ html, body {
     width: 35%; /* La segunda columna será el 30% del ancho */
   }
   
-  .project-table th, .project-table td {
-    border: 0px solid #000;
+  .tabla_anteproyectos_coordinador th, .tabla_anteproyectos_coordinador td {
+    border: 0px solid var(--negro);
     padding: 10px;
-    background-color: #ffffff;
+    background-color: var(--blanco);
   }
   
-  .project-table .btn {
+  .tabla_anteproyectos_coordinador .btn {
     margin-right: 5px;
     padding: 10px 15px;
     border: none;
     cursor: pointer;
   }
 
-  .button-container{
+  .contenedor_botones_anteproyectos_coordinador{
     text-align: right;
   }
   
-  .project-table .revisar {
-    background-color: #001f61;
+  .tabla_anteproyectos_coordinador .revisar {
+    background-color: var(--azul);
     color: white;
     border-radius: 5px;
   }
   
-  .project-table .reporte {
-    background-color: #001f61;
+  .tabla_anteproyectos_coordinador .descargar {
+    background-color: var(--azul);
     color: white;
     border-radius: 5px;
   }
@@ -134,7 +134,7 @@ html, body {
     background-color: #f1f1f1;
     text-align: center;
     padding: 10px;
-    border-top: 1px solid #000;
+    border-top: 1px solid var(--negro);
     width: 100%;
   }
   

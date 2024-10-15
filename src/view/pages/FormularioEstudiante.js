@@ -493,7 +493,7 @@ const EstudianteForm = () => {
         </div>
       </div>
     </div>
-    <div className='button-container'>
+    <div className='contenedor_botones_formEstudiante'>
       <button type="submit" className='button enviar'>Enviar</button>
       <button type="button" className='button cancelar' onClick={handleGoBack}>Cancelar</button>
     </div>

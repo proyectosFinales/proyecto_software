@@ -54,17 +54,17 @@ const AnteproyectosEstudiante = () => {
   }
 
   return (
-    <div className="app-container">
-      <header>
-        <div className="header">
-          <button className="menu-icon" onClick={toggleMenu}>
+    <div className="contenedor_anteproyectos_estudiante">
+      <header className='encabezado_anteproyectos_estudiante'>
+        <div>
+          <button className="icono_menu_anteproyectos_estudiante" onClick={toggleMenu}>
             &#9776;
           </button>
           <h1>Anteproyectos</h1>
         </div>
       </header>
       
-      <div className="content">
+      <div className="contenedor_menu_lateral">
         {/* Menú lateral */}
         {isMenuOpen && (
           <nav className="sidebar">
@@ -82,9 +82,9 @@ const AnteproyectosEstudiante = () => {
         )}
         
         <main>
-          <div className="project-list">
-            <button className="create-project" onClick={handleCreateProject}>Crear anteproyecto</button>
-            <table className="project-table">
+          <div className="lista_anteproyectos_estudiante">
+            <button className="crear_anteproyecto" onClick={handleCreateProject}>Crear anteproyecto</button>
+            <table className="tabla_anteproyectos_estudiante">
               <thead>
                 <tr>
                   <th>Anteproyectos creados</th>
@@ -94,12 +94,12 @@ const AnteproyectosEstudiante = () => {
               <tbody>
                 {anteproyectos.map((anteproyecto) => (
                   <tr key={anteproyecto.id}>
-                    <td>{anteproyecto.nombre}</td>
+                    <td>{anteproyecto.nombreEmpresa}</td>
                     <td>
-                        <div className="button-container">
-                            <button onClick={() => handleEdit(anteproyecto.id)} className="btn edit">Editar</button>
-                            <button onClick={() => handleDownload(anteproyecto.id)} className="btn download">Descargar</button>
-                            <button onClick={() => handleDelete(anteproyecto.id)} className="btn delete">Eliminar</button>
+                        <div className="contenedor_botones_anteproyectos_estudiante">
+                            <button onClick={() => handleEdit(anteproyecto.id)} className="btn editar">Editar</button>
+                            <button onClick={() => handleDownload(anteproyecto.id)} className="btn descargar">Descargar</button>
+                            <button onClick={() => handleDelete(anteproyecto.id)} className="btn eliminar">Eliminar</button>
                         </div>
                     </td>
                   </tr>
