@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/FormularioEstudiante.css'
+import styles from '../styles/FormularioEstudiante.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import {supabase} from '../../model/Cliente';
 
@@ -113,14 +113,14 @@ const EstudianteForm = () => {
   return (
     <div>
 
-    <header>
+    <header className={styles.header}>
         <h1>Crear anteproyecto</h1>
         </header>
 
-    <form className='form' onSubmit={insertarAnteproyecto}>
+    <form className={styles.form} onSubmit={insertarAnteproyecto}>
       <h2>Datos del estudiante</h2>
       
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>1. Nombre del estudiante: *
         </label>
         <input
@@ -131,7 +131,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>2. Carnet: *</label>
         <input
           type="text"
@@ -141,7 +141,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>3. Teléfono: *</label>
         <input
           type="text"
@@ -151,7 +151,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>4. Correo electrónico: *</label>
         <input
           type="email"
@@ -161,7 +161,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>5. Sede de estudio: *</label>
         <div>
           <label>
@@ -200,7 +200,7 @@ const EstudianteForm = () => {
         </div>
         <h2>Datos de la empresa</h2>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
         <label>6. Tipo de empresa: *</label>
         <div>
           <label>
@@ -237,7 +237,7 @@ const EstudianteForm = () => {
           </label>
         </div>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
         <label>7. Nombre de la empresa: *</label>
         <input
           type="text"
@@ -247,7 +247,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>8. Actividad a la que se dedica la empresa: *</label>
         <input
           type="text"
@@ -257,7 +257,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>9. Ubicación de la empresa (Distrito): *</label>
         <input
           type="text"
@@ -267,7 +267,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>10. Ubicación de la empresa (Cantón): *</label>
         <input
           type="text"
@@ -277,7 +277,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>11. Ubicación de la empresa (Provincia): *</label>
         <input
           type="text"
@@ -287,7 +287,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>12. Nombre del asesor industrial: *</label>
         <input
           type="text"
@@ -297,7 +297,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>13. Puesto que desempeña el asesor industrial en la empresa: *</label>
         <input
           type="text"
@@ -307,7 +307,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>14. Teléfono del contacto: *</label>
         <input
           type="text"
@@ -317,7 +317,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>15. Correo del contacto: *</label>
         <input
           type="email"
@@ -327,7 +327,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>16. Nombre del contacto de recursos humanos: *</label>
         <input
           type="text"
@@ -337,7 +337,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>17. Teléfono del contacto de recursos humanos: *</label>
         <input
           type="text"
@@ -347,7 +347,7 @@ const EstudianteForm = () => {
         />
       </div>
       
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>18. Correo del contacto de recursos humanos: *</label>
         <input
           type="email"
@@ -359,10 +359,10 @@ const EstudianteForm = () => {
 
       <h2>Datos del proyecto a realizar</h2>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>19. Contexto: *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon} 
               onClick={() => toggleInfo('contexto')} 
               title="contexto_info"
             />
@@ -373,14 +373,14 @@ const EstudianteForm = () => {
           onChange={(e) => setContexto(e.target.value)}
           required
         />
-         {infoVisible.contexto && <p className="info-text">Que ha pasado en la empresa, cuales son las circunstancias que rodean al hecho
+         {infoVisible.contexto && <p className={styles.infoText}>Que ha pasado en la empresa, cuales son las circunstancias que rodean al hecho
           o a interpretar la situación que desea abordar.</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>20. Justitificación del trabajo a realizar: *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon}
               onClick={() => toggleInfo('justificacion')} 
               title="contexto_info"
             />
@@ -391,15 +391,15 @@ const EstudianteForm = () => {
           onChange={(e) => setJustificacion(e.target.value)}
           required
         />
-        {infoVisible.justificacion && <p className="info-text">La razón por la cual debe de realizarse el proyecto y el 
+        {infoVisible.justificacion && <p className={styles.infoText}>La razón por la cual debe de realizarse el proyecto y el 
           porqué es necesario e importante para la empresa. Se debe tener claro que la justificación no es el análisis del
            problema, sino la que indica que hay un problema que amerita ser resuelta.</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>21. Síntomas principales (a lo sumo 3): *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon} 
               onClick={() => toggleInfo('sintomas')} 
               title="contexto_info"
             />
@@ -410,14 +410,14 @@ const EstudianteForm = () => {
           onChange={(e) => setSintomas(e.target.value)}
           required
         />
-        {infoVisible.sintomas && <p className="info-text">Cuáles son los indicios, que indican que algo está ocurriendo
+        {infoVisible.sintomas && <p className={styles.infoText}>Cuáles son los indicios, que indican que algo está ocurriendo
           y no está funcionando bien.</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>22. Efectos o impactos para la empresa: *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon}
               onClick={() => toggleInfo('impacto')} 
               title="contexto_info"
             />
@@ -428,13 +428,13 @@ const EstudianteForm = () => {
           onChange={(e) => setImpacto(e.target.value)}
           required
         />
-        {infoVisible.impacto && <p className="info-text">Cuáles son los efectos o resultados no conformes que 
+        {infoVisible.impacto && <p className={styles.infoText}>Cuáles son los efectos o resultados no conformes que 
           alertan sobre la necesidad de desarrollar el proyecto. Tome en cuenta que esta sección es parte de un 
           trabajo de ingeniería, por lo tanto, debe mostrarse la dimensión (cuantificación) de los efectos 
           (incluir cifras, métricas, indicadores que evidencien lo que está ocurriendo y por ende justifiquen el estudio).</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>23. Nombre del departamento a realizar el proyecto: *</label>
         <input
           type="text"
@@ -444,7 +444,7 @@ const EstudianteForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>24. Tipo de proyecto: *</label>
         <div>
           <label>
@@ -493,13 +493,13 @@ const EstudianteForm = () => {
         </div>
       </div>
     </div>
-    <div className='contenedor_botones_formEstudiante'>
-      <button type="submit" className='button enviar'>Enviar</button>
-      <button type="button" className='button cancelar' onClick={handleGoBack}>Cancelar</button>
+    <div className={styles.contenedorBotonesFormEstudiante}>
+          <button type="submit" className={styles.button + ' ' + styles.enviar}>Enviar</button>
+          <button type="button" className={styles.button + ' ' + styles.cancelar} onClick={handleGoBack}>Cancelar</button>
     </div>
     </form>
     
-    <footer>
+    <footer className={styles.footer}>
         <p>Instituto Tecnológico de Costa Rica 2024</p>
     </footer>
     </div>

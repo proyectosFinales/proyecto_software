@@ -1,0 +1,112 @@
+/* Formulario.module.css */
+
+form {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 50px;
+  margin-top: 50px;
+}
+
+.formGroup {
+  margin-bottom: 20px;
+  margin-top: 20px;
+}
+
+.formGroup label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="email"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  resize: vertical;
+  overflow-y: auto;
+}
+
+.formGroup textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  min-height: 5px;
+  resize: vertical;
+  overflow-y: auto;
+}
+
+input[type="radio"] {
+  margin-right: 10px;
+}
+
+.contenedor_botones_formCoordinador {
+  display: flex;
+  justify-content: flex-end; /* Alinea los botones a la derecha */
+  gap: 10px; /* Añade un espacio entre los botones */
+  margin-top: 20px; /* Añade margen superior para separación con el formulario */
+}
+
+.button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.aprobar {
+  background-color: #001f61;
+  color: white;
+}
+
+.reprobar {
+  background-color: #001f61;
+  color: white;
+}
+
+.cancelar {
+  background-color: #BD3737;
+  color: white;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+header {
+  background-color: #f1f1f1;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 2px solid #000;
+}
+
+footer {
+  background-color: #f1f1f1;
+  text-align: center;
+  padding: 10px;
+  border-top: 1px solid #000;
+  width: 100%;
+}
+
+.infoIcon {
+  cursor: pointer;
+  margin-left: 5px;
+  color: var(--celeste); /* Puedes cambiar el color */
+}
+
+.infoText {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 5px;
+}

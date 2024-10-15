@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom'; // Importa useNavigate
-import '../styles/AnteproyectosCoordinador.css';
+import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
+import styles from '../styles/AnteproyectosCoordinador.module.css';
 import * as XLSX from 'xlsx'; // Importa xlsx para generar el archivo Excel
 import { supabase } from '../../model/Cliente';
 
@@ -118,22 +118,24 @@ const AnteproyectosCoordinador = () => {
   };
 
   return (
-    <div className="anteproyectos_coordinador_contenedor">
+    <div className={styles.anteproyectos_coordinador_contenedor}>
       <header>
-        <div className="header">
-          <button className="menu-icon" onClick={toggleMenu}>
+        <div className={styles.header}>
+          <button className={styles.menuIcon} onClick={toggleMenu}>
             &#9776;
           </button>
           <h1>Anteproyectos</h1>
         </div>
       </header>
       
-      <div className="contenido_anteproyecto_coordinador">
+      <div className={styles.contenedor_menu_lateral}>
         {/* Menú lateral */}
         {isMenuOpen && (
-          <nav className="sidebar">
+          <nav className={styles.sidebar}>
             <ul>
-              <li>Inicio</li>
+              <Link to="/" className={styles.menuItem}>
+                <li>Inicio</li>
+              </Link>
               <li>Anteproyectos</li>
               <li>Proyectos</li>
               <li>Asignaciones</li>
@@ -146,9 +148,9 @@ const AnteproyectosCoordinador = () => {
         )}
         
         <main>
-          <div className="lista_anteproyectos_coordinador">
-            <button className="generar_reporte" onClick={handleGenerateReport}>Generar reporte de anteproyectos</button>
-            <table className="tabla_anteproyectos_coordinador">
+          <div className={styles.lista_anteproyectos_coordinador}>
+            <button className={styles.generar_reporte} onClick={handleGenerateReport}>Generar reporte de anteproyectos</button>
+            <table className={styles.tabla_anteproyectos_coordinador}>
               <thead>
                 <tr>
                   <th>Estudiante</th>
@@ -164,9 +166,9 @@ const AnteproyectosCoordinador = () => {
                     <td>{proyecto.nombreEmpresa}</td>
                     <td>{proyecto.estado}</td>
                     <td>
-                        <div className="contenedor_botones_anteproyectos_coordinador">
-                            <button onClick={() => handleRevisar(proyecto.id)} className="btn revisar">Revisar</button>
-                            <button onClick={() => handleReporte(proyecto.id)} className="btn descargar">Descargar</button>
+                        <div className={styles.contenedor_botones_anteproyectos_coordinador}>
+                            <button onClick={() => handleRevisar(proyecto.id)} className={styles.btn + ' ' + styles.revisar}>Revisar</button>
+                            <button onClick={() => handleReporte(proyecto.id)} className={styles.btn + ' ' + styles.descargar}>Descargar</button>
                         </div>
                     </td>
                   </tr>

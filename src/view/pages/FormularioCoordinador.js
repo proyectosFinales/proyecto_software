@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/FormularioCoordinador.css'
+import styles from '../styles/FormularioCoordinador.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
 
@@ -167,10 +167,10 @@ const CoordinadorForm = () => {
         <h1>Crear anteproyecto</h1>
         </header>
 
-    <form className='form' onSubmit={aprobarAnteproyecto}>
+    <form className={styles.form} onSubmit={aprobarAnteproyecto}>
       <h2>Datos del estudiante</h2>
       
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>1. Nombre del estudiante: *</label>
         <input
           type="text"
@@ -179,7 +179,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>2. Carnet: *</label>
         <input
           type="text"
@@ -188,7 +188,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>3. Teléfono: *</label>
         <input
           type="text"
@@ -197,7 +197,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>4. Correo electrónico: *</label>
         <input
           type="email"
@@ -206,7 +206,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>5. Sede de estudio: *</label>
         <div>
           <label>
@@ -247,7 +247,7 @@ const CoordinadorForm = () => {
         </div>
         <h2>Datos de la empresa</h2>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
         <label>6. Tipo de empresa: *</label>
         <div>
           <label>
@@ -286,7 +286,7 @@ const CoordinadorForm = () => {
           </label>
         </div>
 
-        <div className="form-group">
+        <div className={styles.formGroup}>
         <label>7. Nombre de la empresa: *</label>
         <input
           type="text"
@@ -296,7 +296,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>8. Actividad a la que se dedica la empresa: *</label>
         <input
           type="text"
@@ -306,7 +306,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>9. Ubicación de la empresa (Distrito): *</label>
         <input
           type="text"
@@ -316,7 +316,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>10. Ubicación de la empresa (Cantón): *</label>
         <input
           type="text"
@@ -326,7 +326,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>11. Ubicación de la empresa (Provincia): *</label>
         <input
           type="text"
@@ -336,7 +336,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>12. Nombre del asesor industrial: *</label>
         <input
           type="text"
@@ -346,7 +346,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>13. Puesto que desempeña el asesor industrial en la empresa: *</label>
         <input
           type="text"
@@ -356,7 +356,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>14. Teléfono del contacto: *</label>
         <input
           type="text"
@@ -366,7 +366,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>15. Correo del contacto: *</label>
         <input
           type="email"
@@ -376,7 +376,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>16. Nombre del contacto de recursos humanos: *</label>
         <input
           type="text"
@@ -386,7 +386,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>17. Teléfono del contacto de recursos humanos: *</label>
         <input
           type="text"
@@ -396,7 +396,7 @@ const CoordinadorForm = () => {
         />
       </div>
       
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>18. Correo del contacto de recursos humanos: *</label>
         <input
           type="email"
@@ -408,10 +408,10 @@ const CoordinadorForm = () => {
 
       <h2>Datos del proyecto a realizar</h2>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>19. Contexto: *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon}  
               onClick={() => toggleInfo('contexto')} 
               title="contexto_info"
             />
@@ -426,10 +426,10 @@ const CoordinadorForm = () => {
           o a interpretar la situación que desea abordar.</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>20. Justitificación del trabajo a realizar: *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon}  
               onClick={() => toggleInfo('justificacion')} 
               title="contexto_info"
             />
@@ -445,10 +445,10 @@ const CoordinadorForm = () => {
            problema, sino la que indica que hay un problema que amerita ser resuelta.</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>21. Síntomas principales (a lo sumo 3): *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon}  
               onClick={() => toggleInfo('sintomas')} 
               title="contexto_info"
             />
@@ -463,10 +463,10 @@ const CoordinadorForm = () => {
           y no está funcionando bien.</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>22. Efectos o impactos para la empresa: *
         <AiOutlineInfoCircle 
-              className="info-icon" 
+              className={styles.infoIcon} 
               onClick={() => toggleInfo('impacto')} 
               title="contexto_info"
             />
@@ -483,7 +483,7 @@ const CoordinadorForm = () => {
           (incluir cifras, métricas, indicadores que evidencien lo que está ocurriendo y por ende justifiquen el estudio).</p>}
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>23. Nombre del departamento a realizar el proyecto: *</label>
         <input
           type="text"
@@ -493,7 +493,7 @@ const CoordinadorForm = () => {
         />
       </div>
 
-      <div className="form-group">
+      <div className={styles.formGroup}>
         <label>24. Tipo de proyecto: *</label>
         <div>
           <label>
@@ -546,7 +546,7 @@ const CoordinadorForm = () => {
       </div>
     </div>
 
-    <div className="form-group">
+    <div className={styles.formGroup}>
         <label>Observaciones del profesor </label>
         <input
           type="text"
@@ -555,10 +555,10 @@ const CoordinadorForm = () => {
         />
       </div>
 
-    <div className='contenedor_botones_formCoordinador'>
-      <button type="submit" className='button aprobar'>Aprobar</button>
-      <button type="submit" className='button reprobar' onClick={reprobarAnteproyecto}>Reprobar</button>
-      <button type="button" className='button cancelar' onClick={handleGoBack}>Cancelar</button>
+    <div className={styles.contenedor_botones_formCoordinador}>
+      <button type="submit" className={styles.button + ' ' + styles.aprobar}>Aprobar</button>
+      <button type="submit" className={styles.button + ' ' + styles.reprobar} onClick={reprobarAnteproyecto}>Reprobar</button>
+      <button type="button" className={styles.button + ' ' + styles.cancelar} onClick={handleGoBack}>Cancelar</button>
     </div>
 
     

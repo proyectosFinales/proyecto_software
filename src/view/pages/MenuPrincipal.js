@@ -1,38 +1,44 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../styles/MenuPrincipal.css';
+import styles from '../styles/MenuPrincipal.module.css';
+import Footer from '../components/Footer'
 
 const Menu = () => {
   return (
     <div>
-      <h1>Inicio</h1>
-      <div className="menu-grid">
-        <Link to="/anteproyectosCoordinador" className="menu-item">
+      <header className={styles.AppHeader}>
+        <h1>Inicio</h1>
+        <div className={styles.settingsIcon}>
+          <i className="fas fa-cog"></i>
+        </div>
+      </header>
+      <div className={styles.menuGrid}>
+        <Link to="/anteproyectosCoordinador" className={styles.menuItem}>
           <i className="fas fa-folder"></i>
           <p>Anteproyectos</p>
         </Link>
-        <Link to="/asignaciones" className="menu-item">
+        <Link to="/asignaciones" className={styles.menuItem}>
           <i className="fas fa-users"></i>
           <p>Asignaciones</p>
         </Link>
-        <Link to="/gestion-perfiles" className="menu-item">
+        <Link to="/gestion-perfiles" className={styles.menuItem}>
           <i className="fas fa-user"></i>
           <p>Gestión de perfiles</p>
         </Link>
-        <Link to="/proyectos" className="menu-item">
+        <Link to="/proyectos" className={styles.menuItem}>
           <i className="fas fa-folder-open"></i>
           <p>Proyectos</p>
         </Link>
-        <Link to="/carga-datos" className="menu-item">
+        <Link to="/carga-datos" className={styles.menuItem}>
           <i className="fas fa-database"></i>
           <p>Cargar datos</p>
         </Link>
-        <Link to="/citas" className="menu-item">
+        <Link to="/citas" className={styles.menuItem}>
           <i className="fas fa-clock"></i>
           <p>Citas</p>
         </Link>
       </div>
-      <footer>Instituto Tecnológico de Costa Rica 2024</footer>
+      <Footer />
     </div>
   );
 };
