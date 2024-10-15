@@ -79,10 +79,10 @@ const CitasUsuario = () => {
       {/* Botones para guardar/vovler */}
       <div className="row justify-content-center">
         <div className="col-auto">
-          <button className="cita-btn" onClick={selectAll}>Guardar</button>
+          <button className="cita-btn">Guardar</button>
         </div>
         <div className="col-auto">
-          <button className="cita-btn-secondary" onClick={deselectAll}>Vovler</button>
+          <button className="cita-btn-secondary">Vovler</button>
         </div>
       </div>
     </div>
