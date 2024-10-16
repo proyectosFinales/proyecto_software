@@ -22,6 +22,7 @@ import RecuperarContraseña from './view/pages/RecuperarContraseña';
 // Otras importaciones de componentes
 import InicioAsignaciones from './view/pages/asignacion-proyectos';
 import Anteproyectos from './view/pages/anteproyectos';
+import CambioContraseña from './view/pages/CambioContraseña.js';
 
 function App() {
 	return (
@@ -54,6 +55,7 @@ function App() {
 				</Route>
 				<Route path="/anteproyectos" element={<Anteproyectos />}></Route>
 				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />}></Route>
+				<Route path="/cambiar-contraseña" element={<CambioContraseña />}></Route>
 			</Routes>
 		</Router>
 	);
