@@ -3,9 +3,9 @@ import supabase from "../model/supabase";
 
 export async function getUserInfo(id) {
     const { data, error } = await supabase
-        .from('usuarios')
+        .from('estudiantes')
         .select('*')
-        .eq('id', id)
+        .eq('usuarioID', id)
         .single();
 
     if (error) {
