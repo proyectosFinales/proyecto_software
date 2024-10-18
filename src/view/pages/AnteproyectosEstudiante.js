@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AnteproyectosEstudiante.module.css'; // Cambiado a módulo CSS
 import { supabase } from '../../model/Cliente';
 import jsPDF from 'jspdf';
+import SidebarCoordinador from '../components/SidebarCoordinador';
 
 const AnteproyectosEstudiante = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -165,18 +166,7 @@ const AnteproyectosEstudiante = () => {
 
       <div className={styles.contenedor_menu_lateral}>
         {isMenuOpen && (
-          <nav className={styles.sidebar}>
-            <ul>
-              <li>Inicio</li>
-              <li>Anteproyectos</li>
-              <li>Proyectos</li>
-              <li>Asignaciones</li>
-              <li>Cargar datos</li>
-              <li>Citas</li>
-              <li>Gestionar perfiles</li>
-              <li>Modificar Información</li>
-            </ul>
-          </nav>
+          <SidebarCoordinador />
         )}
 
         <main className={styles.lista_anteproyectos_estudiante}>

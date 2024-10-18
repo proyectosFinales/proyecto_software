@@ -25,53 +25,9 @@
   left: 20px;
 }
 
-.menuItem {
-  display: flex;
-  flex-direction: column;
-  font-size: 18px;
-  cursor: pointer; /* Hacemos que se vea como botón */
-  text-decoration: none;
-  transition: transform 0.2s ease-in-out;
-  color: var(--blanco); /* Color de texto */
-}
-
-.menuItem:hover {
-  transform: scale(1.05); /* Efecto al pasar el mouse */
-}
-
-.menuItem i {
-  font-size: 50px;
-  color: #001f61;
-}
-
 .contenedor_menu_lateral {
   display: flex;
   flex: 1;
-}
-
-.sidebar {
-  width: 250px;
-  background-color: var(--gris_oscuro);
-  color: white;
-  padding-top: 20px;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding-left: 0;
-}
-
-.sidebar li {
-  padding: 15px 20px;
-  font-size: 16px;
-  border-bottom: 1px solid var(--gris_claro);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.sidebar li:hover {
-  background-color: var(--gris_claro);
 }
 
 .lista_anteproyectos_coordinador {
