@@ -39,6 +39,10 @@
     margin-top: 10px;
 }
 
-.tableSpace {
+.tableSpace td {
     padding: 10px 20px;
+}
+
+.title {
+    border-bottom: 2px solid var(--primary1);
 }
