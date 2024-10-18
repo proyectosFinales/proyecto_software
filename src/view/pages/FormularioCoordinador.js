@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/FormularioCoordinador.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
@@ -32,13 +32,25 @@ const CoordinadorForm = () => {
   const [observaciones, setObservaciones] = useState('');
 
   const navigate = useNavigate();
+  const location = useLocation();
   const [infoVisible, setInfoVisible] = useState({}); 
-  const [anteproyectos, setAnteproyectos] = useState([]);
+  const [idAnteproyecto, setIdAnteproyecto] = useState([]);
 
+   // Función para obtener el valor de un query parameter
+   const getQueryParam = (param) => {
+    const params = new URLSearchParams(location.search);
+    return params.get(param);
+  };
 
   useEffect(() => {
-    consultarAnteproyectos();
-  }, []);
+    const id = getQueryParam('id'); // Obtener el id del query parameter
+    if (id) {
+      // Aquí puedes hacer una consulta para obtener los datos del anteproyecto por su id
+      console.log('ID del anteproyecto para editar:', id);
+      // Ejemplo: consultarAnteproyecto(id);
+    }
+    consultarAnteproyectos(id);
+  }, [location]);
 
   async function aprobarAnteproyecto(e) {
     e.preventDefault();
@@ -50,10 +62,11 @@ const CoordinadorForm = () => {
       const { data, error } = await supabase
         .from('anteproyectos')
         .update({observaciones:observaciones, estado:"Aprobado"})
-        .eq('id', "9");
+        .eq('id', idAnteproyecto);
       if (error) {
         console.error('Error al actualizar anteproyecto:', error);
         return;
+      
       }
 
       console.log('Anteproyecto actualizado:', data);
@@ -73,7 +86,7 @@ const CoordinadorForm = () => {
       const { data, error } = await supabase
         .from('anteproyectos')
         .update({observaciones:observaciones, estado:"Reprobado"})
-        .eq('id', "9");
+        .eq('id', idAnteproyecto);
       if (error) {
         console.error('Error al actualizar anteproyecto:', error);
         return;
@@ -122,14 +135,13 @@ const CoordinadorForm = () => {
           observaciones,
           idEstudiante,
           estudiantes(id, nombre, carnet, telefono, correo)`)
-        .eq('id', "9");
+        .eq('id', id);
 
       if (error) {
         console.error('Error al consultar anteproyectos:', error);
         return;
       }
-
-      setAnteproyectos(data);
+      setIdAnteproyecto(id);
       setNombre(data[0].estudiantes.nombre);
       setCarnet(data[0].estudiantes.carnet);
       setTelefono(data[0].estudiantes.telefono);
@@ -328,12 +340,66 @@ const CoordinadorForm = () => {
 
       <div className={styles.formGroup}>
         <label>11. Ubicación de la empresa (Provincia): *</label>
-        <input
-          type="text"
-          value={provinciaEmpresa}
-          onChange={(e) => setProvinciaEmpresa(e.target.value)}
-          readOnly
-        />
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
+              value="Heredia"
+              checked={provinciaEmpresa === "Heredia" || provinciaEmpresa === " "}
+              disabled
+            />
+            Heredia
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
+              value="Cartago"
+              checked={provinciaEmpresa === "Cartago" || provinciaEmpresa === " "}
+              disabled  
+            />
+            Cartago
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
+              value="San José"
+              checked={provinciaEmpresa === "San José" || provinciaEmpresa === " "}
+              disabled
+            />
+            San José
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
+              value="Limón"
+              checked={provinciaEmpresa === "Limón" || provinciaEmpresa === " "}
+              disabled
+            />
+            Limón
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
+              value="Puntarenas"
+              checked={provinciaEmpresa === "Puntarenas" || provinciaEmpresa === " "}
+              disabled
+            />
+            Puntarenas
+          </label>
+        </div>
       </div>
 
       <div className={styles.formGroup}>
