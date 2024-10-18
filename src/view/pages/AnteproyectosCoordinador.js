@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
 import styles from '../styles/AnteproyectosCoordinador.module.css';
 import * as XLSX from 'xlsx'; // Importa xlsx para generar el archivo Excel
 import { supabase } from '../../model/Cliente';
+import SidebarCoordinador from '../components/SidebarCoordinador';
 
 const AnteproyectosCoordinador = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -125,20 +126,7 @@ const AnteproyectosCoordinador = () => {
       <div className={styles.contenedor_menu_lateral}>
         {/* Menú lateral */}
         {isMenuOpen && (
-          <nav className={styles.sidebar}>
-            <ul>
-              <Link to="/" className={styles.menuItem}>
-                <li>Inicio</li>
-              </Link>
-              <li>Anteproyectos</li>
-              <li>Proyectos</li>
-              <li>Asignaciones</li>
-              <li>Cargar datos</li>
-              <li>Citas</li>
-              <li>Gestionar perfiles</li>
-              <li>Modificar Información</li>
-            </ul>
-          </nav>
+          <SidebarCoordinador />
         )}
         
         <main>
