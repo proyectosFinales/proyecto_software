@@ -17,10 +17,10 @@ const GestionPerfiles = () => {
       console.log(data);
       setSelectedUser({
         nombre: data.nombre,
-        carne: data.Carné,
+        carne: data.carnet,
         correo: data.correo,
-        telefono: data.Telefono,
-        estado: data.Estado,
+        telefono: data.telefono,
+        estado: data.estado,
       });
     } catch (error) {
       console.error('Error al obtener la información del usuario:', error.message);

@@ -1,18 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import Modal from '../components/Modal';
+import { supabase } from '../../model/Cliente';
 
 const Citas = () => {
-  const [date, setDate] = useState('');
-  const [startTime, setStartTime] = useState('');
-  const [appointments, setAppointments] = useState([]);
-  const [selectedAppointment, setSelectedAppointment] = useState(null);
-  const [showModal, setShowModal] = useState(false);
+  const [fecha, setFecha] = useState('');
+  const [horaInicio, setHoraInicio] = useState('');
+  const [citas, setCitas] = useState([]);
+  const [lectores, setLectores] = useState([]);
+  const [citaActual, setCitaActual] = useState(null);
+  const [modal, setModal] = useState(false);
   const [error, setError] = useState('');
 
-  const lecturers = [null, 'Profesor A', 'Profesor B', 'Profesor C'];
-
-  // Function to add one hour to the start time to get the end time
   const addOneHour = (time) => {
     const [hours, minutes] = time.split(':');
     let endHour = parseInt(hours, 10) + 1;
@@ -20,57 +19,121 @@ const Citas = () => {
     return `${endHour.toString().padStart(2, '0')}:${minutes}`;
   };
 
-  // Format the date in dd/mm/yyyy format
   const formatDateDDMMYYYY = (date) => {
     const [year, month, day] = date.split('-');
-    return `${day}/${month}/${year}`;
+    return `${day}-${month}-${year}`;
   };
 
-  // Handle the creation of a new appointment
-  const handleAsignar = () => {
-    if (!date || !startTime) {
+  useEffect(() => {
+    const fetchCitas = async () => {
+      const { data, error } = await supabase
+        .from('citas')
+        .select(`
+          id,
+          fecha,
+          horaInicio,
+          horaFin,
+          lector1,
+          lector2
+        `);
+      if (error) {
+        console.error('Error al obtener citas:', error);
+      } else {
+        setCitas(data);
+      }
+    };
+    fetchCitas();
+
+    const fetchProfesores = async () => {
+      const { data, error } = await supabase
+        .from('profesores')
+        .select(`id, nombre`);
+      if (error) {
+        console.error('Error al obtener profesores:', error);
+      } else {
+        setLectores(data);
+      }
+    };
+    fetchProfesores();
+  }, []);
+
+  const handleAsignarCita = async () => {
+    if (!fecha || !horaInicio) {
       setError('Por favor complete todos los campos antes de asignar la cita.');
       return;
     }
     setError('');
 
-    const newAppointment = {
-      id: appointments.length + 1,
-      date: formatDateDDMMYYYY(date),
-      startTime,
-      endTime: addOneHour(startTime),
-      student: null,
+    const nuevaCita = {
+      fecha: fecha,
+      horaInicio: horaInicio,
+      horaFin: addOneHour(horaInicio),
       lector1: null,
       lector2: null,
-      projectName: null,
-      projectDescription: 'Lorem ipsum dolor sit amet...',
     };
 
-    setAppointments([...appointments, newAppointment]);
-    setDate('');
-    setStartTime('');
+    try {
+      const { data, error } = await supabase
+        .from('citas')
+        .insert([nuevaCita])
+        .select();
+
+      if (error) {
+        console.error('Error al agregar cita:', error);
+        setError('Ocurrió un error al guardar la cita.');
+        return;
+      }
+
+      setCitas([...citas, data[0]]);
+
+      setFecha('');
+      setHoraInicio('');
+
+    } catch (error) {
+      console.error('Error al guardar la cita:', error);
+      setError('Ocurrió un error inesperado.');
+    }
   };
 
-  // Open the modal and pass the selected appointment
-  const handleRowClick = (appointment) => {
-    setSelectedAppointment({
-      ...appointment,
-      startTime: appointment.startTime,
-      endTime: appointment.endTime,
+
+  const handleCitaClick = (cita) => {
+    setCitaActual({
+      ...cita,
+      horaInicio: cita.horaInicio,
+      horaFin: cita.horaFin,
     });
-    setShowModal(true);
+    setModal(true);
   };
 
-  // Update the selected appointment and close the modal
-  const updateAppointment = (modifiedAppointment) => {
-    const updatedAppointments = appointments.map((appt) =>
-      appt.id === modifiedAppointment.id ? modifiedAppointment : appt
-    );
+  const updateCita = async (citaModificada) => {
+    try {
+      const { error } = await supabase
+        .from('citas')
+        .update({
+          lector1: citaModificada.lector1,
+          lector2: citaModificada.lector2,
+          horaInicio: citaModificada.horaInicio,
+          horaFin: citaModificada.horaFin,
+        })
+        .eq('id', citaModificada.id);
 
-    setAppointments(updatedAppointments);
-    setSelectedAppointment(null);
-    setShowModal(false);
+      if (error) {
+        console.error('Error al actualizar la cita en la base de datos:', error);
+        return;
+      }
+
+      const citasModificadas = citas.map((cita) =>
+        cita.id === citaModificada.id ? citaModificada : cita
+      );
+
+      setCitas(citasModificadas);
+      setCitaActual(null);
+      setModal(false);
+    } catch (error) {
+      console.error('Error al actualizar la cita:', error);
+    }
   };
+
 
   return (
     <div className="citas-form container">
@@ -88,8 +151,8 @@ const Citas = () => {
                 <input
                   type="date"
                   className="styled-input"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
+                  value={fecha}
+                  onChange={(e) => setFecha(e.target.value)}
                 />
               </label>
             </div>
@@ -100,15 +163,15 @@ const Citas = () => {
                 <input
                   type="time"
                   className="styled-input"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
+                  value={horaInicio}
+                  onChange={(e) => setHoraInicio(e.target.value)}
                   step="300" // 300 seconds = 5 minutes
                 />
               </label>
             </div>
 
             <div className="col-12 d-flex justify-content-center">
-              <button className="cita-btn w-50" onClick={handleAsignar}>Guardar cita</button>
+              <button className="cita-btn w-50" onClick={handleAsignarCita}>Guardar cita</button>
             </div>
 
             <div className="col-12">
@@ -130,80 +193,79 @@ const Citas = () => {
             <tr>
               <th>Día</th>
               <th>Hora</th>
-              <th>Estudiante</th>
               <th>Lector 1</th>
               <th>Lector 2</th>
-              <th>Proyecto</th>
             </tr>
           </thead>
 
           <tbody>
-            {appointments.length === 0 ? (
+            {citas.length === 0 ? (
               <tr>
                 <td colSpan="6" style={{ textAlign: 'center' }}>
                   No hay citas asignadas.
                 </td>
               </tr>
             ) : (
-              appointments.map((appointment) => (
-                <tr className='appointment-row' key={appointment.id} onClick={() => handleRowClick(appointment)}>
-                  <td>{appointment.date}</td>
-                  <td>{`${appointment.startTime} - ${appointment.endTime}`}</td> {/* Display both times in a single column */}
-                  <td>{appointment.student ? appointment.student : 'N/A'}</td>
-                  <td>{appointment.lector1 ? appointment.lector1 : 'N/A'}</td>
-                  <td>{appointment.lector2 ? appointment.lector2 : 'N/A'}</td>
-                  <td>{appointment.projectName ? appointment.projectName : 'N/A'}</td>
-                </tr>
-              ))
+              citas.map((cita) => {
+                const lector1 = lectores.find((lect) => lect.id === cita.lector1);
+                const lector2 = lectores.find((lect) => lect.id === cita.lector2);
+
+                return (
+                  <tr className='cita-row' key={cita.id} onClick={() => handleCitaClick(cita)}>
+                    <td>{formatDateDDMMYYYY(cita.fecha)}</td>
+                    <td>{`${cita.horaInicio} - ${cita.horaFin}`}</td>
+                    <td>{lector1 ? lector1.nombre : 'N/A'}</td>
+                    <td>{lector2 ? lector2.nombre : 'N/A'}</td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
+
         </table>
       </div>
 
       {/* Modal */}
-      <Modal show={showModal} onClose={() => setShowModal(false)}>
-        {selectedAppointment && (
+      <Modal show={modal} onClose={() => setModal(false)}>
+        {citaActual && (
           <>
             <h2>Editar Cita</h2>
-            <p><strong>Estudiante:</strong> {selectedAppointment.student ? selectedAppointment.student : 'N/A'}</p>
-
-            <p><strong>Descripción del proyecto:</strong> {selectedAppointment.projectDescription}</p>
 
             <label>
-              Profesor lector 1:
+              Lector 1:
               <select
                 name="lector1"
                 className="styled-input"
-                value={selectedAppointment.lector1 || ''}
+                value={citaActual.lector1 || ''}
                 onChange={(e) => {
-                  const updatedAppt = { ...selectedAppointment, lector1: e.target.value || null };
-                  setSelectedAppointment(updatedAppt);
+                  const updatedAppt = { ...citaActual, lector1: e.target.value || null };
+                  setCitaActual(updatedAppt);
                 }}
               >
                 <option value="">N/A</option>
-                {lecturers.map((lecturer, index) => (
-                  <option key={index} value={lecturer}>
-                    {lecturer}
+                {lectores.map((lecturer) => (
+                  <option key={lecturer.id} value={lecturer.id}>
+                    {lecturer.nombre}
                   </option>
                 ))}
               </select>
             </label>
 
             <label>
-              Profesor lector 2:
+              Lector 2:
               <select
                 name="lector2"
                 className="styled-input"
-                value={selectedAppointment.lector2 || ''}
+                value={citaActual.lector2 || ''}
                 onChange={(e) => {
-                  const updatedAppt = { ...selectedAppointment, lector2: e.target.value || null };
-                  setSelectedAppointment(updatedAppt);
+                  const updatedAppt = { ...citaActual, lector2: e.target.value || null };
+                  setCitaActual(updatedAppt);
                 }}
               >
                 <option value="">N/A</option>
-                {lecturers.map((lecturer, index) => (
-                  <option key={index} value={lecturer}>
-                    {lecturer}
+                {lectores.map((lecturer) => (
+                  <option key={lecturer.id} value={lecturer.id}>
+                    {lecturer.nombre}
                   </option>
                 ))}
               </select>
@@ -213,25 +275,25 @@ const Citas = () => {
               Hora de inicio:
               <input
                 type="time"
-                name="startTime"
+                name="horaInicio"
                 className="styled-input"
-                value={selectedAppointment.startTime} // Show the start time
+                value={citaActual.horaInicio}
                 onChange={(e) => {
-                  const newStartTime = e.target.value;
-                  const newEndTime = addOneHour(newStartTime); // Recalculate end time
+                  const horaInicio = e.target.value;
+                  const horaFin = addOneHour(horaInicio);
                   const updatedAppt = {
-                    ...selectedAppointment,
-                    startTime: newStartTime, // Update start time
-                    endTime: newEndTime, // Update end time
+                    ...citaActual,
+                    horaInicio: horaInicio,
+                    horaFin: horaFin,
                   };
-                  setSelectedAppointment(updatedAppt);
+                  setCitaActual(updatedAppt);
                 }}
               />
             </label>
 
             <div className="modal-actions">
-              <button className="cita-btn w-25" onClick={() => updateAppointment(selectedAppointment)}>Guardar</button>
-              <button className="cita-btn-secondary w-25" onClick={() => setShowModal(false)}>Cerrar</button>
+              <button className="cita-btn w-50" onClick={() => updateCita(citaActual)}>Guardar</button>
+              <button className="cita-btn w-50" onClick={() => setModal(false)}>Cancelar</button>
             </div>
           </>
         )}
