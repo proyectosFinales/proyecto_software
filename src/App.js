@@ -8,6 +8,7 @@ import FormularioEstudiantes from './view/pages/FormularioEstudiante';
 import FormularioCoordinador from './view/pages/FormularioCoordinador';
 import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador';
+import EditarFormulario from './view/pages/EditarFormulario';
 import Citas from './view/pages/Citas';
 import CitasUsuario from './view/pages/CitasUsuario';
 import Login from './view/pages/Login';
@@ -36,6 +37,7 @@ function App() {
 				<Route path="/gestion-perfiles" element={<GestionPerfiles />} />
 				<Route path="/formulario-estudiantes" element={<FormularioEstudiantes />} />
 				<Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
+				<Route path="/editarFormulario" element={<EditarFormulario />} />
 				<Route path="/citas" element={<Citas />} />
 				<Route path="/citas-usuario" element={<CitasUsuario />} />
 				<Route path="/editar-perfil" element={<EditarPerfil />} />

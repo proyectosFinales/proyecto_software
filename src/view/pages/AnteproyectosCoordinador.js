@@ -6,10 +6,7 @@ import { supabase } from '../../model/Cliente';
 
 const AnteproyectosCoordinador = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [anteproyectos, setAnteproyectos] = useState([
-    { id: 1, name: "Deutch Center for management Deutch Center for management Deutch Center for management", studentName: "Ana Victoria Castro"},
-    { id: 2, name: "Otro anteproyecto", studentName: "Otro estudiante" }
-  ]);
+  const [anteproyectos, setAnteproyectos] = useState([]);
 
   const navigate = useNavigate(); // Hook para redireccionar
 
@@ -18,7 +15,7 @@ const AnteproyectosCoordinador = () => {
   };
 
   const handleRevisar = (id) => {
-    navigate('/formulario-coordinador')
+    navigate('/formulario-coordinador?id=' + id)
     // Lógica para editar
   };
 
@@ -27,16 +24,13 @@ const AnteproyectosCoordinador = () => {
     // Lógica para descargar
   };
 
-  const handleCreateProject = () => {
-    navigate('/formulario-estudiantes'); // Redirecciona a la página de creación de anteproyectos
-  };
-
   // Función para obtener los datos de la base de datos
   useEffect(() => {
     const fetchAnteproyectos = async () => {
       const { data, error } = await supabase
       .from('anteproyectos')
-      .select(`sede,
+      .select(`id,
+          sede,
           tipoEmpresa,
           nombreEmpresa,
           actividadEmpresa,
@@ -160,15 +154,15 @@ const AnteproyectosCoordinador = () => {
                 </tr>
               </thead>
               <tbody>
-                {anteproyectos.map((proyecto) => (
-                  <tr key={proyecto.id}>
-                    <td>{proyecto.estudiantes ? proyecto.estudiantes.nombre : 'Sin estudiante asignado'}</td>
-                    <td>{proyecto.nombreEmpresa}</td>
-                    <td>{proyecto.estado}</td>
+                {anteproyectos.map((anteproyecto) => (
+                  <tr key={anteproyecto.id}>
+                    <td>{anteproyecto.estudiantes ? anteproyecto.estudiantes.nombre : 'Sin estudiante asignado'}</td>
+                    <td>{anteproyecto.nombreEmpresa}</td>
+                    <td>{anteproyecto.estado}</td>
                     <td>
                         <div className={styles.contenedor_botones_anteproyectos_coordinador}>
-                            <button onClick={() => handleRevisar(proyecto.id)} className={styles.btn + ' ' + styles.revisar}>Revisar</button>
-                            <button onClick={() => handleReporte(proyecto.id)} className={styles.btn + ' ' + styles.descargar}>Descargar</button>
+                            <button onClick={() => handleRevisar(anteproyecto.id)} className={styles.btn + ' ' + styles.revisar}>Revisar</button>
+                            <button onClick={() => handleReporte(anteproyecto.id)} className={styles.btn + ' ' + styles.descargar}>Descargar</button>
                         </div>
                     </td>
                   </tr>
