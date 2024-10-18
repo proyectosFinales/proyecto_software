@@ -6,8 +6,8 @@ class Profesor extends Usuario {
     cantidadProyectos;
     original = {};
 
-    constructor(id, nombre, cantidadProyectos) {
-        super(id, nombre);
+    constructor(id, nombre, sede, cantidadProyectos) {
+        super(id, nombre, sede);
         this.cantidadProyectos = cantidadProyectos;
         this.original.cantidadProyectos = cantidadProyectos;
     }
@@ -15,8 +15,8 @@ class Profesor extends Usuario {
     static async obtenerTodos() {
         const { data } = await supabase
             .from("profesores")
-            .select("id, cantidadProyectos, usuario:usuarios(id, nombre)");
-        return data.map(p => new Profesor(p.usuario.id, p.usuario.nombre, p.cantidadProyectos));
+            .select("id, nombre, cantidadProyectos, usuario:usuarios(sede)");
+        return data.map(p => new Profesor(p.id, p.nombre, p.usuario.sede, p.cantidadProyectos));
     }
 
     async actualizarCantidadProyectos() {
