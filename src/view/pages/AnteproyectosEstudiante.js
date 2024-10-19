@@ -5,9 +5,9 @@ import { supabase } from '../../model/Cliente';
 import jsPDF from 'jspdf';
 import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
+import Header from '../components/Header';
 
 const AnteproyectosEstudiante = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [anteproyectos, setAnteproyectos] = useState([]);
 
   const navigate = useNavigate();
@@ -152,16 +152,8 @@ const AnteproyectosEstudiante = () => {
 
   return (
     <div className={styles.contenedor_anteproyectos_estudiante}>
-        <div className={styles.header}>
-        <button className={styles.menuIcon} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            &#9776;
-          </button>
-          <h1>Anteproyectos</h1>
-        </div>
-
+        <Header title="Anteproyectos"/>
       <div>
-        <SidebarCoordinador show={isMenuOpen} />
-
         <main className={styles.lista_anteproyectos_estudiante}>
           <button className={styles.crear_anteproyecto} onClick={() => navigate('/formulario-estudiantes')}>
             Crear anteproyecto

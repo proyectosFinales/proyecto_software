@@ -4,6 +4,7 @@
   }
   
   .AppHeader {
+    height: 80px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -13,8 +14,11 @@
   }
   
   .settingsIcon {
-    font-size: 24px;
+    font-size: 35px;
     margin-right: 10px;
+    cursor: pointer;
+    border: none;
+    background: none;
   }
   
   .menuGrid {

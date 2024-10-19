@@ -6,10 +6,12 @@
     padding-top: 20px;
     z-index: 999;
     position: absolute;
+    right: 0; /* Posiciona el sidebar a la derecha */
     transition: transform 1s;
-    transform: translate(0);
+    transform: translateX(0); /* Visible por defecto */
+    overflow: hidden;
   }
-  
+
   .sidebar ul {
     list-style: none;
     padding-left: 0;
@@ -30,13 +32,14 @@
 
   .sidebarHide {
     width: 250px;
-    height: 100vh;
-    background-color: var(--gris_oscuro);
+    height: calc(100vh - 80px);
+    background: var(--gris_oscuro);
     color: white;
     padding-top: 20px;
     z-index: 999;
-    position: absolute;
-    transform: translateX(-250px);
+    position: fixed;
+    right: 0; /* Posiciona el sidebar oculto a la derecha */
+    transform: translateX(100%); 
   }
 
   .menuItem {
