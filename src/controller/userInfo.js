@@ -2,51 +2,72 @@ import supabase from "../model/supabase";
 
 
 export async function getUserInfo(id) {
-    const { data, error } = await supabase
-        .from('estudiantes')
-        .select('*')
-        .eq('usuarioID', id)
-        .single();
+  const { data: data, error } = await supabase
+    .from('usuarios')
+    .select('correo, contraseña, rol, \
+profesor: profesores(nombre), \
+estudiante: estudiantes(nombre, carnet, telefono)')
+    .eq('id', id)
+    .single();
 
-    if (error) {
-        throw new Error(error.message);
-    }
+  if (!data) {
+    throw new Error("Hubo un problema al consultad sus datos. Por favor, inténtelo de nuevo.");
+  }
 
-    if (!data) {
-        throw new Error('No se encontró el usuario de la sesión. \nPor favor vuelta a interntarlo.'); 
-    }
-    
-    return data;
+  return data;
+}
+
+export async function gestionUserInfo(id) {
+  const { data: data, error } = await supabase
+    .from('usuarios')
+    .select('id, correo, rol, \
+profesor: profesores(nombre), \
+estudiante: estudiantes(nombre, carnet, telefono, estado)')
+    .eq('id', id)
+    .single();
+
+  if (!data) {
+    throw new Error("Hubo un problema al consultad sus datos. Por favor, inténtelo de nuevo.");
+  }
+
+  return data;
 }
 
 export async function updateUserInfo(userData) {
-    const { response, error } = await supabase
-      .from('usuarios')
-      .update({
-        Nombre: userData.nombre,
-        Correo: userData.correo,
-        Telefono: userData.telefono,
-        Contraseña: userData.password,
-      })
-      .eq('id', userData.id);
-  
-    if (error) {
-      console.error('Error al actualizar el usuario:', error.message);
-      return { error };
-    }
-  
-    return { response };
+  const { response, error } = await supabase
+    .from('usuarios')
+    .update({
+      Nombre: userData.nombre,
+      Correo: userData.correo,
+      Telefono: userData.telefono,
+      Contraseña: userData.password,
+    })
+    .eq('id', userData.id);
+
+  if (error) {
+    console.error('Error al actualizar el usuario:', error.message);
+    return { error };
   }
 
-  export async function getAllUsers() {
-    const { data, error } = await supabase
-      .from('usuarios')
-      .select("id, nombre");
+  return { response };
+}
+
+export async function getAllUsers() {
+  const { data: dataE, error: errorE } = await supabase
+    .from('usuarios')
+    .select("id, rol, estudiante:estudiantes(nombre)")
+    .eq("rol", 3);
+
+
+  const { data: dataP, error: errorP } = await supabase
+    .from('usuarios')
+    .select("id, rol, profesor:profesores(nombre)")
+    .eq("rol", 2);
+
+
+  if (errorE || errorP) {
+    throw new Error("Hubo problemas para extraer los usuarios.");
+  };
   
-    if (error) {
-      console.error('Error al actualizar el usuario:', error.message);
-      return { error };
-    }
-  
-    return { data };
-  }
+  return [...dataE, ...dataP];
+}
