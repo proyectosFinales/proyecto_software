@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
 
-const CitasUsuario = () => {
+const CitasProfesor = () => {
   const [citas, setCitas] = useState([]);
   const [citasOriginales, setCitasOriginales] = useState([]);
   const [error, setError] = useState('');
@@ -177,4 +177,4 @@ const CitasUsuario = () => {
   );
 };
 
-export default CitasUsuario;
+export default CitasProfesor;
