@@ -8,12 +8,12 @@
 }
 
 .header {
-  background-color: var(--blanco);
-  padding: 10px;
+  height: 80px;
+  background-color: var(--gris_claro);
   display: flex;
   justify-content: center;
   align-items: center;
-  border-bottom: 2px solid var(--negro);
+  border-bottom: 1px solid black;
 }
 
 .menuIcon {

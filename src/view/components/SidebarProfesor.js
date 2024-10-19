@@ -2,21 +2,26 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styles from './Sidebar.module.css';
 
-/*copiar y pegar esto tambien
+/*copiar y pegar esta variable
 
 const [isMenuOpen, setIsMenuOpen] = useState(false);
-const navigate = useNavigate(); // Hook para redireccionar
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+copiar y pegar este botón dentro del header
+
+<button className={styles.menuIcon} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+  &#9776;
+</button>
+
 */
 
-const SidebarProfesor = () => {
+const SidebarProfesor = ({show}) => {
   return (
-    <nav className={styles.sidebar}>
+    <nav className={show ? styles.sidebar : styles.sidebarHide}>
     <ul>
         <Link to="/" className={styles.menuItem}><li>Inicio</li></Link>
+        <Link to="/anteproyectosCoordinador" className={styles.menuItem}><li>Anteproyecto</li></Link>
+        <Link to="/proyectosCoordinador" className={styles.menuItem}><li>Proyectos</li></Link>
+        <Link to="/asignaciones" className={styles.menuItem}><li>Asignaciones</li></Link>
     </ul>
     </nav>
   );
