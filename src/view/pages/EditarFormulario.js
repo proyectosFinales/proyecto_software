@@ -203,7 +203,7 @@ const CoordinadorForm = () => {
           type="text"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -213,7 +213,7 @@ const CoordinadorForm = () => {
           type="text"
           value={carnet}
           onChange={(e) => setCarnet(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -223,7 +223,7 @@ const CoordinadorForm = () => {
           type="text"
           value={telefono}
           onChange={(e) => setTelefono(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -233,7 +233,7 @@ const CoordinadorForm = () => {
           type="email"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
