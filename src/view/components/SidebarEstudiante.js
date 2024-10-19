@@ -18,9 +18,9 @@ const SidebarEstudiante = ({show}) => {
   return (
     <nav className={show ? styles.sidebar : styles.sidebarHide}>
     <ul>
-        <Link to="/" className={styles.menuItem}><li>Inicio</li></Link>
-        <Link to="/anteproyectosCoordinador" className={styles.menuItem}><li>Anteproyecto</li></Link>
-        <Link to="/proyectosCoordinador" className={styles.menuItem}><li>Proyectos</li></Link>
+        <Link to="/MenuEstudiante" className={styles.menuItem}><li>Inicio</li></Link>
+        <Link to="/anteproyectosEstudiante" className={styles.menuItem}><li>Anteproyecto</li></Link>
+        <Link to="/MeneEstudiante" className={styles.menuItem}><li>Citas</li></Link>
     </ul>
     </nav>
   );

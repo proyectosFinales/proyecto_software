@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/FormularioEstudiante.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import {supabase} from '../../model/Cliente';
+import Footer from '../components/Footer';
 
 const EstudianteForm = () => {
   const [nombre, setNombre] = useState('');
@@ -32,6 +33,33 @@ const EstudianteForm = () => {
 
   const navigate = useNavigate();
   const [infoVisible, setInfoVisible] = useState({});
+
+  useEffect(() => {
+    consultarEstudiante();
+  },);
+
+  async function consultarEstudiante() {
+    try {
+      const { data, error } = await supabase
+        .from('estudiantes')
+        .select(`id,
+          nombre,
+          carnet,
+          telefono,
+          correo`)
+          .eq('id', localStorage.getItem('token'))
+      if (error) {
+        console.error('Error al consultar estudiante:', error);
+        return;
+      }
+      setNombre(data[0].nombre);
+      setCarnet(data[0].carnet);
+      setTelefono(data[0].telefono);
+      setCorreo(data[0].correo);
+    } catch (error) {
+      console.error('Error al consultar estudiante:', error);
+    }
+  }
 
   async function insertarAnteproyecto(e) {
     e.preventDefault();
@@ -64,7 +92,7 @@ const EstudianteForm = () => {
           impacto:impacto,
           nombreDepartamento:nombreDepartamento,
           tipoProyecto:tipoProyecto,
-          idEstudiante:'83851b7f-b719-4b6f-84b7-c6ccee42e9a1'
+          idEstudiante: localStorage.getItem('token')
         });
 
       if (error2) throw error2;
@@ -103,7 +131,7 @@ const EstudianteForm = () => {
           type="text"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -113,7 +141,7 @@ const EstudianteForm = () => {
           type="text"
           value={carnet}
           onChange={(e) => setCarnet(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -123,7 +151,7 @@ const EstudianteForm = () => {
           type="text"
           value={telefono}
           onChange={(e) => setTelefono(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -133,7 +161,7 @@ const EstudianteForm = () => {
           type="email"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
-          required
+          readOnly
         />
       </div>
 
@@ -533,9 +561,7 @@ const EstudianteForm = () => {
     </div>
     </form>
     
-    <footer className={styles.footer}>
-        <p>Instituto Tecnológico de Costa Rica 2024</p>
-    </footer>
+    <Footer />
     </div>
   );
 };

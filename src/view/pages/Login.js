@@ -21,9 +21,9 @@ const Login = () => {
       if (data.rol === 1) {
         navigate('/');
       } else if (data.rol === 2) {
-        navigate('/');
+        navigate('/MenuProfesor');
       } else {
-        navigate('/');
+        navigate('/MenuEstudiante');
       }
     } catch (error) {
       alert('Las credenciales no coinciden con ningún usuario. \nPor favor inténtelo de nuevo.');

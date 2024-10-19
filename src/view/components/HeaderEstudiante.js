@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import styles from './Header.module.css';
-import SidebarEstudiante from './SidebarCoordinador';
-import SettingsEstudiante from './SettingsCoordinador';
+import SidebarEstudiante from './SidebarEstudiante';
+import SettingsEstudiante from './SettingsEstudiante';
 
 const HeaderEstudiante = ({title}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

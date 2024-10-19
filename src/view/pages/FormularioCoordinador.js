@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/FormularioCoordinador.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
+import Footer from '../components/Footer';
 
 const CoordinadorForm = () => {
   const [nombre, setNombre] = useState('');
@@ -631,9 +632,7 @@ const CoordinadorForm = () => {
 
     </form>
     
-    <footer>
-        <p>Instituto Tecnológico de Costa Rica 2024</p>
-    </footer>
+    <Footer />
     </div>
   );
 };
