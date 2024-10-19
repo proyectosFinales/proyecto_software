@@ -1,6 +1,9 @@
-import supabase from "../model/supabase"
+import supabase from "../model/supabase";
+import validateInfo from "./validarEntradasGU";
 
-export async function signUpNewUser(fullName, carnet, number, email, password) {
+export async function signUpNewUser(fullName, carnet, tel, email, password) {
+
+    validateInfo(carnet, tel, email, password);
 
     const { data: userData, error: userError } = await supabase
         .from('usuarios')
@@ -8,7 +11,8 @@ export async function signUpNewUser(fullName, carnet, number, email, password) {
             {
                 nombre: fullName,
                 correo: email,
-                contraseña: password
+                contraseña: password,
+                rol: 3
             },
         ])
         .select();
@@ -25,7 +29,7 @@ export async function signUpNewUser(fullName, carnet, number, email, password) {
             {
                 nombre: fullName,
                 carnet: carnet,
-                telefono: number,
+                telefono: tel,
                 correo: email,
                 usuarioID: usuarioID,
             },
@@ -37,4 +41,3 @@ export async function signUpNewUser(fullName, carnet, number, email, password) {
 
     return userData;
 }
-

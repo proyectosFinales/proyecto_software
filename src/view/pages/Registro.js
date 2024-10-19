@@ -15,12 +15,11 @@ const Registro = () => {
 
   const handleSubmit = async () => {
     try {
-      await signUpNewUser(fullName, carnet, number, email, password); // Llama a la función desde el servicio
+      await signUpNewUser(fullName, carnet, number, email, password);
       alert('Usuario registrado con éxito.');
       navigate('/login');
     } catch (error) {
-      alert('Falló el registro de usuario. \nPor favor inténtelo de nuevo.');
-      console.error(error);
+      alert(error);
     }
   };
 
@@ -49,7 +48,7 @@ const Registro = () => {
 
         <div className="input-container">
           <FaEnvelope className="icon" />
-          <input type="email" className="input-field" placeholder="Correo electrónico" value={email}
+          <input type="email" className="input-field" placeholder="Correo de la institución" value={email}
             onChange={(e) => setEmail(e.target.value)} />
         </div>
 
