@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import styles from '../styles/MenuPrincipal.module.css';
 import Footer from '../components/Footer'
+import SettingsCoordinador from '../components/SettingsCoordinador';
 
 const Menu = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
     <div>
       <header className={styles.AppHeader}>
         <h1>Inicio</h1>
-        <div className={styles.settingsIcon}>
+        <button className={styles.settingsIcon} onClick={() => setIsMenuOpen(!isMenuOpen)}>
           <i className="fas fa-cog"></i>
-        </div>
+        </button>
       </header>
+      <SettingsCoordinador show={isMenuOpen} />
       <div className={styles.menuGrid}>
         <Link to="/anteproyectosCoordinador" className={styles.menuItem}>
           <i className="fas fa-folder"></i>

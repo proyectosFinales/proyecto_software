@@ -5,9 +5,9 @@ import * as XLSX from 'xlsx'; // Importa xlsx para generar el archivo Excel
 import { supabase } from '../../model/Cliente';
 import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
+import Header from '../components/Header';
 
 const AnteproyectosCoordinador = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [anteproyectos, setAnteproyectos] = useState([]);
 
   const navigate = useNavigate(); // Hook para redireccionar
@@ -111,17 +111,9 @@ const AnteproyectosCoordinador = () => {
 
   return (
     <div className={styles.anteproyectos_coordinador_contenedor}>
-        <div className={styles.header}>
-          <button className={styles.menuIcon} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            &#9776;
-          </button>
-          <h1>Anteproyectos</h1>
-        </div>
-      
+        <Header title="Anteproyectos"/> 
       <div>
-        <SidebarCoordinador show={isMenuOpen} />
         <main>
-        
           <div className={styles.lista_anteproyectos_coordinador}>
             <button className={styles.generar_reporte} onClick={handleGenerateReport}>Generar reporte de anteproyectos</button>
             <table className={styles.tabla_anteproyectos_coordinador}>
