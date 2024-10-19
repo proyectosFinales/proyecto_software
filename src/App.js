@@ -3,6 +3,8 @@ import './App.css'
 import './view/styles/app.css'
 import './view/styles/index.css'
 import Menu from './view/pages/MenuPrincipal';
+import MenuProfesor from './view/pages/MenuPrincipalProfesor.js';
+import MenuEstudiante from './view/pages/MenuPrincipalEstudiante.js';
 import GestionPerfiles from './view/pages/GestionPerfiles';
 import FormularioEstudiantes from './view/pages/FormularioEstudiante';
 import FormularioCoordinador from './view/pages/FormularioCoordinador';
@@ -10,7 +12,7 @@ import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador';
 import EditarFormulario from './view/pages/EditarFormulario';
 import Citas from './view/pages/Citas';
-import CitasUsuario from './view/pages/CitasUsuario';
+import CitasProfesor from './view/pages/CitasProfesor.js';
 import Login from './view/pages/Login';
 import Registro from './view/pages/Registro';
 import EditarPerfil from './view/pages/EditarPerfil';
@@ -30,6 +32,8 @@ function App() {
 		<Router>
 			<Routes>
 				<Route path="/" element={<Menu />} />  {/* Ruta para la página principal */}
+				<Route path="/menuProfesor" element={<MenuProfesor />} />  {/* Ruta para la página principal */}
+				<Route path="/menuEstudiante" element={<MenuEstudiante />} />  {/* Ruta para la página principal */}
 				<Route path="/login" element={<Login />} />  {/* Ruta para login */}
 				<Route path="/registro" element={<Registro />} />  {/* Ruta para registrarse */}
 				<Route path="/anteproyectosEstudiante" element={<AnteproyectosEstudiante />} />  {/* Ruta para anteproyectos */}
@@ -40,7 +44,7 @@ function App() {
 				<Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
 				<Route path="/editarFormulario" element={<EditarFormulario />} />
 				<Route path="/citas" element={<Citas />} />
-				<Route path="/citas-usuario" element={<CitasUsuario />} />
+				<Route path="/citas-profesor" element={<CitasProfesor />} />
 				<Route path="/editar-perfil" element={<EditarPerfil />} />
 				<Route path="/carga-datos" element={<InicioCargaDatos />} />
 				<Route path="/carga-datos/cantidad-proyectos-profesor" element={<CantidadProyectosProfesor />} />
