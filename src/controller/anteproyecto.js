@@ -1,29 +1,25 @@
 import supabase from "../model/supabase";
 import Estudiante from "./estudiante";
+import Profesor from "./profesor";
 
 const ESTADOS_ANTEPROYECTO = {
+    PENDIENTE: "Pendiente",
     APROBADO: "Aprobado",
-    REPROBADO: "Reprobado"
-}
+    REPROBADO: "Reprobado",
+    FINALIZADO: "Finalizado",
+    PERDIDO: "Perdido"
+};
 
 const consultaAnteproyectos = () => {
     return supabase
         .from("anteproyectos")
-        .select("id, nombreEmpresa, estado, estudiante:estudiantes(id, nombre, usuario:usuarios(sede))");
-}
-
-/**
- * 
- * @param {*} rawAnteproyectos 
- * @returns {Anteproyecto[]}
- */
-const transformacionAnteproyectos = rawAnteproyectos => {
-    return rawAnteproyectos.map(a => new Anteproyecto(
-        a.id,
-        a.nombreEmpresa,
-        a.estado,
-        new Estudiante(a.estudiante?.id, a.estudiante?.nombre, a.estudiante?.usuario.sede)
-    ));
+        .select(`
+            id,
+            nombreEmpresa,
+            estado,
+            estudiante:estudiantes(id, nombre, usuario:usuarios(sede)),
+            encargado:profesores(id, nombre, usuario:usuarios(sede))
+        `);
 }
 
 class Anteproyecto {
@@ -31,32 +27,45 @@ class Anteproyecto {
     nombre;
     /** @type {Estudiante} */
     estudiante;
+    /** @type {Profesor} */
+    encargado;
     /** @type {Anteproyecto[]} */
-    anteproyectosAnteriores = [];
+    anteproyectosPerdidos = [];
 
-    constructor(id, nombre, estado, estudiante) {
+    constructor(id, nombre, estado, estudiante, encargado) {
         this.id = id;
         this.nombre = nombre;
         this.estado = estado;
         this.estudiante = estudiante;
+        this.encargado = encargado;
+    }
+
+    static from(obj) {
+        return new Anteproyecto(
+            obj.id,
+            obj.nombreEmpresa,
+            obj.estado,
+            Estudiante.from(obj.estudiante),
+            Profesor.from(obj.encargado)
+        )
     }
 
     static async obtenerTodos() {
         const { data } = await consultaAnteproyectos();
-        return transformacionAnteproyectos(data);
+        return data.map(ap => Anteproyecto.from(ap));
     }
 
     static async obtenerAsignables() {
         const { data } = await consultaAnteproyectos()
             .eq("estado", ESTADOS_ANTEPROYECTO.APROBADO)
             .is("idEncargado", null);
-        const anteproyectos = transformacionAnteproyectos(data);
-        // Se almacenan los proyectos repetidos de cada estudiante
+        const anteproyectos = data.map(ap => Anteproyecto.from(ap));
+        // Se almacenan los proyectos perdidos de cada estudiante
         for(let anteproyecto of anteproyectos) {
-            const { data:repetidos } = await consultaAnteproyectos()
+            const { data:perdidos } = await consultaAnteproyectos()
                 .eq("idEstudiante", anteproyecto.estudiante.id)
-                .eq("");
-            anteproyecto.anteproyectosAnteriores = transformacionAnteproyectos(repetidos);
+                .eq("estado", ESTADOS_ANTEPROYECTO.PERDIDO);
+            anteproyecto.anteproyectosPerdidos = perdidos.map(ap => Anteproyecto.from(ap));
         }
         return anteproyectos;
     }
