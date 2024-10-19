@@ -8,7 +8,8 @@
 }
 
 .header {
-  background-color: var(--blanco);
+  height: 80px;
+  background-color: var(--gris_claro);
   padding: 10px;
   display: flex;
   justify-content: center;

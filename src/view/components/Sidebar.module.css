@@ -1,11 +1,13 @@
   .sidebar {
     width: 250px;
-    height: 100vh;
-    background-color: var(--gris_oscuro);
+    height: calc(100vh - 80px);
+    background: var(--gris_oscuro);
     color: white;
     padding-top: 20px;
     z-index: 999;
     position: absolute;
+    transition: transform 1s;
+    transform: translate(0);
   }
   
   .sidebar ul {
@@ -23,6 +25,35 @@
   }
   
   .sidebar li:hover {
+    background-color: var(--gris_claro);
+  }
+
+  .sidebarHide {
+    width: 250px;
+    height: 100vh;
+    background-color: var(--gris_oscuro);
+    color: white;
+    padding-top: 20px;
+    z-index: 999;
+    position: absolute;
+    transform: translateX(-250px);
+  }
+
+  .sidebarHide ul {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .sidebarHide li {
+    padding: 15px 20px;
+    font-size: 16px;
+    border-bottom: 1px solid var(--gris_claro);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+  }
+  
+  .sidebarHide li:hover {
     background-color: var(--gris_claro);
   }
 

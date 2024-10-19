@@ -4,16 +4,13 @@ import styles from '../styles/AnteproyectosEstudiante.module.css'; // Cambiado a
 import { supabase } from '../../model/Cliente';
 import jsPDF from 'jspdf';
 import SidebarCoordinador from '../components/SidebarCoordinador';
+import Footer from '../components/Footer';
 
 const AnteproyectosEstudiante = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [anteproyectos, setAnteproyectos] = useState([]);
 
   const navigate = useNavigate();
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
 
   useEffect(() => {
     consultarAnteproyectos();
@@ -155,19 +152,15 @@ const AnteproyectosEstudiante = () => {
 
   return (
     <div className={styles.contenedor_anteproyectos_estudiante}>
-      <header>
         <div className={styles.header}>
-          <button className={styles.menuIcon} onClick={toggleMenu}>
+        <button className={styles.menuIcon} onClick={() => setIsMenuOpen(!isMenuOpen)}>
             &#9776;
           </button>
           <h1>Anteproyectos</h1>
         </div>
-      </header>
 
-      <div className={styles.contenedor_menu_lateral}>
-        {isMenuOpen && (
-          <SidebarCoordinador />
-        )}
+      <div>
+        <SidebarCoordinador show={isMenuOpen} />
 
         <main className={styles.lista_anteproyectos_estudiante}>
           <button className={styles.crear_anteproyecto} onClick={() => navigate('/formulario-estudiantes')}>
@@ -204,9 +197,7 @@ const AnteproyectosEstudiante = () => {
         </main>
       </div>
 
-      <footer>
-        <p>Instituto Tecnológico de Costa Rica 2024</p>
-      </footer>
+      <Footer />
     </div>
   );
 };
