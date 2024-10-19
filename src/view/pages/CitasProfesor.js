@@ -6,7 +6,7 @@ const CitasProfesor = () => {
   const [citas, setCitas] = useState([]);
   const [citasOriginales, setCitasOriginales] = useState([]);
   const [error, setError] = useState('');
-  const profesorID = '83851b7f-b719-4b6f-84b7-c6ccee42e9a1'; // Static for debugging
+  const profesorID = '5c210fa7-0fd8-42df-a3cb-8ca023e3f41e'; // Static for debugging
 
   useEffect(() => {
     const fetchCitas = async () => {
