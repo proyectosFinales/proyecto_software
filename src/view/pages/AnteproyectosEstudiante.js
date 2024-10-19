@@ -6,6 +6,7 @@ import jsPDF from 'jspdf';
 import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderEstudiante';
+import HeaderEstudiante from '../components/HeaderEstudiante';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -45,7 +46,7 @@ const AnteproyectosEstudiante = () => {
           estado,
           idEstudiante,
           estudiantes(id, nombre, carnet, telefono, correo)`)
-          .eq('idEstudiante','83851b7f-b719-4b6f-84b7-c6ccee42e9a1')
+          .eq('idEstudiante',localStorage.getItem('token'))
       if (error) {
         console.error('Error al consultar anteproyectos:', error);
         return;
@@ -152,7 +153,7 @@ const AnteproyectosEstudiante = () => {
 
   return (
     <div className={styles.contenedor_anteproyectos_estudiante}>
-        <Header title="Anteproyectos"/>
+        <HeaderEstudiante title="Anteproyectos"/>
       <div>
         <main className={styles.lista_anteproyectos_estudiante}>
           <button className={styles.crear_anteproyecto} onClick={() => navigate('/formulario-estudiantes')}>
