@@ -5,7 +5,7 @@ import * as XLSX from 'xlsx'; // Importa xlsx para generar el archivo Excel
 import { supabase } from '../../model/Cliente';
 import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
+import Header from '../components/HeaderCoordinador';
 
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
