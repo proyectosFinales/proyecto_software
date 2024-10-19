@@ -2,7 +2,7 @@ import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
 import Footer from '../components/Footer';
-import Header from '../components/Header'
+import Header from '../components/HeaderCoordinador'
 import { getAllUsers, gestionUserInfo } from "../../controller/userInfo";
 
 const GestionPerfiles = () => {
@@ -76,7 +76,7 @@ const GestionPerfiles = () => {
 
   return (
     <div className="gestion-container">
-      <Header />
+      <Header title={"Gestión de perfiles"}/>
       <div className="content">
         <button onClick={handleNavigate} className="btn-volver-menu">
           Volver

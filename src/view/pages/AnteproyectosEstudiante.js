@@ -5,7 +5,7 @@ import { supabase } from '../../model/Cliente';
 import jsPDF from 'jspdf';
 import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
-import Header from '../components/Header';
+import Header from '../components/HeaderEstudiante';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
