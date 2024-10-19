@@ -1,4 +1,4 @@
-import { React, useState, useEffect } from "react";
+import { React, useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/Login.css";
 import { signIn } from '../../controller/Signin';
@@ -11,7 +11,6 @@ const Login = () => {
 
   const navigate = useNavigate();
 
-  // Función para manejar el envío del formulario
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
@@ -34,12 +33,14 @@ const Login = () => {
     navigate("/registro");
   };
 
+  const toRecovery = async () => {
+    navigate("/recuperar-contraseña");
+  };
+
   return (
     <div className="login-container">
       <div className="login-box">
         <h2>Iniciar sesión</h2>
-
-        {/* Formulario que envuelve los campos de entrada */}
         <form onSubmit={handleSubmit}>
           <div className="input-container">
             <FaUser className="icon" />
@@ -71,7 +72,7 @@ const Login = () => {
         </form>
 
         <div className="forgot-password">
-          <a href="#">Olvidé mi contraseña</a>
+          <a onClick = {toRecovery}>Olvidé mi contraseña</a>
         </div>
 
         <button className="btn-register" onClick={toRegister}>

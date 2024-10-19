@@ -8,7 +8,6 @@
   background-color: var(--gris_claro);
 }
 
-/* Caja de inicio de sesión */
 .login-box {
   width: 450px;
   height: 600px;
@@ -20,14 +19,13 @@
   border: 1px solid var(--gris_claro);
 }
 
-/* Título */
 h2 {
   font-size: 24px;
   margin-bottom: 20px;
-  color: var(--azul); /* Color azul oscuro */
+  color: var(--azul);
 }
 
-/* Estilo para los campos de entrada */
+
 .input-container {
   position: relative;
   margin-bottom: 15px;
@@ -46,26 +44,30 @@ h2 {
   left: 10px;
   top: 50%;
   transform: translateY(-50%);
-  color: var(--azul); /* Color azul oscuro para los iconos */
+  color: var(--azul);
 }
 
-/* Estilo para el enlace de contraseña olvidada */
+
 .forgot-password {
   text-align: right;
   margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.forgot-password:hover {
+  text-decoration: underline;
 }
 
 .forgot-password a {
-  color: var(--azul); /* Cambiado a azul oscuro */
+  color: var(--azul);
   font-size: 12px;
   text-decoration: none;
 }
 
-/* Botón de inicio de sesión */
 .btn-login {
   width: 100%;
   padding: 10px;
-  background-color: var(--azul); /* Azul oscuro */
+  background-color: var(--azul);
   color: var(--blanco);
   border: none;
   border-radius: 5px;
@@ -75,27 +77,26 @@ h2 {
 }
 
 .btn-login:hover {
-  background-color: #003080; /* Azul más oscuro para hover */
+  background-color: #003080;
 }
 
-/* Botón de registrarse */
-/* Estilo del enlace de registro */
+
 .btn-register {
   display: inline-block;
   width: 100%;
   padding: 10px;
-  background-color: var(--gris_claro); /* Color de fondo similar */
+  background-color: var(--gris_claro);
   color: var(--gris_oscuro);
   border: none;
   border-radius: 5px;
   font-size: 16px;
   cursor: pointer;
   text-align: center;
-  text-decoration: none; /* Quita el subrayado del enlace */
-  margin-top: 10px; /* Añade un margen */
+  text-decoration: none;
+  margin-top: 10px;
 }
 
 .btn-register:hover {
-  background-color: var(--gris_oscuro); /* Efecto hover */
+  background-color: var(--gris_oscuro);
 }
 
