@@ -1,6 +1,7 @@
 import supabase from "../model/supabase"
 
 export async function signIn(email, password) {
+    
     const { data, error } = await supabase
         .from('usuarios')
         .select('*')
@@ -12,7 +13,6 @@ export async function signIn(email, password) {
         throw new Error(error.message);
     }
 
-    // Verifica si se encontró el usuario
     if (!data) {
         throw new Error('Credenciales inválidas.');
     }
