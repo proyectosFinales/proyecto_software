@@ -172,7 +172,7 @@ const Citas = () => {
   return (
     <div>
       <Header title="Citas" />
-      <div className="citas-form container">
+      <div className="citas-div container">
         {/* Form */}
         <div className="row justify-content-center">
           <div className="col-8">
