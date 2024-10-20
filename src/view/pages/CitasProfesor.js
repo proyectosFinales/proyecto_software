@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
+import Footer from '../components/Footer';
+import Header from '../components/HeaderProfesor';
 
 const CitasProfesor = () => {
   const [citas, setCitas] = useState([]);
@@ -111,68 +113,72 @@ const CitasProfesor = () => {
   };
 
   return (
-    <div className="container cita-table">
-      {/* Tabla de citas */}
-      <div className="row justify-content-center">
-        <h2 className="mb-5 w-auto">Lista de citas</h2>
+    <div>
+      <Header title="Citas" />
+      <div className="container cita-table">
+        {/* Tabla de citas */}
+        <div className="row justify-content-center">
+          <h2 className="mb-5 w-auto">Lista de citas</h2>
 
-        {/* Botones para seleccionar/deseleccionar */}
-        <div className="row justify-content-center mb-4">
-          <div className="col-auto">
-            <button className="cita-btn" onClick={selectAll}>Seleccionar todos</button>
+          {/* Botones para seleccionar/deseleccionar */}
+          <div className="row justify-content-center mb-4">
+            <div className="col-auto">
+              <button className="cita-btn" onClick={selectAll}>Seleccionar todos</button>
+            </div>
+            <div className="col-auto">
+              <button className="cita-btn-secondary" onClick={deselectAll}>Deseleccionar todos</button>
+            </div>
           </div>
-          <div className="col-auto">
-            <button className="cita-btn-secondary" onClick={deselectAll}>Deseleccionar todos</button>
-          </div>
-        </div>
 
-        <table className="mb-4">
-          <thead>
-            <tr>
-              <th>Día</th>
-              <th>Hora</th>
-              <th>Disponible</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {citas.length === 0 ? (
+          <table className="mb-4">
+            <thead>
               <tr>
-                <td colSpan="3" style={{ textAlign: 'center' }}>
-                  No hay citas disponibles.
-                </td>
+                <th>Día</th>
+                <th>Hora</th>
+                <th>Disponible</th>
               </tr>
-            ) : (
-              citas.map((cita, index) => (
-                <tr key={cita.id}>
-                  <td>{cita.date}</td>
-                  <td>{cita.time}</td>
-                  <td>
-                    <input
-                      type="checkbox"
-                      checked={cita.disponible}
-                      onChange={() => handleCheckboxChange(index)}
-                    />
+            </thead>
+
+            <tbody>
+              {citas.length === 0 ? (
+                <tr>
+                  <td colSpan="3" style={{ textAlign: 'center' }}>
+                    No hay citas disponibles.
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Botones para guardar/volver */}
-      <div className="row justify-content-center">
-        <div className="col-auto">
-          <button className="cita-btn" onClick={handleSave}>Guardar</button>
+              ) : (
+                citas.map((cita, index) => (
+                  <tr key={cita.id}>
+                    <td>{cita.date}</td>
+                    <td>{cita.time}</td>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={cita.disponible}
+                        onChange={() => handleCheckboxChange(index)}
+                      />
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-        <div className="col-auto">
-          <button className="cita-btn-secondary" onClick={handleDiscardChanges}>Volver</button>
-        </div>
-      </div>
 
-      {/* Error message display */}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+        {/* Botones para guardar/volver */}
+        <div className="row justify-content-center">
+          <div className="col-auto">
+            <button className="cita-btn" onClick={handleSave}>Guardar</button>
+          </div>
+          <div className="col-auto">
+            <button className="cita-btn-secondary" onClick={handleDiscardChanges}>Volver</button>
+          </div>
+        </div>
+
+        {/* Error message display */}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
+      </div>
+      <Footer />
     </div>
   );
 };
