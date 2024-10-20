@@ -1,5 +1,6 @@
 import styles from "../styles/layout.module.css";
 import ToastContainer from "./toast";
+import PiePagina from "./Footer";
 
 const Layout = ({ title, children }) => {
     return (<>
@@ -20,9 +21,6 @@ const Title = ({ children }) =>
     </header>
 
 const Footer = () =>
-    <footer className={styles.footer}>
-        <p>Instituto Tecnológico de Costa Rica</p>
-        <p>2024</p>
-    </footer>
+    <PiePagina />
 
 export default Layout;

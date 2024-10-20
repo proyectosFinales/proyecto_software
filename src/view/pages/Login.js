@@ -17,9 +17,9 @@ const Login = () => {
       const data = await signIn(email, password);
       const uToken = data.id;
       localStorage.setItem("token", uToken);
-      if (data.rol === 1) {
-        navigate('/');
-      } else if (data.rol === 2) {
+      if (data.rol === '1') {
+        navigate('/MenuCoordinador');
+      } else if (data.rol === '2') {
         navigate('/MenuProfesor');
       } else {
         navigate('/MenuEstudiante');

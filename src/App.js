@@ -10,6 +10,7 @@ import FormularioEstudiantes from './view/pages/FormularioEstudiante';
 import FormularioCoordinador from './view/pages/FormularioCoordinador';
 import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador';
+import CargarProfesores from './view/pages/CargarProfesores';
 import EditarFormulario from './view/pages/EditarFormulario';
 import Citas from './view/pages/Citas';
 import CitasProfesor from './view/pages/CitasProfesor.js';
@@ -33,10 +34,10 @@ function App() {
 	return (
 		<Router>
 			<Routes>
-				<Route path="/" element={<Menu />} />  {/* Ruta para la página principal */}
+				<Route path="/" element={<Login />} />  {/* Ruta para la página principal */}
+				<Route path="/menuCoordinador" element={<Menu />} />  {/* Ruta para la página principal */}
 				<Route path="/menuProfesor" element={<MenuProfesor />} />  {/* Ruta para la página principal */}
 				<Route path="/menuEstudiante" element={<MenuEstudiante />} />  {/* Ruta para la página principal */}
-				<Route path="/login" element={<Login />} />  {/* Ruta para login */}
 				<Route path="/registro" element={<Registro />} />  {/* Ruta para registrarse */}
 				<Route path="/anteproyectosEstudiante" element={<AnteproyectosEstudiante />} />  {/* Ruta para anteproyectos */}
 				<Route path="/anteproyectosCoordinador" element={<AnteproyectosCoordinador />} />  {/* Ruta para anteproyectos */}
@@ -46,6 +47,7 @@ function App() {
 				<Route path="/formulario-estudiantes" element={<FormularioEstudiantes />} />
 				<Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
 				<Route path="/editarFormulario" element={<EditarFormulario />} />
+				<Route path="/cargarProfesores" element={<CargarProfesores />} />
 				<Route path="/citas" element={<Citas />} />
 				<Route path="/citas-profesor" element={<CitasProfesor />} />
 				<Route path="/citas-estudiante" element={<CitasEstudiante />} />
