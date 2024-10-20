@@ -11,7 +11,8 @@ const Citas = () => {
   const [citaActual, setCitaActual] = useState(null);
   const [modal, setModal] = useState(false);
   const [error, setError] = useState('');
-  const [estudiantes, setEstudiantes] = useState({}); // Store student names by anteproyectoID
+  const [estudiantes, setEstudiantes] = useState({});
+  const [profesores, setProfesores] = useState({});
 
   const addOneHour = (time) => {
     const [hours, minutes] = time.split(':');
@@ -56,14 +57,15 @@ const Citas = () => {
       }
     };
 
-    // Fetch students linked to the anteproyectoID
     const fetchEstudiantes = async () => {
       const { data, error } = await supabase
         .from('anteproyectos')
         .select(`
           id,
           idEstudiante,
-          estudiantes (nombre)
+          estudiantes (nombre),
+          idEncargado,
+          profesores (nombre)
         `);
       if (error) {
         console.error('Error al obtener estudiantes:', error);
@@ -72,7 +74,13 @@ const Citas = () => {
           acc[anteproyecto.id] = anteproyecto.estudiantes.nombre;
           return acc;
         }, {});
-        setEstudiantes(estudiantesMap); // Map anteproyectoID to student name
+        setEstudiantes(estudiantesMap);
+
+        const profesoresMap = data.reduce((acc, anteproyecto) => {
+          acc[anteproyecto.id] = anteproyecto.profesores?.nombre || "N/A";
+          return acc;
+        }, {});
+        setProfesores(profesoresMap);
       }
     };
 
@@ -94,7 +102,7 @@ const Citas = () => {
       horaFin: addOneHour(horaInicio),
       lector1: null,
       lector2: null,
-      anteproyectoID: null, // For now, assuming no anteproyecto assigned at creation
+      anteproyectoID: null,
     };
 
     try {
@@ -217,7 +225,7 @@ const Citas = () => {
             <tr>
               <th>Día</th>
               <th>Hora</th>
-              <th>Estudiante</th> {/* New column for Estudiante */}
+              <th>Estudiante</th>
               <th>Lector 1</th>
               <th>Lector 2</th>
             </tr>
@@ -234,13 +242,13 @@ const Citas = () => {
               citas.map((cita) => {
                 const lector1 = lectores.find((lect) => lect.id === cita.lector1);
                 const lector2 = lectores.find((lect) => lect.id === cita.lector2);
-                const estudianteNombre = estudiantes[cita.anteproyectoID] || 'N/A'; // Get student name or 'N/A'
+                const estudianteNombre = estudiantes[cita.anteproyectoID]
 
                 return (
                   <tr className='cita-row' key={cita.id} onClick={() => handleCitaClick(cita)}>
                     <td>{formatDateDDMMYYYY(cita.fecha)}</td>
                     <td>{`${cita.horaInicio} - ${cita.horaFin}`}</td>
-                    <td>{estudianteNombre}</td> {/* Display student name or 'N/A' */}
+                    <td>{estudianteNombre ? estudianteNombre : 'N/A'}</td>
                     <td>{lector1 ? lector1.nombre : 'N/A'}</td>
                     <td>{lector2 ? lector2.nombre : 'N/A'}</td>
                   </tr>
@@ -259,6 +267,10 @@ const Citas = () => {
 
             <label className="label-modal">
               Estudiante: {estudiantes[citaActual.anteproyectoID] || 'N/A'}
+            </label>
+
+            <label className="label-modal">
+              Profesor: {profesores[citaActual.anteproyectoID] || 'N/A'}
             </label>
 
             <label className="label-modal">

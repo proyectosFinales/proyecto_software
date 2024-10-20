@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador'
-import { getAllUsers, gestionUserInfo } from "../../controller/userInfo";
+import { getAllUsers, gestionUserInfo, delUser } from "../../controller/userInfo";
+import Modal from "../components/Modal"
 
 const GestionPerfiles = () => {
   const [users, setUsers] = useState([]);
   const [editableUser, setEditableUser] = useState({});
   const [checkedUsers, setCheckedUsers] = useState(new Set());
+  const [modal, setModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -17,17 +19,22 @@ const GestionPerfiles = () => {
       const data = await gestionUserInfo(id);
 
       setEditableUser({
+        id: id,
         correo: data.correo,
         rol: data.rol,
         ...(data.rol === '2' && { nombre: data.profesor.nombre }),
-        ...(data.rol === '3' && { 
+        ...(data.rol === '3' && {
           nombre: data.estudiante.nombre,
           carnet: data.estudiante.carnet,
           telefono: data.estudiante.telefono,
-          estado: data.estudiante.estado,
+          ...(data.estudiante.estado.length !== 0 && {
+            estado: data.estudiante.estado.at(-1).estado
+          }),
+          ...(data.estudiante.estado.length === 0 && {
+            estado: "-"
+          })
         })
       });
-
     } catch (error) {
       console.error('Error al obtener la información del usuario:', error.message);
     }
@@ -53,6 +60,28 @@ const GestionPerfiles = () => {
     });
   };
 
+  const handleDeleteUsers = async () => {
+    try {
+      const usersToDelete = new Set(checkedUsers);
+
+      if (editableUser.id) {
+        usersToDelete.add(editableUser.id);
+      }
+
+      for (const userId of usersToDelete) {
+        await delUser(userId);
+      }
+
+      const updatedUsers = users.filter(user => !usersToDelete.has(user.id));
+
+      setUsers(updatedUsers);
+      setCheckedUsers(new Set());
+      setEditableUser({});
+    } catch (error) {
+      console.error('Error al eliminar el usuario:', error.message);
+    }
+  };
+
   const handleNavigate = () => {
     navigate("/");
   };
@@ -70,13 +99,12 @@ const GestionPerfiles = () => {
     };
 
     getAllUsersInfo();
-  }, [users]);
-
+  }, []);
 
 
   return (
     <div className="gestion-container">
-      <Header title={"Gestión de perfiles"}/>
+      <Header title={"Gestión de perfiles"} />
       <div className="content">
         <button onClick={handleNavigate} className="btn-volver-menu">
           Volver
@@ -97,7 +125,7 @@ const GestionPerfiles = () => {
                           ? user.profesor.nombre
                           : user.estudiante.nombre}
                       </span>
-                      <input type="checkbox" className="user-checkbox" />
+                      <input type="checkbox" className="user-checkbox" onClick={() => handleCheckboxChange(user.id)} />
                     </li>
                   );
                 })
@@ -106,7 +134,7 @@ const GestionPerfiles = () => {
               )}
             </ul>
           </div>
-  
+
           <div className="info-container">
             <div className="user-info">
               <h2>Información del usuario</h2>
@@ -181,20 +209,40 @@ const GestionPerfiles = () => {
                 </>
               )}
             </div>
-  
+
             <div className="actions">
-              <button className="btn-delete">Borrar usuario(s)</button>
+              <button className="btn-delete" onClick={() => setModal(true)}>Borrar usuario(s)</button>
               <button className="btn-edit">Editar usuario</button>
             </div>
           </div>
         </div>
       </div>
-  
       <Footer />
+      <Modal show={modal} onClose={() => setModal(false)} className="modal confirm-delete-modal">
+        <h2>¿Deseas eliminar todos los usuarios seleccionados?</h2>
+        <p>
+          Al confirmar la eliminación, se borrarán tanto el usuario mostrado como los usuarios seleccionados.
+          Debe tener en cuenta que una vez que se eliminen, estos NO SE PUEDEN RECUPERAR. Se recomienda
+          revisar que los usuarios a eliminar son los deseados antes de proceder.
+        </p>
+        <p>¿Desea proceder con la eliminación de los usuarios seleccionados?</p>
+
+        <div className="modal-actions">
+          <button className="delModalBtn btnCancelar" onClick={() => setModal(false)}>
+            Cancelar
+          </button>
+          <button className="delModalBtn btnConfirmar" onClick={() => {
+            handleDeleteUsers();
+            setModal(false);
+          }}>
+            Confirmar
+          </button>
+        </div>
+      </Modal>
     </div>
   );
-  
-  
+
+
 
 };
 
