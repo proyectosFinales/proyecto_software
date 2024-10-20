@@ -28,6 +28,12 @@ const Citas = () => {
     return `${day}-${month}-${year}`;
   };
 
+  const formatTime = (time) => {
+    // eslint-disable-next-line
+    const [hours, minutes, seconds] = time.split(':');
+    return `${hours}:${minutes}`;
+  };
+
   useEffect(() => {
     const fetchCitas = async () => {
       const { data, error } = await supabase
@@ -251,7 +257,7 @@ const Citas = () => {
                   return (
                     <tr className='cita-row' key={cita.id} onClick={() => handleCitaClick(cita)}>
                       <td>{formatDateDDMMYYYY(cita.fecha)}</td>
-                      <td>{`${cita.horaInicio} - ${cita.horaFin}`}</td>
+                      <td>{`${formatTime(cita.horaInicio)} - ${formatTime(cita.horaFin)}`}</td>
                       <td>{estudianteNombre ? estudianteNombre : 'N/A'}</td>
                       <td>{lector1 ? lector1.nombre : 'N/A'}</td>
                       <td>{lector2 ? lector2.nombre : 'N/A'}</td>
