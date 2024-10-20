@@ -10,6 +10,12 @@ const CitasProfesor = () => {
   const [error, setError] = useState('');
   const profesorID = '5c210fa7-0fd8-42df-a3cb-8ca023e3f41e'; // Static for debugging
 
+  const formatTime = (time) => {
+    // eslint-disable-next-line
+    const [hours, minutes, seconds] = time.split(':');
+    return `${hours}:${minutes}`;
+  };
+
   useEffect(() => {
     const fetchCitas = async () => {
       try {
@@ -33,8 +39,9 @@ const CitasProfesor = () => {
 
           return {
             id: cita.id,
-            date: cita.fecha,
-            time: `${cita.horaInicio} - ${cita.horaFin}`,
+            fecha: cita.fecha,
+            horaInicio: cita.horaInicio,
+            horaFin: cita.horaFin,
             disponible: matchedDisponibilidad ? matchedDisponibilidad.disponible : false,
             disponibilidadID: matchedDisponibilidad ? matchedDisponibilidad.id : null,
           };
@@ -149,8 +156,8 @@ const CitasProfesor = () => {
               ) : (
                 citas.map((cita, index) => (
                   <tr key={cita.id}>
-                    <td>{cita.date}</td>
-                    <td>{cita.time}</td>
+                    <td>{cita.fecha}</td>
+                    <td>{`${formatTime(cita.horaInicio)} - ${formatTime(cita.horaFin)}`}</td>
                     <td>
                       <input
                         type="checkbox"

@@ -6,11 +6,17 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderEstudiante';
 
 const CitasEstudiante = () => {
-  const estudianteID = '67449fbe-30f6-4e80-a6eb-30ae5f9d43fa'; // Predefined student ID
-  const [cita, setCita] = useState(null); // To hold the appointment details
-  const [lectores, setLectores] = useState({ lector1: '', lector2: '' }); // To store the names of lecturers
-  const [estudiante, setEstudiante] = useState(''); // To store the student name
-  const [profesor, setProfesor] = useState(''); // To store the professor's name
+  const estudianteID = '67449fbe-30f6-4e80-a6eb-30ae5f9d43fa'; // Static for debugging
+  const [cita, setCita] = useState(null);
+  const [lectores, setLectores] = useState({ lector1: '', lector2: '' });
+  const [estudiante, setEstudiante] = useState('');
+  const [profesor, setProfesor] = useState('');
+
+  const formatTime = (time) => {
+    // eslint-disable-next-line
+    const [hours, minutes, seconds] = time.split(':');
+    return `${hours}:${minutes}`;
+  };
 
   // Fetch appointment data
   useEffect(() => {
@@ -97,8 +103,8 @@ const CitasEstudiante = () => {
                 <p><strong>Estudiante:</strong> {estudiante}</p>
                 <p><strong>Profesor:</strong> {profesor}</p> {/* New field for Profesor */}
                 <p><strong>Fecha:</strong> {cita.fecha}</p>
-                <p><strong>Hora de inicio:</strong> {cita.horaInicio}</p>
-                <p><strong>Hora de fin:</strong> {cita.horaFin}</p>
+                <p><strong>Hora de inicio:</strong> {formatTime(cita.horaInicio)}</p>
+                <p><strong>Hora de fin:</strong> {formatTime(cita.horaFin)}</p>
                 <p><strong>Lector 1:</strong> {lectores.lector1}</p>
                 <p><strong>Lector 2:</strong> {lectores.lector2}</p>
               </div>
