@@ -18,11 +18,11 @@ const SidebarCoordinador = ({show}) => {
   return (
     <nav className={show ? styles.sidebar : styles.sidebarHide}>
     <ul>
-        <Link to="/" className={styles.menuItem}><li>Inicio</li></Link>
+        <Link to="/menuCoordinador" className={styles.menuItem}><li>Inicio</li></Link>
         <Link to="/anteproyectosCoordinador" className={styles.menuItem}><li>Anteproyecto</li></Link>
         <Link to="/aprobarProyectos" className={styles.menuItem}><li>Proyectos</li></Link>
         <Link to="/asignaciones" className={styles.menuItem}><li>Asignaciones</li></Link>
-        <Link to="/" className={styles.menuItem}><li>Base de datos</li></Link>
+        <Link to="/carga-datos" className={styles.menuItem}><li>Base de datos</li></Link>
         <Link to="/citas" className={styles.menuItem}><li>Citas</li></Link>
         <Link to="/gestion-perfiles" className={styles.menuItem}><li>Gestionar perfiles</li></Link>
         <Link to="/editar-perfil" className={styles.menuItem}><li>Modificar Información</li></Link>
