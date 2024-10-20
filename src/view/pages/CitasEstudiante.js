@@ -2,13 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
+import Footer from '../components/Footer';
+import Header from '../components/HeaderEstudiante';
 
 const CitasEstudiante = () => {
-  const estudianteID = '67449fbe-30f6-4e80-a6eb-30ae5f9d43fa'; // Predefined student ID
-  const [cita, setCita] = useState(null); // To hold the appointment details
-  const [lectores, setLectores] = useState({ lector1: '', lector2: '' }); // To store the names of lecturers
-  const [estudiante, setEstudiante] = useState(''); // To store the student name
-  const [profesor, setProfesor] = useState(''); // To store the professor's name
+  const estudianteID = '67449fbe-30f6-4e80-a6eb-30ae5f9d43fa'; // Static for debugging
+  const [cita, setCita] = useState(null);
+  const [lectores, setLectores] = useState({ lector1: '', lector2: '' });
+  const [estudiante, setEstudiante] = useState('');
+  const [profesor, setProfesor] = useState('');
+
+  const formatTime = (time) => {
+    // eslint-disable-next-line
+    const [hours, minutes, seconds] = time.split(':');
+    return `${hours}:${minutes}`;
+  };
 
   // Fetch appointment data
   useEffect(() => {
@@ -40,7 +48,6 @@ const CitasEstudiante = () => {
         }
 
         const cita = citaData[0]; // Assume the student has only one appointment
-        setCita(cita);
 
         // Step 3: Fetch the student's name from the estudiantes table
         const { data: estudianteData, error: estudianteError } = await supabase
@@ -75,6 +82,7 @@ const CitasEstudiante = () => {
         const lector2 = profesoresData.find((profesor) => profesor.id === cita.lector2)?.nombre || 'N/A';
 
         setLectores({ lector1, lector2 });
+        setCita(cita);
       } catch (error) {
         console.error('Error fetching student appointment data:', error);
       }
@@ -84,25 +92,29 @@ const CitasEstudiante = () => {
   }, [estudianteID]);
 
   return (
-    <div className="citas-form container">
-      <div className="row justify-content-center">
-        <div className="col-8">
-          <h2 className="w-100 text-center">Información de la cita del estudiante</h2>
-          {cita ? (
-            <div className="cita-info">
-              <p><strong>Estudiante:</strong> {estudiante}</p>
-              <p><strong>Profesor:</strong> {profesor}</p> {/* New field for Profesor */}
-              <p><strong>Fecha:</strong> {cita.fecha}</p>
-              <p><strong>Hora de inicio:</strong> {cita.horaInicio}</p>
-              <p><strong>Hora de fin:</strong> {cita.horaFin}</p>
-              <p><strong>Lector 1:</strong> {lectores.lector1}</p>
-              <p><strong>Lector 2:</strong> {lectores.lector2}</p>
-            </div>
-          ) : (
-            <p>No se ha encontrado ninguna cita para este estudiante.</p>
-          )}
+    <div>
+      <Header title="Citas" />
+      <div className="citas-div container">
+        <div className="row justify-content-center">
+          <div className="col-8">
+            <h2 className="w-100 text-center">Información de la cita del estudiante</h2>
+            {cita ? (
+              <div className="cita-info">
+                <p><strong>Estudiante:</strong> {estudiante}</p>
+                <p><strong>Profesor:</strong> {profesor}</p> {/* New field for Profesor */}
+                <p><strong>Fecha:</strong> {cita.fecha}</p>
+                <p><strong>Hora de inicio:</strong> {formatTime(cita.horaInicio)}</p>
+                <p><strong>Hora de fin:</strong> {formatTime(cita.horaFin)}</p>
+                <p><strong>Lector 1:</strong> {lectores.lector1}</p>
+                <p><strong>Lector 2:</strong> {lectores.lector2}</p>
+              </div>
+            ) : (
+              <p>No se ha encontrado ninguna cita para este estudiante.</p>
+            )}
+          </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };
