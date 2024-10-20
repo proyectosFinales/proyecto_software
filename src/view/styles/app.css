@@ -79,3 +79,9 @@ h1 {
   padding: 10px 15px;
   border-radius: 5px;
 }
+
+.precaucion {
+  margin-top: 10px;
+  color: #e59e43;
+  font-weight: bold;
+}
