@@ -115,9 +115,9 @@ const CitasProfesor = () => {
   return (
     <div>
       <Header title="Citas" />
-      <div className="container cita-table">
+      <div className="container citas-div">
         {/* Tabla de citas */}
-        <div className="row justify-content-center">
+        <div className="row justify-content-center cita-table">
           <h2 className="mb-5 w-auto">Lista de citas</h2>
 
           {/* Botones para seleccionar/deseleccionar */}

@@ -88,7 +88,7 @@ const CitasEstudiante = () => {
   return (
     <div>
       <Header title="Citas" />
-      <div className="citas-form container">
+      <div className="citas-div container">
         <div className="row justify-content-center">
           <div className="col-8">
             <h2 className="w-100 text-center">Información de la cita del estudiante</h2>
