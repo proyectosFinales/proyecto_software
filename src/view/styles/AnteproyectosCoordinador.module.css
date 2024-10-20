@@ -7,29 +7,6 @@
   background-color: var(--blanco);
 }
 
-.header {
-  height: 80px;
-  background-color: var(--gris_claro);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-bottom: 1px solid black;
-}
-
-.menuIcon {
-  font-size: 35px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  position: absolute;
-  left: 20px;
-}
-
-.contenedor_menu_lateral {
-  display: flex;
-  flex: 1;
-}
-
 .lista_anteproyectos_coordinador {
   width: 70%;
   margin: auto;

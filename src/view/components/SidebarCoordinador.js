@@ -20,7 +20,7 @@ const SidebarCoordinador = ({show}) => {
     <ul>
         <Link to="/" className={styles.menuItem}><li>Inicio</li></Link>
         <Link to="/anteproyectosCoordinador" className={styles.menuItem}><li>Anteproyecto</li></Link>
-        <Link to="/proyectosCoordinador" className={styles.menuItem}><li>Proyectos</li></Link>
+        <Link to="/aprobarProyectos" className={styles.menuItem}><li>Proyectos</li></Link>
         <Link to="/asignaciones" className={styles.menuItem}><li>Asignaciones</li></Link>
         <Link to="/" className={styles.menuItem}><li>Base de datos</li></Link>
         <Link to="/citas" className={styles.menuItem}><li>Citas</li></Link>
