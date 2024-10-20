@@ -26,6 +26,7 @@ import RecuperarContraseña from './view/pages/RecuperarContraseña';
 import InicioAsignaciones from './view/pages/asignacion-proyectos';
 import Anteproyectos from './view/pages/anteproyectos';
 import CambioContraseña from './view/pages/CambioContraseña.js';
+import AprobarProyectos from './view/pages/AprobarProyectos';
 
 function App() {
 	return (
@@ -39,6 +40,7 @@ function App() {
 				<Route path="/anteproyectosEstudiante" element={<AnteproyectosEstudiante />} />  {/* Ruta para anteproyectos */}
 				<Route path="/anteproyectosCoordinador" element={<AnteproyectosCoordinador />} />  {/* Ruta para anteproyectos */}
 				<Route path="/asignaciones" element={<Asignaciones />} />
+				<Route path="/aprobarProyectos" element={<AprobarProyectos />} /> 
 				<Route path="/gestion-perfiles" element={<GestionPerfiles />} />
 				<Route path="/formulario-estudiantes" element={<FormularioEstudiantes />} />
 				<Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
