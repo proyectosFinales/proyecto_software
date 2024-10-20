@@ -18,15 +18,16 @@ estudiante: estudiantes(nombre, carnet, telefono)')
 }
 
 export async function gestionUserInfo(id) {
-  const { data: data, error } = await supabase
+  const { data, error } = await supabase
     .from('usuarios')
     .select('id, correo, rol, \
 profesor: profesores(nombre), \
-estudiante: estudiantes(nombre, carnet, telefono, estado)')
+estudiante: estudiantes(nombre, carnet, telefono, estado: anteproyectos(estado))')
     .eq('id', id)
     .single();
 
   if (!data) {
+    console.log(error);
     throw new Error("Hubo un problema al consultad sus datos. Por favor, inténtelo de nuevo.");
   }
 
@@ -70,4 +71,18 @@ export async function getAllUsers() {
   };
   
   return [...dataE, ...dataP];
+}
+
+export async function delUser(id) {
+
+    const { data: data, error: error } = await supabase
+    .from('usuarios')
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error(error);
+  };
+  
+  return;
 }

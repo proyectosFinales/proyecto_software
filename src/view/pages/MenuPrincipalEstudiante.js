@@ -17,7 +17,7 @@ const MenuEstudiante = () => {
           <i className="fas fa-folder"></i>
           <p>Anteproyectos</p>
         </Link>
-        <Link to="/citas" className={styles.menuItem}>
+        <Link to="/citas-estudiante" className={styles.menuItem}>
           <i className="fas fa-clock"></i>
           <p>Citas</p>
         </Link>

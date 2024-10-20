@@ -11,7 +11,7 @@ h1 {
 .content {
   flex: 1;
   padding: 10px;
-  background-color: var(--gris_claro);
+  background-color: var(--blanco);
   display: flex;
   flex-direction: column;
 }
@@ -46,8 +46,9 @@ h1 {
 }
 
 .users-list {
-  background-color: var(--blanco);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  background-color: #f2f2f2;
+  border-color: var(--gris_oscuro);
+  box-shadow: 5px 4px 8px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   border-radius: 10px;
 }
@@ -85,7 +86,7 @@ h1 {
 .user-info {
   width: 100%;
   height: 80%;
-  background-color: var(--blanco);
+  background-color: #f2f2f2;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -146,4 +147,43 @@ h1 {
 
 .btn-edit:hover {
   background-color: darkblue;
+}
+
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end; /* Alinear los botones a la derecha */
+  margin-top: 20px; /* Espacio superior para separar de los contenidos de la modal */
+  position: absolute; /* Cambio a posición relativa */
+}
+
+
+.delModalBtn {
+  margin-top: 450px;
+  padding: 20px 30px; /* Tamaño del botón */
+  font-size: 16px; /* Tamaño de la fuente */
+  border: none; /* Quitar el borde predeterminado */
+  border-radius: 5px; /* Redondear los bordes */
+  margin-left: 50px; /* Espacio entre los botones */
+  min-width: 120px;
+  transition: background-color 0.3s ease;
+}
+
+.btnCancelar {
+  background-color: gray; /* Color de fondo para el botón de cancelar */
+  color: white; /* Color de texto */
+  margin-left: 800px;
+}
+
+.btnCancelar:hover {
+  background-color: var(--gris_oscuro);
+}
+
+.btnConfirmar {
+  background-color: red;
+  color: white;
+}
+
+.btnConfirmar:hover {
+  background-color: darkred;
 }

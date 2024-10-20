@@ -12,6 +12,11 @@ class Profesor extends Usuario {
         this.original.cantidadProyectos = cantidadProyectos;
     }
 
+    static from(obj) {
+        if(obj === null) return null;
+        return new Profesor(obj.id, obj.nombre, obj.usuario.sede, obj.cantidadProyectos);
+    }
+
     static async obtenerTodos() {
         const { data } = await supabase
             .from("profesores")
