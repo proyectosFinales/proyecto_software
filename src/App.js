@@ -13,6 +13,7 @@ import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador';
 import EditarFormulario from './view/pages/EditarFormulario';
 import Citas from './view/pages/Citas';
 import CitasProfesor from './view/pages/CitasProfesor.js';
+import CitasEstudiante from './view/pages/CitasEstudiante.js';
 import Login from './view/pages/Login';
 import Registro from './view/pages/Registro';
 import EditarPerfil from './view/pages/EditarPerfil';
@@ -45,6 +46,7 @@ function App() {
 				<Route path="/editarFormulario" element={<EditarFormulario />} />
 				<Route path="/citas" element={<Citas />} />
 				<Route path="/citas-profesor" element={<CitasProfesor />} />
+				<Route path="/citas-estudiante" element={<CitasEstudiante />} />
 				<Route path="/editar-perfil" element={<EditarPerfil />} />
 				<Route path="/carga-datos" element={<InicioCargaDatos />} />
 				<Route path="/carga-datos/cantidad-proyectos-profesor" element={<CantidadProyectosProfesor />} />
