@@ -12,6 +12,7 @@ const Citas = () => {
   const [modal, setModal] = useState(false);
   const [error, setError] = useState('');
   const [estudiantes, setEstudiantes] = useState({});
+  const [profesores, setProfesores] = useState({});
 
   const addOneHour = (time) => {
     const [hours, minutes] = time.split(':');
@@ -62,7 +63,9 @@ const Citas = () => {
         .select(`
           id,
           idEstudiante,
-          estudiantes (nombre)
+          estudiantes (nombre),
+          idEncargado,
+          profesores (nombre)
         `);
       if (error) {
         console.error('Error al obtener estudiantes:', error);
@@ -72,6 +75,12 @@ const Citas = () => {
           return acc;
         }, {});
         setEstudiantes(estudiantesMap);
+
+        const profesoresMap = data.reduce((acc, anteproyecto) => {
+          acc[anteproyecto.id] = anteproyecto.profesores?.nombre || "N/A";
+          return acc;
+        }, {});
+        setProfesores(profesoresMap);
       }
     };
 
@@ -258,6 +267,10 @@ const Citas = () => {
 
             <label className="label-modal">
               Estudiante: {estudiantes[citaActual.anteproyectoID] || 'N/A'}
+            </label>
+
+            <label className="label-modal">
+              Profesor: {profesores[citaActual.anteproyectoID] || 'N/A'}
             </label>
 
             <label className="label-modal">
