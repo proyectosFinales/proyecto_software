@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador'
-import { getAllUsers, gestionUserInfo, delUser } from "../../controller/userInfo";
+import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
 import Modal from "../components/Modal"
 
 const GestionPerfiles = () => {
@@ -79,6 +79,15 @@ const GestionPerfiles = () => {
       setEditableUser({});
     } catch (error) {
       console.error('Error al eliminar el usuario:', error.message);
+    }
+  };
+
+  const handleUserEdit = async () => {
+    try {
+      await editUserGestion(editableUser);
+      alert("El usuario ha sido modificado con éxito.");
+    } catch (error) {
+      console.error("Error al editar el usuario", error.message);
     }
   };
 
@@ -212,7 +221,7 @@ const GestionPerfiles = () => {
 
             <div className="actions">
               <button className="btn-delete" onClick={() => setModal(true)}>Borrar usuario(s)</button>
-              <button className="btn-edit">Editar usuario</button>
+              <button className="btn-edit" onClick={handleUserEdit}>Editar usuario</button>
             </div>
           </div>
         </div>

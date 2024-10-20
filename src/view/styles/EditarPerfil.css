@@ -8,16 +8,18 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-  }
+}
   
   /* Nueva clase para centrar vertical y horizontalmente */
   .center-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Hace que ocupe toda la altura de la ventana */
-    background-color: var(--gris_claro); /* Puedes ajustar el fondo si lo deseas */
-  }
+    padding: 60px 0; /* Márgenes para evitar que el contenido se solape con el Header y Footer */
+    background-color: var(--gris_claro);
+    min-height: calc(100vh - 120px); /* Altura total menos la suma del Header y Footer */
+    box-sizing: border-box;
+}
   
   .edit-user-info {
     margin-bottom: 30px;
@@ -49,7 +51,7 @@
   
   .btn-cancel,
   .btn-save {
-    width: 45%;
+    width: 30%;
     padding: 12px 20px;
     border: none;
     border-radius: 5px;

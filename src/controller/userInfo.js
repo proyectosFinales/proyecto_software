@@ -2,16 +2,16 @@ import supabase from "../model/supabase";
 
 
 export async function getUserInfo(id) {
-  const { data: data, error } = await supabase
+  const { data, error } = await supabase
     .from('usuarios')
-    .select('correo, contraseña, rol, \
+    .select('id, correo, contraseña, rol, \
 profesor: profesores(nombre), \
 estudiante: estudiantes(nombre, carnet, telefono)')
     .eq('id', id)
     .single();
 
   if (!data) {
-    throw new Error("Hubo un problema al consultad sus datos. Por favor, inténtelo de nuevo.");
+    throw new Error("Hubo un problema al consultar sus datos. Por favor, inténtelo de nuevo.");
   }
 
   return data;
@@ -35,22 +35,47 @@ estudiante: estudiantes(nombre, carnet, telefono, estado: anteproyectos(estado))
 }
 
 export async function updateUserInfo(userData) {
-  const { response, error } = await supabase
+
+  const { error } = await supabase
     .from('usuarios')
     .update({
-      Nombre: userData.nombre,
-      Correo: userData.correo,
-      Telefono: userData.telefono,
-      Contraseña: userData.password,
+      correo: userData.correo,
+      contraseña: userData.contraseña,
     })
     .eq('id', userData.id);
 
   if (error) {
-    console.error('Error al actualizar el usuario:', error.message);
-    return { error };
+    throw new Error('Error al actualizar el usuario:', error.message);
   }
 
-  return { response };
+  if (userData.rol === "2") {
+    const { error } = await supabase
+    .from('profesores')
+    .update({ nombre: userData.nombre })
+    .eq('id', userData.id);
+
+    if (error) {
+      throw new Error("Error al actualizar el usuario", error.message);
+    }
+  } else if (userData.rol === "3") {
+
+    const { error } = await supabase
+    .from('estudiantes')
+    .update({
+      nombre: userData.nombre,
+      correo: userData.correo,
+      carnet: userData.carnet,
+      telefono: userData.telefono,
+     })
+    .eq('id', userData.id);
+
+    if (error) {
+      throw new Error("Error al actualizar el usuario", error.message);
+    }
+
+  }
+
+  return;
 }
 
 export async function getAllUsers() {
@@ -69,13 +94,13 @@ export async function getAllUsers() {
   if (errorE || errorP) {
     throw new Error("Hubo problemas para extraer los usuarios.");
   };
-  
+
   return [...dataE, ...dataP];
 }
 
 export async function delUser(id) {
 
-    const { data: data, error: error } = await supabase
+  const {error: error } = await supabase
     .from('usuarios')
     .delete()
     .eq("id", id);
@@ -83,6 +108,54 @@ export async function delUser(id) {
   if (error) {
     throw new Error(error);
   };
-  
+
+  return;
+}
+
+export async function editUserGestion(user) {
+
+  const {error: error } = await supabase
+    .from('usuarios')
+    .update({ correo: user.correo })
+    .eq("id", user.id);
+
+  if (error) {
+    throw new Error("No se pudo editar la información del usuario. \
+Por favor inténtelo de nuevo.")
+  };
+
+  if (user.rol === "2") {
+    const { error: error2 } = await supabase
+      .from('profesores')
+      .update({ nombre: user.nombre })
+      .eq("id", user.id);
+
+    if (error2) {
+      throw new Error("No se pudo editar la información del profesor. \
+Por favor inténtelo de nuevo.");
+    }
+  } else {
+    const { error: error } = await supabase
+      .from('estudiantes')
+      .update({
+        nombre: user.nombre,
+        carnet: user.carnet,
+        telefono: user.telefono,
+        correo: user.correo
+      })
+      .eq("id", user.id);
+
+    const { error: error2 } = await supabase
+      .from('anteproyectos')
+      .update({ estado: user.estado })
+      .eq("idEstudiante", user.id);
+
+    if (error || error2) {
+      throw new Error("No se pudo editar la información del estudiante. \
+Por favor inténtelo de nuevo.");
+    }
+
+  }
+
   return;
 }

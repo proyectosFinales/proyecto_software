@@ -18,7 +18,7 @@ const consultaAnteproyectos = () => {
             nombreEmpresa,
             estado,
             estudiante:estudiantes(id, nombre, usuario:usuarios(sede)),
-            encargado:profesores(id, nombre, usuario:usuarios(sede))
+            encargado:profesores(id, nombre, cantidadProyectos, usuario:usuarios(sede))
         `);
 }
 
@@ -41,13 +41,14 @@ class Anteproyecto {
     }
 
     static from(obj) {
-        return new Anteproyecto(
+        const anteproyecto = new Anteproyecto(
             obj.id,
             obj.nombreEmpresa,
             obj.estado,
             Estudiante.from(obj.estudiante),
             Profesor.from(obj.encargado)
         )
+        return anteproyecto;
     }
 
     static async obtenerTodos() {
@@ -68,6 +69,18 @@ class Anteproyecto {
             anteproyecto.anteproyectosPerdidos = perdidos.map(ap => Anteproyecto.from(ap));
         }
         return anteproyectos;
+    }
+
+    async guardarAsignacion() {
+        return new Promise(async (resolve, reject) => {
+            const { data, error } = await supabase
+                .from("anteproyectos")
+                .update({idEncargado: this.encargado.id})
+                .eq("id", this.id)
+                .select();
+            if(error) reject();
+            else resolve();
+        });
     }
 }
 

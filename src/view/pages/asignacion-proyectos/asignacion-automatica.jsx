@@ -6,7 +6,7 @@ import listStyles from "../../styles/list.module.css";
 import Anteproyecto from "../../../controller/anteproyecto";
 import Profesor from "../../../controller/profesor";
 import { asignarAnteproyectosAProfesores } from "../../../controller/asignacion";
-import { loadToast } from "../../components/toast";
+import { errorToast, loadToast, successToast } from "../../components/toast";
 import Modal from "../../components/modal.jsx";
 
 const AsignacionAutomatica = () => {
@@ -25,43 +25,59 @@ const AsignacionAutomatica = () => {
         setCalculando(true);
         const asignacion = asignarAnteproyectosAProfesores(anteproyectos, profesores);
         asignacion.then(resultado => {
-            console.log(resultado);
             modalRef.open();
             setAsignaciones(resultado);
         });
         asignacion.finally(() => setCalculando(false));
-        loadToast(
-            asignacion,
-            "Realizando asignación de anteproyectos...",
-            "Asignación calculada",
-            "Error en asignación !!!"
-        );
+    }
+
+    const guardarAsignacion = () => {
+        const guardado = Promise.all(asignaciones.asignados.map(ap => ap.guardarAsignacion()));
+        guardado.then(() => {
+            modalRef.close();
+            successToast("Asignaciones de anteproyectos guardadas.");
+        });
+        guardado.catch(() => errorToast("Error en guardado de asignaciones de anteproyectos."));
     }
 
     return <>
         <Layout title="Asignación Automática de profesores a proyectos">
             <Button onClick={calcularAsignacion} disabled={calculando}>Inicializar asignación</Button>
-            <TablaAnteproyectos anteproyectos={anteproyectos}/>
+            <TablaAnteproyectos title="Anteproyectos asignables" anteproyectos={anteproyectos}/>
             <TablaProfesores profesores={profesores}/>
-            <Modal title="Asignación Calculada" modalRef={modalRef}>
-                <ul className={listStyles.list}>
-                    <li>Anteproyectos asignados</li>
-                    {asignaciones.asignados.map((anteproyecto, index) =>
-                        <li>
-                            <ElementoDatosAnteproyecto anteproyecto={anteproyecto}/>
-                            <hr/>
-                            <p><label>Profesor asignado:</label> {anteproyecto.encargado.nombre}</p>
-                        </li>
-                    )}
-                </ul>
+            <Modal
+                title="Asignación Calculada"
+                modalRef={modalRef}
+                footer={<Button onClick={guardarAsignacion}>Guardar asignaciones</Button>}
+            >
+                <Button onClick={guardarAsignacion}>Guardar asignaciones</Button>
+                <DetalleAsignaciones asignaciones={asignaciones}/>
             </Modal>
         </Layout>
     </>;
 }
 
-const TablaAnteproyectos = ({ anteproyectos }) => <>
+const DetalleAsignaciones = ({ asignaciones }) => <>
+    {asignaciones.noasignados.length ?
+        <p className="precaucion">Quedaron anteproyectos sin asignar debido a incompatibilidades como Sede, No disponibilidad de profesores o Repetición con encargados anteriores!!! (Estos anteproyectos pueden ser asignados de manera manual en la edición de asignaciones).</p>
+    : ""}
     <ul className={listStyles.list}>
-        <li className={listStyles.title}>Anteproyectos asignables</li>
+        <li className={listStyles.title}>Anteproyectos asignados</li>
+        {asignaciones.asignados.map((anteproyecto, index) =>
+        <li key={`asignado-${index}`}>
+                <ElementoDatosAnteproyecto anteproyecto={anteproyecto}/>
+                <hr/>
+                <p><label>Profesor asignado:</label> {anteproyecto.encargado.nombre}</p>
+                <p><label>Sede:</label> {anteproyecto.encargado.sede}</p>
+            </li>
+        )}
+    </ul>
+    <TablaAnteproyectos title="Anteproyectos no asignados" anteproyectos={asignaciones.noasignados}/>
+</>;
+
+const TablaAnteproyectos = ({ title, anteproyectos }) => <>
+    <ul className={listStyles.list}>
+        <li className={listStyles.title}>{title}</li>
         {anteproyectos.map((ap, index) =>
             <li key={`ap-${index}`}>
                 <ElementoDatosAnteproyecto anteproyecto={ap}/>     
@@ -77,7 +93,7 @@ const ElementoDatosAnteproyecto = ({ anteproyecto }) => <>
     <p><label>Estado:</label> {anteproyecto.estado}</p>
     <p>
         <label>Encargados anteriores:</label>{" "}
-        {anteproyecto.anteproyectosPerdidos.map(ap => ap.profesor.nombre).join(", ") || "-"}
+        {anteproyecto.anteproyectosPerdidos.map(ap => ap.encargado.nombre).join(", ") || "-"}
     </p>
 </>;
 
