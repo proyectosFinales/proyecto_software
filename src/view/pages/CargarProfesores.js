@@ -3,9 +3,20 @@ import * as XLSX from 'xlsx';
 import { supabase } from '../../model/Cliente';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
+import Correo from '../../controller/Correo';
 
 const CargarDatos = () => {
-  const [excelData, setExcelData] = useState([]); // Estado para almacenar los datos leídos del archivo
+  const [excelData, setExcelData] = useState([]);
+
+  function generarContraseña(longitud = 12) {
+    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+    let contraseña = '';
+    for (let i = 0; i < longitud; i++) {
+      const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
+      contraseña += caracteres.charAt(indiceAleatorio);
+    }
+    return contraseña;
+  }
 
   // Función para procesar el archivo de Excel
   const handleFileUpload = (e) => {
@@ -34,13 +45,18 @@ const CargarDatos = () => {
             sede: row.Sede
         };
 
+        const contraseña = generarContraseña();
+
         const { data, error } = await supabase
             .from('usuarios')
             .insert( {
                 correo: dataToInsert.correo,
                 rol:'2',
+                contraseña: contraseña,
                 sede: dataToInsert.sede
             });
+
+        Correo(dataToInsert.nombre, dataToInsert.correo, contraseña);
 
         if (error) {
           console.error('Error al cargar datos en la base de datos:', error);
