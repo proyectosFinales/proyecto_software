@@ -4,11 +4,11 @@ import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderProfesor';
 
-const CitasProfesor = () => {
+const DisponibilidadProfesor = () => {
   const [citas, setCitas] = useState([]);
   const [citasOriginales, setCitasOriginales] = useState([]);
   const [error, setError] = useState('');
-  const profesorID = '5c210fa7-0fd8-42df-a3cb-8ca023e3f41e'; // Static for debugging
+  const profesorID = localStorage.getItem('token'); // Static for debugging
 
   const formatTime = (time) => {
     // eslint-disable-next-line
@@ -190,4 +190,4 @@ const CitasProfesor = () => {
   );
 };
 
-export default CitasProfesor;
+export default DisponibilidadProfesor;
