@@ -1,6 +1,6 @@
 import emailjs from 'emailjs-com';
 
-const Correo = (nombre, destinatario, contraseña) => {
+const Correo = (nombre, destinatario, contraseña, plantilla) => {
 
     const templateParams = {
         to_email:destinatario,
@@ -9,7 +9,7 @@ const Correo = (nombre, destinatario, contraseña) => {
         user_password: contraseña
     };
 
-    emailjs.send('service_fynfzt7', 'template_password',templateParams, 'RVzuF8Rk6oOqnKI5f' 
+    emailjs.send('service_fynfzt7', plantilla, templateParams, 'RVzuF8Rk6oOqnKI5f' 
     )
         .then((result) => {
             console.log(result.text);
