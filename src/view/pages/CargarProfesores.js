@@ -56,7 +56,7 @@ const CargarDatos = () => {
                 sede: dataToInsert.sede
             });
 
-        Correo(dataToInsert.nombre, dataToInsert.correo, contraseña);
+        Correo(dataToInsert.nombre, dataToInsert.correo, contraseña, 'template_password');
 
         if (error) {
           console.error('Error al cargar datos en la base de datos:', error);
