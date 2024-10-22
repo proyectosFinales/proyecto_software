@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderEstudiante';
 
 const CitasEstudiante = () => {
-  const estudianteID = '67449fbe-30f6-4e80-a6eb-30ae5f9d43fa'; // Static for debugging
+  const estudianteID = localStorage.getItem('token'); // Static for debugging
   const [cita, setCita] = useState(null);
   const [lectores, setLectores] = useState({ lector1: '', lector2: '' });
   const [estudiante, setEstudiante] = useState('');
@@ -101,7 +101,7 @@ const CitasEstudiante = () => {
             {cita ? (
               <div className="cita-info">
                 <p><strong>Estudiante:</strong> {estudiante}</p>
-                <p><strong>Profesor:</strong> {profesor}</p> {/* New field for Profesor */}
+                <p><strong>Profesor:</strong> {profesor}</p>
                 <p><strong>Fecha:</strong> {cita.fecha}</p>
                 <p><strong>Hora de inicio:</strong> {formatTime(cita.horaInicio)}</p>
                 <p><strong>Hora de fin:</strong> {formatTime(cita.horaFin)}</p>
