@@ -1,0 +1,6 @@
+[build]
+  functions = "netlify/functions" # Ruta de las funciones serverless
+
+[dev]
+  command = "npm start"
+  targetPort = 3000
