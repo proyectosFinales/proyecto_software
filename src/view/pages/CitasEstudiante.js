@@ -1,4 +1,3 @@
-// CitasEstudiante.js
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
@@ -6,72 +5,65 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderEstudiante';
 
 const CitasEstudiante = () => {
-  const estudianteID = localStorage.getItem('token'); // Static for debugging
+  const estudianteID = localStorage.getItem('token');
   const [cita, setCita] = useState(null);
   const [lectores, setLectores] = useState({ lector1: '', lector2: '' });
   const [estudiante, setEstudiante] = useState('');
   const [profesor, setProfesor] = useState('');
 
   const formatTime = (time) => {
-    // eslint-disable-next-line
-    const [hours, minutes, seconds] = time.split(':');
+    const [hours, minutes] = time.split(':');
     return `${hours}:${minutes}`;
   };
 
-  // Fetch appointment data
   useEffect(() => {
     const fetchCita = async () => {
       try {
-        // Step 1: Find the anteproyecto by matching idEstudiante
         const { data: anteproyectoData, error: anteproyectoError } = await supabase
           .from('anteproyectos')
-          .select('id, idEncargado') // Also select idEncargado
-          .eq('idEstudiante', estudianteID); // Filter by student ID
+          .select('id, idEncargado')
+          .eq('idEstudiante', estudianteID);
 
         if (anteproyectoError) throw anteproyectoError;
         if (!anteproyectoData || anteproyectoData.length === 0) {
           throw new Error('No se encontró un anteproyecto para este estudiante.');
         }
 
-        const anteproyectoID = anteproyectoData[0].id; // Get the anteproyecto ID
-        const idEncargado = anteproyectoData[0].idEncargado; // Get the idEncargado (professor)
+        const anteproyectoID = anteproyectoData[0].id;
+        const idEncargado = anteproyectoData[0].idEncargado;
 
-        // Step 2: Find the corresponding cita using anteproyectoID
         const { data: citaData, error: citaError } = await supabase
           .from('citas')
           .select('id, fecha, horaInicio, horaFin, lector1, lector2')
-          .eq('anteproyectoID', anteproyectoID); // Filter by anteproyectoID
+          .eq('anteproyectoID', anteproyectoID);
 
         if (citaError) throw citaError;
         if (!citaData || citaData.length === 0) {
           throw new Error('No se encontró una cita para este anteproyecto.');
         }
 
-        const cita = citaData[0]; // Assume the student has only one appointment
+        const cita = citaData[0];
 
-        // Step 3: Fetch the student's name from the estudiantes table
         const { data: estudianteData, error: estudianteError } = await supabase
           .from('estudiantes')
           .select('nombre')
-          .eq('id', estudianteID); // Filter by student ID
+          .eq('id', estudianteID);
 
         if (estudianteError) throw estudianteError;
 
         const estudianteInfo = estudianteData.length > 0 ? estudianteData[0].nombre : 'Estudiante no encontrado';
         setEstudiante(estudianteInfo);
 
-        // Step 4: Fetch the professor's name using idEncargado from the profesores table
         const { data: profesorData, error: profesorError } = await supabase
           .from('profesores')
           .select('nombre')
-          .eq('id', idEncargado); // Filter by idEncargado
+          .eq('id', idEncargado);
 
         if (profesorError) throw profesorError;
 
         const profesorNombre = profesorData.length > 0 ? profesorData[0].nombre : 'Profesor no encontrado';
         setProfesor(profesorNombre);
 
-        // Step 5: Fetch lecturers' names
         const { data: profesoresData, error: profesoresError } = await supabase
           .from('profesores')
           .select('id, nombre');
