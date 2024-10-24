@@ -29,8 +29,7 @@ const Citas = () => {
   };
 
   const formatTime = (time) => {
-    // eslint-disable-next-line
-    const [hours, minutes, seconds] = time.split(':');
+    const [hours, minutes] = time.split(':');
     return `${hours}:${minutes}`;
   };
 
@@ -50,6 +49,11 @@ const Citas = () => {
       if (error) {
         console.error('Error al obtener citas:', error);
       } else {
+        data.sort((a, b) => {
+          if (a.fecha < b.fecha) return -1;
+          if (a.fecha > b.fecha) return 1;
+          return a.horaInicio.localeCompare(b.horaInicio);
+        });
         setCitas(data);
       }
     };
@@ -172,6 +176,29 @@ const Citas = () => {
       setModal(false);
     } catch (error) {
       console.error('Error al actualizar la cita:', error);
+    }
+  };
+
+  const deleteCita = async (cita) => {
+    const confirmDelete = window.confirm("¿Está seguro de que desea eliminar esta cita?");
+    if (!confirmDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('citas')
+        .delete()
+        .eq('id', cita.id);
+
+      if (error) {
+        console.error('Error al eliminar la cita:', error);
+        return;
+      }
+
+      setCitas(citas.filter((c) => c.id !== cita.id));
+      setModal(false);
+      alert('Cita eliminada correctamente.');
+    } catch (error) {
+      console.error('Error al eliminar la cita:', error);
     }
   };
 
@@ -343,6 +370,7 @@ const Citas = () => {
               </label>
 
               <div className="modal-actions">
+                <button className="cita-btn cita-btn-error w-50" onClick={() => deleteCita(citaActual)}>Eliminiar</button>
                 <button className="cita-btn w-50" onClick={() => updateCita(citaActual)}>Guardar</button>
                 <button className="cita-btn w-50" onClick={() => setModal(false)}>Cancelar</button>
               </div>

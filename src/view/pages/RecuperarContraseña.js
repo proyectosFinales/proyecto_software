@@ -3,20 +3,25 @@ import { useNavigate } from 'react-router-dom';
 import "../styles/RecuperarContraseña.css";
 import { FaEnvelope } from "react-icons/fa";
 import Footer from '../components/Footer';
+import sendRecovery from "../../controller/Recovery";
 
 const RecuperarContraseña = () => {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
   const handleRecovery = () => {
-    // Aquí puedes implementar la lógica para enviar la solicitud de recuperación
-    console.log("Solicitud enviada para el correo:", email);
-    // Mostrar mensaje de éxito o redirigir al usuario según sea necesario
+    try {
+      sendRecovery(email);
+      alert(`Se envió la solicitud al correo electrónico: ${email}`);
+      navigate("/");
+    } catch (error) {
+      alert(error);
+    }
   };
 
   return (
     <div className="recover-container">
-      <button className="btn-back" onClick={() => navigate("/login")}>
+      <button className="btn-back" onClick={() => navigate("/")}>
         Volver
       </button>
 
