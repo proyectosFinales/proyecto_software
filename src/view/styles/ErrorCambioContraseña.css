@@ -1,0 +1,28 @@
+.error-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: var(--gris_claro);
+    color: var(--gris_oscuro);
+    padding: 20px;
+  }
+  
+  .error-message {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--rojo);
+    color: var(--blanco);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+  }
+  
+  .error-message h2 {
+    margin: 0;
+  }
+  
+  .error-message p {
+    margin-top: 10px;
+  }

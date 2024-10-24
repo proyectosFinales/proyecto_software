@@ -1,0 +1,19 @@
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ocupa toda la altura de la ventana */
+    background-color: var(--gris_claro);
+    color: var(--gris_oscuro);
+    padding: 20px;
+  }
+  
+  .loading-container h2 {
+    text-align: center;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: var(--azul);
+    color: var(--blanco);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
