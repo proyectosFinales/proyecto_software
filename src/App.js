@@ -15,6 +15,7 @@ import EditarFormulario from './view/pages/EditarFormulario';
 import Citas from './view/pages/Citas';
 import DisponibilidadProfesor from './view/pages/DisponibilidadProfesor.js';
 import CitasEstudiante from './view/pages/CitasEstudiante.js';
+import CitasProfesor from './view/pages/CitasProfesor.js';
 import Login from './view/pages/Login';
 import Registro from './view/pages/Registro';
 import EditarPerfil from './view/pages/EditarPerfil';
@@ -29,10 +30,12 @@ import InicioAsignaciones from './view/pages/asignacion-proyectos';
 import Anteproyectos from './view/pages/anteproyectos';
 import CambioContraseña from './view/pages/CambioContraseña.js';
 import AprobarProyectos from './view/pages/AprobarProyectos';
+import LimpiarToken from './controller/limpiezaToken';
 
 function App() {
 	return (
 		<Router>
+			<LimpiarToken />
 			<Routes>
 				<Route path="/" element={<Login />} />  {/* Ruta para la página principal */}
 				<Route path="/menuCoordinador" element={<Menu />} />  {/* Ruta para la página principal */}
@@ -51,6 +54,7 @@ function App() {
 				<Route path="/citas" element={<Citas />} />
 				<Route path="/disponibilidad-profesor" element={<DisponibilidadProfesor />} />
 				<Route path="/citas-estudiante" element={<CitasEstudiante />} />
+				<Route path="/citas-profesor" element={<CitasProfesor />} />
 				<Route path="/editar-perfil" element={<EditarPerfil />} />
 				<Route path="/carga-datos" element={<InicioCargaDatos />} />
 				<Route path="/carga-datos/cantidad-proyectos-profesor" element={<CantidadProyectosProfesor />} />
@@ -67,7 +71,7 @@ function App() {
 				</Route>
 				<Route path="/anteproyectos" element={<Anteproyectos />}></Route>
 				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />}></Route>
-				<Route path="/cambiar-contraseña" element={<CambioContraseña />}></Route>
+				<Route path="/cambiar-contraseña/:token" element={<CambioContraseña />}></Route>
 			</Routes>
 		</Router>
 	);

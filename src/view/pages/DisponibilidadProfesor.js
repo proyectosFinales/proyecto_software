@@ -8,11 +8,10 @@ const DisponibilidadProfesor = () => {
   const [citas, setCitas] = useState([]);
   const [citasOriginales, setCitasOriginales] = useState([]);
   const [error, setError] = useState('');
-  const profesorID = localStorage.getItem('token'); // Static for debugging
+  const profesorID = localStorage.getItem('token');
 
   const formatTime = (time) => {
-    // eslint-disable-next-line
-    const [hours, minutes, seconds] = time.split(':');
+    const [hours, minutes] = time.split(':');
     return `${hours}:${minutes}`;
   };
 
@@ -47,6 +46,13 @@ const DisponibilidadProfesor = () => {
           };
         });
 
+        formattedAppointments.sort((a, b) => {
+          if (a.fecha === b.fecha) {
+            return a.horaInicio.localeCompare(b.horaInicio);
+          }
+          return a.fecha.localeCompare(b.fecha);
+        });
+
         for (let cita of formattedAppointments) {
           if (cita.disponibilidadID === null) {
             const { data, error } = await supabase
@@ -69,7 +75,7 @@ const DisponibilidadProfesor = () => {
     };
 
     fetchCitas();
-  }, []);
+  }, [profesorID]);
 
   const handleCheckboxChange = (index) => {
     const nuevasCitas = [...citas];
@@ -93,7 +99,16 @@ const DisponibilidadProfesor = () => {
     setCitas(nuevasCitas);
   };
 
+  const hasChanges = () => {
+    return JSON.stringify(citas) !== JSON.stringify(citasOriginales);
+  };
+
   const handleSave = async () => {
+    if (!hasChanges()) {
+      alert('No hay cambios para guardar.');
+      return;
+    }
+
     if (window.confirm('¿Está seguro de que desea guardar los cambios?')) {
       try {
         for (let cita of citas) {
@@ -114,6 +129,11 @@ const DisponibilidadProfesor = () => {
   };
 
   const handleDiscardChanges = () => {
+    if (!hasChanges()) {
+      alert('No hay cambios que descartar.');
+      return;
+    }
+
     if (window.confirm('¿Está seguro de que desea descartar los cambios?')) {
       setCitas(JSON.parse(JSON.stringify(citasOriginales)));
     }
