@@ -29,10 +29,12 @@ import InicioAsignaciones from './view/pages/asignacion-proyectos';
 import Anteproyectos from './view/pages/anteproyectos';
 import CambioContraseña from './view/pages/CambioContraseña.js';
 import AprobarProyectos from './view/pages/AprobarProyectos';
+import LimpiarToken from './controller/limpiezaToken';
 
 function App() {
 	return (
 		<Router>
+			<LimpiarToken />
 			<Routes>
 				<Route path="/" element={<Login />} />  {/* Ruta para la página principal */}
 				<Route path="/menuCoordinador" element={<Menu />} />  {/* Ruta para la página principal */}
@@ -67,7 +69,7 @@ function App() {
 				</Route>
 				<Route path="/anteproyectos" element={<Anteproyectos />}></Route>
 				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />}></Route>
-				<Route path="/cambiar-contraseña" element={<CambioContraseña />}></Route>
+				<Route path="/cambiar-contraseña/:token" element={<CambioContraseña />}></Route>
 			</Routes>
 		</Router>
 	);

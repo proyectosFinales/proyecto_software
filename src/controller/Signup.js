@@ -1,5 +1,5 @@
 import supabase from "../model/supabase";
-import validateInfo from "./validarEntradasGU";
+import validateInfo from "./validarEntradas";
 
 export async function signUpNewUser(fullName, carnet, tel, email, password) {
 
