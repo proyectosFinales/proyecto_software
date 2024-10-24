@@ -3,7 +3,8 @@ import * as XLSX from 'xlsx';
 import { supabase } from '../../model/Cliente';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
-import Correo from '../../controller/Correo';
+import sendEmail from '../../controller/Correo';
+import sendMail from '../../controller/email.mjs';
 
 const CargarDatos = () => {
   const [excelData, setExcelData] = useState([]);
@@ -56,7 +57,7 @@ const CargarDatos = () => {
                 sede: dataToInsert.sede
             });
 
-        Correo(dataToInsert.nombre, dataToInsert.correo, contraseña, 'template_password');
+        sendMail(dataToInsert.nombre, dataToInsert.correo, contraseña, 'template_password');
 
         if (error) {
           console.error('Error al cargar datos en la base de datos:', error);

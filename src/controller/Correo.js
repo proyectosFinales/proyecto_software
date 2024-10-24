@@ -1,23 +1,28 @@
 import emailjs from 'emailjs-com';
 
-const Correo = (nombre, destinatario, contraseña, plantilla) => {
+import { Resend } from 'resend';
 
-    const templateParams = {
-        to_email:destinatario,
-        user_name: nombre,
-        user_email: destinatario,
-        user_password: contraseña
-    };
+const resend = new Resend('re_WH9u3jVe_37bsXSDrWqxDUwLZCFcjB3aK');
 
-    emailjs.send('service_fynfzt7', plantilla, templateParams, 'RVzuF8Rk6oOqnKI5f' 
-    )
-        .then((result) => {
-            console.log(result.text);
-        }, (error) => {
-            console.log(error.text);
-        });
-    };
+async function sendEmail(to, subject, body) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: 'proyectosoftware07@gmail.com',
+      to: [to],
+      subject: subject,
+      html: body
+    });
 
- 
+    if (error) {
+      console.error({ error });
+      return;
+    }
 
-export default Correo;
+    console.log({ data });
+  } catch (err) {
+    console.error('Unexpected error:', err);
+  }
+}
+
+export default sendEmail;
+
