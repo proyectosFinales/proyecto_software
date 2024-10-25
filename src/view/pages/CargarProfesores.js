@@ -4,7 +4,7 @@ import { supabase } from '../../model/Cliente';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
 import sendEmail from '../../controller/Correo';
-import sendMail from '../../controller/email.mjs';
+import sendMail from '../../controller/email.js';
 
 const CargarDatos = () => {
   const [excelData, setExcelData] = useState([]);
@@ -47,22 +47,24 @@ const CargarDatos = () => {
         };
 
         const contraseña = generarContraseña();
+        const mensaje="Hola, tu contraseña generada es: " + contraseña + 
+        " y su usuarios es su correo electrónico: " + dataToInsert.correo;
 
-        const { data, error } = await supabase
+/*         const { data, error } = await supabase
             .from('usuarios')
             .insert( {
                 correo: dataToInsert.correo,
                 rol:'2',
                 contraseña: contraseña,
                 sede: dataToInsert.sede
-            });
+            }); */
 
-        sendMail(dataToInsert.nombre, dataToInsert.correo, contraseña, 'template_password');
+        sendMail(dataToInsert.correo, "Credenciales", mensaje);
 
-        if (error) {
+       /*  if (error) {
           console.error('Error al cargar datos en la base de datos:', error);
         }
-
+ */
       });
     };
 

@@ -1,6 +1,7 @@
 [build]
-  functions = "netlify/functions" # Ruta de las funciones serverless
+  functions = "netlify/functions"  # Carpeta donde se encuentran tus funciones
 
-[dev]
-  command = "npm start"
-  targetPort = 3000
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
