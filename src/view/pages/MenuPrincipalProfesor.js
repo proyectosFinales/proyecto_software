@@ -18,7 +18,7 @@ const Menu = () => {
           <p>Proyectos asignados</p>
         </Link>
         <Link to="/disponibilidad-profesor" className={styles.menuItem}>
-          <i className="fas fa-clock"></i>
+          <i className="fas fa-calendar-days"></i>
           <p>Citas para defensas</p>
         </Link>
         <Link to="/citas-profesor" className={styles.menuItem}>
