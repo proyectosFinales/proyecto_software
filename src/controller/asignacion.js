@@ -1,3 +1,4 @@
+import * as XLSX from "xlsx";
 import Anteproyecto from "./anteproyecto";
 import Profesor from "./profesor";
 
@@ -45,4 +46,27 @@ const esAsignable = (anteproyecto, profesor) => {
     return true;
 }
 
-export { asignarAnteproyectosAProfesores };
+/**
+ * Genera un reporte de excel con los profesores y sus proyectos asignados
+ * @param {Profesor[]} profesores 
+ */
+const generarReporteAsignaciones = profesores => {
+    const datosAexportar = profesores.map(profesor => {
+        return profesor.anteproyectos.map(anteproyecto => {
+            return {
+                "Profesor": profesor.nombre,
+                "Empresa": anteproyecto.nombreEmpresa,
+                "Estudiante": anteproyecto.estudiante.nombre,
+                "Carnet": anteproyecto.estudiante.carnet,
+                "Telefono": anteproyecto.estudiante.telefono,
+            };
+        });
+    }).flat();
+
+    const worksheet = XLSX.utils.json_to_sheet(datosAexportar);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Asignaciones");
+    XLSX.writeFile(workbook, "Reporte Asignaciones.xlsx");
+}
+
+export { asignarAnteproyectosAProfesores, generarReporteAsignaciones };
