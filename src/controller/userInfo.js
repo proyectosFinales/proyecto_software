@@ -34,7 +34,7 @@ export async function updateUserInfo(userData) {
 
   const { error } = await supabase
     .from('usuarios')
-    .update({
+    .upsert({
       correo: userData.correo,
       contraseña: userData.contraseña,
     })
@@ -47,7 +47,7 @@ export async function updateUserInfo(userData) {
   if (userData.rol === "2") {
     const { error } = await supabase
     .from('profesores')
-    .update({ nombre: userData.nombre })
+    .upsert({ nombre: userData.nombre })
     .eq('id', userData.id);
 
     if (error) {
@@ -57,7 +57,8 @@ export async function updateUserInfo(userData) {
 
     const { error } = await supabase
     .from('estudiantes')
-    .update({
+    .upsert({
+      id: userData.id,
       nombre: userData.nombre,
       correo: userData.correo,
       carnet: userData.carnet,
