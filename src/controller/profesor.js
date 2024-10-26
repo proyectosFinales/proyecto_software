@@ -5,6 +5,7 @@ import Usuario from "./usuario";
 class Profesor extends Usuario {
     nombre;
     cantidadProyectos;
+    /** @type {Anteproyecto[]} */
     anteproyectos = [];
     original = {};
 
@@ -23,6 +24,21 @@ class Profesor extends Usuario {
         );
     }
 
+    static async fromID(id) {
+        const { data } = await supabase
+            .from("profesores")
+            .select(`
+                id, nombre, cantidadProyectos,
+                usuario:usuarios(sede),
+                anteproyectos(
+                    id, nombreEmpresa,
+                    estudiante:estudiantes(id, nombre, usuario:usuarios(sede, correo), carnet, telefono)
+                )
+            `)
+            .eq("id", id);
+        return Profesor.from(data[0]);
+    }
+
     static async obtenerTodos() {
         const { data } = await supabase
             .from("profesores")
@@ -38,7 +54,7 @@ class Profesor extends Usuario {
                 usuario:usuarios(sede),
                 anteproyectos(
                     id, nombreEmpresa,
-                    estudiante:estudiantes(id, nombre, usuario:usuarios(sede))
+                    estudiante:estudiantes(id, nombre, usuario:usuarios(sede, correo), carnet, telefono)
                 )
             `);
         return data.map(p => Profesor.from(p));

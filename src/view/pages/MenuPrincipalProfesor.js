@@ -13,7 +13,7 @@ const Menu = () => {
         </div>
       </header>
       <div className={styles.menuGrid}>
-        <Link to="/proyectos" className={styles.menuItem}>
+        <Link to="/proyectos-profesor" className={styles.menuItem}>
           <i className="fas fa-folder-open"></i>
           <p>Proyectos asignados</p>
         </Link>
