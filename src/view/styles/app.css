@@ -62,18 +62,18 @@ h1 {
   color: #333;
 }
 
-.proyectos-profesores {
+.anteproyectos-profesores {
   padding: 0;
 }
 
-.proyectos-profesores li {
+.anteproyectos-profesores li {
   display: flex;
   gap: 10px;
   margin: 5px 0;
   align-items: center;
 }
 
-.proyectos-profesores li button {
+.anteproyectos-profesores li button {
   background-color: var(--primary1);
   color: var(--background1);
   padding: 10px 15px;

@@ -24,7 +24,7 @@ const consultaAnteproyectos = () => {
 
 class Anteproyecto {
     id;
-    nombre;
+    nombreEmpresa;
     /** @type {Estudiante} */
     estudiante;
     /** @type {Profesor} */
@@ -32,9 +32,9 @@ class Anteproyecto {
     /** @type {Anteproyecto[]} */
     anteproyectosPerdidos = [];
 
-    constructor(id, nombre, estado, estudiante, encargado) {
+    constructor(id, nombreEmpresa, estado, estudiante, encargado) {
         this.id = id;
-        this.nombre = nombre;
+        this.nombreEmpresa = nombreEmpresa;
         this.estado = estado;
         this.estudiante = estudiante;
         this.encargado = encargado;
@@ -75,7 +75,7 @@ class Anteproyecto {
         return new Promise(async (resolve, reject) => {
             const { data, error } = await supabase
                 .from("anteproyectos")
-                .update({idEncargado: this.encargado.id})
+                .update({idEncargado: this.encargado ? this.encargado.id : null})
                 .eq("id", this.id)
                 .select();
             if(error) reject();

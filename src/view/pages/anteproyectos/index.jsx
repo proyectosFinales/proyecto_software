@@ -27,7 +27,7 @@ const Anteproyectos = () => {
                     {anteproyectos.map((ap, index) =>
                         <tr key={`anteproyecto-${index}`}>
                             <td>{ap.estudiante.nombre}</td>
-                            <td>{ap.nombre}</td>
+                            <td>{ap.nombreEmpresa}</td>
                             <td className={styles.tableButtons}>
                                 <Button>Revisar</Button>
                                 <GenerarPDFAnteproyecto anteproyecto={ap}/>

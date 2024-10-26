@@ -5,7 +5,7 @@ const GenerarPDFAnteproyecto = ({ anteproyecto }) => {
     return <>
         <PDFDownloadLink
             document={<PDFAnteproyecto anteproyecto={anteproyecto}/>}
-            fileName={`${anteproyecto.nombre}.pdf`}
+            fileName={`${anteproyecto.nombreEmpresa}.pdf`}
         >
             <Button>Reporte</Button>
         </PDFDownloadLink>
@@ -17,7 +17,7 @@ const PDFAnteproyecto = ({ anteproyecto }) => {
         <Document>
             <Page style={styles.page}>
                 <Text style={styles.title}>Anteproyecto</Text>
-                <LabelTextPDF label="Nombre:" text={anteproyecto.nombre}/>
+                <LabelTextPDF label="Nombre:" text={anteproyecto.nombreEmpresa}/>
                 <LabelTextPDF label="Estudiante:" text={anteproyecto.estudiante?.nombre}/>
             </Page>
         </Document>
