@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { supabase } from '../../model/Cliente';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
-import sendMail from '../../controller/Email';
+import sendMail from '../../controller/email';
 
 const CargarDatos = () => {
   const [excelData, setExcelData] = useState([]);
