@@ -20,7 +20,12 @@ const Title = ({ children }) =>
         <i className="fa-solid fa-gear"></i>
     </header>
 
-const Footer = () =>
-    <PiePagina />
+const Footer = () => <>
+    {/* <PiePagina /> */}
+    <footer className={styles.footer}>
+        <p>Instituto Tecnológico de Costa Rica</p>
+        <p>2024</p>
+    </footer>
+</>;
 
 export default Layout;
