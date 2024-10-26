@@ -97,7 +97,7 @@ const CargarDatos = () => {
 
         {/* Tabla para mostrar los datos cargados */}
         <div className={styles.tableContainer}>
-            <table className={styles.table}>
+            <table className={styles.tabla_proyectos}>
             <thead>
                 <tr>
                 {/* Aquí puedes generar los encabezados dinámicamente según tus datos */}

@@ -117,7 +117,7 @@ const EstudianteForm = () => {
   return (
     <div>
 
-    <header className={styles.header}>
+    <header className={styles.header_estudiante}>
         <h1>Crear anteproyecto</h1>
         </header>
 

@@ -176,7 +176,7 @@ const CoordinadorForm = () => {
   return (
     <div>
 
-    <header>
+    <header className={styles.header_coordinador}>
         <h1>Crear anteproyecto</h1>
         </header>
 
