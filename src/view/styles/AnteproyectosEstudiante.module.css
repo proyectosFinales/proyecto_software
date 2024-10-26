@@ -149,11 +149,3 @@
   background-color: var(--gris_claro);
   color: var(--gris_oscuro);
 }
-
-footer {
-  text-align: center;
-  padding: 15px;
-  background-color: var(--blanco);
-  border-top: 2px solid var(--negro);
-  font-size: 14px;
-}

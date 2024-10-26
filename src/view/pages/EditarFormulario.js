@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/FormularioCoordinador.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
+import Footer from '../components/Footer';
 
 const CoordinadorForm = () => {
   const [idAnteproyecto, setIdAnteproyecto] = useState('');
@@ -190,7 +191,7 @@ const CoordinadorForm = () => {
   return (
     <div>
 
-    <header>
+    <header className={styles.encabezado_formulario}>
         <h1>Crear anteproyecto</h1>
         </header>
 
@@ -665,9 +666,7 @@ const CoordinadorForm = () => {
 
     </form>
     
-    <footer>
-        <p>Instituto Tecnológico de Costa Rica 2024</p>
-    </footer>
+    <Footer />
     </div>
   );
 };
