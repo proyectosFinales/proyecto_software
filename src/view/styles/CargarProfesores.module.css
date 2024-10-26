@@ -45,10 +45,6 @@
     overflow-y: scroll;
 }
 
-/* Estilos generales */
-body {
-    font-family: Arial, sans-serif;
-}
 
 .button {
     padding: 10px 20px;
@@ -60,21 +56,21 @@ input[type="file"] {
     display: none;
 }
 
-.table {
+.tabla_proyectos {
     width: 100%;
     border-collapse: collapse;
 }
 
-th, td {
+.tabla_proyectos th, .tabla_proyectos td {
     padding: 10px;
     border: 1px solid black;
 }
 
-th {
+.tabla_proyectos th {
     background-color: #f2f2f2;
 }
 
-tbody {
+.tabla_proyectos tbody {
     background-color: #ddd;
     overflow-y: scroll;
     max-height: 400px;
