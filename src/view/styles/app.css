@@ -64,13 +64,13 @@ h1 {
 
 .anteproyectos-profesores {
   padding: 0;
-  margin: 0 0 5px 0;
+  margin: 5px 0;
 }
 
 .anteproyectos-profesores li {
   display: flex;
   gap: 10px;
-  margin: 5px 0;
+  margin: 0 0 5px 0;
   align-items: center;
 }
 
