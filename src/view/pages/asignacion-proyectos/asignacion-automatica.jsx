@@ -89,7 +89,7 @@ const TablaAnteproyectos = ({ title, anteproyectos }) => <>
 const ElementoDatosAnteproyecto = ({ anteproyecto }) => <>
     <p><label>Estudiante:</label> {anteproyecto.estudiante.nombre}</p>
     <p><label>Sede:</label> {anteproyecto.estudiante.sede}</p>
-    <p><label>Empresa:</label> {anteproyecto.nombre}</p>
+    <p><label>Empresa:</label> {anteproyecto.nombreEmpresa}</p>
     <p><label>Estado:</label> {anteproyecto.estado}</p>
     <p>
         <label>Encargados anteriores:</label>{" "}

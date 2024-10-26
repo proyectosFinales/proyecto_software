@@ -10,7 +10,7 @@ const InicioAsignaciones = () => <>
             </Link>
             <Link className="menu-item" to="/asignaciones/manual" style={{textDecoration: "none", color: "var(--primary1)"}}>
                 <i className="fa-solid fa-laptop-file" style={{color: "var(--primary1)"}}></i>
-                <p>Asignación manual</p>
+                <p>Asignación manual y Reporte</p>
             </Link>
         </div>
     </Layout>

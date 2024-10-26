@@ -257,7 +257,7 @@ const Citas = () => {
             <h2 className="col-5 w-auto m-0">Lista de citas</h2>
           </div>
 
-          <table>
+          <table className="w-100">
             <thead>
               <tr>
                 <th>Día</th>
