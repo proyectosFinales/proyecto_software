@@ -1,20 +1,26 @@
 import supabase from "../model/supabase";
+import Anteproyecto from "./anteproyecto";
 import Usuario from "./usuario";
 
 class Profesor extends Usuario {
     nombre;
     cantidadProyectos;
+    anteproyectos = [];
     original = {};
 
-    constructor(id, nombre, sede, cantidadProyectos) {
+    constructor(id, nombre, sede, cantidadProyectos, anteproyectos) {
         super(id, nombre, sede);
         this.cantidadProyectos = cantidadProyectos;
+        this.anteproyectos = anteproyectos;
         this.original.cantidadProyectos = cantidadProyectos;
     }
 
     static from(obj) {
-        if(obj === null) return null;
-        return new Profesor(obj.id, obj.nombre, obj.usuario.sede, obj.cantidadProyectos);
+        if(!(obj ?? false)) return null;
+        return new Profesor(
+            obj.id, obj.nombre, obj.usuario.sede, obj.cantidadProyectos,
+            obj.anteproyectos ? obj.anteproyectos.map(ap => Anteproyecto.from(ap)) : []
+        );
     }
 
     static async obtenerTodos() {
@@ -22,6 +28,20 @@ class Profesor extends Usuario {
             .from("profesores")
             .select("id, nombre, cantidadProyectos, usuario:usuarios(sede)");
         return data.map(p => new Profesor(p.id, p.nombre, p.usuario.sede, p.cantidadProyectos));
+    }
+
+    static async obtenerEncargados() {
+        const { data } = await supabase
+            .from("profesores")
+            .select(`
+                id, nombre, cantidadProyectos,
+                usuario:usuarios(sede),
+                anteproyectos(
+                    id, nombreEmpresa,
+                    estudiante:estudiantes(id, nombre, usuario:usuarios(sede))
+                )
+            `);
+        return data.map(p => Profesor.from(p));
     }
 
     async actualizarCantidadProyectos() {
