@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { supabase } from '../../model/Cliente';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
-import sendMail from '../../controller/email.js';
+import sendMail from '../../controller/Email';
 
 const CargarDatos = () => {
   const [excelData, setExcelData] = useState([]);
@@ -35,47 +35,55 @@ const CargarDatos = () => {
       const sheetData = XLSX.utils.sheet_to_json(worksheet);
       setExcelData(sheetData); // Guardamos los datos en el estado
 
-      // Aquí puedes enviar los datos a tu base de datos (ejemplo con Supabase)
-      sheetData.forEach(async (row) => {
-
-        const dataToInsert={
-            nombre: row.Nombre,
-            carnet: row.Carnet,
-            correo: row.Correo,
-            sede: row.Sede
-        };
-
-        const contraseña = generarContraseña();
-        const mensaje="Hola, tu contraseña generada es: " + contraseña + 
-        " y su usuarios es su correo electrónico: " + dataToInsert.correo;
-
-/*         const { data, error } = await supabase
-            .from('usuarios')
-            .insert( {
-                correo: dataToInsert.correo,
-                rol:'2',
-                contraseña: contraseña,
-                sede: dataToInsert.sede
-            }); */
-
-        sendMail(dataToInsert.correo, "Credenciales", mensaje);
-
-       /*  if (error) {
-          console.error('Error al cargar datos en la base de datos:', error);
-        }
- */
-      });
     };
 
     reader.readAsBinaryString(file);
   };
 
+  const subirDatos =(e) => {
+    e.preventDefault();
+    // Aquí puedes enviar los datos a tu base de datos (ejemplo con Supabase)
+    excelData.forEach(async (row) => {
+
+      const dataToInsert={
+          nombre: row.Nombre,
+          carnet: row.Carnet,
+          correo: row.Correo,
+          sede: row.Sede
+      };
+
+      const contraseña = generarContraseña();
+      const mensaje="Hola, tu contraseña generada es: " + contraseña + 
+      " y su usuarios es su correo electrónico: " + dataToInsert.correo;
+
+         const { data, error } = await supabase
+          .from('usuarios')
+          .insert( {
+              correo: dataToInsert.correo,
+              rol:'2',
+              contraseña: contraseña,
+              sede: dataToInsert.sede
+          }); 
+
+      sendMail(dataToInsert.correo, "Credenciales", mensaje);
+
+       if (error) {
+        console.error('Error al cargar datos en la base de datos:', error);
+      }
+    });
+  }      
+
   return (
     <div className={styles.container}>
       <Header title="Carga de datos"/>
       <div className={styles.datos_cargados}>
-        <button className={styles.uploadButton}>
+        <button className={styles.selectButton}>
             <label htmlFor="file-upload">
+            Seleccionar archivo
+            </label>
+        </button>
+        <button className={styles.uploadButton} onClick={subirDatos}>
+            <label>
             Cargar datos
             </label>
         </button>
