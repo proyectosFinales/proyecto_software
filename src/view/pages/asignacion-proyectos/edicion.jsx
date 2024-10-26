@@ -19,6 +19,7 @@ const EdicionAsignacionProyectos = () => {
 
     /** @param {Anteproyecto} anteproyecto */
     const desencargarAnteproyecto = async (anteproyecto) => {
+        if(!window.confirm(`Remover la asignación del proyecto de ${anteproyecto.estudiante.nombre}?`)) return;
         anteproyecto.encargado = null;
         await anteproyecto.guardarAsignacion();
         successToast(`La asignación del proyecto de ${anteproyecto.estudiante.nombre} fue removida`);
@@ -82,6 +83,7 @@ const AdicionAnteproyectoProfesor = ({ profesor, onAdicion }) => {
         await anteproyectoSeleccionado.guardarAsignacion();
         onAdicion();
         successToast("Proyecto agregado");
+        setSeleccionado("");
         modalRef.close();
     }
 
