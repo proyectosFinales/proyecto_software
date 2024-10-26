@@ -2,9 +2,9 @@ import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
 import Footer from '../components/Footer';
-import Header from '../components/HeaderCoordinador'
+import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
-import Modal from "../components/Modal"
+import Modal from "../components/Modal";
 
 const GestionPerfiles = () => {
   const [users, setUsers] = useState([]);
@@ -28,28 +28,28 @@ const GestionPerfiles = () => {
           carnet: data.estudiante.carnet,
           telefono: data.estudiante.telefono,
           ...(data.estudiante.estado.length !== 0 && {
-            estado: data.estudiante.estado.at(-1).estado
+            estado: data.estudiante.estado.at(-1).estado,
           }),
           ...(data.estudiante.estado.length === 0 && {
-            estado: "-"
-          })
-        })
+            estado: "-",
+          }),
+        }),
       });
     } catch (error) {
-      console.error('Error al obtener la información del usuario:', error.message);
+      alert("El usuario presente no está registrado, por favor eliminelo o bien agreguelo a la plataforma seleccionando la casilla y presionando el botón 'Agregar usuario'.");
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditableUser(prevState => ({
+    setEditableUser((prevState) => ({
       ...prevState,
       [name]: value,
     }));
   };
 
   const handleCheckboxChange = (userId) => {
-    setCheckedUsers(prevState => {
+    setCheckedUsers((prevState) => {
       const updatedCheckedUsers = new Set(prevState);
       if (updatedCheckedUsers.has(userId)) {
         updatedCheckedUsers.delete(userId);
@@ -72,7 +72,7 @@ const GestionPerfiles = () => {
         await delUser(userId);
       }
 
-      const updatedUsers = users.filter(user => !usersToDelete.has(user.id));
+      const updatedUsers = users.filter((user) => !usersToDelete.has(user.id));
 
       setUsers(updatedUsers);
       setCheckedUsers(new Set());
@@ -127,14 +127,21 @@ const GestionPerfiles = () => {
                     <li
                       key={user.id || index}
                       className={index % 2 === 0 ? "even-row" : "odd-row"}
-                      onClick={() => handleUserClick(user.id)}
                     >
-                      <span className="user-name">
+                      <span
+                        className="user-name"
+                        onClick={() => handleUserClick(user.id)}
+                      >
                         {user.rol === "2"
                           ? user.profesor.nombre
-                          : user.estudiante.nombre}
+                          : user.estudiante.nombre || "Usuario no registrado"}
                       </span>
-                      <input type="checkbox" className="user-checkbox" onClick={() => handleCheckboxChange(user.id)} />
+                      <input
+                        type="checkbox"
+                        className="user-checkbox"
+                        checked={checkedUsers.has(user.id)}
+                        onChange={() => handleCheckboxChange(user.id)}
+                      />
                     </li>
                   );
                 })
@@ -222,6 +229,7 @@ const GestionPerfiles = () => {
             <div className="actions">
               <button className="btn-delete" onClick={() => setModal(true)}>Borrar usuario(s)</button>
               <button className="btn-edit" onClick={handleUserEdit}>Editar usuario</button>
+              <button className="btn-add-user">Agregar usuario</button>
             </div>
           </div>
         </div>
@@ -250,9 +258,6 @@ const GestionPerfiles = () => {
       </Modal>
     </div>
   );
-
-
-
 };
 
 export default GestionPerfiles;
