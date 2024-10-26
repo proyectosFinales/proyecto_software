@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
+import Anteproyecto from "../../../controller/anteproyecto";
+import Profesor from "../../../controller/profesor";
+import { generarReporteAsignaciones } from "../../../controller/asignacion.js";
 import Button from "../../components/button";
 import Layout from "../../components/layout";
 import styles from "../../styles/table.module.css";
-import Profesor from "../../../controller/profesor";
 import Modal from "../../components/modal.jsx";
-import Anteproyecto from "../../../controller/anteproyecto";
 import { FloatInput } from "../../components/input.jsx";
 import { errorToast, successToast } from "../../components/toast";
 
@@ -28,7 +29,7 @@ const EdicionAsignacionProyectos = () => {
 
     return <>
         <Layout title="Edición de asignación de proyectos">
-            <Button>Generar reporte de asignaciones</Button>
+            <Button onClick={() => generarReporteAsignaciones(profesores)}>Generar reporte de asignaciones</Button>
             <table className={styles.table}>
                 <thead>
                     <tr>

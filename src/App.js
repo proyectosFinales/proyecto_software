@@ -31,6 +31,7 @@ import Anteproyectos from './view/pages/anteproyectos';
 import CambioContraseña from './view/pages/CambioContraseña.js';
 import AprobarProyectos from './view/pages/AprobarProyectos';
 import LimpiarToken from './controller/limpiezaToken';
+import ProyectosAsignadosProfesor from './view/pages/asignacion-proyectos/proyectos-profesor.jsx';
 
 function App() {
 	return (
@@ -72,6 +73,7 @@ function App() {
 				<Route path="/anteproyectos" element={<Anteproyectos />}></Route>
 				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />}></Route>
 				<Route path="/cambiar-contraseña/:token" element={<CambioContraseña />}></Route>
+				<Route path="/proyectos-profesor" element={<ProyectosAsignadosProfesor/>}/>
 			</Routes>
 		</Router>
 	);
