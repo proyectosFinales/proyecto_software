@@ -20,7 +20,7 @@ const SettingsCoordinador = ({show}) => {
     <ul>
         <Link to="/editar-perfil" className={styles.menuItem}><li>Perfil</li></Link>
         <Link to="/anteproyectosCoordinador" className={styles.menuItem}><li>Establecer duración de las defensas</li></Link>
-        <Link to="/proyectosCoordinador" className={styles.menuItem}><li>Cerrar sesión</li></Link>
+        <Link to="/" className={styles.menuItem}><li>Cerrar sesión</li></Link>
     </ul>
     </nav>
   );
