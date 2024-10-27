@@ -6,6 +6,7 @@ import { supabase } from '../../model/Cliente';
 import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
+import {descargarAnteproyecto} from '../../controller/DescargarPDF';
 
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -15,11 +16,6 @@ const AnteproyectosCoordinador = () => {
   const handleRevisar = (id) => {
     navigate('/formulario-coordinador?id=' + id)
     // Lógica para editar
-  };
-
-  const handleReporte = (id) => {
-    console.log(`Descargando anteproyecto con id ${id}`);
-    // Lógica para descargar
   };
 
   // Función para obtener los datos de la base de datos
@@ -134,7 +130,7 @@ const AnteproyectosCoordinador = () => {
                     <td>
                         <div className={styles.contenedor_botones_anteproyectos_coordinador}>
                             <button onClick={() => handleRevisar(anteproyecto.id)} className={styles.btn + ' ' + styles.revisar}>Revisar</button>
-                            <button onClick={() => handleReporte(anteproyecto.id)} className={styles.btn + ' ' + styles.descargar}>Descargar</button>
+                            <button onClick={() => descargarAnteproyecto(anteproyecto)} className={styles.btn + ' ' + styles.descargar}>Descargar</button>
                         </div>
                     </td>
                   </tr>

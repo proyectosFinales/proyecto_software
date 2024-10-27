@@ -31,6 +31,7 @@ const CoordinadorForm = () => {
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  const [idEstudiante, setIdEstudiante] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -45,11 +46,6 @@ const CoordinadorForm = () => {
 
   useEffect(() => {
     const id = getQueryParam('id'); // Obtener el id del query parameter
-    if (id) {
-      // Aquí puedes hacer una consulta para obtener los datos del anteproyecto por su id
-      console.log('ID del anteproyecto para editar:', id);
-      // Ejemplo: consultarAnteproyecto(id);
-    }
     consultarAnteproyectos(id);
   }, [location]);
 
@@ -112,7 +108,7 @@ const CoordinadorForm = () => {
     try {
       const { data, error } = await supabase
         .from('anteproyectos')
-        .select(`sede,
+        .select(`
           tipoEmpresa,
           nombreEmpresa,
           actividadEmpresa,
@@ -147,7 +143,6 @@ const CoordinadorForm = () => {
       setCarnet(data[0].estudiantes.carnet);
       setTelefono(data[0].estudiantes.telefono);
       setCorreo(data[0].estudiantes.correo);
-      setSede(data[0].sede);
       setTipoEmpresa(data[0].tipoEmpresa);
       setNombreEmpresa(data[0].nombreEmpresa);
       setActividadEmpresa(data[0].actividadEmpresa);
@@ -168,9 +163,29 @@ const CoordinadorForm = () => {
       setNombreDepartamento(data[0].nombreDepartamento);
       setTipoProyecto(data[0].tipoProyecto);
       setObservaciones(data[0].observaciones);
+      setIdEstudiante(data[0].estudiantes.id);
+
     } catch (error) {
-      console.error('Error al consultar setear variables:', error);
+      console.error('Error al consultar anteproyecto:', error);
     }
+
+    try {
+      const { data, error } = await supabase
+        .from('usuarios')
+        .select(`
+          id,
+          correo,
+          sede,
+          rol
+        `)
+        .eq('id', idEstudiante)
+        if (error) throw error;
+
+        setSede(data[0].sede);
+
+      } catch (error) {
+        console.error('Error al consultar usuarios:', error);
+      }
   }
 
   return (
@@ -220,44 +235,15 @@ const CoordinadorForm = () => {
       </div>
 
       <div className={styles.formGroup}>
-        <label>5. Sede de estudio: *</label>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="sede"
-              value="Cartago"
-              checked={sede === "Cartago" || sede === " "}
-              disabled
-            />
-            Cartago
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="sede"
-              value="San Carlos"
-              checked={sede === "San Carlos" || sede === " "}
-              disabled
-            />
-            San Carlos
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="sede"
-              value="Limón"
-              checked={sede === "Limón" || sede === " "}
-              disabled
-            />
-            Limón
-          </label>
-        </div>
-        </div>
+        <label>5. Sede: *</label>
+        <input
+          type="text"
+          value={sede}
+          readOnly
+        />
+      </div>
+
+      
         <h2>Datos de la empresa</h2>
 
         <div className={styles.formGroup}>
@@ -615,7 +601,7 @@ const CoordinadorForm = () => {
 
     <div className={styles.formGroup}>
         <label>Observaciones del profesor </label>
-        <input
+        <textarea
           type="text"
           value={observaciones}
           onChange={(e) => setObservaciones(e.target.value)}
@@ -627,8 +613,6 @@ const CoordinadorForm = () => {
       <button type="submit" className={styles.button + ' ' + styles.reprobar} onClick={reprobarAnteproyecto}>Reprobar</button>
       <button type="button" className={styles.button + ' ' + styles.cancelar} onClick={handleGoBack}>Cancelar</button>
     </div>
-
-    
 
     </form>
     

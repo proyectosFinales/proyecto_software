@@ -41,23 +41,24 @@ const EstudianteForm = () => {
   async function consultarEstudiante() {
     try {
       const { data, error } = await supabase
-        .from('estudiantes')
+        .from('usuarios')
         .select(`id,
-          nombre,
-          carnet,
-          telefono,
-          correo`)
-          .eq('id', localStorage.getItem('token'))
+          sede,
+          correo,
+          estudiantes(id, nombre, carnet, telefono)`)
+          .eq('id', localStorage.getItem('token'));
       if (error) {
         console.error('Error al consultar estudiante:', error);
         return;
       }
-      setNombre(data[0].nombre);
-      setCarnet(data[0].carnet);
-      setTelefono(data[0].telefono);
+      setNombre(data[0].estudiantes.nombre);
+      setCarnet(data[0].estudiantes.carnet);
+      setTelefono(data[0].estudiantes.telefono);
       setCorreo(data[0].correo);
+      setSede(data[0].sede);
+
     } catch (error) {
-      console.error('Error al consultar estudiante:', error);
+      console.error('Error al consultar estudiante o usuario:', error);
     }
   }
 
@@ -166,44 +167,15 @@ const EstudianteForm = () => {
       </div>
 
       <div className={styles.formGroup}>
-        <label>5. Sede de estudio: *</label>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="sede"
-              value="Cartago"
-              onChange={(e) => setSede(e.target.value)}
-              required
-            />
-            Cartago
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="sede"
-              value="San Carlos"
-              onChange={(e) => setSede(e.target.value)}
-              required
-            />
-            San Carlos
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="sede"
-              value="Limón"
-              onChange={(e) => setSede(e.target.value)}
-              required
-            />
-            Limón
-          </label>
-        </div>
-        </div>
+        <label>5. Sede: *</label>
+        <input
+          type="text"
+          value={sede}
+          onChange={(e) => setSede(e.target.value)}
+          readOnly
+        />
+      </div>
+    
         <h2>Datos de la empresa</h2>
 
         <div className={styles.formGroup}>

@@ -2,11 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AnteproyectosEstudiante.module.css'; // Cambiado a módulo CSS
 import { supabase } from '../../model/Cliente';
-import jsPDF from 'jspdf';
-import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
-import Header from '../components/HeaderEstudiante';
 import HeaderEstudiante from '../components/HeaderEstudiante';
+import {descargarAnteproyecto} from '../../controller/DescargarPDF';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -86,69 +84,6 @@ const AnteproyectosEstudiante = () => {
     } catch (error) {
       console.error('Error al eliminar anteproyecto:', error);
     }
-  }
-
-  function descargarAnteproyecto(anteproyecto) {
-    const doc = new jsPDF();
-
-    // Título
-    doc.setFontSize(18);
-    doc.text('Información del Anteproyecto', 20, 20);
-
-    let yPosition = 40;
-    const lineSpacing = 10;
-
-    const pageWidth = doc.internal.pageSize.getWidth(); 
-    const textWidth = pageWidth - 40; // Ancho disponible (20 de margen a cada lado)
-    const pageHeight = doc.internal.pageSize.getHeight(); 
-
-    // Función para añadir texto de manera dinámica, manejando el espacio vertical
-    function addText(text) {
-      const textDividido = doc.splitTextToSize(text, textWidth); // Dividir el texto para ajustarse al ancho
-      const requiredHeight = textDividido.length * lineSpacing; // Calcular altura necesaria para este texto
-
-      // Verificar si hay espacio suficiente en la página actual
-      if (yPosition + requiredHeight > pageHeight - 20) { // Deja un margen de 20 px al final de la página
-        doc.addPage(); // Agregar nueva página
-        yPosition = 20; // Reiniciar la posición Y en la nueva página
-      }
-
-      // Imprimir el texto en la posición actual
-      console.log(yPosition);
-      doc.text(textDividido, 20, yPosition);
-      yPosition += requiredHeight; 
-    }
-
-    // Información del anteproyecto
-    doc.setFontSize(12);
-    addText(`Nombre del estudiante: ${anteproyecto.estudiantes.nombre}`);
-    addText(`Carnet: ${anteproyecto.estudiantes.carnet}`);
-    addText(`Teléfono: ${anteproyecto.estudiantes.telefono}`);
-    addText(`Correo: ${anteproyecto.estudiantes.correo}`);
-    addText(`Sede: ${anteproyecto.sede}`);
-    addText(`Nombre de la Empresa: ${anteproyecto.nombreEmpresa}`);
-    addText(`Tipo de Empresa: ${anteproyecto.tipoEmpresa}`);
-    addText(`Actividad de la empresa: ${anteproyecto.actividadEmpresa}`);
-    addText(`Ubicación de la empresa (distrito): ${anteproyecto.distritoEmpresa}`);
-    addText(`Ubicación de la empresa (cantón): ${anteproyecto.cantonEmpresa}`);
-    addText(`Ubicación de la empresa (provincia): ${anteproyecto.provinciaEmpresa}`);
-    addText(`Nombre del asesor industrial: ${anteproyecto.nombreAsesor}`);
-    addText(`Puesto que desempeña el asesor industrial en la empresa: ${anteproyecto.puestoAsesor}`);
-    addText(`Teléfono del contacto: ${anteproyecto.telefonoContacto}`);
-    addText(`Correo del contacto: ${anteproyecto.correoContacto}`);
-    addText(`Nombre del contacto de recursos humanos: ${anteproyecto.nombreHR}`);
-    addText(`Teléfono del contacto de recursos humanos: ${anteproyecto.telefonoHR}`);
-    addText(`Correo del contacto de recursos humanos: ${anteproyecto.correoHR}`);
-    addText(`Contexto: ${anteproyecto.contexto}`, 20, 220);
-    addText(`Justificación del trabajo: ${anteproyecto.justificacion}`);
-    addText(`Síntomas principales (a lo sumo 3): ${anteproyecto.sintomas}`);
-    addText(`Efectos o impactos para la empresa: ${anteproyecto.impacto}`);
-    addText(`Nombre del departamento a realizar el proyecto: ${anteproyecto.nombreDepartamento}`);
-    addText(`Tipo de proyecto: ${anteproyecto.tipoProyecto}`);
-    addText(`Estado del proyecto: ${anteproyecto.estado}`); 
-
-    // Descarga del PDF
-    doc.save(`Anteproyecto_${anteproyecto.nombreEmpresa}.pdf`);
   }
 
   return (
