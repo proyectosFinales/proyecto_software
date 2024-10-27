@@ -2,11 +2,9 @@ import supabase from "../model/supabase";
 
 
 export async function getUserInfo(id) {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from('usuarios')
-    .select('id, correo, contraseña, rol, \
-profesor: profesores(nombre), \
-estudiante: estudiantes(nombre, carnet, telefono)')
+    .select('id, correo, contraseña, rol, profesor: profesores(nombre), estudiante: estudiantes(nombre, carnet, telefono)')
     .eq('id', id)
     .single();
 
@@ -18,16 +16,14 @@ estudiante: estudiantes(nombre, carnet, telefono)')
 }
 
 export async function gestionUserInfo(id) {
-  const { data, error } = await supabase
+
+  const { data } = await supabase
     .from('usuarios')
-    .select('id, correo, rol, \
-profesor: profesores(nombre), \
-estudiante: estudiantes(nombre, carnet, telefono, estado: anteproyectos(estado))')
+    .select('id, correo, rol, profesor: profesores(nombre), estudiante: estudiantes(nombre, carnet, telefono, estado: anteproyectos(estado))')
     .eq('id', id)
     .single();
 
   if (!data) {
-    console.log(error);
     throw new Error("Hubo un problema al consultad sus datos. Por favor, inténtelo de nuevo.");
   }
 
@@ -38,7 +34,7 @@ export async function updateUserInfo(userData) {
 
   const { error } = await supabase
     .from('usuarios')
-    .update({
+    .upsert({
       correo: userData.correo,
       contraseña: userData.contraseña,
     })
@@ -51,7 +47,7 @@ export async function updateUserInfo(userData) {
   if (userData.rol === "2") {
     const { error } = await supabase
     .from('profesores')
-    .update({ nombre: userData.nombre })
+    .upsert({ nombre: userData.nombre })
     .eq('id', userData.id);
 
     if (error) {
@@ -61,7 +57,8 @@ export async function updateUserInfo(userData) {
 
     const { error } = await supabase
     .from('estudiantes')
-    .update({
+    .upsert({
+      id: userData.id,
       nombre: userData.nombre,
       correo: userData.correo,
       carnet: userData.carnet,
@@ -95,18 +92,42 @@ export async function getAllUsers() {
     throw new Error("Hubo problemas para extraer los usuarios.");
   };
 
-  return [...dataE, ...dataP];
+  const updatedDataE = dataE.map(usuario => {
+    if (usuario.estudiante === null) {
+      usuario.estudiante = {
+        nombre: "Usuario no registrado"
+      };
+    }
+    return {...usuario,
+    profesor: {
+      nombre: ""
+    }}
+  });
+
+  const updatedDataP = dataP.map(usuario => {
+    if (usuario.profesor === null) {
+      usuario.profesor = {
+        nombre: "Usuario no registrado"
+      };
+    }
+    return {...usuario,
+    estudiante: {
+      nombre: ""
+    }}
+  });
+
+  return [...updatedDataE, ...updatedDataP];
 }
 
 export async function delUser(id) {
 
-  const {error: error } = await supabase
+  const { error } = await supabase
     .from('usuarios')
     .delete()
     .eq("id", id);
 
   if (error) {
-    throw new Error(error);
+    throw new Error(error.message);
   };
 
   return;
@@ -114,14 +135,13 @@ export async function delUser(id) {
 
 export async function editUserGestion(user) {
 
-  const {error: error } = await supabase
+  const { error } = await supabase
     .from('usuarios')
     .update({ correo: user.correo })
     .eq("id", user.id);
 
   if (error) {
-    throw new Error("No se pudo editar la información del usuario. \
-Por favor inténtelo de nuevo.")
+    throw new Error("No se pudo editar la información del usuario. Por favor inténtelo de nuevo.")
   };
 
   if (user.rol === "2") {
@@ -131,11 +151,10 @@ Por favor inténtelo de nuevo.")
       .eq("id", user.id);
 
     if (error2) {
-      throw new Error("No se pudo editar la información del profesor. \
-Por favor inténtelo de nuevo.");
+      throw new Error("No se pudo editar la información del profesor. Por favor inténtelo de nuevo.");
     }
   } else {
-    const { error: error } = await supabase
+    const { error } = await supabase
       .from('estudiantes')
       .update({
         nombre: user.nombre,
@@ -151,8 +170,7 @@ Por favor inténtelo de nuevo.");
       .eq("idEstudiante", user.id);
 
     if (error || error2) {
-      throw new Error("No se pudo editar la información del estudiante. \
-Por favor inténtelo de nuevo.");
+      throw new Error("No se pudo editar la información del estudiante. Por favor inténtelo de nuevo.");
     }
 
   }

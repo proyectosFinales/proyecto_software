@@ -114,6 +114,11 @@ h1 {
   border-radius: 5px;
 }
 
+.user-name {
+  width: 90%;
+  text-align: left;
+}
+
 .actions {
   display: flex;
   justify-content: center;
@@ -123,7 +128,7 @@ h1 {
   gap: 20%;
 }
 
-.btn-delete, .btn-edit {
+.btn-delete, .btn-edit, .btn-add-user{
   color: var(--blanco);
   padding: 15px 30px;
   font-size: 16px;
@@ -146,6 +151,14 @@ h1 {
 }
 
 .btn-edit:hover {
+  background-color: darkblue;
+}
+
+.btn-add-user {
+  background-color: var(--azul);
+}
+
+.btn-add-user:hover {
   background-color: darkblue;
 }
 
