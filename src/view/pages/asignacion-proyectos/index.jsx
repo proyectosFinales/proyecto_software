@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import Layout from "../../components/layout";
+import Header from "../../components/HeaderCoordinador";
+import Footer from "../../components/Footer";
 
 const InicioAsignaciones = () => <>
-    <Layout title="Menú de carga de datos">
+    <Header title="Menú de asignaciones"/>
         <div className="menu-grid" style={{textAlign: "center"}}>
             <Link className="menu-item" to="/asignaciones/automatica" style={{textDecoration: "none", color: "var(--primary1)"}}>
                 <i className="fa-solid fa-laptop-code" style={{color: "var(--primary1)"}}></i>
@@ -13,7 +15,7 @@ const InicioAsignaciones = () => <>
                 <p>Asignación manual y Reporte</p>
             </Link>
         </div>
-    </Layout>
+    <Footer />
 </>;
 
 export default InicioAsignaciones;

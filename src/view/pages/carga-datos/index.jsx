@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import Layout from "../../components/layout";
 import { AiOutlineCloudUpload } from "react-icons/ai";
+import Header from "../../components/HeaderCoordinador";
+import Footer from "../../components/Footer";
 
 const InicioCargaDatos = () => <>
-    <Layout title="Menú de carga de datos">
+    <Header title="Menú de carga de datos"/>
         <div className="menu-grid" style={{textAlign: "center"}}>
             <Link className="menu-item" to="/carga-datos/cantidad-proyectos-profesor" style={{textDecoration: "none", color: "var(--primary1)"}}>
                 <i className="fa-solid fa-chalkboard-user" style={{color: "var(--primary1)"}}></i>
@@ -14,7 +16,7 @@ const InicioCargaDatos = () => <>
                 <p>Carga de datos</p>
             </Link>
         </div>
-    </Layout>
+    <Footer />
 </>;
 
 export default InicioCargaDatos;
