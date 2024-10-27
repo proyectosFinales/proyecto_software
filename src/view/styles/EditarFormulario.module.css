@@ -78,12 +78,12 @@ form {
   }
   
   .encabezado_formulario {
-    background-color: #f1f1f1;
-    padding: 10px;
+    height: 80px;
+    background-color: var(--gris_claro);
     display: flex;
     justify-content: center;
     align-items: center;
-    border-bottom: 2px solid #000;
+    border-bottom: 1px solid black;
   }
   
   .infoIcon {
