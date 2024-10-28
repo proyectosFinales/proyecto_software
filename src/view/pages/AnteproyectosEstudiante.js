@@ -5,6 +5,7 @@ import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import {descargarAnteproyecto} from '../../controller/DescargarPDF';
+import styles2 from '../styles/table.module.css';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -94,7 +95,7 @@ const AnteproyectosEstudiante = () => {
           <button className={styles.crear_anteproyecto} onClick={() => navigate('/formulario-estudiantes')}>
             Crear anteproyecto
           </button>
-          <table className={styles.tabla_anteproyectos_estudiante}>
+          <table className={styles2.table}>
             <thead>
               <tr>
                 <th>Anteproyectos creados</th>
