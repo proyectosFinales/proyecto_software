@@ -5,6 +5,7 @@ import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { AiOutlineArrowDown, AiOutlineArrowUp } from 'react-icons/ai';
+import styles2 from '../styles/table.module.css';
 
 const AprobarProyectos = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -111,7 +112,7 @@ const AprobarProyectos = () => {
       <div>
         <main>
           <div className={styles.lista_anteproyectos_coordinador}>
-            <table className={styles.tabla_anteproyectos_coordinador}>
+            <table className={styles2.table}>
               <thead>
                 <tr>
                   <th>Estudiante</th>

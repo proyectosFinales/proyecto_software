@@ -7,6 +7,7 @@ import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import {descargarAnteproyecto} from '../../controller/DescargarPDF';
+import styles2 from '../styles/table.module.css';
 
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -112,7 +113,7 @@ const AnteproyectosCoordinador = () => {
         <main>
           <div className={styles.lista_anteproyectos_coordinador}>
             <button className={styles.generar_reporte} onClick={handleGenerateReport}>Generar reporte de anteproyectos</button>
-            <table className={styles.tabla_anteproyectos_coordinador}>
+            <table className={styles2.table}>
               <thead>
                 <tr>
                   <th>Estudiante</th>

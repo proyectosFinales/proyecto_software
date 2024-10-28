@@ -12,11 +12,13 @@
 
 .table th {
     padding: 10px 20px;
+    text-align: left;
 }
 
 .table td {
     padding-left: 20px;
     padding-right: 20px;
+    text-align: left;
 }
 
 .table tr:nth-child(even) {

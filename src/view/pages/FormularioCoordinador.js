@@ -31,7 +31,7 @@ const CoordinadorForm = () => {
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
-  const [idEstudiante, setIdEstudiante] = useState([]);
+  let idEstudiante = '';
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -163,7 +163,7 @@ const CoordinadorForm = () => {
       setNombreDepartamento(data[0].nombreDepartamento);
       setTipoProyecto(data[0].tipoProyecto);
       setObservaciones(data[0].observaciones);
-      setIdEstudiante(data[0].estudiantes.id);
+      idEstudiante = data[0].estudiantes.id;
 
     } catch (error) {
       console.error('Error al consultar anteproyecto:', error);
