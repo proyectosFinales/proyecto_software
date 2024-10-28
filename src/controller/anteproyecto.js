@@ -65,7 +65,8 @@ class Anteproyecto {
         for(let anteproyecto of anteproyectos) {
             const { data:perdidos } = await consultaAnteproyectos()
                 .eq("idEstudiante", anteproyecto.estudiante.id)
-                .eq("estado", ESTADOS_ANTEPROYECTO.PERDIDO);
+                .eq("estado", ESTADOS_ANTEPROYECTO.PERDIDO)
+                .not("idEncargado", 'is', null); // Se descartan los que no tienen profesor
             anteproyecto.anteproyectosPerdidos = perdidos.map(ap => Anteproyecto.from(ap));
         }
         return anteproyectos;
