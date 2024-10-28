@@ -139,11 +139,11 @@ const CitasProfesor = () => {
       <Header title="Citas" />
       <div className="citas-div container">
         <div className="row justify-content-center">
-          <div className="col-12">
+          <div className="cita-table col-12">
             <h2 className="w-100 text-center">Citas del profesor</h2>
             <table className="w-100">
               <thead>
-                <tr>
+                <tr className="cita-row">
                   <th>Estudiante</th>
                   <th>Profesor</th>
                   <th>Día</th>
