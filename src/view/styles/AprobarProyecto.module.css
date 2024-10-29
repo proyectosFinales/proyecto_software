@@ -74,3 +74,9 @@
     background-color: var(--gris_claro);
     color: white;
   }
+
+  .infoText {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }

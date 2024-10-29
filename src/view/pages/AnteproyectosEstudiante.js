@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import {descargarAnteproyecto} from '../../controller/DescargarPDF';
 import styles2 from '../styles/table.module.css';
+import {errorToast, successToast} from '../components/toast';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -47,12 +48,12 @@ const AnteproyectosEstudiante = () => {
           estudiantes(id, nombre, carnet, telefono, correo)`)
           .eq('idEstudiante',localStorage.getItem('token'))
       if (error) {
-        console.error('Error al consultar anteproyectos:', error);
+        alert('No se pudieron obtener los anteproyectos');
         return;
       }
       setAnteproyectos(data);
     } catch (error) {
-      console.error('Error al consultar anteproyectos:', error);
+      alert('Error al consultar anteproyectos:', error);
     }
   }
 
@@ -75,7 +76,7 @@ const AnteproyectosEstudiante = () => {
         .eq('id', id);
 
       if (error) {
-        console.error('Error al eliminar anteproyecto:', error);
+        alert('Error al eliminar anteproyecto:', error);
         return;
       }
 
@@ -83,7 +84,7 @@ const AnteproyectosEstudiante = () => {
       setAnteproyectos(anteproyectos.filter((anteproyecto) => anteproyecto.id !== id));
       console.log(`Anteproyecto con ID ${id} eliminado exitosamente.`);
     } catch (error) {
-      console.error('Error al eliminar anteproyecto:', error);
+      alert('Error al eliminar anteproyecto:', error);
     }
   }
 

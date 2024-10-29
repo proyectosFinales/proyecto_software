@@ -4,6 +4,7 @@ import styles from '../styles/EditarFormulario.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
+import {errorToast, successToast} from '../components/toast';
 
 const CoordinadorForm = () => {
   const [idAnteproyecto, setIdAnteproyecto] = useState('');
@@ -32,7 +33,7 @@ const CoordinadorForm = () => {
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
-  const [idEstudiante, setIdEstudiante] = useState('');
+  let idEstudiante = '';
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -48,11 +49,6 @@ const CoordinadorForm = () => {
 
   useEffect(() => {
     const id = getQueryParam('id'); // Obtener el id del query parameter
-    if (id) {
-      // Aquí puedes hacer una consulta para obtener los datos del anteproyecto por su id
-      console.log('ID del anteproyecto para editar:', id);
-      // Ejemplo: consultarAnteproyecto(id);
-    }
     consultarAnteproyectos(id);
   }, [location]);
 
@@ -72,11 +68,9 @@ const CoordinadorForm = () => {
           telefono: telefono,
           correo: correo
         })
-        .eq('id','8a673ee4-4842-4936-92eb-85b598b5d810');
+        .eq('id', idEstudiante);
       
       if (error1) throw error1;
-
-      console.log('Actualización en tabla estudiante exitosa', data1);
 
       const { data2, error2 } = await supabase
         .from('anteproyectos')
@@ -105,12 +99,13 @@ const CoordinadorForm = () => {
         })
         .eq('id', idAnteproyecto);
 
-      console.log('Anteproyecto actualizado:', data2);
       if (error2) throw error2;
+
+      successToast('Anteproyecto actualizado exitosamente');
       navigate('/anteproyectosEstudiante');
 
     } catch (error) {
-      console.error('Error al actualizar anteproyecto:', error);
+      errorToast('Error al actualizar anteproyecto:', error);
     }
   }
 
@@ -184,9 +179,9 @@ const CoordinadorForm = () => {
       setNombreDepartamento(data[0].nombreDepartamento);
       setTipoProyecto(data[0].tipoProyecto);
       setObservaciones(data[0].observaciones);
-      setIdEstudiante(data[0].estudiantes.id);
+      idEstudiante = data[0].estudiantes.id;
     } catch (error) {
-      console.error('Error al consultar setear variables:', error);
+      errorToast('Error al consultar anteproyecto:', error);
     }
     try {
       const { data, error } = await supabase
@@ -203,7 +198,7 @@ const CoordinadorForm = () => {
         setSede(data[0].sede);
 
       } catch (error) {
-        console.error('Error al consultar usuarios:', error);
+        errorToast('Error al consultar usuarios:', error);
       }
   }
 
