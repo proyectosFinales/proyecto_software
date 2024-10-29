@@ -25,9 +25,9 @@ export function validarContraseña(contraseña) {
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&.])[A-Za-z\d@$!%*?&.]{8,}$/;
     console.log(passwordRegex.test(contraseña));
     if (!passwordRegex.test(contraseña)) {
-        return false;
-    } else {
         return true;
+    } else {
+        return false;
     }
 }
 

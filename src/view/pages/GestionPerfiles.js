@@ -91,6 +91,14 @@ const GestionPerfiles = () => {
     }
   };
 
+  const handleUserAdd = async () => {
+    try {
+      navigate("/gestion-perfiles/agregar-usuario");
+    } catch (error) {
+      console.error("Error al editar el usuario", error.message);
+    }
+  };
+
   const handleNavigate = () => {
     navigate("/");
   };
@@ -229,7 +237,7 @@ const GestionPerfiles = () => {
             <div className="actions">
               <button className="btn-delete" onClick={() => setModal(true)}>Borrar usuario(s)</button>
               <button className="btn-edit" onClick={handleUserEdit}>Editar usuario</button>
-              <button className="btn-add-user">Agregar usuario</button>
+              <button className="btn-add-user" onClick={handleUserAdd}>Agregar usuario</button>
             </div>
           </div>
         </div>
