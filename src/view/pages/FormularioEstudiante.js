@@ -4,6 +4,7 @@ import styles from '../styles/FormularioEstudiante.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import {supabase} from '../../model/Cliente';
 import Footer from '../components/Footer';
+import {errorToast, successToast} from '../components/toast';
 
 const EstudianteForm = () => {
   const [nombre, setNombre] = useState('');
@@ -58,7 +59,7 @@ const EstudianteForm = () => {
       setSede(data[0].sede);
 
     } catch (error) {
-      console.error('Error al consultar estudiante o usuario:', error);
+      alert('Error al consultar estudiante o usuario');
     }
   }
 
@@ -97,13 +98,14 @@ const EstudianteForm = () => {
         });
 
       if (error2) throw error2;
+      
 
-      console.log('Inserción en tabla anteproyecto exitosa', data2);
+      alert('Anteproyecto insertado exitosamente');
 
       navigate('/anteproyectosEstudiante');
 
     } catch (error) {
-      console.error('Error al insertar anteproyecto:', error);
+      alert('Error al insertar anteproyecto:', error);
     }
   }
 

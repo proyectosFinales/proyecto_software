@@ -7,11 +7,11 @@ exports.handler = async function(event, context) {
     "Messages": [{
       "From": {
         "Email": "proyectosoftware07@gmail.com",
-        "Name": "Zephyr"
+        "Name": "Proyectos finales escuela de Produccion Industrial"
       },
       "To": [{
         "Email": destino,
-        "Name": "Zephyr User"
+        "Name": "Querido usuario"
       }],
       "Subject": asunto,
       "TextPart": mensaje
