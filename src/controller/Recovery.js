@@ -4,12 +4,14 @@ import { CorreoRecuperacion } from "../controller/Correo";
 
 export async function sendRecovery(email) {
 
+    console.log(email);
     const { data } = await supabase
         .from('usuarios')
         .select("id")
-        .eq('correo', email)
+        .eq("correo", email)
         .single();
 
+    console.log(data);
     if (!data) {
         throw new Error("No se encontró un usuario con el correo ingresado. Por favor inténtelo de nuevo.");
     }

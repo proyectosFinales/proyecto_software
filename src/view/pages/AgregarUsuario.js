@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import './AgregarUsuario.css';
-import Header from './Header';
-import Footer from './Footer';
+import { useNavigate } from 'react-router-dom';
+import '../styles/AgregarUsuario.css';
+import Header from '../components/HeaderCoordinador';
+import Footer from '../components/Footer';
+import { signUpNewUser, registroProfesor } from '../../controller/Signup';
 
 const AgregarUsuario = () => {
   const [tipoUsuario, setTipoUsuario] = useState('estudiante'); // Por defecto, se selecciona "estudiante"
@@ -10,8 +12,10 @@ const AgregarUsuario = () => {
     carnet: '',
     numero: '',
     correo: '',
-    contrasena: '',
+    contraseña: '',
   });
+
+  const navigate = useNavigate();
 
   const handleTipoUsuarioChange = (tipo) => {
     setTipoUsuario(tipo);
@@ -21,7 +25,7 @@ const AgregarUsuario = () => {
       carnet: '',
       numero: '',
       correo: '',
-      contrasena: '',
+      contraseña: '',
     });
   };
 
@@ -33,17 +37,26 @@ const AgregarUsuario = () => {
     }));
   };
 
-  const handleAgregarUsuario = () => {
-    // Aquí iría la lógica para agregar el usuario
+  const handleAgregarUsuario = async () => {
+
     const nuevoUsuario = {
       ...usuario,
       tipo: tipoUsuario,
     };
 
-    console.log('Nuevo usuario agregado:', nuevoUsuario);
-    // Aquí puedes llamar a la API para agregar el usuario
+    try {
+      if (tipoUsuario === "profesor") {
+        await registroProfesor(nuevoUsuario.nombre, nuevoUsuario.correo, nuevoUsuario.contraseña)
+        alert('Profesor agregado con éxito.');
+      } else {
+        await signUpNewUser(nuevoUsuario.nombre, nuevoUsuario.carnet, nuevoUsuario.numero, nuevoUsuario.correo, nuevoUsuario.contraseña);
+        alert('Estudiante agregado con éxito.');
+      }
+      navigate('/gestion-perfiles');
+    } catch (error) {
+      alert(error);
+    }
 
-    // Limpia los campos después de agregar
     setUsuario({
       nombre: '',
       carnet: '',
@@ -121,8 +134,8 @@ const AgregarUsuario = () => {
           <label>Contraseña:</label>
           <input
             type="password"
-            name="contrasena"
-            value={usuario.contrasena}
+            name="contraseña"
+            value={usuario.contraseña}
             onChange={handleInputChange}
             required
           />

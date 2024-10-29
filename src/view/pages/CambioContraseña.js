@@ -76,7 +76,7 @@ y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caract
 
   return (
     <div className="change-container">
-      <button className="btn-back" onClick={() => navigate("/login")}>
+      <button className="btn-back" onClick={() => navigate("/")}>
         Volver
       </button>
 
