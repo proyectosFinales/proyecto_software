@@ -59,8 +59,8 @@ const CargarDatos = () => {
       const contraseña = generarContraseña();
       const mensaje="Hola, su contraseña generada es: " + contraseña + 
       " y su usuario es su correo electrónico: " + dataToInsert.correo + ". Para acceder a la plataforma, "+
-      "ingrese a https://proyectos.netlify.app/ y use el correo electrónico y la contraseña."+
-      "Para cualquier duda, escriba a bguzman@itcr.ac.cr no responda a este mensaje ya que es un correo automatizado.";
+      "ingrese a https://proyectos.netlify.app/ y use el correo electrónico y la contraseña.\n"+
+      "Para cualquier duda, escriba a bguzman@itcr.ac.cr y responda a este mensaje ya que es un correo automatizado.";
 
          const { data, error } = await supabase
           .from('usuarios')
