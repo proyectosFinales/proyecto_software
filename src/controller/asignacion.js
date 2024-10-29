@@ -57,6 +57,7 @@ const generarReporteAsignaciones = profesores => {
                 "Profesor": profesor.nombre,
                 "Empresa": anteproyecto.nombreEmpresa,
                 "Estudiante": anteproyecto.estudiante.nombre,
+                "Correo": anteproyecto.estudiante.correo,
                 "Carnet": anteproyecto.estudiante.carnet,
                 "Telefono": anteproyecto.estudiante.telefono,
             };
