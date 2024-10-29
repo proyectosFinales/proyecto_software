@@ -46,7 +46,7 @@ const EditarPerfil = () => {
       try {
         const data = await getUserInfo(id);
 
-        if (data.estudiante === null && data.profesor === null) {
+        if (data.estudiante === null && data.profesor === null && data.rol !== "1") {
           setUserData({
             id: id,
             correo: data.correo,

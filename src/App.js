@@ -6,6 +6,7 @@ import Menu from './view/pages/MenuPrincipal';
 import MenuProfesor from './view/pages/MenuPrincipalProfesor.js';
 import MenuEstudiante from './view/pages/MenuPrincipalEstudiante.js';
 import GestionPerfiles from './view/pages/GestionPerfiles';
+import AgregarUsuario from './view/pages/AgregarUsuario';
 import FormularioEstudiantes from './view/pages/FormularioEstudiante';
 import FormularioCoordinador from './view/pages/FormularioCoordinador';
 import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante';
@@ -48,6 +49,7 @@ function App() {
 				<Route path="/asignaciones" element={<Asignaciones />} />
 				<Route path="/aprobarProyectos" element={<AprobarProyectos />} /> 
 				<Route path="/gestion-perfiles" element={<GestionPerfiles />} />
+				<Route path="/gestion-perfiles/agregar-usuario" element={<AgregarUsuario />} />
 				<Route path="/formulario-estudiantes" element={<FormularioEstudiantes />} />
 				<Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
 				<Route path="/editarFormulario" element={<EditarFormulario />} />

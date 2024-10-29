@@ -35,6 +35,7 @@ export async function updateUserInfo(userData) {
   const { error } = await supabase
     .from('usuarios')
     .upsert({
+      id: userData.id,
       correo: userData.correo,
       contraseña: userData.contraseña,
     })

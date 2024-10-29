@@ -3,13 +3,16 @@ import validateInfo from "./validarEntradas";
 
 export async function signUpNewUser(fullName, carnet, tel, email, password) {
 
-    validateInfo(carnet, tel, email, password);
+    try {
+        validateInfo(carnet, tel, email, password);
+    } catch (error) {
+        alert(error.message);
+    }
 
     const { data: userData, error: userError } = await supabase
         .from('usuarios')
         .insert([
             {
-                nombre: fullName,
                 correo: email,
                 contraseña: password,
                 rol: 3
@@ -31,7 +34,7 @@ export async function signUpNewUser(fullName, carnet, tel, email, password) {
                 carnet: carnet,
                 telefono: tel,
                 correo: email,
-                usuarioID: usuarioID,
+                id: usuarioID,
             },
         ]);
 
@@ -40,4 +43,39 @@ export async function signUpNewUser(fullName, carnet, tel, email, password) {
     }
 
     return userData;
+}
+
+export async function registroProfesor(nombre, correo, contraseña) {
+
+
+    const { data, error } = await supabase
+        .from('usuarios')
+        .insert([
+            {
+                correo: correo,
+                contraseña: contraseña,
+                rol: 2
+            },
+        ])
+        .select();
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    const usuarioID = data[0].id;
+
+    const { data1, error1 } = await supabase
+        .from('profesores')
+        .insert([
+            {
+                id: usuarioID,
+                nombre: nombre
+            },
+        ]);
+    
+    if (error1) {
+        throw new Error(error1.message);
+    }
+
 }
