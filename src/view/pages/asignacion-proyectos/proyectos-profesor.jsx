@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import Profesor from "../../../controller/profesor";
 import Layout from "../../components/layout";
-import tableStyles from "../../styles/table.module.css";
 import listStyles from "../../styles/list.module.css";
+import SidebarProfesor from "../../components/SidebarProfesor";
+import SettingsCoordinador from "../../components/SettingsProfesor";
 
 const ProyectosAsignadosProfesor = () => {
     const [anteproyectos, setAnteproyectos] = useState([]);
@@ -13,7 +14,7 @@ const ProyectosAsignadosProfesor = () => {
     }, []);
 
     return <>
-        <Layout title="Proyecto asignados a profesor">
+        <Layout title="Proyecto asignados a profesor" Sidebar={SidebarProfesor} Settings={SettingsCoordinador}>
             <ul className={listStyles.list}>
                 <li className={listStyles.title}>Anteproyectos asignados</li>
                 {anteproyectos.map((anteproyecto, index) =>
