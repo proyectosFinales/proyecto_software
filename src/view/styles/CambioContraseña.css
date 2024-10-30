@@ -40,7 +40,7 @@
     color: var(--azul);
   }
   
-  .input-container {
+  .input-container-contra {
     position: relative;
     margin-bottom: 15px;
   }
@@ -53,7 +53,7 @@
     border-radius: 5px;
   }
   
-  .icon {
+  .icon-contra {
     position: absolute;
     left: 10px;
     top: 50%;
