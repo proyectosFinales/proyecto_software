@@ -5,7 +5,7 @@
     justify-content: center;
     height: 100vh;
     background-color: var(--gris_claro);
-    position: relative; /* Permite posicionar el botón de volver en relación a este contenedor */
+    position: relative;
   }
   
   .btn-back {
@@ -13,16 +13,16 @@
     top: 20px;
     left: 20px;
     padding: 10px 15px;
-    background-color: var(--azul); /* Color de fondo del botón */
+    background-color: var(--azul);
     color: var(--blanco);
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s ease; /* Efecto de transición */
+    transition: background-color 0.3s ease;
   }
   
   .btn-back:hover {
-    background-color: #003080; /* Color más oscuro en hover */
+    background-color: #003080;
   }
   
   .recover-box {
@@ -40,7 +40,7 @@
     color: var(--azul);
   }
   
-  .input-container {
+  .input-container-recuperar {
     position: relative;
     margin-bottom: 15px;
   }
@@ -53,7 +53,7 @@
     border-radius: 5px;
   }
   
-  .icon {
+  .icon-recuperar {
     position: absolute;
     left: 10px;
     top: 50%;
@@ -70,10 +70,10 @@
     border-radius: 5px;
     font-size: 16px;
     cursor: pointer;
-    margin-top: 20px; /* Espaciado superior */
+    margin-top: 20px;
   }
   
   .btn-send:hover {
-    background-color: #003080; /* Color más oscuro en hover */
+    background-color: #003080;
   }
   
