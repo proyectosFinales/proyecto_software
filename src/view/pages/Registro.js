@@ -28,32 +28,32 @@ const Registro = () => {
       <div className="register-box">
         <h2>Registro de Usuario</h2>
 
-        <div className="input-container">
-          <FaUser className="icon" />
+        <div className="input-container-registro">
+          <FaUser className="icon-registro" />
           <input type="text" className="input-field" placeholder="Nombre completo" value={fullName}
             onChange={(e) => setFullName(e.target.value)} />
         </div>
 
-        <div className="input-container">
-          <FaIdCard className="icon" />
+        <div className="input-container-registro">
+          <FaIdCard className="icon-registro" />
           <input type="number" className="input-field" placeholder="Carné de institución" value={carnet}
             onChange={(e) => setCarnet(e.target.value)} />
         </div>
 
-        <div className="input-container">
-          <FaPhone className="icon" />
+        <div className="input-container-registro">
+          <FaPhone className="icon-registro" />
           <input type="tel" className="input-field" placeholder="Teléfono" value={number}
             onChange={(e) => setNumber(e.target.value)} />
         </div>
 
-        <div className="input-container">
-          <FaEnvelope className="icon" />
+        <div className="input-container-registro">
+          <FaEnvelope className="icon-registro" />
           <input type="email" className="input-field" placeholder="Correo de la institución" value={email}
             onChange={(e) => setEmail(e.target.value)} />
         </div>
 
-        <div className="input-container">
-          <FaLock className="icon" />
+        <div className="input-container-registro">
+          <FaLock className="icon-registro" />
           <input type="password" className="input-field" placeholder="Contraseña" value={password}
             onChange={(e) => setPassword(e.target.value)} />
         </div>
@@ -62,7 +62,7 @@ const Registro = () => {
 
         <div className="footer-links">
           <span>¿Ya tienes cuenta?</span>
-          <a href="/login">Iniciar sesión</a>
+          <a href="/">Iniciar sesión</a>
         </div>
       </div>
 

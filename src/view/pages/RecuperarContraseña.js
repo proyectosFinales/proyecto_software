@@ -29,8 +29,8 @@ const RecuperarContraseña = () => {
         <h2>Recuperar Contraseña</h2>
         <p>Ingresa tu correo electrónico registrado en la plataforma para enviar una solicitud de recuperación de contraseña.</p>
 
-        <div className="input-container">
-          <FaEnvelope className="icon" />
+        <div className="input-container-recuperar">
+          <FaEnvelope className="icon-recuperar" />
           <input
             type="email"
             className="input-field"

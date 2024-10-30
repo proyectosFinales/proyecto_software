@@ -1,4 +1,5 @@
 import supabase from "../model/supabase";
+import validateInfo, { validarCorreo, validarContraseña } from "./validarEntradas";
 
 
 export async function getUserInfo(id) {
@@ -47,9 +48,9 @@ export async function updateUserInfo(userData) {
 
   if (userData.rol === "2") {
     const { error } = await supabase
-    .from('profesores')
-    .upsert({ nombre: userData.nombre })
-    .eq('id', userData.id);
+      .from('profesores')
+      .upsert({ nombre: userData.nombre })
+      .eq('id', userData.id);
 
     if (error) {
       throw new Error("Error al actualizar el usuario", error.message);
@@ -57,15 +58,15 @@ export async function updateUserInfo(userData) {
   } else if (userData.rol === "3") {
 
     const { error } = await supabase
-    .from('estudiantes')
-    .upsert({
-      id: userData.id,
-      nombre: userData.nombre,
-      correo: userData.correo,
-      carnet: userData.carnet,
-      telefono: userData.telefono,
-     })
-    .eq('id', userData.id);
+      .from('estudiantes')
+      .upsert({
+        id: userData.id,
+        nombre: userData.nombre,
+        correo: userData.correo,
+        carnet: userData.carnet,
+        telefono: userData.telefono,
+      })
+      .eq('id', userData.id);
 
     if (error) {
       throw new Error("Error al actualizar el usuario", error.message);
@@ -99,10 +100,12 @@ export async function getAllUsers() {
         nombre: "Usuario no registrado"
       };
     }
-    return {...usuario,
-    profesor: {
-      nombre: ""
-    }}
+    return {
+      ...usuario,
+      profesor: {
+        nombre: ""
+      }
+    }
   });
 
   const updatedDataP = dataP.map(usuario => {
@@ -111,10 +114,12 @@ export async function getAllUsers() {
         nombre: "Usuario no registrado"
       };
     }
-    return {...usuario,
-    estudiante: {
-      nombre: ""
-    }}
+    return {
+      ...usuario,
+      estudiante: {
+        nombre: ""
+      }
+    }
   });
 
   return [...updatedDataE, ...updatedDataP];
@@ -136,44 +141,55 @@ export async function delUser(id) {
 
 export async function editUserGestion(user) {
 
-  const { error } = await supabase
-    .from('usuarios')
-    .update({ correo: user.correo })
-    .eq("id", user.id);
-
-  if (error) {
-    throw new Error("No se pudo editar la información del usuario. Por favor inténtelo de nuevo.")
-  };
-
-  if (user.rol === "2") {
-    const { error: error2 } = await supabase
-      .from('profesores')
-      .update({ nombre: user.nombre })
-      .eq("id", user.id);
-
-    if (error2) {
-      throw new Error("No se pudo editar la información del profesor. Por favor inténtelo de nuevo.");
+  try {
+    if (!validarCorreo(user.correo)) {
+      throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.")
     }
-  } else {
+
     const { error } = await supabase
-      .from('estudiantes')
-      .update({
-        nombre: user.nombre,
-        carnet: user.carnet,
-        telefono: user.telefono,
-        correo: user.correo
-      })
+      .from('usuarios')
+      .update({ correo: user.correo })
       .eq("id", user.id);
 
-    const { error: error2 } = await supabase
-      .from('anteproyectos')
-      .update({ estado: user.estado })
-      .eq("idEstudiante", user.id);
+    if (error) {
+      throw new Error("No se pudo editar la información del usuario. Por favor inténtelo de nuevo.")
+    };
 
-    if (error || error2) {
-      throw new Error("No se pudo editar la información del estudiante. Por favor inténtelo de nuevo.");
+    if (user.rol === "2") {
+      const { error: error2 } = await supabase
+        .from('profesores')
+        .update({ nombre: user.nombre })
+        .eq("id", user.id);
+
+      if (error2) {
+        throw new Error("No se pudo editar la información del profesor. Por favor inténtelo de nuevo.");
+      }
+    } else {
+      if (!validateInfo(user.carnet, user.telefono, user.correo, "", false)) {
+        throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.")
+      }
+
+      const { error } = await supabase
+        .from('estudiantes')
+        .update({
+          nombre: user.nombre,
+          carnet: user.carnet,
+          telefono: user.telefono,
+          correo: user.correo
+        })
+        .eq("id", user.id);
+
+      const { error: error2 } = await supabase
+        .from('anteproyectos')
+        .update({ estado: user.estado })
+        .eq("idEstudiante", user.id);
+
+      if (error || error2) {
+        throw new Error("No se pudo editar la información del estudiante. Por favor inténtelo de nuevo.");
+      }
     }
-
+  } catch (error) {
+    throw new Error(error.message);
   }
 
   return;

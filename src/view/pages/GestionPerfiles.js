@@ -87,7 +87,7 @@ const GestionPerfiles = () => {
       await editUserGestion(editableUser);
       alert("El usuario ha sido modificado con éxito.");
     } catch (error) {
-      console.error("Error al editar el usuario", error.message);
+      alert(error.message);
     }
   };
 
@@ -95,12 +95,12 @@ const GestionPerfiles = () => {
     try {
       navigate("/gestion-perfiles/agregar-usuario");
     } catch (error) {
-      console.error("Error al editar el usuario", error.message);
+      console.error("Error al editar el usuario: ", error.message);
     }
   };
 
   const handleNavigate = () => {
-    navigate("/");
+    navigate("/menuCoordinador");
   };
 
   useEffect(() => {
