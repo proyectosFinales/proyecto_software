@@ -44,26 +44,23 @@ const AgregarUsuario = () => {
       tipo: tipoUsuario,
     };
 
-    try {
-      if (tipoUsuario === "profesor") {
+    if (tipoUsuario === "profesor") {
+      try {
         await registroProfesor(nuevoUsuario.nombre, nuevoUsuario.correo, nuevoUsuario.contraseña)
         alert('Profesor agregado con éxito.');
-      } else {
+        navigate('/gestion-perfiles');
+      } catch (error) {
+        alert(error.message);
+      }
+    } else {
+      try {
         await signUpNewUser(nuevoUsuario.nombre, nuevoUsuario.carnet, nuevoUsuario.numero, nuevoUsuario.correo, nuevoUsuario.contraseña);
         alert('Estudiante agregado con éxito.');
+        navigate('/gestion-perfiles');
+      } catch (error) {
+        alert(error.message);
       }
-      navigate('/gestion-perfiles');
-    } catch (error) {
-      alert(error);
     }
-
-    setUsuario({
-      nombre: '',
-      carnet: '',
-      numero: '',
-      correo: '',
-      contrasena: '',
-    });
   };
 
   const handleLimpiarEntradas = () => {
