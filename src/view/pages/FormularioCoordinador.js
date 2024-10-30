@@ -4,6 +4,7 @@ import styles from '../styles/FormularioCoordinador.module.css'
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
+import {errorToast, successToast} from '../components/toast';
 
 const CoordinadorForm = () => {
   const [nombre, setNombre] = useState('');
@@ -66,10 +67,10 @@ const CoordinadorForm = () => {
       
       }
 
-      console.log('Anteproyecto actualizado:', data);
+      alert('Anteproyecto actualizado exitosamente');
       navigate('/anteproyectosCoordinador');
     } catch (error) {
-      console.error('Error al actualizar anteproyecto:', error);
+      alert('Error al actualizar anteproyecto:', error);
     }
   }
 
@@ -89,10 +90,10 @@ const CoordinadorForm = () => {
         return;
       }
 
-      console.log('Anteproyecto actualizado:', data);
+      alert('Anteproyecto actualizado exitosamente');
       navigate('/anteproyectosCoordinador');
     } catch (error) {
-      console.error('Error al actualizar anteproyecto:', error);
+      alert('Error al actualizar anteproyecto:', error);
     }
   }
 
@@ -166,7 +167,7 @@ const CoordinadorForm = () => {
       idEstudiante = data[0].estudiantes.id;
 
     } catch (error) {
-      console.error('Error al consultar anteproyecto:', error);
+      alert('Error al consultar anteproyecto:', error);
     }
 
     try {
@@ -184,7 +185,7 @@ const CoordinadorForm = () => {
         setSede(data[0].sede);
 
       } catch (error) {
-        console.error('Error al consultar usuarios:', error);
+        alert('Error al consultar usuarios:', error);
       }
   }
 

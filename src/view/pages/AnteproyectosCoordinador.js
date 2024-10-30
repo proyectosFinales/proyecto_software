@@ -8,15 +8,15 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import {descargarAnteproyecto} from '../../controller/DescargarPDF';
 import styles2 from '../styles/table.module.css';
+import {errorToast, successToast} from '../components/toast';
 
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
 
-  const navigate = useNavigate(); // Hook para redireccionar
+  const navigate = useNavigate();
 
   const handleRevisar = (id) => {
     navigate('/formulario-coordinador?id=' + id)
-    // Lógica para editar
   };
 
   // Función para obtener los datos de la base de datos
@@ -49,9 +49,10 @@ const AnteproyectosCoordinador = () => {
           observaciones,
           estado,
           idEstudiante,
-          estudiantes(id, nombre, carnet, telefono, correo)`);
+          estudiantes(id, nombre, carnet, telefono, correo)`)
+          .or('estado.eq.Aprobado,estado.eq.Reprobado');
       if (error) {
-        console.error('Error al obtener anteproyectos:', error);
+        errorToast('No se puedieron obtener los anteproyectos');
       } else {
         setAnteproyectos(data);
         
