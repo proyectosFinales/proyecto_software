@@ -100,6 +100,7 @@ const AnteproyectosEstudiante = () => {
             <thead>
               <tr>
                 <th>Anteproyectos creados</th>
+                <th>Estado</th>
                 <th></th>
               </tr>
             </thead>
@@ -107,6 +108,7 @@ const AnteproyectosEstudiante = () => {
               {anteproyectos.map((anteproyecto) => (
                 <tr key={anteproyecto.id}>
                   <td>{anteproyecto.nombreEmpresa}</td>
+                  <td>{anteproyecto.estado}</td>
                   <td>
                     <div className={styles.contenedor_botones_anteproyectos_estudiante}>
                       <button onClick={() => editarAnteproyecto(anteproyecto.id)} className={styles.btn + ' ' + styles.editar}>
