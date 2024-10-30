@@ -1,5 +1,4 @@
 import { Link } from "react-router-dom";
-import Layout from "../../components/layout";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";

@@ -4,6 +4,7 @@ import { supabase } from '../../model/Cliente';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
 import sendMail from '../../controller/Email';
+import { errorToast, successToast }  from '../components/toast';
 
 const CargarDatos = () => {
   const [excelData, setExcelData] = useState([]);
@@ -42,7 +43,10 @@ const CargarDatos = () => {
 
   const subirDatos =(e) => {
     e.preventDefault();
-    // Aquí puedes enviar los datos a tu base de datos (ejemplo con Supabase)
+    const confirmAprobar=window.confirm("Los datos mostrados en el recuadro de abajo serán insertados en la base de datos y se enviará un correo a cada uno de los profesores con sus credenciales. \n¿Estás seguro de que deseas proceder?");
+
+    if(!confirmAprobar){return;}
+
     excelData.forEach(async (row) => {
 
       const dataToInsert={
@@ -53,8 +57,10 @@ const CargarDatos = () => {
       };
 
       const contraseña = generarContraseña();
-      const mensaje="Hola, tu contraseña generada es: " + contraseña + 
-      " y su usuarios es su correo electrónico: " + dataToInsert.correo;
+      const mensaje="Hola, su contraseña generada es: " + contraseña + 
+      " y su usuario es su correo electrónico: " + dataToInsert.correo + ". Para acceder a la plataforma, "+
+      "ingrese a https://proyectos.netlify.app/ y use el correo electrónico y la contraseña.\n"+
+      "Para cualquier duda, escriba a bguzman@itcr.ac.cr y responda a este mensaje ya que es un correo automatizado.";
 
          const { data, error } = await supabase
           .from('usuarios')
@@ -68,7 +74,9 @@ const CargarDatos = () => {
       sendMail(dataToInsert.correo, "Credenciales", mensaje);
 
        if (error) {
-        console.error('Error al cargar datos en la base de datos:', error);
+        alert('Error al cargar datos en la base de datos:', error);
+      }else{
+        alert('Datos cargados exitosamente');
       }
     });
   }      

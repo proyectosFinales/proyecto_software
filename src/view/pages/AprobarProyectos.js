@@ -4,18 +4,25 @@ import styles from '../styles/AprobarProyecto.module.css';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
-import { AiOutlineArrowDown, AiOutlineArrowUp } from 'react-icons/ai';
+import { AiOutlineArrowDown, AiOutlineArrowUp, AiOutlineInfoCircle } from 'react-icons/ai';
 import styles2 from '../styles/table.module.css';
+import {errorToast, successToast} from '../components/toast';
+
 
 const AprobarProyectos = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
   const navigate = useNavigate();
+  const [infoVisible, setInfoVisible] = useState({});
 
   // Función para obtener los datos de la base de datos
   useEffect(() => {
     fetchAnteproyectos();
   }, []);
+
+  const toggleInfo = (field) => {
+    setInfoVisible((prev) => ({ ...prev, [field]: !prev[field] }));
+  };
 
   const fetchAnteproyectos = async () => {
     const { data, error } = await supabase
@@ -47,7 +54,7 @@ const AprobarProyectos = () => {
         idEstudiante,
         estudiantes(id, nombre, carnet, telefono, correo)`).or('estado.eq.Aprobado,estado.eq.Perdido,estado.eq.Finalizado');
     if (error) {
-      console.error('Error al obtener anteproyectos:', error);
+      alert('No se pudieron obtener los anteproyectos');
     } else {
       setAnteproyectos(data);
       
@@ -70,17 +77,17 @@ const AprobarProyectos = () => {
       
       }
 
-      console.log('Proyecto actualizado:', data);
+      successToast('Proyecto actualizado exitosamente');
 
       fetchAnteproyectos();
 
     } catch (error) {
-      console.error('Error al actualizar proyecto:', error);
+      alert('Error al actualizar proyecto:', error);
     }
   }
 
   async function reprobar(id) {
-    const confirmAprobar=window.confirm("¿Está seguro de APROBAR el proyecto?");
+    const confirmAprobar=window.confirm("¿Está seguro de REPROBAR el proyecto?");
 
     if(!confirmAprobar){return;}
 
@@ -94,11 +101,11 @@ const AprobarProyectos = () => {
         return;
       }
 
-      console.log('Proyecto actualizado:', data);
+      successToast('Proyecto actualizado exitosamente');
 
       fetchAnteproyectos();
     } catch (error) {
-      console.error('Error al actualizar proyecto:', error);
+      alert('Error al actualizar proyecto:', error);
     }
   }
 
@@ -117,7 +124,14 @@ const AprobarProyectos = () => {
                 <tr>
                   <th>Estudiante</th>
                   <th>Propuesta de proyecto</th>
-                  <th>Estado del proyecto</th>
+                  <th>Estado del proyecto
+                      <AiOutlineInfoCircle 
+                        className={styles.infoIcon}
+                        onClick={() => toggleInfo('estados')} 
+                        title="contexto_info"
+                        />
+                        {infoVisible.estados && <p className={styles.infoText}>(Finalizado: Curso aprobado, Perdido: Curso perdido).</p>}
+                  </th>
                   <th></th>
                 </tr>
               </thead>
@@ -127,7 +141,7 @@ const AprobarProyectos = () => {
                   <tr key={anteproyecto.id}>
                     <td>{anteproyecto.estudiantes ? anteproyecto.estudiantes.nombre : 'Sin estudiante asignado'}</td>
                     <td>{anteproyecto.nombreEmpresa}</td>
-                    <td>{anteproyecto.estado}</td>
+                    <td>{anteproyecto.estado==='Aprobado' ? 'Pendiente' : anteproyecto.estado}</td>
                     <td>
                         <div className={styles.contenedor_botones_anteproyectos_coordinador}>
                             <button onClick={() => aprobar(anteproyecto.id)} className={styles.btn + ' ' + styles.revisar}>Aprobar</button>
