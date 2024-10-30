@@ -1,7 +1,7 @@
 /* Contenedor principal */
 .edit-user-container {
     width: 50%;
-    background-color: var(--blanco);
+    background-color: #f2f2f2;
     padding: 30px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
@@ -16,7 +16,7 @@
     justify-content: center;
     align-items: center;
     padding: 60px 0; /* Márgenes para evitar que el contenido se solape con el Header y Footer */
-    background-color: var(--gris_claro);
+    background-color: var(--blanco);
     min-height: calc(100vh - 120px); /* Altura total menos la suma del Header y Footer */
     box-sizing: border-box;
 }
@@ -63,9 +63,18 @@
     background-color: var(--gris_claro);
     color: var(--negro);
   }
+
+  .btn-cancel:hover {
+    background-color: var(--gris_oscuro);
+    color: var(--blanco);
+  }
   
   .btn-save {
     background-color: var(--azul);
     color: var(--blanco);
+  }
+
+  .btn-save:hover {
+    background-color: darkblue;
   }
   
