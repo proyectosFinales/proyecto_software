@@ -41,7 +41,7 @@ const Login = () => {
     <div className="login-container">
       <div className="login-box">
         <h2>Iniciar sesión</h2>
-        <form onSubmit={handleSubmit}>
+        <form className = "login-form" onSubmit={handleSubmit}>
           <div className="input-container">
             <FaUser className="icon" />
             <input 
