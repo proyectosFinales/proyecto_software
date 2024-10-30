@@ -84,8 +84,8 @@ y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caract
         <h2>Nueva contraseña</h2>
         <p>Debe contener al menos una mayúscula, una minúscula, un carácter especial y un dígito.</p>
 
-        <div className="input-container">
-          <FaLock className="icon" />
+        <div className="input-container-contra">
+          <FaLock className="icon-contra" />
           <input
             type="password"
             className="input-field"
@@ -95,8 +95,8 @@ y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caract
           />
         </div>
 
-        <div className="input-container">
-          <FaLock className="icon" />
+        <div className="input-container-contra">
+          <FaLock className="icon-contra" />
           <input
             type="password"
             className="input-field"
