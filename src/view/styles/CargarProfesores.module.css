@@ -45,6 +45,14 @@
     overflow-y: scroll;
 }
 
+.infoIcon {
+    cursor: pointer;
+    margin-left: 5px;
+    color: var(--celeste); 
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
 
 .button {
     padding: 10px 20px;
@@ -75,3 +83,8 @@ input[type="file"] {
     overflow-y: scroll;
     max-height: 400px;
 }
+.infoText {
+    font-size: 01rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }

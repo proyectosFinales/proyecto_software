@@ -26,6 +26,7 @@ import Asignaciones from "./view/pages/asignacion-proyectos";
 import AsignacionAutomatica from "./view/pages/asignacion-proyectos/asignacion-automatica";
 import EdicionAsignacionProyectos from './view/pages/asignacion-proyectos/edicion';
 import RecuperarContraseña from './view/pages/RecuperarContraseña';
+import Abandonar from './view/pages/Abandonar';
 // Otras importaciones de componentes
 import InicioAsignaciones from './view/pages/asignacion-proyectos';
 import Anteproyectos from './view/pages/anteproyectos';
@@ -40,12 +41,13 @@ function App() {
 			<LimpiarToken />
 			<Routes>
 				<Route path="/" element={<Login />} />  {/* Ruta para la página principal */}
-				<Route path="/menuCoordinador" element={<Menu />} />  {/* Ruta para la página principal */}
-				<Route path="/menuProfesor" element={<MenuProfesor />} />  {/* Ruta para la página principal */}
-				<Route path="/menuEstudiante" element={<MenuEstudiante />} />  {/* Ruta para la página principal */}
-				<Route path="/registro" element={<Registro />} />  {/* Ruta para registrarse */}
-				<Route path="/anteproyectosEstudiante" element={<AnteproyectosEstudiante />} />  {/* Ruta para anteproyectos */}
-				<Route path="/anteproyectosCoordinador" element={<AnteproyectosCoordinador />} />  {/* Ruta para anteproyectos */}
+				<Route path="/menuCoordinador" element={<Menu />} /> 
+				<Route path="/menuProfesor" element={<MenuProfesor />} />  
+				<Route path="/menuEstudiante" element={<MenuEstudiante />} /> 
+				<Route path="/registro" element={<Registro />} />  
+				<Route path="/anteproyectosEstudiante" element={<AnteproyectosEstudiante />} />  
+				<Route path="/anteproyectosCoordinador" element={<AnteproyectosCoordinador />} />
+				<Route path="/darseBaja" element={<Abandonar />} />   
 				<Route path="/asignaciones" element={<Asignaciones />} />
 				<Route path="/aprobarProyectos" element={<AprobarProyectos />} /> 
 				<Route path="/gestion-perfiles" element={<GestionPerfiles />} />
