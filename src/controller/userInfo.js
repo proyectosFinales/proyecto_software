@@ -1,5 +1,5 @@
 import supabase from "../model/supabase";
-import validateInfo, { validarCorreo, validarContraseña } from "./validarEntradas";
+import validateInfo, { validarCorreo, validarContraseña, validarCorreoEstudiante } from "./validarEntradas";
 
 
 export async function getUserInfo(id) {
@@ -33,45 +33,62 @@ export async function gestionUserInfo(id) {
 
 export async function updateUserInfo(userData) {
 
-  const { error } = await supabase
-    .from('usuarios')
-    .upsert({
-      id: userData.id,
-      correo: userData.correo,
-      contraseña: userData.contraseña,
-    })
-    .eq('id', userData.id);
-
-  if (error) {
-    throw new Error('Error al actualizar el usuario:', error.message);
-  }
-
-  if (userData.rol === "2") {
-    const { error } = await supabase
-      .from('profesores')
-      .upsert({ nombre: userData.nombre })
-      .eq('id', userData.id);
-
-    if (error) {
-      throw new Error("Error al actualizar el usuario", error.message);
+  try {
+    if (!validarCorreo(userData.correo)) {
+      throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.");
+    } else if (!validarContraseña(userData.contraseña)) {
+      throw new Error("La contraseña no es válida, debe contener al menos 8 caracteres y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caracter especial");
     }
-  } else if (userData.rol === "3") {
 
     const { error } = await supabase
-      .from('estudiantes')
+      .from('usuarios')
       .upsert({
         id: userData.id,
-        nombre: userData.nombre,
         correo: userData.correo,
-        carnet: userData.carnet,
-        telefono: userData.telefono,
+        contraseña: userData.contraseña,
       })
       .eq('id', userData.id);
 
     if (error) {
-      throw new Error("Error al actualizar el usuario", error.message);
+      throw new Error('Error al actualizar el usuario:', error.message);
     }
 
+    if (userData.rol === "2") {
+      const { error } = await supabase
+        .from('profesores')
+        .upsert({ nombre: userData.nombre })
+        .eq('id', userData.id);
+
+      if (error) {
+        throw new Error("Error al actualizar el usuario", error.message);
+      }
+    } else if (userData.rol === "3") {
+
+      try {
+        validateInfo(userData.carnet, userData.telefono, userData.correo, userData.contraseña, "", false);
+        validarCorreoEstudiante(userData.correo);
+      } catch (error) {
+        throw new Error(error.message);
+      }
+
+      const { error } = await supabase
+        .from('estudiantes')
+        .upsert({
+          id: userData.id,
+          nombre: userData.nombre,
+          correo: userData.correo,
+          carnet: userData.carnet,
+          telefono: userData.telefono,
+        })
+        .eq('id', userData.id);
+
+      if (error) {
+        throw new Error("Error al actualizar el usuario", error.message);
+      }
+
+    }
+  } catch (error) {
+    throw new Error(error.message);
   }
 
   return;
