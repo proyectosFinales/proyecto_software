@@ -1,4 +1,4 @@
-/* Contenedor principal */
+
 .edit-user-container {
     width: 50%;
     background-color: #f2f2f2;
@@ -10,14 +10,13 @@
     justify-content: space-between;
 }
   
-  /* Nueva clase para centrar vertical y horizontalmente */
   .center-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 60px 0; /* Márgenes para evitar que el contenido se solape con el Header y Footer */
+    padding: 60px 0;
     background-color: var(--blanco);
-    min-height: calc(100vh - 120px); /* Altura total menos la suma del Header y Footer */
+    min-height: calc(100vh - 120px);
     box-sizing: border-box;
 }
   
