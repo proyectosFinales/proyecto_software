@@ -1,17 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 import supabase from "../model/supabase";
-import { CorreoRecuperacion } from "../controller/Correo";
+import sendMail from "../controller/Email";
 
 export async function sendRecovery(email) {
 
-    console.log(email);
     const { data } = await supabase
         .from('usuarios')
         .select("id")
         .eq("correo", email)
         .single();
 
-    console.log(data);
     if (!data) {
         throw new Error("No se encontró un usuario con el correo ingresado. Por favor inténtelo de nuevo.");
     }
@@ -34,8 +32,15 @@ export async function sendRecovery(email) {
     }
 
     const resetLink = `${window.location.origin}/cambiar-contraseña/${token}`;
+    const mensaje = "Buenas,\n" +
+"Se ha realizado una solicitud para restablecer tu contraseña, puede hacerlo ingresando al siguiente enlace." +
+"Por favor no comparta el enlace con ningún otro usuario.\n\n" +
+"Si no ha realizado ninguna solicitud reciente, puede ignorar este mensaje.\n" +
+{resetLink} +
+"Instituto Tecnológico de Costar Rica,\n" +
+"Escuela de Producción Industrial.";
 
-    CorreoRecuperacion(resetLink, email, "template_recovery");
+    sendMail(email, "Recuperación de contraseña", mensaje);
 
     return resetLink;
 };
