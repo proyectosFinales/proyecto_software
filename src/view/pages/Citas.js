@@ -45,7 +45,8 @@ const Citas = () => {
           lector1,
           lector2,
           anteproyectoID
-        `);
+        `)
+        .eq('semestreActual', 1);
       if (error) {
         console.error('Error al obtener citas:', error);
       } else {
@@ -78,7 +79,8 @@ const Citas = () => {
           estudiantes (nombre),
           idEncargado,
           profesores (nombre)
-        `);
+        `)
+        .eq('semestreActual', 1);
       if (error) {
         console.error('Error al obtener estudiantes:', error);
       } else {

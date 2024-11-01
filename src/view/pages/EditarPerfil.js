@@ -21,13 +21,13 @@ const EditarPerfil = () => {
     });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     try {
-      updateUserInfo(userData);
+      await updateUserInfo(userData);
       alert("Se ha modificado la información con éxito.");
       handleCancel();
     } catch (error) {
-      alert(error);
+      alert(error.message);
     }
   };
 

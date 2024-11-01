@@ -22,11 +22,11 @@ const Menu = () => {
         </Link>
         <Link to="/disponibilidad-profesor" className={styles.menuItem}>
           <i className="fas fa-calendar-days"></i>
-          <p>Citas para defensas</p>
+          <p>Disponibilidad para defensas</p>
         </Link>
         <Link to="/citas-profesor" className={styles.menuItem}>
           <i className="fas fa-clock"></i>
-          <p>Consultar cita</p>
+          <p>Consultar citas</p>
         </Link>
 
       </div>

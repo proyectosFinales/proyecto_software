@@ -22,7 +22,7 @@ const CitasEstudiante = () => {
         const { data: anteproyectoData, error: anteproyectoError } = await supabase
           .from('anteproyectos')
           .select('id, idEncargado')
-          .eq('idEstudiante', estudianteID);
+          .eq('idEstudiante', estudianteID, 'semestreActual', 1);
 
         if (anteproyectoError) throw anteproyectoError;
         if (!anteproyectoData || anteproyectoData.length === 0) {
@@ -35,7 +35,7 @@ const CitasEstudiante = () => {
         const { data: citaData, error: citaError } = await supabase
           .from('citas')
           .select('id, fecha, horaInicio, horaFin, lector1, lector2')
-          .eq('anteproyectoID', anteproyectoID);
+          .eq('anteproyectoID', anteproyectoID, 'semestreActual', 1);
 
         if (citaError) throw citaError;
         if (!citaData || citaData.length === 0) {

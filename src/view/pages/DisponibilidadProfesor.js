@@ -20,7 +20,8 @@ const DisponibilidadProfesor = () => {
       try {
         const { data: citasData, error: citasError } = await supabase
           .from('citas')
-          .select('id, fecha, horaInicio, horaFin');
+          .select('id, fecha, horaInicio, horaFin')
+          .eq('semestreActual', 1);
 
         if (citasError) throw citasError;
 

@@ -5,10 +5,9 @@ export function validateInfo(carnet, tel, email, password, checkPass = true) {
     const carnetRegex = /^[0-9]{10}$/;
 
     if (!carnetRegex.test(carnet)) {
-        throw new Error("El carnet no cumple con un formato válido, asegúrese de que el carnet cumpla con el formato de la institución.");
+        throw new Error("El carnet no cumple con un formato válido, asegúrese su ingresar el carnet de la institución.");
     } else if (!telRegex.test(tel)) {
-        console.log(tel);
-        throw new Error("El número de teléfono no cumple con un formato válido, asegúrese de que sea un número de teléfono válido.");
+        throw new Error("El número de teléfono no cumple con un formato válido, asegúrese de ingresar su número correctamente.");
     } else if (!validarCorreo(email)) {
         throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.");
     } else if (!validarContraseña(password) && checkPass) {
@@ -29,6 +28,14 @@ export function validarCorreo(correo) {
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@(estudiantec\.cr|itcr\.ac\.cr)$/;
     return emailRegex.test(correo);
+}
+
+export function validarCorreoEstudiante(correo) {
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@estudiantec\.cr$/;
+    if (!emailRegex.test(correo)) {
+        throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.");
+    };
 }
 
 export default validateInfo;
