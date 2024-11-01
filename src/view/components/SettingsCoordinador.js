@@ -4,10 +4,12 @@ import styles from './SettingsMenu.module.css';
 import Modal from './Modal';
 import modalEstilos from './SettingsCoordinador.module.css'
 import { supabase } from '../../model/Cliente';
+import { useNavigate } from "react-router-dom";
 
 const SettingsCoordinador = ({show}) => {
   const [modal, setModal] = useState(false);
   const [duracion, setDuracion] = useState('');
+  const navigate = useNavigate();
 
   async function cambiarDuracion (e){
     e.preventDefault();
@@ -26,13 +28,18 @@ const SettingsCoordinador = ({show}) => {
     setModal(false);
   };
 
+  function delSessionToken () {
+    sessionStorage.clear();
+    navigate("/");
+  }
+
   return (
     <>
     <nav className={show ? styles.sidebar : styles.sidebarHide}>
     <ul>
         <Link to="/editar-perfil" className={styles.menuItem}><li>Perfil</li></Link>
         <li className={styles.menuItem} onClick={() => setModal(true)}>Establecer duración de las defensas</li>
-        <Link to="/" className={styles.menuItem}><li>Cerrar sesión</li></Link>
+        <li className={styles.menuItem} onClick={delSessionToken}>Cerrar sesión</li>
     </ul>
     </nav>
     <Modal show={modal} onClose={() => setModal(false)}>
