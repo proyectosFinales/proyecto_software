@@ -37,7 +37,7 @@ export async function sendRecovery(email) {
 "Por favor no comparta el enlace con ningún otro usuario.\n\n" +
 "Si no ha realizado ninguna solicitud reciente, puede ignorar este mensaje.\n" +
 resetLink +
-"\n\nInstituto Tecnológico de Costar Rica,\n" +
+"\nInstituto Tecnológico de Costar Rica,\n" +
 "Escuela de Producción Industrial.";
 
     sendMail(email, "Recuperación de contraseña", mensaje);
