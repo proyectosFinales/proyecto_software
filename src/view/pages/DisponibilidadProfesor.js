@@ -8,7 +8,7 @@ const DisponibilidadProfesor = () => {
   const [citas, setCitas] = useState([]);
   const [citasOriginales, setCitasOriginales] = useState([]);
   const [error, setError] = useState('');
-  const profesorID = localStorage.getItem('token');
+  const profesorID = sessionStorage.getItem('token');
 
   const formatTime = (time) => {
     const [hours, minutes] = time.split(':');
