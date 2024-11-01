@@ -29,7 +29,7 @@ const CitasProfesor = () => {
         const { data: anteproyectoData, error: anteproyectoError } = await supabase
           .from('anteproyectos')
           .select('id, idEncargado, idEstudiante')
-          .eq('idEncargado', profesorID);
+          .eq('idEncargado', profesorID, 'semestreActual', 1);
 
         if (anteproyectoError) throw anteproyectoError;
 
@@ -41,7 +41,7 @@ const CitasProfesor = () => {
             const { data: citasData, error: citasError } = await supabase
               .from('citas')
               .select('id, fecha, horaInicio, horaFin, lector1, lector2, anteproyectoID')
-              .eq('anteproyectoID', anteproyectoID);
+              .eq('anteproyectoID', anteproyectoID, 'semestreActual', 1);
 
             if (citasError) throw citasError;
 
@@ -71,7 +71,8 @@ const CitasProfesor = () => {
         const { data: lectorCitasData, error: lectorError } = await supabase
           .from('citas')
           .select('id, anteproyectoID, fecha, horaInicio, horaFin, lector1, lector2')
-          .or(`lector1.eq.${profesorID},lector2.eq.${profesorID}`);
+          .or(`lector1.eq.${profesorID},lector2.eq.${profesorID}`)
+          .eq('semestreActual', 1);
 
         if (lectorError) throw lectorError;
 
