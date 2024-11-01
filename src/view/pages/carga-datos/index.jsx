@@ -4,15 +4,15 @@ import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 
 const InicioCargaDatos = () => <>
-    <Header title="Menú de carga de datos"/>
+    <Header title="Menú de base de datos"/>
         <div className="menu-grid" style={{textAlign: "center"}}>
             <Link className="menu-item" to="/carga-datos/cantidad-proyectos-profesor" style={{textDecoration: "none", color: "var(--primary1)"}}>
-                <i className="fa-solid fa-chalkboard-user" style={{color: "var(--primary1)"}}></i>
-                <p>Cantidad de proyectos por profesor</p>
+                <i className="fa-solid fa-chalkboard-user" style={{color: "var(--azul)"}}></i>
+                <p>Proyectos por profesor</p>
             </Link>
             <Link className="menu-item" to="/cargarProfesores" style={{ textDecoration: "none", color: "var(--primary1)" }}>
-                <AiOutlineCloudUpload style={{ color: "var(--primary1)", fontSize: "80px" }} /> {/* Tamaño y estilo del ícono */}
-                <p>Carga de datos</p>
+                <AiOutlineCloudUpload style={{ color: "var(--azul)", fontSize: "80px" }} /> {/* Tamaño y estilo del ícono */}
+                <p>Registrar profesores</p>
             </Link>
         </div>
     <Footer />
