@@ -36,7 +36,7 @@ export async function sendRecovery(email) {
 "Se ha realizado una solicitud para restablecer tu contraseña, puede hacerlo ingresando al siguiente enlace." +
 "Por favor no comparta el enlace con ningún otro usuario.\n\n" +
 "Si no ha realizado ninguna solicitud reciente, puede ignorar este mensaje.\n" +
-{resetLink} +
+resetLink +
 "Instituto Tecnológico de Costar Rica,\n" +
 "Escuela de Producción Industrial.";
 
