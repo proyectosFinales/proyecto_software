@@ -6,7 +6,6 @@ import Footer from '../components/Footer';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import {descargarAnteproyecto} from '../../controller/DescargarPDF';
 import styles2 from '../styles/table.module.css';
-import {errorToast, successToast} from '../components/toast';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
