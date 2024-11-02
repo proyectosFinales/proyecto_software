@@ -45,7 +45,7 @@ const AnteproyectosEstudiante = () => {
           estado,
           idEstudiante,
           estudiantes(id, nombre, carnet, telefono, correo)`)
-          .eq('idEstudiante',localStorage.getItem('token'))
+          .eq('idEstudiante',sessionStorage.getItem('token'))
       if (error) {
         alert('No se pudieron obtener los anteproyectos');
         return;

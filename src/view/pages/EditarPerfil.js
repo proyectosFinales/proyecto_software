@@ -11,7 +11,7 @@ const EditarPerfil = () => {
 
   const [userData, setUserData] = useState({});
   const navigate = useNavigate();
-  const id = localStorage.getItem("token");
+  const id = sessionStorage.getItem("token");
 
   const handleChange = (e) => {
     const { name, value } = e.target;

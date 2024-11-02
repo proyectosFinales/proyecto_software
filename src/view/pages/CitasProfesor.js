@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderProfesor';
 
 const CitasProfesor = () => {
-  const profesorID = localStorage.getItem('token');
+  const profesorID = sessionStorage.getItem('token');
   const [citas, setCitas] = useState([]);
   const [lectoresMap, setLectoresMap] = useState({});
   const [estudiantesMap, setEstudiantesMap] = useState({});

@@ -20,7 +20,7 @@ const AprobarProyectos = () => {
           const { data, error } = await supabase
             .from('anteproyectos')
             .update({estado:"Retirado"})
-            .eq('idEstudiante', localStorage.getItem('token'));
+            .eq('idEstudiante', sessionStorage.getItem('token'));
           if (error) {
             alert('Error al retirar anteproyecto/proyecto:', error);
             return;
