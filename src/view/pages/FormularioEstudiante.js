@@ -47,7 +47,7 @@ const EstudianteForm = () => {
           sede,
           correo,
           estudiantes(id, nombre, carnet, telefono)`)
-          .eq('id', localStorage.getItem('token'));
+          .eq('id', sessionStorage.getItem('token'));
       if (error) {
         console.error('Error al consultar estudiante:', error);
         return;
@@ -94,7 +94,7 @@ const EstudianteForm = () => {
           impacto:impacto,
           nombreDepartamento:nombreDepartamento,
           tipoProyecto:tipoProyecto,
-          idEstudiante: localStorage.getItem('token')
+          idEstudiante: sessionStorage.getItem('token')
         });
 
       if (error2) throw error2;

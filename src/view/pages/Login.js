@@ -16,7 +16,7 @@ const Login = () => {
     try {
       const data = await signIn(email, password);
       const uToken = data.id;
-      localStorage.setItem("token", uToken);
+      sessionStorage.setItem("token", uToken);
       if (data.rol === '1') {
         navigate('/MenuCoordinador');
       } else if (data.rol === '2') {
