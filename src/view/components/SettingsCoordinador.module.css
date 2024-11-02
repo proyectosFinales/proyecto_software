@@ -44,6 +44,7 @@
     border: none;
     border-radius: 4px;
     cursor: pointer;
+    width: 150px;
   }
   
   .guardar {
@@ -51,6 +52,6 @@
   }
   
   .volver {
-    background-color: var(--rojo);
+    background-color: var(--azul);
   }
   
