@@ -14,6 +14,7 @@ import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador';
 import CargarProfesores from './view/pages/CargarProfesores';
 import EditarFormulario from './view/pages/EditarFormulario';
 import Citas from './view/pages/Citas';
+import CitasMenu from './view/pages/CitasMenu';
 import DisponibilidadProfesor from './view/pages/DisponibilidadProfesor.js';
 import CitasEstudiante from './view/pages/CitasEstudiante.js';
 import CitasProfesor from './view/pages/CitasProfesor.js';
@@ -57,6 +58,7 @@ function App() {
 				<Route path="/editarFormulario" element={<EditarFormulario />} />
 				<Route path="/cargarProfesores" element={<CargarProfesores />} />
 				<Route path="/citas" element={<Citas />} />
+				<Route path="/citasMenu" element={<CitasMenu />} />
 				<Route path="/disponibilidad-profesor" element={<DisponibilidadProfesor />} />
 				<Route path="/citas-estudiante" element={<CitasEstudiante />} />
 				<Route path="/citas-profesor" element={<CitasProfesor />} />
