@@ -23,12 +23,13 @@ const EditarPerfil = () => {
 
   const handleSave = async () => {
     try {
-      await updateUserInfo(userData);
-      alert("Se ha modificado la información con éxito.");
+      await updateUserInfo(userData)
+      alert("Usuario modificado con éxito.");
       handleCancel();
     } catch (error) {
       alert(error.message);
     }
+
   };
 
   const handleCancel = () => {
@@ -60,8 +61,8 @@ const EditarPerfil = () => {
             ...(data.rol === "3" && {
               estudiante: {
                 nombre: "",
-              carnet: "",
-              telefono: ""
+                carnet: "",
+                telefono: ""
               }
             })
           });
@@ -94,85 +95,85 @@ const EditarPerfil = () => {
 
   return (
     <>
-    {userData.rol === "1" && <HeaderCoordinador title={"Editar Perfil"} />}
+      {userData.rol === "1" && <HeaderCoordinador title={"Editar Perfil"} />}
       {userData.rol === "2" && <HeaderProfesor title={"Editar Perfil"} />}
       {userData.rol === "3" && <HeaderEstudiante title={"Editar Perfil"} />}
-      {(userData.estudiante === null || userData.profesor === null)  && (alert(""))}
-    <div className="center-container">
-      <div className="edit-user-container">
-        <div className="edit-user-info">
-          <h2>Editar Información</h2>
-          {(userData.rol === "2" || userData.rol === "3") && (
-            <label>
-              Nombre
-              <input
-                type="text"
-                name="nombre"
-                value={userData.nombre || ""}
-                onChange={handleChange}
-              />
-            </label>
-          )}
-
-          {userData.rol === "3" && (
-            <label>
-              Carnet
-              <input
-                type="text"
-                name="carnet"
-                value={userData.carnet || ""}
-                onChange={handleChange}
-              />
-            </label>
-          )}
-
-          {userData.rol === "3" && (
-            <label>
-              Teléfono
-              <input
-                type="text"
-                name="telefono"
-                value={userData.telefono || ""}
-                onChange={handleChange}
-              />
-            </label>
-          )}
-
-          {(userData.rol === "1" || userData.rol === "2" || userData.rol === "3") && (
-            <>
+      {(userData.estudiante === null || userData.profesor === null) && (alert(""))}
+      <div className="center-container">
+        <div className="edit-user-container">
+          <div className="edit-user-info">
+            <h2>Editar Información</h2>
+            {(userData.rol === "2" || userData.rol === "3") && (
               <label>
-                Correo electrónico
-                <input
-                  type="email"
-                  name="correo"
-                  value={userData.correo}
-                  onChange={handleChange}
-                />
-              </label>
-              <label>
-                Contraseña
+                Nombre
                 <input
                   type="text"
-                  name="contraseña"
-                  value={userData.contraseña}
+                  name="nombre"
+                  value={userData.nombre || ""}
                   onChange={handleChange}
                 />
               </label>
-            </>
-          )}
-        </div>
+            )}
 
-        <div className="edit-actions">
-          <button className="btn-cancel" onClick={handleCancel}>
-            Cancelar
-          </button>
-          <button className="btn-save" onClick={handleSave}>
-            Guardar
-          </button>
+            {userData.rol === "3" && (
+              <label>
+                Carnet
+                <input
+                  type="text"
+                  name="carnet"
+                  value={userData.carnet || ""}
+                  onChange={handleChange}
+                />
+              </label>
+            )}
+
+            {userData.rol === "3" && (
+              <label>
+                Teléfono
+                <input
+                  type="text"
+                  name="telefono"
+                  value={userData.telefono || ""}
+                  onChange={handleChange}
+                />
+              </label>
+            )}
+
+            {(userData.rol === "1" || userData.rol === "2" || userData.rol === "3") && (
+              <>
+                <label>
+                  Correo electrónico
+                  <input
+                    type="email"
+                    name="correo"
+                    value={userData.correo}
+                    onChange={handleChange}
+                  />
+                </label>
+                <label>
+                  Contraseña
+                  <input
+                    type="text"
+                    name="contraseña"
+                    value={userData.contraseña}
+                    onChange={handleChange}
+                  />
+                </label>
+              </>
+            )}
+          </div>
+
+          <div className="edit-actions">
+            <button className="btn-cancel" onClick={handleCancel}>
+              Cancelar
+            </button>
+            <button className="btn-save" onClick={handleSave}>
+              Guardar
+            </button>
+          </div>
         </div>
+        <Footer />
       </div>
-      <Footer />
-    </div>
     </>
   );
 };

@@ -19,7 +19,6 @@ const AgregarUsuario = () => {
 
   const handleTipoUsuarioChange = (tipo) => {
     setTipoUsuario(tipo);
-    // Limpia los campos al cambiar el tipo de usuario
     setUsuario({
       nombre: '',
       carnet: '',

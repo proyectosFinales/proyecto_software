@@ -1,3 +1,4 @@
+import supabase from "../model/supabase";
 
 export function validateInfo(carnet, tel, email, password, checkPass = true) {
 
@@ -36,6 +37,27 @@ export function validarCorreoEstudiante(correo) {
     if (!emailRegex.test(correo)) {
         throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.");
     };
+}
+
+export async function validarCorreoExistente(correo, id) {
+
+    const { data } = await supabase
+        .from('usuarios')
+        .select('id, correo')
+        .eq('correo', correo)
+        .single();
+
+
+    if (!data) {
+        return true;
+    } else if (data.id !== id) {
+        if (id === "" && data.correo !== correo) {
+            return true;
+        }
+        return false;
+    }
+
+    return true;
 }
 
 export default validateInfo;

@@ -1,9 +1,15 @@
 import supabase from "../model/supabase";
-import validateInfo, { validarContraseña, validarCorreo } from "./validarEntradas";
+import validateInfo, { validarContraseña, validarCorreo, validarCorreoExistente } from "./validarEntradas";
 
 export async function signUpNewUser(fullName, carnet, tel, email, password) {
 
     try {
+
+        const result = await validarCorreoExistente(email, "");
+        if (!result) {
+            throw new Error("El correo ingresado ya se encuentra registrado, asegúrese de ingresar su correo de la institución.");
+        }
+
         validateInfo(carnet, tel, email, password)
 
         const { data: userData, error: userError } = await supabase
@@ -51,9 +57,13 @@ export async function registroProfesor(nombre, correo, contraseña) {
     try {
         if (!validarCorreo(correo)) {
             throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.");
-        }
-         else if (!validarContraseña(contraseña)) {
+        } else if (!validarContraseña(contraseña)) {
             throw new Error("La contraseña no es válida, debe contener al menos 8 caracteres y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caracter especial")
+        } 
+
+        const result = await validarCorreoExistente(correo, "");
+        if (!result) {
+            throw new Error("El correo ingresado ya se encuentra registrado, asegúrese de ingresar su correo de la institución.");
         }
         
 
