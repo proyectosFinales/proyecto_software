@@ -9,7 +9,7 @@ const SidebarEstudiante = ({show}) => {
     <ul>
         <Link to="/MenuEstudiante" className={styles.menuItem}><li>Inicio</li></Link>
         <Link to="/anteproyectosEstudiante" className={styles.menuItem}><li>Anteproyecto</li></Link>
-        <Link to="/MeneEstudiante" className={styles.menuItem}><li>Citas</li></Link>
+        <Link to="/citas-estudiante" className={styles.menuItem}><li>Citas</li></Link>
     </ul>
     </nav>
   );
