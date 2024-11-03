@@ -1,5 +1,5 @@
 import supabase from "../model/supabase";
-import validateInfo, { validarCorreo, validarContraseña, validarCorreoEstudiante } from "./validarEntradas";
+import validateInfo, { validarCorreo, validarContraseña, validarCorreoEstudiante, validarCorreoExistente } from "./validarEntradas";
 
 
 export async function getUserInfo(id) {
@@ -40,6 +40,11 @@ export async function updateUserInfo(userData) {
       throw new Error("La contraseña no es válida, debe contener al menos 8 caracteres y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caracter especial");
     }
 
+    const result = await validarCorreoExistente(userData.correo, userData.id);
+    if (!result) {
+      throw new Error("El correo ingresado ya se encuentra registrado, asegúrese de ingresar su correo de la institución.");
+    }
+
     const { error } = await supabase
       .from('usuarios')
       .upsert({
@@ -54,14 +59,20 @@ export async function updateUserInfo(userData) {
     }
 
     if (userData.rol === "2") {
+
       const { error } = await supabase
         .from('profesores')
-        .upsert({ nombre: userData.nombre })
+        .upsert({
+          id: userData.id,
+          nombre: userData.nombre
+        })
         .eq('id', userData.id);
 
       if (error) {
-        throw new Error("Error al actualizar el usuario", error.message);
+        console.log(error.message);
+        throw new Error("Error al actualizar el usuario");
       }
+
     } else if (userData.rol === "3") {
 
       try {
@@ -162,6 +173,13 @@ export async function editUserGestion(user) {
     if (!validarCorreo(user.correo)) {
       throw new Error("El correo no cumple con un formato válido, asegúrese de ingresar su correo de la institución.")
     }
+
+    const result = await validarCorreoExistente(user.correo, user.id);
+    if (!result) {
+      throw new Error("El correo ingresado ya se encuentra registrado, asegúrese de ingresar su correo de la institución.");
+    }
+
+    
 
     const { error } = await supabase
       .from('usuarios')
