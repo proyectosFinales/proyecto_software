@@ -36,7 +36,7 @@ const Menu = () => {
           <i className="fas fa-database"></i>
           <p>Base de datos</p>
         </Link>
-        <Link to="/citas" className={styles.menuItem}>
+        <Link to="/citasMenu" className={styles.menuItem}>
           <i className="fas fa-clock"></i>
           <p>Citas</p>
         </Link>
