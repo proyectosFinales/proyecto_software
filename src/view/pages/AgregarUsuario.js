@@ -13,6 +13,7 @@ const AgregarUsuario = () => {
     numero: '',
     correo: '',
     contraseña: '',
+    sede: ''
   });
 
   const navigate = useNavigate();
@@ -25,6 +26,7 @@ const AgregarUsuario = () => {
       numero: '',
       correo: '',
       contraseña: '',
+      sede: ''
     });
   };
 
@@ -45,7 +47,7 @@ const AgregarUsuario = () => {
 
     if (tipoUsuario === "profesor") {
       try {
-        await registroProfesor(nuevoUsuario.nombre, nuevoUsuario.correo, nuevoUsuario.contraseña)
+        await registroProfesor(nuevoUsuario.nombre, nuevoUsuario.correo, nuevoUsuario.contraseña, nuevoUsuario.sede)
         alert('Profesor agregado con éxito.');
         navigate('/gestion-perfiles');
       } catch (error) {
@@ -53,7 +55,7 @@ const AgregarUsuario = () => {
       }
     } else {
       try {
-        await signUpNewUser(nuevoUsuario.nombre, nuevoUsuario.carnet, nuevoUsuario.numero, nuevoUsuario.correo, nuevoUsuario.contraseña);
+        await signUpNewUser(nuevoUsuario.nombre, nuevoUsuario.carnet, nuevoUsuario.numero, nuevoUsuario.correo, nuevoUsuario.contraseña, nuevoUsuario.sede);
         alert('Estudiante agregado con éxito.');
         navigate('/gestion-perfiles');
       } catch (error) {
@@ -69,6 +71,7 @@ const AgregarUsuario = () => {
       numero: '',
       correo: '',
       contrasena: '',
+      sede: ''
     });
   };
 
@@ -76,6 +79,9 @@ const AgregarUsuario = () => {
     <div className="agregar-usuario-container">
       <Header />
       <div className="form-container">
+        <button className="btn-back-addUser" onClick={() => navigate("/gestion-perfiles")}>
+          Volver
+        </button>
         <h2>Agregar Usuario</h2>
         <div className="tabs">
           <button onClick={() => handleTipoUsuarioChange('estudiante')} className={tipoUsuario === 'estudiante' ? 'active' : ''}>
@@ -86,7 +92,7 @@ const AgregarUsuario = () => {
           </button>
         </div>
 
-        <form>
+        <form className="form-addUser">
           <label>Nombre:</label>
           <input
             type="text"
@@ -106,7 +112,7 @@ const AgregarUsuario = () => {
                 onChange={handleInputChange}
                 required
               />
-              
+
               <label>Número:</label>
               <input
                 type="text"
@@ -129,12 +135,28 @@ const AgregarUsuario = () => {
 
           <label>Contraseña:</label>
           <input
-            type="password"
+            type="text"
             name="contraseña"
             value={usuario.contraseña}
             onChange={handleInputChange}
             required
           />
+
+          <label>Seleccione una sede:</label>
+          <select
+            name="sede"
+            className="sede-dropdown"
+            value={usuario.sede}
+            onChange={handleInputChange}
+            required
+          >
+            <option value="">Seleccione una sede</option>
+            <option value="Central Cartago">Central Cartago</option>
+            <option value="Local San José">Local San José</option>
+            <option value="Local San Carlos">Local San Carlos</option>
+            <option value="Limón">Centro Académico de Limón</option>
+            <option value="Alajuela">Centro Académico de Alajuela</option>
+          </select>
 
           <div className="buttons">
             <button type="button" onClick={handleLimpiarEntradas}>Limpiar</button>

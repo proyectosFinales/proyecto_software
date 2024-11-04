@@ -23,7 +23,7 @@ const EditarPerfil = () => {
 
   const handleSave = async () => {
     try {
-      await updateUserInfo(userData)
+      await updateUserInfo(userData);
       alert("Usuario modificado con éxito.");
       handleCancel();
     } catch (error) {
@@ -52,6 +52,7 @@ const EditarPerfil = () => {
             id: id,
             correo: data.correo,
             contraseña: data.contraseña,
+            sede: data.sede,
             rol: data.rol,
             ...(data.rol === "2" && {
               profesor: {
@@ -72,6 +73,7 @@ const EditarPerfil = () => {
             id: id,
             correo: data.correo,
             contraseña: data.contraseña,
+            sede: data.sede,
             rol: data.rol,
             ...(data.rol === "2" && {
               nombre: data.profesor.nombre || ""
@@ -84,7 +86,7 @@ const EditarPerfil = () => {
           });
         }
       } catch (error) {
-        console.error('Error al obtener la información del usuario:', error.message);
+        alert(error.message);
       }
     };
 
@@ -159,6 +161,21 @@ const EditarPerfil = () => {
                     onChange={handleChange}
                   />
                 </label>
+                <label>Seleccione una sede:</label>
+                <select
+                  name="sede"
+                  className="sede-dropdown"
+                  value={userData.sede}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="">Seleccione una sede</option>
+                  <option value="Central Cartago">Central Cartago</option>
+                  <option value="Local San José">Local San José</option>
+                  <option value="Local San Carlos">Local San Carlos</option>
+                  <option value="Limón">Centro Académico de Limón</option>
+                  <option value="Alajuela">Centro Académico de Alajuela</option>
+                </select>
               </>
             )}
           </div>

@@ -5,7 +5,7 @@ import validateInfo, { validarCorreo, validarContraseña, validarCorreoEstudiant
 export async function getUserInfo(id) {
   const { data } = await supabase
     .from('usuarios')
-    .select('id, correo, contraseña, rol, profesor: profesores(nombre), estudiante: estudiantes(nombre, carnet, telefono)')
+    .select('id, correo, contraseña, sede, rol, profesor: profesores(nombre), estudiante: estudiantes(nombre, carnet, telefono)')
     .eq('id', id)
     .single();
 
@@ -45,12 +45,17 @@ export async function updateUserInfo(userData) {
       throw new Error("El correo ingresado ya se encuentra registrado, asegúrese de ingresar su correo de la institución.");
     }
 
+    if (userData.sede === "" || userData.sede === null) {
+      throw new Error("Debes seleccionar una sede.");
+    }
+
     const { error } = await supabase
       .from('usuarios')
       .upsert({
         id: userData.id,
         correo: userData.correo,
         contraseña: userData.contraseña,
+        sede: userData.sede
       })
       .eq('id', userData.id);
 

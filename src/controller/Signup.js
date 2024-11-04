@@ -1,7 +1,7 @@
 import supabase from "../model/supabase";
 import validateInfo, { validarContraseña, validarCorreo, validarCorreoExistente } from "./validarEntradas";
 
-export async function signUpNewUser(fullName, carnet, tel, email, password) {
+export async function signUpNewUser(fullName, carnet, tel, email, password, sede) {
 
     try {
 
@@ -18,7 +18,8 @@ export async function signUpNewUser(fullName, carnet, tel, email, password) {
                 {
                     correo: email,
                     contraseña: password,
-                    rol: 3
+                    rol: 3,
+                    sede: sede
                 },
             ])
             .select();
@@ -52,7 +53,7 @@ export async function signUpNewUser(fullName, carnet, tel, email, password) {
     }
 }
 
-export async function registroProfesor(nombre, correo, contraseña) {
+export async function registroProfesor(nombre, correo, contraseña, sede) {
 
     try {
         if (!validarCorreo(correo)) {
@@ -73,7 +74,8 @@ export async function registroProfesor(nombre, correo, contraseña) {
                 {
                     correo: correo,
                     contraseña: contraseña,
-                    rol: 2
+                    rol: 2,
+                    sede: sede
                 },
             ])
             .select();
