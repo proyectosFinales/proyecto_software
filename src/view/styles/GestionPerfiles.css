@@ -165,26 +165,26 @@ h1 {
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end; /* Alinear los botones a la derecha */
-  margin-top: 20px; /* Espacio superior para separar de los contenidos de la modal */
-  position: absolute; /* Cambio a posición relativa */
+  justify-content: flex-end;
+  margin-top: 20px;
+  position: absolute;
 }
 
 
 .delModalBtn {
   margin-top: 450px;
-  padding: 20px 30px; /* Tamaño del botón */
-  font-size: 16px; /* Tamaño de la fuente */
-  border: none; /* Quitar el borde predeterminado */
-  border-radius: 5px; /* Redondear los bordes */
-  margin-left: 50px; /* Espacio entre los botones */
+  padding: 20px 30px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  margin-left: 50px;
   min-width: 120px;
   transition: background-color 0.3s ease;
 }
 
 .btnCancelar {
-  background-color: gray; /* Color de fondo para el botón de cancelar */
-  color: white; /* Color de texto */
+  background-color: gray;
+  color: white;
   margin-left: 800px;
 }
 
