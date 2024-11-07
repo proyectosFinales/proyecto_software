@@ -3,8 +3,8 @@ import listStyles from "../../styles/list.module.css";
 import Header from "../../components/HeaderProfesor";
 import Footer from "../../components/Footer";
 import Styles from "../../styles/proyectos-profesor.module.css";
-import {descargarAnteproyecto} from "../../../controller/DescargarPDF";
-import {supabase} from "../../../model/Cliente";
+import { descargarAnteproyecto } from "../../../controller/DescargarPDF";
+import { supabase } from "../../../model/Cliente";
 
 const ProyectosAsignadosProfesor = () => {
     const [anteproyectos, setAnteproyectos] = useState([]);
@@ -44,7 +44,8 @@ const ProyectosAsignadosProfesor = () => {
                     idEstudiante,
                     estudiantes(id, nombre, carnet, telefono, correo)
                 `)
-                .eq('idEncargado', localStorage.getItem('token'));
+                .eq('idEncargado', localStorage.getItem('token'))
+                .eq('semestreActual', 1);
             if (error) {
                 alert('No se pudieron obtener los anteproyectos');
                 return;

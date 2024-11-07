@@ -46,6 +46,7 @@ const AnteproyectosEstudiante = () => {
           idEstudiante,
           estudiantes(id, nombre, carnet, telefono, correo)`)
           .eq('idEstudiante',sessionStorage.getItem('token'))
+          .eq('semestreActual', 1);
       if (error) {
         alert('No se pudieron obtener los anteproyectos');
         return;
