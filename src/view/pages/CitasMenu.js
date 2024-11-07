@@ -21,6 +21,7 @@ const CitasMenu = () => {
       const { data: allAnteproyectos, error: anteproyectosError } = await supabase
         .from('anteproyectos')
         .select('id, idEstudiante')
+        .eq('estado', 'Aprobado')
         .eq('semestreActual', 1);
       if (anteproyectosError) throw anteproyectosError;
 
