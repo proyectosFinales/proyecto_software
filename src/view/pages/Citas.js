@@ -8,6 +8,7 @@ import Header from '../components/HeaderCoordinador';
 const Citas = () => {
   const [fecha, setFecha] = useState('');
   const [horaInicio, setHoraInicio] = useState('');
+  const [duracion, setDuracion] = useState(1);
   const [citas, setCitas] = useState([]);
   const [lectores, setLectores] = useState([]);
   const [citaActual, setCitaActual] = useState(null);
@@ -16,10 +17,10 @@ const Citas = () => {
   const [estudiantes, setEstudiantes] = useState({});
   const [profesores, setProfesores] = useState({});
 
-  const addOneHour = (time) => {
+  const getEndDate = (time) => {
     const [hours, minutes] = time.split(':');
-    let endHour = parseInt(hours, 10) + 1;
-    if (endHour === 24) endHour = 0;
+    const endHour = (parseInt(hours, 10) + duracion) % 24;
+
     return `${endHour.toString().padStart(2, '0')}:${minutes}`;
   };
 
@@ -98,9 +99,23 @@ const Citas = () => {
       }
     };
 
+    const fetchDuracion = async () => {
+      const { data, error } = await supabase
+        .from('duraciones')
+        .select('horas')
+        .eq('id', 1);
+
+      if (error) {
+        console.error("Error obteniendo duration:", error);
+      } else {
+        setDuracion(data[0].horas);
+      }
+    }
+
     fetchCitas();
     fetchProfesores();
     fetchEstudiantes();
+    fetchDuracion();
   }, []);
 
   const handleAsignarCita = async () => {
@@ -113,7 +128,7 @@ const Citas = () => {
     const nuevaCita = {
       fecha: fecha,
       horaInicio: horaInicio,
-      horaFin: addOneHour(horaInicio),
+      horaFin: getEndDate(horaInicio),
       lector1: null,
       lector2: null,
       anteproyectoID: null,
@@ -126,7 +141,7 @@ const Citas = () => {
         .select();
 
       if (error) {
-        console.error('Error al agregar cita:', error);
+        console.error('Error al agregar cita:', error, data);
         setError('Ocurrió un error al guardar la cita.');
         return;
       }
@@ -363,7 +378,7 @@ const Citas = () => {
                     const updatedCita = {
                       ...citaActual,
                       horaInicio: updatedTime,
-                      horaFin: addOneHour(updatedTime),
+                      horaFin: getEndDate(updatedTime),
                     };
                     setCitaActual(updatedCita);
                   }}
