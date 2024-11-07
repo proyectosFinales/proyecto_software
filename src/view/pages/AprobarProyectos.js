@@ -52,7 +52,8 @@ const AprobarProyectos = () => {
         observaciones,
         estado,
         idEstudiante,
-        estudiantes(id, nombre, carnet, telefono, correo)`).or('estado.eq.Aprobado,estado.eq.Perdido,estado.eq.Finalizado');
+        estudiantes(id, nombre, carnet, telefono, correo)`).or('estado.eq.Aprobado,estado.eq.Perdido,estado.eq.Finalizado')
+        .eq('semestreActual', 1);
     if (error) {
       alert('No se pudieron obtener los anteproyectos');
     } else {

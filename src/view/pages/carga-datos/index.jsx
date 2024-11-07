@@ -15,7 +15,7 @@ const InicioCargaDatos = () => {
                 // const { data: usuariosDeleted, error: usuariosError } = await supabase
                 //     .from('usuarios')
                 //     .delete()
-                //     .in('id', supabase.from('anteproyectos').select('idEstudiante').eq('estado', 'Aprobado'));
+                //     .in('id', supabase.from('anteproyectos').select('idEstudiante').eq('estado', 'Aprobado'))
 
                 // if (usuariosError) throw usuariosError;
 
