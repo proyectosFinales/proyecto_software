@@ -74,7 +74,6 @@ export async function updateUserInfo(userData) {
         .eq('id', userData.id);
 
       if (error) {
-        console.log(error.message);
         throw new Error("Error al actualizar el usuario");
       }
 
