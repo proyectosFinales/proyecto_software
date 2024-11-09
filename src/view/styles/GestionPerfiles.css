@@ -105,13 +105,42 @@ h1 {
   margin-bottom: 10px;
 }
 
-.user-info input {
-  width: 100%;
-  padding: 10px;
-  margin-top: 5px;
+.input-container-gestion {
+  position: relative;
   margin-bottom: 15px;
+}
+
+.input-field-gestion {
+  width: 100%;
+  padding: 10px 40px;
+  margin-top: 5px;
+  margin-bottom: 5px;
   border: 1px solid var(--gris_claro);
   border-radius: 5px;
+}
+
+.sede-dropdown {
+  width: 100%;
+  padding: 10px 40px;
+  font-size: 16px;
+  border: 1px solid var(--gris_claro);
+  border-radius: 5px;
+}
+
+.icon-gestion {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--azul);
+}
+
+.icon-sede{
+  position: absolute;
+  left: 10px;
+  top: 35%;
+  transform: translateY(-50%);
+  color: var(--azul);
 }
 
 .user-name {

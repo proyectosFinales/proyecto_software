@@ -35,51 +35,54 @@ import CambioContraseña from './view/pages/CambioContraseña.js';
 import AprobarProyectos from './view/pages/AprobarProyectos';
 import LimpiarToken from './controller/limpiezaToken';
 import ProyectosAsignadosProfesor from './view/pages/asignacion-proyectos/proyectos-profesor.jsx';
+import RutaProtegida from './controller/ProteccionRutas.js';
 
 function App() {
+
+	
 	return (
 		<Router>
 			<LimpiarToken />
 			<Routes>
 				<Route path="/" element={<Login />} />  {/* Ruta para la página principal */}
-				<Route path="/menuCoordinador" element={<Menu />} /> 
-				<Route path="/menuProfesor" element={<MenuProfesor />} />  
-				<Route path="/menuEstudiante" element={<MenuEstudiante />} /> 
+				<Route path="/menuCoordinador" element={<RutaProtegida element={<Menu />} requiredRoles={["1"]} />} /> 
+				<Route path="/menuProfesor" element={<RutaProtegida element={<MenuProfesor />} requiredRoles={["2"]} />} />  
+				<Route path="/menuEstudiante" element={<RutaProtegida element={<MenuEstudiante />} requiredRoles={["3"]} />} /> 
 				<Route path="/registro" element={<Registro />} />  
-				<Route path="/anteproyectosEstudiante" element={<AnteproyectosEstudiante />} />  
-				<Route path="/anteproyectosCoordinador" element={<AnteproyectosCoordinador />} />
-				<Route path="/darseBaja" element={<Abandonar />} />   
-				<Route path="/asignaciones" element={<Asignaciones />} />
-				<Route path="/aprobarProyectos" element={<AprobarProyectos />} /> 
-				<Route path="/gestion-perfiles" element={<GestionPerfiles />} />
-				<Route path="/gestion-perfiles/agregar-usuario" element={<AgregarUsuario />} />
-				<Route path="/formulario-estudiantes" element={<FormularioEstudiantes />} />
-				<Route path="/formulario-coordinador" element={<FormularioCoordinador />} />
-				<Route path="/editarFormulario" element={<EditarFormulario />} />
-				<Route path="/cargarProfesores" element={<CargarProfesores />} />
-				<Route path="/citas" element={<Citas />} />
-				<Route path="/citasMenu" element={<CitasMenu />} />
-				<Route path="/disponibilidad-profesor" element={<DisponibilidadProfesor />} />
-				<Route path="/citas-estudiante" element={<CitasEstudiante />} />
-				<Route path="/citas-profesor" element={<CitasProfesor />} />
-				<Route path="/editar-perfil" element={<EditarPerfil />} />
-				<Route path="/carga-datos" element={<InicioCargaDatos />} />
-				<Route path="/carga-datos/cantidad-proyectos-profesor" element={<CantidadProyectosProfesor />} />
-				<Route path="/asignaciones/automatica" element={<AsignacionAutomatica />} />
-				<Route path="/asignaciones/manual" element={<EdicionAsignacionProyectos />} />
+				<Route path="/anteproyectosEstudiante" element={<RutaProtegida element={<AnteproyectosEstudiante />} requiredRoles={["3"]} />} />  
+				<Route path="/anteproyectosCoordinador" element={<RutaProtegida element={<AnteproyectosCoordinador />} requiredRoles={["1"]} />} />
+				<Route path="/darseBaja" element={<RutaProtegida element={<Abandonar />} requiredRoles={["3"]} />} />   
+				<Route path="/asignaciones" element={<RutaProtegida element={<Asignaciones />} requiredRoles={["1"]} />} />
+				<Route path="/aprobarProyectos" element={<RutaProtegida element={<Asignaciones />} requiredRoles={["1"]} />} /> 
+				<Route path="/gestion-perfiles" element={<RutaProtegida element={<GestionPerfiles />} requiredRoles={["1"]} />} />
+				<Route path="/gestion-perfiles/agregar-usuario" element={<RutaProtegida element={<AgregarUsuario />} requiredRoles={["1"]} />} />
+				<Route path="/formulario-estudiantes" element={<RutaProtegida element={<FormularioEstudiantes />} requiredRoles={["3"]} />} />
+				<Route path="/formulario-coordinador" element={<RutaProtegida element={<FormularioCoordinador />} requiredRoles={["1"]} />} />
+				<Route path="/editarFormulario" element={<RutaProtegida element={<EditarFormulario />} requiredRoles={["3"]} />} />
+				<Route path="/cargarProfesores" element={<RutaProtegida element={<CargarProfesores />} requiredRoles={["1"]} />} />
+				<Route path="/citas" element={<RutaProtegida element={<Citas />} requiredRoles={["1"]} />} />
+				<Route path="/citasMenu" element={<RutaProtegida element={<CitasMenu />} requiredRoles={["1"]} />} />
+				<Route path="/disponibilidad-profesor" element={<RutaProtegida element={<DisponibilidadProfesor />} requiredRoles={["2"]} />} />
+				<Route path="/citas-estudiante" element={<RutaProtegida element={<CitasEstudiante />} requiredRoles={["3"]} />} />
+				<Route path="/citas-profesor" element={<RutaProtegida element={<CitasProfesor />} requiredRoles={["2"]} />} />
+				<Route path="/editar-perfil" element={<RutaProtegida element={<EditarPerfil />} requiredRoles={["1", "2", "3"]} />} />
+				<Route path="/carga-datos" element={<RutaProtegida element={<InicioCargaDatos />} requiredRoles={["1"]} />} />
+				<Route path="/carga-datos/cantidad-proyectos-profesor" element={<RutaProtegida element={<CantidadProyectosProfesor />} requiredRoles={["1"]} />} />
+				<Route path="/asignaciones/automatica" element={<RutaProtegida element={<AsignacionAutomatica />} requiredRoles={["1"]} />} />
+				<Route path="/asignaciones/manual" element={<RutaProtegida element={<EdicionAsignacionProyectos />} requiredRoles={["1"]} />} />
 				<Route path="/carga-datos">
-					<Route index element={<InicioCargaDatos />} />
-					<Route path="cantidad-proyectos-profesor" element={<CantidadProyectosProfesor />} />
+					<Route index element={<RutaProtegida element={<InicioCargaDatos />} requiredRoles={["1"]} />} />
+					<Route path="cantidad-proyectos-profesor" element={<RutaProtegida element={<CantidadProyectosProfesor />} requiredRoles={["1"]} />} />
 				</Route>
 				<Route path="/asignaciones">
-					<Route index element={<InicioAsignaciones />} />
-					<Route path="automatica" element={<AsignacionAutomatica />} />
-					<Route path="manual" element={<EdicionAsignacionProyectos />} />
+					<Route index element={<RutaProtegida element={<InicioAsignaciones />} requiredRoles={["1"]} />} />
+					<Route path="automatica" element={<RutaProtegida element={<AsignacionAutomatica />} requiredRoles={["1"]} />} />
+					<Route path="manual" element={<RutaProtegida element={<EdicionAsignacionProyectos />} requiredRoles={["1"]} />} />
 				</Route>
-				<Route path="/anteproyectos" element={<Anteproyectos />}></Route>
-				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />}></Route>
-				<Route path="/cambiar-contraseña/:token" element={<CambioContraseña />}></Route>
-				<Route path="/proyectos-profesor" element={<ProyectosAsignadosProfesor/>}/>
+				<Route path="/anteproyectos" element={<RutaProtegida element={<Anteproyectos />} requiredRoles={["1"]} />} />
+				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />} />
+				<Route path="/cambiar-contraseña/:token" element={<CambioContraseña />} />
+				<Route path="/proyectos-profesor" element={<RutaProtegida element={<ProyectosAsignadosProfesor />} requiredRoles={["2"]} />} />
 			</Routes>
 		</Router>
 	);
