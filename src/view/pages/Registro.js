@@ -1,5 +1,5 @@
 import { React, useState } from 'react';
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'react-icons/fa';
 import '../styles/Registro.css';
 import { signUpNewUser } from '../../controller/Signup';
 import { useNavigate } from 'react-router-dom';
@@ -10,12 +10,13 @@ const Registro = () => {
   const [number, setNumber] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [sede, setSede] = useState('');
 
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
-      await signUpNewUser(fullName, carnet, number, email, password);
+      await signUpNewUser(fullName, carnet, number, email, password, sede);
       alert('Usuario registrado con éxito.');
       navigate('/login');
     } catch (error) {
@@ -56,6 +57,24 @@ const Registro = () => {
           <FaLock className="icon-registro" />
           <input type="password" className="input-field" placeholder="Contraseña" value={password}
             onChange={(e) => setPassword(e.target.value)} />
+        </div>
+
+        <div className="input-container-registro">
+          <FaMapMarked className="icon-sede" />
+                <select
+                  name="sede"
+                  className="sede-dropdown"
+                  value={sede}
+                  onChange={(e) => setSede(e.target.value)}
+                  required
+                >
+                  <option value="">Seleccione una sede</option>
+                  <option value="Central Cartago">Central Cartago</option>
+                  <option value="Local San José">Local San José</option>
+                  <option value="Local San Carlos">Local San Carlos</option>
+                  <option value="Limón">Centro Académico de Limón</option>
+                  <option value="Alajuela">Centro Académico de Alajuela</option>
+                </select>
         </div>
 
         <button className="btn-register" onClick={handleSubmit}>Registrarse</button>

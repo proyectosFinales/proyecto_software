@@ -79,7 +79,7 @@ h2 {
 .icon {
   position: absolute;
   left: 10px;
-  top: 38%;
+  top: 50%;
   transform: translateY(-50%);
   color: var(--azul);
 }

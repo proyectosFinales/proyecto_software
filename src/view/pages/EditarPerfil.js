@@ -1,5 +1,6 @@
 import { React, useState, useEffect } from "react";
 import "../styles/EditarPerfil.css"
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'react-icons/fa';
 import Footer from "../components/Footer"
 import { getUserInfo, updateUserInfo } from "../../controller/userInfo";
 import { useNavigate } from "react-router-dom";
@@ -22,6 +23,7 @@ const EditarPerfil = () => {
   };
 
   const handleSave = async () => {
+    
     try {
       await updateUserInfo(userData);
       alert("Usuario modificado con éxito.");
@@ -108,36 +110,48 @@ const EditarPerfil = () => {
             {(userData.rol === "2" || userData.rol === "3") && (
               <label>
                 Nombre
+                <div className="input-container-editar">
+                <FaUser className="icon-editar" />
                 <input
                   type="text"
                   name="nombre"
+                  className="input-field-editar"
                   value={userData.nombre || ""}
                   onChange={handleChange}
                 />
+                </div>
               </label>
             )}
 
             {userData.rol === "3" && (
               <label>
                 Carnet
+                <div className="input-container-editar">
+                <FaIdCard className="icon-editar" />
                 <input
                   type="text"
                   name="carnet"
+                  className="input-field-editar"
                   value={userData.carnet || ""}
                   onChange={handleChange}
                 />
+                </div>
               </label>
             )}
 
             {userData.rol === "3" && (
               <label>
                 Teléfono
+                <div className="input-container-editar">
+                <FaPhone className="icon-editar" />
                 <input
                   type="text"
                   name="telefono"
+                  className="input-field-editar"
                   value={userData.telefono || ""}
                   onChange={handleChange}
                 />
+                </div>
               </label>
             )}
 
@@ -145,23 +159,33 @@ const EditarPerfil = () => {
               <>
                 <label>
                   Correo electrónico
+                  <div className="input-container-editar">
+                  <FaEnvelope className="icon-editar" />
                   <input
                     type="email"
                     name="correo"
+                    className="input-field-editar"
                     value={userData.correo}
                     onChange={handleChange}
                   />
+                  </div>
                 </label>
                 <label>
                   Contraseña
+                  <div className="input-container-editar">
+                  <FaLock className="icon-editar" />
                   <input
                     type="text"
                     name="contraseña"
+                    className="input-field-editar"
                     value={userData.contraseña}
                     onChange={handleChange}
                   />
+                  </div>
                 </label>
                 <label>Seleccione una sede:</label>
+                <div className="input-container-editar">
+                <FaMapMarked className="icon-sede" />
                 <select
                   name="sede"
                   className="sede-dropdown"
@@ -176,6 +200,7 @@ const EditarPerfil = () => {
                   <option value="Limón">Centro Académico de Limón</option>
                   <option value="Alajuela">Centro Académico de Alajuela</option>
                 </select>
+                </div>
               </>
             )}
           </div>

@@ -20,12 +20,27 @@ export async function gestionUserInfo(id) {
 
   const { data } = await supabase
     .from('usuarios')
-    .select('id, correo, rol, profesor: profesores(nombre), estudiante: estudiantes(nombre, carnet, telefono, estado: anteproyectos(estado))')
+    .select('id, correo, contraseña, rol, sede, profesor: profesores(nombre), estudiante: estudiantes(nombre, carnet, telefono, estado: anteproyectos(estado))')
     .eq('id', id)
     .single();
 
   if (!data) {
     throw new Error("Hubo un problema al consultad sus datos. Por favor, inténtelo de nuevo.");
+  }
+
+  return data;
+}
+
+export async function getRol(id) {
+
+  const { data } = await supabase
+    .from('usuarios')
+    .select('rol')
+    .eq('id', id)
+    .single();
+
+  if (!data) {
+    throw new Error("No se ha iniciado sesión.");
   }
 
   return data;
@@ -74,7 +89,6 @@ export async function updateUserInfo(userData) {
         .eq('id', userData.id);
 
       if (error) {
-        console.log(error.message);
         throw new Error("Error al actualizar el usuario");
       }
 
@@ -188,7 +202,11 @@ export async function editUserGestion(user) {
 
     const { error } = await supabase
       .from('usuarios')
-      .update({ correo: user.correo })
+      .update({
+        correo: user.correo,
+        contraseña: user.contraseña,
+        sede: user.sede
+      })
       .eq("id", user.id);
 
     if (error) {

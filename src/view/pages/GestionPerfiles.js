@@ -1,6 +1,7 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaFileAlt, FaMapMarked } from 'react-icons/fa';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
@@ -21,7 +22,9 @@ const GestionPerfiles = () => {
       setEditableUser({
         id: id,
         correo: data.correo,
+        contraseña: data.contraseña,
         rol: data.rol,
+        sede: data.sede,
         ...(data.rol === '2' && { nombre: data.profesor.nombre }),
         ...(data.rol === '3' && {
           nombre: data.estudiante.nombre,
@@ -166,69 +169,130 @@ const GestionPerfiles = () => {
                 <>
                   <label>
                     Nombre
-                    <input
-                      type="text"
-                      name="nombre"
-                      value={editableUser.nombre || ''}
-                      onChange={handleInputChange}
-                    />
+                    <div className="input-container-gestion">
+                    <FaUser className="icon-gestion" />
+                      <input
+                        type="text"
+                        name="nombre"
+                        className="input-field-gestion"
+                        value={editableUser.nombre || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </label>
                   <label>
                     Correo electrónico
-                    <input
-                      type="email"
-                      name="correo"
-                      value={editableUser.correo || ''}
-                      onChange={handleInputChange}
-                    />
+                    <div className="input-container-gestion">
+                    <FaEnvelope className="icon-gestion" />
+                      <input
+                        type="email"
+                        name="correo"
+                        className="input-field-gestion"
+                        value={editableUser.correo || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </label>
                 </>
               ) : (
                 <>
                   <label>
                     Nombre
-                    <input
-                      type="text"
-                      name="nombre"
-                      value={editableUser.nombre || ''}
-                      onChange={handleInputChange}
-                    />
+                    <div className="input-container-gestion">
+                    <FaUser className="icon-gestion" />
+                      <input
+                        type="text"
+                        name="nombre"
+                        className="input-field-gestion"
+                        value={editableUser.nombre || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </label>
                   <label>
                     Carnet
-                    <input
-                      type="text"
-                      name="carnet"
-                      value={editableUser.carnet || ''}
-                      onChange={handleInputChange}
-                    />
+                    <div className="input-container-gestion">
+                    <FaIdCard className="icon-gestion" />
+                      <input
+                        type="text"
+                        name="carnet"
+                        className="input-field-gestion"
+                        value={editableUser.carnet || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </label>
                   <label>
                     Correo electrónico
-                    <input
-                      type="email"
-                      name="correo"
-                      value={editableUser.correo || ''}
-                      onChange={handleInputChange}
-                    />
+                    <div className="input-container-gestion">
+                    <FaEnvelope className="icon-gestion" />
+                      <input
+                        type="email"
+                        name="correo"
+                        className="input-field-gestion"
+                        value={editableUser.correo || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </label>
                   <label>
                     Teléfono
-                    <input
-                      type="text"
-                      name="telefono"
-                      value={editableUser.telefono || ''}
-                      onChange={handleInputChange}
-                    />
+                    <div className="input-container-gestion">
+                    <FaPhone className="icon-gestion" />
+                      <input
+                        type="text"
+                        name="telefono"
+                        className="input-field-gestion"
+                        value={editableUser.telefono || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </label>
+                  <label>
+                    Contraseña
+                    <div className="input-container-gestion">
+                    <FaLock className="icon-registro" />
+                      <input
+                        type="text"
+                        name="contraseña"
+                        className="input-field-gestion"
+                        value={editableUser.contraseña || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </label>
+                  <label>
+                    Sede
+                    <div className="input-container-gestion">
+                    <FaMapMarked className="icon-sede" />
+                      <select
+                        name="sede"
+                        className="sede-dropdown"
+                        value={editableUser.sede}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Seleccione una sede</option>
+                        <option value="Central Cartago">Central Cartago</option>
+                        <option value="Local San José">Local San José</option>
+                        <option value="Local San Carlos">Local San Carlos</option>
+                        <option value="Limón">Centro Académico de Limón</option>
+                        <option value="Alajuela">Centro Académico de Alajuela</option>
+                      </select>
+                    </div>
                   </label>
                   <label>
                     Estado
-                    <input
-                      type="text"
-                      name="estado"
-                      value={editableUser.estado || ''}
-                      onChange={handleInputChange}
-                    />
+                    <div className="input-container-gestion">
+                    <FaFileAlt className="icon-gestion" />
+                      <input
+                        type="text"
+                        name="estado"
+                        className="input-field-gestion"
+                        value={editableUser.estado || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
                   </label>
                 </>
               )}
