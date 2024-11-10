@@ -3,12 +3,14 @@ import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderProfesor';
+import { useNavigate } from 'react-router-dom';
 
 const DisponibilidadProfesor = () => {
   const [citas, setCitas] = useState([]);
   const [citasOriginales, setCitasOriginales] = useState([]);
   const [error, setError] = useState('');
   const profesorID = sessionStorage.getItem('token');
+  const navigate = useNavigate();
 
   const formatTime = (time) => {
     const [hours, minutes] = time.split(':');
@@ -129,14 +131,14 @@ const DisponibilidadProfesor = () => {
     }
   };
 
-  const handleDiscardChanges = () => {
+  const handleGoBack = () => {
     if (!hasChanges()) {
-      alert('No hay cambios que descartar.');
-      return;
-    }
-
-    if (window.confirm('¿Está seguro de que desea descartar los cambios?')) {
-      setCitas(JSON.parse(JSON.stringify(citasOriginales)));
+      navigate('/MenuProfesor');
+    } else {
+      if (window.confirm('¿Está seguro de que desea descartar los cambios?')) {
+        setCitas(JSON.parse(JSON.stringify(citasOriginales)));
+        navigate('/MenuProfesor');
+      }
     }
   };
 
@@ -199,7 +201,7 @@ const DisponibilidadProfesor = () => {
             <button className="cita-btn" onClick={handleSave}>Guardar</button>
           </div>
           <div className="col-auto">
-            <button className="cita-btn-secondary" onClick={handleDiscardChanges}>Volver</button>
+            <button className="cita-btn-secondary" onClick={handleGoBack}>Volver</button>
           </div>
         </div>
 
