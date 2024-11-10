@@ -82,12 +82,26 @@ h2 {
   color: var(--gris_oscuro);
 }
 
-.form-addUser input {
+.input-container-add {
+  position: relative;
+  margin-bottom: 15px;
+  min-width: 50vh;
+}
+
+.input-field-add {
   padding: 10px;
   margin-bottom: 15px;
   border: 1px solid var(--gris_claro);
   border-radius: 5px;
   width: 100%;
+}
+
+.icon-add {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--azul);
 }
 
 .sede-dropdown {
@@ -96,6 +110,14 @@ h2 {
   border: 1px solid var(--gris_claro);
   border-radius: 5px;
   width: 100%;
+}
+
+.icon-sede{
+  position: absolute;
+  left: 10px;
+  top: 35%;
+  transform: translateY(-50%);
+  color: var(--azul);
 }
 
 .buttons {

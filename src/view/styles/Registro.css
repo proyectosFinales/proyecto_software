@@ -85,3 +85,19 @@ h2 {
   padding: 10px 0;
   box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
 }
+
+.sede-dropdown {
+  width: 100%;
+  padding: 10px 40px;
+  font-size: 16px;
+  border: 1px solid var(--gris_claro);
+  border-radius: 5px;
+}
+
+.icon-sede{
+  position: absolute;
+  left: 10px;
+  top: 35%;
+  transform: translateY(-50%);
+  color: var(--azul);
+}

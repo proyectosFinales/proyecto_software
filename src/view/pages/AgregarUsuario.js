@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'react-icons/fa';
 import '../styles/AgregarUsuario.css';
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import { signUpNewUser, registroProfesor } from '../../controller/Signup';
 
 const AgregarUsuario = () => {
-  const [tipoUsuario, setTipoUsuario] = useState('estudiante'); // Por defecto, se selecciona "estudiante"
+  const [tipoUsuario, setTipoUsuario] = useState('estudiante');
   const [usuario, setUsuario] = useState({
     nombre: '',
     carnet: '',
@@ -20,14 +21,7 @@ const AgregarUsuario = () => {
 
   const handleTipoUsuarioChange = (tipo) => {
     setTipoUsuario(tipo);
-    setUsuario({
-      nombre: '',
-      carnet: '',
-      numero: '',
-      correo: '',
-      contraseña: '',
-      sede: ''
-    });
+    handleLimpiarEntradas();
   };
 
   const handleInputChange = (e) => {
@@ -70,7 +64,7 @@ const AgregarUsuario = () => {
       carnet: '',
       numero: '',
       correo: '',
-      contrasena: '',
+      contraseña: '',
       sede: ''
     });
   };
@@ -94,55 +88,77 @@ const AgregarUsuario = () => {
 
         <form className="form-addUser">
           <label>Nombre:</label>
+          <div className="input-container-add">
+          <FaUser className="icon-add" />
           <input
             type="text"
             name="nombre"
+            className="input-field"
             value={usuario.nombre}
             onChange={handleInputChange}
             required
           />
+          </div>
 
           {tipoUsuario === 'estudiante' && (
             <>
               <label>Carnet:</label>
+              <div className="input-container-add">
+              <FaIdCard className="icon-add" />
               <input
                 type="text"
                 name="carnet"
+                className="input-field"
                 value={usuario.carnet}
                 onChange={handleInputChange}
                 required
               />
+              </div>
 
               <label>Número:</label>
+              <div className="input-container-add">
+              <FaPhone className="icon-add" />
               <input
                 type="text"
                 name="numero"
+                className="input-field"
                 value={usuario.numero}
                 onChange={handleInputChange}
                 required
               />
+              </div>
             </>
           )}
 
           <label>Correo:</label>
+          <div className="input-container-add">
+          <FaEnvelope className="icon-add" />
           <input
             type="email"
             name="correo"
+            className="input-field"
             value={usuario.correo}
             onChange={handleInputChange}
             required
           />
+          </div>
 
           <label>Contraseña:</label>
+          <div className="input-container-add">
+          <FaLock className="icon-add" />
           <input
             type="text"
             name="contraseña"
+            className="input-field"
             value={usuario.contraseña}
             onChange={handleInputChange}
             required
           />
+          </div>
 
           <label>Seleccione una sede:</label>
+          <div className="input-container-add">
+          <FaMapMarked className="icon-sede" />
           <select
             name="sede"
             className="sede-dropdown"
@@ -157,6 +173,7 @@ const AgregarUsuario = () => {
             <option value="Limón">Centro Académico de Limón</option>
             <option value="Alajuela">Centro Académico de Alajuela</option>
           </select>
+          </div>
 
           <div className="buttons">
             <button type="button" onClick={handleLimpiarEntradas}>Limpiar</button>
