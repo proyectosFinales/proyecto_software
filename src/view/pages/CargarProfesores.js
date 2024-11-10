@@ -4,7 +4,6 @@ import { supabase } from '../../model/Cliente';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
 import sendMail from '../../controller/Email';
-import { errorToast, successToast }  from '../components/toast';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 
 const CargarDatos = () => {
@@ -90,7 +89,7 @@ const CargarDatos = () => {
         const mensaje = "Hola, su contraseña generada es: " + contraseña + 
         " y su usuario es su correo electrónico: " + dataToInsert.correo + ". Para acceder a la plataforma, "+
         "ingrese a https://proyectos.netlify.app/ y use el correo electrónico y la contraseña.\n"+
-        "Para cualquier duda, escriba a bguzman@itcr.ac.cr y responda a este mensaje ya que es un correo automatizado.";
+        "Para cualquier duda, escriba a bguzman@itcr.ac.cr y NO responda a este mensaje ya que es un correo automatizado.";
 
         // Insertar en la base de datos
         const { data: usuarioData, error: errorInsertUser } = await supabase
@@ -126,7 +125,6 @@ const CargarDatos = () => {
             alert('Error al cargar datos en la base de datos:', errorInsertProf.message);
         } else {
             sendMail(dataToInsert.correo, "Credenciales", mensaje);
-            alert(`Datos cargados exitosamente para el carnet ${dataToInsert.carnet}`);
         }
     }
 };   
