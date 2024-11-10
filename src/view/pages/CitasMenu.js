@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styles from '../styles/MenuPrincipal.module.css';
 import Header from '../components/HeaderCoordinador'
 import Footer from '../components/Footer'
@@ -8,6 +8,7 @@ import { supabase } from '../../model/Cliente';
 
 const CitasMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
   const assignLecturersToAppointments = async () => {
     try {
       // 1. Fetch all appointments (`citas`) where `semestreActual = 1`
@@ -107,9 +108,12 @@ const CitasMenu = () => {
       }
 
       console.log('Lecturer assignments completed successfully.');
+      alert('Se asignaron correctamente los lectores');
     } catch (error) {
       console.error('Error assigning lecturers:', error.message);
+      alert('Hubo un error al realizar la asignaron de los lectores');
     }
+    navigate('/citas');
   };
 
 
