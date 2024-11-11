@@ -46,7 +46,8 @@ const AnteproyectosEstudiante = () => {
           idEstudiante,
           estudiantes(id, nombre, carnet, telefono, correo)`)
           .eq('idEstudiante',sessionStorage.getItem('token'))
-          .eq('semestreActual', 1);
+          .eq('semestreActual', 1)
+          .or('estado.eq.Aprobado,estado.eq.Reprobado,estado.eq.Pendiente');;
       if (error) {
         alert('No se pudieron obtener los anteproyectos');
         return;
