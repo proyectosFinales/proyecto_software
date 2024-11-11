@@ -14,7 +14,6 @@ const SidebarCoordinador = ({show}) => {
         <Link to="/carga-datos" className={styles.menuItem}><li>Base de datos</li></Link>
         <Link to="/citas" className={styles.menuItem}><li>Citas</li></Link>
         <Link to="/gestion-perfiles" className={styles.menuItem}><li>Gestionar perfiles</li></Link>
-        <Link to="/editar-perfil" className={styles.menuItem}><li>Modificar Información</li></Link>
     </ul>
     </nav>
   );

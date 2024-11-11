@@ -53,7 +53,7 @@ function App() {
 				<Route path="/anteproyectosCoordinador" element={<RutaProtegida element={<AnteproyectosCoordinador />} requiredRoles={["1"]} />} />
 				<Route path="/darseBaja" element={<RutaProtegida element={<Abandonar />} requiredRoles={["3"]} />} />   
 				<Route path="/asignaciones" element={<RutaProtegida element={<Asignaciones />} requiredRoles={["1"]} />} />
-				<Route path="/aprobarProyectos" element={<RutaProtegida element={<Asignaciones />} requiredRoles={["1"]} />} /> 
+				<Route path="/aprobarProyectos" element={<RutaProtegida element={<AprobarProyectos />} requiredRoles={["1"]} />} /> 
 				<Route path="/gestion-perfiles" element={<RutaProtegida element={<GestionPerfiles />} requiredRoles={["1"]} />} />
 				<Route path="/gestion-perfiles/agregar-usuario" element={<RutaProtegida element={<AgregarUsuario />} requiredRoles={["1"]} />} />
 				<Route path="/formulario-estudiantes" element={<RutaProtegida element={<FormularioEstudiantes />} requiredRoles={["3"]} />} />
