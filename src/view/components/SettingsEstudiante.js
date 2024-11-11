@@ -15,9 +15,8 @@ const SettingsCoordinador = ({show}) => {
     <nav className={show ? styles.sidebar : styles.sidebarHide}>
     <ul>
         <Link to="/editar-perfil" className={styles.menuItem}><li>Perfil</li></Link>
-        <li className={styles.menuItem} onClick={delSessionToken}>Cerrar sesión</li>
         <Link to="/darseBaja" className={styles.menuItem}><li>Darse de baja</li></Link>
-        
+        <li className={styles.menuItem} onClick={delSessionToken}>Cerrar sesión</li>
     </ul>
     </nav>
   );

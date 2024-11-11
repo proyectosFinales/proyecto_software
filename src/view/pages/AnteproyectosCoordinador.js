@@ -51,7 +51,7 @@ const AnteproyectosCoordinador = () => {
           idEstudiante,
           estudiantes(id, nombre, carnet, telefono, correo)`)
           .eq('semestreActual', 1)
-          .or('estado.eq.Aprobado,estado.eq.Reprobado');
+          .or('estado.eq.Aprobado,estado.eq.Reprobado,estado.eq.Pendiente');
       if (error) {
         errorToast('No se puedieron obtener los anteproyectos');
       } else {

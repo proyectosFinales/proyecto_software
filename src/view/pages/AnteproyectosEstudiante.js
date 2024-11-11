@@ -64,17 +64,23 @@ const AnteproyectosEstudiante = () => {
   }
 
   // Función para eliminar anteproyectos
-  async function eliminarAnteproyecto(id) {
+  async function eliminarAnteproyecto(id, estado) {
     const confirmarEnvio=window.confirm("¿Está seguro que desea eliminar este anteproyecto?");
 
     if(!confirmarEnvio){return;}
+
+    if(estado == 'Aprobado'){
+      alert("No se puede eliminar un anteproyecto aprobado.");
+      return;
+    }
 
     try {
       // Eliminar anteproyecto de la base de datos en Supabase
       const { error } = await supabase
         .from('anteproyectos')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .in('estado', ['Reprobado', 'Pendiente']);
 
       if (error) {
         alert('Error al eliminar anteproyecto:', error);
@@ -118,7 +124,7 @@ const AnteproyectosEstudiante = () => {
                       <button onClick={() => descargarAnteproyecto(anteproyecto)} className={styles.btn + ' ' + styles.descargar}>
                         Descargar
                       </button>
-                      <button onClick={() => eliminarAnteproyecto(anteproyecto.id)} className={styles.btn + ' ' + styles.eliminar}>
+                      <button onClick={() => eliminarAnteproyecto(anteproyecto.id, anteproyecto.estado)} className={styles.btn + ' ' + styles.eliminar}>
                         Eliminar
                       </button>
                     </div>

@@ -54,18 +54,18 @@ const InicioCargaDatos = () => {
                 <Link
                     className="menu-item"
                     to="/carga-datos/cantidad-proyectos-profesor"
-                    style={{ textDecoration: "none", color: "var(--primary1)" }}
+                    style={{ textDecoration: "none", color: "var(--azul)" }}
                 >
-                    <i className="fa-solid fa-chalkboard-user" style={{ color: "var(--primary1)" }}></i>
+                    <i className="fa-solid fa-chalkboard-user" style={{ color: "var(--azul)" }}></i>
                     <p>Cantidad de proyectos por profesor</p>
                 </Link>
                 <Link
                     className="menu-item"
                     to="/cargarProfesores"
-                    style={{ textDecoration: "none", color: "var(--primary1)" }}
+                    style={{ textDecoration: "none", color: "var(--azul)" }}
                 >
                     <AiOutlineCloudUpload
-                        style={{ color: "var(--primary1)", fontSize: "80px" }}
+                        style={{ color: "var(--azul)", fontSize: "80px" }}
                     />
                     <p>Carga de datos</p>
                 </Link>
