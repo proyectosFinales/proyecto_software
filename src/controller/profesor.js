@@ -31,7 +31,10 @@ class Profesor extends Usuario {
                 id, nombre, cantidadProyectos,
                 usuario:usuarios(sede),
                 anteproyectos(
-                    id, nombreEmpresa,
+                    id, nombreEmpresa, estado, tipoEmpresa, actividadEmpresa, distritoEmpresa, cantonEmpresa,
+                    provinciaEmpresa, nombreAsesor, puestoAsesor, telefonoContacto, correoContacto, nombreHR,
+                    telefonoHR, correoHR, contexto, justificacion, sintomas, impacto, nombreDepartamento,
+                    tipoProyecto, observaciones,
                     estudiante:estudiantes(id, nombre, usuario:usuarios(sede, correo), carnet, telefono)
                 )
             `)
