@@ -23,3 +23,12 @@
 .button-light:hover {
     background-color: var(--secondary1);   
 }
+
+.button-blue {
+    background-color: var(--azul);
+    color: var(--background1);
+}
+
+.button-blue:hover {
+    background-color: var(--celeste);   
+}

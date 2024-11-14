@@ -2,15 +2,27 @@ import { useState } from "react";
 import styles from "../styles/layout.module.css";
 import ToastContainer from "./toast";
 import SidebarCoordinador from "./SidebarCoordinador";
+import SidebarProfesor from "./SidebarProfesor";
+import SidebarEstudiante from "./SidebarEstudiante";
 import SettingsCoordinador from "./SettingsCoordinador";
+import AppFooter from "./Footer";
+import HeaderCoordinador from "./HeaderCoordinador";
+import HeaderProfesor from "./HeaderProfesor";
+import HeaderEstudiante from "./HeaderEstudiante";
 
 const Layout = ({ title, children, Sidebar=SidebarCoordinador, Settings=SettingsCoordinador }) => {
     return <>
-        <Title Sidebar={Sidebar} Settings={Settings}>{title}</Title>
+        {/* <Title Sidebar={Sidebar} Settings={Settings}>{title}</Title> */}
+        {
+            Sidebar === SidebarCoordinador ? <HeaderCoordinador title={title}/> :
+            Sidebar === SidebarProfesor ? <HeaderProfesor title={title}/> :
+            <HeaderEstudiante title={title}/>
+        }
         <main className={styles.layout}>
             {children}
         </main>
-        <Footer/>
+        {/* <Footer/> */}
+        <AppFooter/>
         <ToastContainer/>
     </>;
 }
@@ -36,7 +48,6 @@ const Title = ({ children, Sidebar, Settings }) => {
     </>;
 }
 const Footer = () => <>
-    {/* <PiePagina /> */}
     <footer className={styles.footer}>
         <p>Instituto Tecnológico de Costa Rica</p>
         <p>2024</p>
