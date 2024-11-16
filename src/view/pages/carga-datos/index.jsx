@@ -67,7 +67,7 @@ const InicioCargaDatos = () => {
                     <AiOutlineCloudUpload
                         style={{ color: "var(--azul)", fontSize: "80px" }}
                     />
-                    <p>Carga de datos</p>
+                    <p>Registrar profesores</p>
                 </Link>
                 <div className="menu-item" onClick={() => setModal(true)}>
                     <i className="fas fa-clock"></i>
