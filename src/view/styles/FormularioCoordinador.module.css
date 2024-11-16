@@ -63,6 +63,10 @@ input[type="radio"] {
   font-size: 16px;
 }
 
+.aviso{
+  font-size: 20px;
+}
+
 .aprobar {
   background-color: #001f61;
   color: white;

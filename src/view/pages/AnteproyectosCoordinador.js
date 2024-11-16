@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
+import {useNavigate } from 'react-router-dom'; // Importa useNavigate
 import styles from '../styles/AnteproyectosCoordinador.module.css';
 import * as XLSX from 'xlsx'; // Importa xlsx para generar el archivo Excel
 import { supabase } from '../../model/Cliente';
-import SidebarCoordinador from '../components/SidebarCoordinador';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import {descargarAnteproyecto} from '../../controller/DescargarPDF';
 import styles2 from '../styles/table.module.css';
-import {errorToast, successToast} from '../components/toast';
+import {errorToast,} from '../components/toast';
 
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -115,6 +114,7 @@ const AnteproyectosCoordinador = () => {
         <main>
           <div className={styles.lista_anteproyectos_coordinador}>
             <button className={styles.generar_reporte} onClick={handleGenerateReport}>Generar reporte de anteproyectos</button>
+            <div className={styles.contenedor_tabla}>
             <table className={styles2.table}>
               <thead>
                 <tr>
@@ -140,6 +140,7 @@ const AnteproyectosCoordinador = () => {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
         </main>
       </div>
