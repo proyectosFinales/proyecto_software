@@ -32,10 +32,29 @@ class Anteproyecto {
     /** @type {Anteproyecto[]} */
     anteproyectosPerdidos = [];
 
-    constructor(id, nombreEmpresa, estado, estudiante, encargado) {
+    constructor(id, nombreEmpresa, estado, tipoEmpresa, actividadEmpresa, distritoEmpresa, cantonEmpresa, provinciaEmpresa, nombreAsesor, puestoAsesor, telefonoContacto, correoContacto, nombreHR, telefonoHR, correoHR, contexto, justificacion, sintomas, impacto, nombreDepartamento, tipoProyecto, observaciones, estudiante, encargado) {
         this.id = id;
         this.nombreEmpresa = nombreEmpresa;
         this.estado = estado;
+        this.tipoEmpresa = tipoEmpresa;
+        this.actividadEmpresa = actividadEmpresa;
+        this.distritoEmpresa = distritoEmpresa;
+        this.cantonEmpresa = cantonEmpresa;
+        this.provinciaEmpresa = provinciaEmpresa;
+        this.nombreAsesor = nombreAsesor;
+        this.puestoAsesor = puestoAsesor;
+        this.telefonoContacto = telefonoContacto;
+        this.correoContacto = correoContacto;
+        this.nombreHR = nombreHR;
+        this.telefonoHR = telefonoHR;
+        this.correoHR = correoHR;
+        this.contexto = contexto;
+        this.justificacion = justificacion;
+        this.sintomas = sintomas;
+        this.impacto = impacto;
+        this.nombreDepartamento = nombreDepartamento;
+        this.tipoProyecto = tipoProyecto;
+        this.observaciones = observaciones;
         this.estudiante = estudiante;
         this.encargado = encargado;
     }
@@ -45,6 +64,25 @@ class Anteproyecto {
             obj.id,
             obj.nombreEmpresa,
             obj.estado,
+            obj.tipoEmpresa,
+            obj.actividadEmpresa,
+            obj.distritoEmpresa,
+            obj.cantonEmpresa,
+            obj.provinciaEmpresa,
+            obj.nombreAsesor,
+            obj.puestoAsesor,
+            obj.telefonoContacto,
+            obj.correoContacto,
+            obj.nombreHR,
+            obj.telefonoHR,
+            obj.correoHR,
+            obj.contexto,
+            obj.justificacion,
+            obj.sintomas,
+            obj.impacto,
+            obj.nombreDepartamento,
+            obj.tipoProyecto,
+            obj.observaciones,
             Estudiante.from(obj.estudiante),
             Profesor.from(obj.encargado)
         )

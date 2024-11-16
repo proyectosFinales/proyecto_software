@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styles from './Sidebar.module.css';
 
-
 const SidebarCoordinador = ({show}) => {
   return (
     <nav className={show ? styles.sidebar : styles.sidebarHide}>

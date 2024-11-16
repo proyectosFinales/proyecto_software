@@ -30,7 +30,6 @@ import RecuperarContraseña from './view/pages/RecuperarContraseña';
 import Abandonar from './view/pages/Abandonar';
 // Otras importaciones de componentes
 import InicioAsignaciones from './view/pages/asignacion-proyectos';
-import Anteproyectos from './view/pages/anteproyectos';
 import CambioContraseña from './view/pages/CambioContraseña.js';
 import AprobarProyectos from './view/pages/AprobarProyectos';
 import LimpiarToken from './controller/limpiezaToken';
@@ -38,7 +37,6 @@ import ProyectosAsignadosProfesor from './view/pages/asignacion-proyectos/proyec
 import RutaProtegida from './controller/ProteccionRutas.js';
 
 function App() {
-
 	
 	return (
 		<Router>
@@ -79,7 +77,6 @@ function App() {
 					<Route path="automatica" element={<RutaProtegida element={<AsignacionAutomatica />} requiredRoles={["1"]} />} />
 					<Route path="manual" element={<RutaProtegida element={<EdicionAsignacionProyectos />} requiredRoles={["1"]} />} />
 				</Route>
-				<Route path="/anteproyectos" element={<RutaProtegida element={<Anteproyectos />} requiredRoles={["1"]} />} />
 				<Route path="/recuperar-contraseña" element={<RecuperarContraseña />} />
 				<Route path="/cambiar-contraseña/:token" element={<CambioContraseña />} />
 				<Route path="/proyectos-profesor" element={<RutaProtegida element={<ProyectosAsignadosProfesor />} requiredRoles={["2"]} />} />
