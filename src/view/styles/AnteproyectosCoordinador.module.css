@@ -30,6 +30,11 @@
   color: var(--gris_oscuro);
 }
 
+.contenedor_tabla{
+  max-height: 70vh; /* Limita la altura al 70% de la ventana */
+  overflow-y: auto; /* Agrega desplazamiento vertical si el contenido excede */
+}
+
 .tabla_anteproyectos_coordinador {
   width: 100%;
   border-collapse: collapse;

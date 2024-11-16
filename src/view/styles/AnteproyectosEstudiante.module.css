@@ -79,6 +79,11 @@
   color: var(--gris_oscuro);
 }
 
+.contenedor_tabla{
+  max-height: 70vh; 
+  overflow-y: auto; 
+}
+
 .tabla_anteproyectos_estudiante {
   width: 100%;
   border-collapse: collapse;

@@ -103,6 +103,7 @@ const AnteproyectosEstudiante = () => {
           <button className={styles.crear_anteproyecto} onClick={() => navigate('/formulario-estudiantes')}>
             Crear anteproyecto
           </button>
+          <div className={styles.contenedor_tabla}>
           <table className={styles2.table}>
             <thead>
               <tr>
@@ -133,6 +134,7 @@ const AnteproyectosEstudiante = () => {
               ))}
             </tbody>
           </table>
+          </div>
         </main>
       </div>
 

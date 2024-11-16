@@ -488,6 +488,7 @@ const CoordinadorForm = () => {
       </div>
 
       <h2>Datos del proyecto a realizar</h2>
+      <h3 className={styles.aviso}>(En caso de que la cantidad de información supere la altura del campo puede expandir el campo al arrastrar la esquina inferior derecha del mismo)</h3>
 
       <div className={styles.formGroup}>
         <label>19. Contexto: *
