@@ -152,7 +152,7 @@ const CargarDatos = () => {
             Cargar datos
             </label>
         </button>
-        {infoVisible.formato && <p className={styles.infoText}>Seleccione una archivo excel que contenga las columnas: Nombre, Carnet, Correo y Sede.
+        {infoVisible.formato && <p className={styles.infoText}>Seleccione una archivo excel que contenga las columnas: Nombre, Carnet, Correo, Sede y Telefono.
           Puede contener más columnas pero solo se subiran los datos de las columnas solicitadas.</p>}
         <input
             type="file"
