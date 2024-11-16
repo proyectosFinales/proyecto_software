@@ -65,20 +65,21 @@ h1 {
 .anteproyectos-profesores {
   padding: 0;
   margin: 5px 0;
+  list-style: none;
 }
 
 .anteproyectos-profesores li {
-  display: flex;
-  gap: 10px;
   margin: 0 0 5px 0;
-  align-items: center;
+  border-bottom: 1px solid var(--secondary1);
+  padding-bottom: 5px;
 }
 
-.anteproyectos-profesores li button {
-  background-color: var(--primary1);
-  color: var(--background1);
-  padding: 10px 15px;
-  border-radius: 5px;
+.anteproyectos-profesores button {
+  width: 100%;
+}
+
+.anteproyectos-profesores li p {
+  margin:  0 0 10px 0;
 }
 
 .precaucion {

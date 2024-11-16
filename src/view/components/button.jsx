@@ -9,7 +9,7 @@ import styles from "../styles/button.module.css";
  */
 const Button = ({ children, type, ...properties }) =>
     <button
-        className={`${styles.button} ${styles[`button-${type || "dark"}`]}`}
+        className={`${styles.button} ${styles[`button-${type || "blue"}`]}`}
         {...properties}
     >{children}</button>;
 

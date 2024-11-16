@@ -25,7 +25,7 @@ const CantidadProyectosProfesor = () => {
 
     return <>
         <Layout title="Asignación de cantidad de proyectos por profesor">
-            <Button type="dark" onClick={guardarCambios}>Guardar cambios</Button>
+            <Button onClick={guardarCambios}>Guardar cambios</Button>
             <table className={styles.table}>
                 <thead>
                     <tr>

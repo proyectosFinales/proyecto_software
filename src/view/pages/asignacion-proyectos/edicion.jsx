@@ -40,18 +40,21 @@ const EdicionAsignacionProyectos = () => {
                 <tbody>
                     {profesores.map((profesor, i) =>
                         <tr key={`profesor-${i}`}>
-                            <td>{profesor.nombre}</td>
+                            <td>
+                                <p style={{margin: "0 0 5px 0"}}>{profesor.nombre}</p>
+                                <AdicionAnteproyectoProfesor profesor={profesor} onAdicion={actualizarProfesores}/>
+                            </td>
                             <td>
                                 <ul className="anteproyectos-profesores">
                                     {profesor.anteproyectos.map((ap, j) =>
                                         <li key={`anteproyecto-${j}-profesor-${i}`}>
-                                            <button onClick={() => desencargarAnteproyecto(ap)}>
-                                                <i className="fa-solid fa-trash"></i>
-                                            </button>
-                                            <span>{ap.estudiante.nombre}</span>
+                                            <p><b>Estudiante</b>: {ap.estudiante.nombre}</p>
+                                            <p><b>Empresa</b>: {ap.nombreEmpresa}</p>
+                                            <Button onClick={() => desencargarAnteproyecto(ap)}>
+                                                Deasignar proyecto
+                                            </Button>
                                         </li>
                                     )}
-                                    <AdicionAnteproyectoProfesor profesor={profesor} onAdicion={actualizarProfesores}/>
                                 </ul>
                             </td>
                         </tr>
@@ -103,7 +106,7 @@ const AdicionAnteproyectoProfesor = ({ profesor, onAdicion }) => {
                     <option disabled value="">Seleccione un anteproyecto</option>
                     {anteproyectos.map((ap, index) =>
                         <option key={`anteproyecto-asignable-${index}`} value={ap.id}>
-                            {ap.estudiante.nombre}
+                            {ap.estudiante.nombre} - {ap.nombreEmpresa}
                         </option>
                     )}
                 </select>
