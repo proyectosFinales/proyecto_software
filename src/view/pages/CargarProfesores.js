@@ -100,8 +100,7 @@ const CargarDatos = () => {
                 correo: dataToInsert.correo,
                 rol: '2',
                 contraseña: contraseña,
-                sede: dataToInsert.sede,
-                telefono:dataToInsert.telefono
+                sede: dataToInsert.sede
             })
             .select('id') // Selecciona el ID del usuario insertado
             .single(); // Obtén solo el primer resultado (esperando un solo registro)
@@ -119,7 +118,8 @@ const CargarDatos = () => {
           .insert({
               nombre: dataToInsert.nombre,
               carnet: dataToInsert.carnet,
-              id: usuarioId 
+              id: usuarioId,
+              telefono: dataToInsert.carnet
           });
         
 
