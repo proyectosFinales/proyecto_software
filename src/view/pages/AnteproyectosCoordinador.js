@@ -119,7 +119,7 @@ const AnteproyectosCoordinador = () => {
               <thead>
                 <tr>
                   <th>Estudiante</th>
-                  <th>Propuesta de proyecto</th>
+                  <th>Nombre de la empresa</th>
                   <th>Estado del proyecto</th>
                   <th></th>
                 </tr>
