@@ -124,7 +124,7 @@ const AprobarProyectos = () => {
               <thead>
                 <tr>
                   <th>Estudiante</th>
-                  <th>Propuesta de proyecto</th>
+                  <th>Nombre de la empresa</th>
                   <th>Estado del proyecto
                       <AiOutlineInfoCircle 
                         className={styles.infoIcon}
