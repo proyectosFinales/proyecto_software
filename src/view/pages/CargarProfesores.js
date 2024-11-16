@@ -83,7 +83,7 @@ const CargarDatos = () => {
         }
 
         if (existingUser && existingUser.length > 0) {
-            console.log(`El carnet ${dataToInsert.carnet} ya existe. No se insertará este registro.`);
+            alert(`El carnet ${dataToInsert.carnet} ya existe. No se insertará este registro.`);
             continue;
         }
 
