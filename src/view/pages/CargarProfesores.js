@@ -45,7 +45,8 @@ const CargarDatos = () => {
         Nombre: row.Nombre,
         Correo: row.Correo,
         Carnet: row.Carnet,
-        Sede: row.Sede
+        Sede: row.Sede,
+        Telefono: row.Telefono
       }));
   
       setExcelData(filteredData); // Guardamos los datos filtrados en el estado
@@ -66,7 +67,8 @@ const CargarDatos = () => {
             nombre: row.Nombre,
             carnet: row.Carnet,
             correo: row.Correo,
-            sede: row.Sede
+            sede: row.Sede,
+            telefono: row.Telefono
         };
 
         // Verificación si ya existe el carnet
@@ -98,7 +100,8 @@ const CargarDatos = () => {
                 correo: dataToInsert.correo,
                 rol: '2',
                 contraseña: contraseña,
-                sede: dataToInsert.sede
+                sede: dataToInsert.sede,
+                telefono:dataToInsert.telefono
             })
             .select('id') // Selecciona el ID del usuario insertado
             .single(); // Obtén solo el primer resultado (esperando un solo registro)
