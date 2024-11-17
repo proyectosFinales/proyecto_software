@@ -39,7 +39,7 @@ const GestionPerfiles = () => {
         }),
       });
     } catch (error) {
-      alert("El usuario presente no está registrado, por favor eliminelo o bien agreguelo a la plataforma seleccionando la casilla y presionando el botón 'Agregar usuario'.");
+      alert("El usuario presente no está registrado. Por favor, elimínelo del sistema seleccionando la casilla correspondiente y presionando el botón 'Eliminar usuario(s)'.");
     }
   };
 
