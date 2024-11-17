@@ -206,6 +206,26 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+                  <label>
+                    Sede
+                    <div className="input-container-gestion">
+                    <FaMapMarked className="icon-sede" />
+                      <select
+                        name="sede"
+                        className="sede-dropdown"
+                        value={editableUser.sede}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Seleccione una sede</option>
+                        <option value="Central Cartago">Central Cartago</option>
+                        <option value="Local San José">Local San José</option>
+                        <option value="Local San Carlos">Local San Carlos</option>
+                        <option value="Limón">Centro Académico de Limón</option>
+                        <option value="Alajuela">Centro Académico de Alajuela</option>
+                      </select>
+                    </div>
+                  </label>
                 </>
               ) : (
                 <>
