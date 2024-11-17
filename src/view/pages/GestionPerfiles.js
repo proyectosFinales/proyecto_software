@@ -193,6 +193,19 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+                  <label>
+                    Contraseña
+                    <div className="input-container-gestion">
+                    <FaLock className="icon-registro" />
+                      <input
+                        type="text"
+                        name="contraseña"
+                        className="input-field-gestion"
+                        value={editableUser.contraseña || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </label>
                 </>
               ) : (
                 <>
