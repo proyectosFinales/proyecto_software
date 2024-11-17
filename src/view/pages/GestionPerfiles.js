@@ -39,7 +39,7 @@ const GestionPerfiles = () => {
         }),
       });
     } catch (error) {
-      alert("El usuario presente no está registrado, por favor eliminelo o bien agreguelo a la plataforma seleccionando la casilla y presionando el botón 'Agregar usuario'.");
+      alert("El usuario presente no está registrado. Por favor, elimínelo del sistema seleccionando la casilla correspondiente y presionando el botón 'Eliminar usuario(s)'.");
     }
   };
 
@@ -191,6 +191,39 @@ const GestionPerfiles = () => {
                         value={editableUser.correo || ''}
                         onChange={handleInputChange}
                       />
+                    </div>
+                  </label>
+                  <label>
+                    Contraseña
+                    <div className="input-container-gestion">
+                    <FaLock className="icon-registro" />
+                      <input
+                        type="text"
+                        name="contraseña"
+                        className="input-field-gestion"
+                        value={editableUser.contraseña || ''}
+                        onChange={handleInputChange}
+                      />
+                    </div>
+                  </label>
+                  <label>
+                    Sede
+                    <div className="input-container-gestion">
+                    <FaMapMarked className="icon-sede" />
+                      <select
+                        name="sede"
+                        className="sede-dropdown"
+                        value={editableUser.sede}
+                        onChange={handleInputChange}
+                        required
+                      >
+                        <option value="">Seleccione una sede</option>
+                        <option value="Central Cartago">Central Cartago</option>
+                        <option value="Local San José">Local San José</option>
+                        <option value="Local San Carlos">Local San Carlos</option>
+                        <option value="Limón">Centro Académico de Limón</option>
+                        <option value="Alajuela">Centro Académico de Alajuela</option>
+                      </select>
                     </div>
                   </label>
                 </>
