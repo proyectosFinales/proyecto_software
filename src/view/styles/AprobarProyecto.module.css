@@ -1,0 +1,84 @@
+.expandedRow {
+    background-color: #f9f9f9;
+  }
+  
+.info_adicional {
+    padding: 10px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.lista_anteproyectos_coordinador {
+    width: 70%;
+    margin: auto;
+    margin-top: 30px;
+    text-align: center;
+    max-height: 70vh; 
+    overflow-y: auto;
+  }
+
+.tabla_anteproyectos_coordinador {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid var(--primary1);
+    margin: 5px 0 15px 0;
+  }
+  
+  .tabla_anteproyectos_coordinador th,
+  .tabla_anteproyectos_coordinador td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid var(--gris_claro);
+  }
+  
+  .tabla_anteproyectos_coordinador th {
+    background-color: var(--gris_oscuro);
+    color: white;
+    font-weight: bold;
+  }
+  
+  .tabla_anteproyectos_coordinador td {
+    font-size: 14px;
+    color: var(--negro);
+  }
+  
+  .contenedor_botones_anteproyectos_coordinador {
+    display: flex;
+    gap: 10px;
+  }
+  
+  .btn {
+    margin-right: 5px;
+    padding: 5px 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+  }
+  
+  .revisar {
+    background-color: var(--azul);
+    color: white;
+    border-radius: 5px;
+  }
+  
+  .revisar:hover {
+    background-color: var(--gris_claro);
+    color: var(--gris_oscuro);
+  }
+  
+  .descargar {
+    background-color: var(--azul);
+    color: white;
+    border-radius: 5px;
+  }
+  
+  .descargar:hover {
+    background-color: var(--gris_claro);
+    color: white;
+  }
+
+  .infoText {
+    font-size: 0.8rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }

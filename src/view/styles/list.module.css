@@ -1,0 +1,32 @@
+.list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 2px solid var(--primary1);
+    margin: 5px 0;
+}
+
+.title {
+    background-color: var(--secondary2);
+    margin: 0;
+    font-size: 16px;
+    color: var(--primary1);
+    font-weight: bold;
+    border-bottom: 2px solid var(--primary1);
+}
+
+.list li:nth-child(odd) {
+    background-color: var(--secondary2);
+}
+
+.list li {
+    padding: 10px 20px;
+}
+
+.list li p {
+    margin: 0;
+}
+
+.list li p label {
+    font-weight: bold;
+}
