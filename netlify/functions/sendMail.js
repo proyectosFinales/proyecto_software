@@ -20,12 +20,12 @@ exports.handler = async function(event, context) {
 
   const config = {
     method: 'post',
-    url: 'https://api.mailjet.com/v3.1/send',
+    url: process.env.MAIL_JET_URL,
     data: data,
     headers: { 'Content-Type': 'application/json' },
     auth: {
-      username: '3a4ac386b4ed148b6357eeccac0ab83b',
-      password: '33cbb34c0f2241405b48c81dbccb64d4'
+      username: process.env.MAIL_JET_USERNAME,
+      password: process.env.MAIL_JET_PASSWORD
     },
   };
 
