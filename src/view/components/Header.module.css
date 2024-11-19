@@ -1,0 +1,29 @@
+.header {
+  height: 80px;
+  background-color: var(--gris_claro);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 1px solid black;
+}
+
+
+.menuIcon {
+  font-size: 35px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  left: 20px;
+}
+
+.settingsIcon {
+  margin-right: 10px;
+  font-size: 35px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  right: 20px;
+}
+  

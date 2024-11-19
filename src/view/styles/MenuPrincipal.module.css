@@ -1,0 +1,67 @@
+.App {
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+  
+  .AppHeader {
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f5f5f5;
+    border-bottom: 2px solid #000;
+  }
+  
+  .settingsIcon {
+    font-size: 35px;
+    margin-right: 10px;
+    cursor: pointer;
+    border: none;
+    background: none;
+  }
+  
+  .menuGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 30px;
+    justify-items: center;
+    align-items: center;
+    padding: 100px 0 270px 0;
+  }
+  
+  .menuItem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer; /* Hacemos que se vea como botón */
+    text-decoration: none;
+    transition: transform 0.2s ease-in-out;
+    color: #002855; /* Color de texto */
+  }
+  
+  .menuItem:hover {
+    transform: scale(1.05); /* Efecto al pasar el mouse */
+  }
+  
+  .menuItem i {
+    font-size: 50px;
+    color: #001f61;
+  }
+  
+  .AppFooter {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-top: 1px solid #000;
+    bottom: 0;
+    position: relative;
+  }
+  
+  .AppFooter p {
+    margin: 0;
+    font-size: 14px;
+    color: #000000;
+  }
+  

@@ -1,0 +1,46 @@
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    border: 2px solid var(--primary1);
+    margin: 5px 0 15px 0;
+}
+
+.table thead tr {
+    background-color: var(--secondary2);
+    text-align: left;
+}
+
+.table th {
+    padding: 10px 20px;
+    text-align: left;
+}
+
+.table td {
+    padding-left: 20px;
+    padding-right: 20px;
+    text-align: left;
+}
+
+.table tr:nth-child(even) {
+    background-color: var(--secondary2);
+}
+
+.tableButtons {
+    text-align: center;
+}
+
+.tableButtons button {
+    margin: 5px;
+}
+
+.table td label {
+    margin-top: 10px;
+}
+
+.tableSpace td {
+    padding: 10px 20px;
+}
+
+.title {
+    border-bottom: 2px solid var(--primary1);
+}

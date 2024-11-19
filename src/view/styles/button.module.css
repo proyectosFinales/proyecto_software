@@ -1,0 +1,34 @@
+.button {
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.button-dark {
+    background-color: var(--primary1);
+    color: var(--background1);
+}
+
+.button-dark:hover {
+    background-color: var(--primary2);   
+}
+
+.button-light {
+    background-color: var(--background1);
+    color: var(--primary1);
+    border: 2px solid var(--primary1);
+}
+
+.button-light:hover {
+    background-color: var(--secondary1);   
+}
+
+.button-blue {
+    background-color: var(--azul);
+    color: var(--background1);
+}
+
+.button-blue:hover {
+    background-color: var(--celeste);   
+}

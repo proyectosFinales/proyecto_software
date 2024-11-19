@@ -1,0 +1,102 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+
+.citas-div {
+    padding: 20px 20px 60px 20px;
+}
+
+.cita-form {
+    flex: 1;
+    padding: 20px 50px;
+    border: 1px solid #000;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+}
+
+.cita-form h2 {
+    margin-bottom: 20px;
+}
+
+.cita-form label {
+    display: block;
+    margin-bottom: 15px;
+}
+
+.cita-form input {
+    width: 100%;
+    padding: 5px;
+    margin-top: 5px;
+    border-radius: 5px;
+}
+
+.cita-btn {
+    display: block;
+    padding: 10px;
+    background-color: var(--azul);
+    color: var(--blanco);
+    border: solid 1px var(--azul);
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.cita-btn-error {
+    background-color: var(--rojo);
+}
+
+.cita-btn-secondary {
+    display: block;
+    padding: 10px;
+    background-color: var(--blanco);
+    color: var(--azul);
+    border: solid 1px var(--azul);
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 15px;
+    position: relative;
+}
+
+
+
+.cita-table {
+    flex: 2;
+    padding: 20px;
+}
+
+.cita-table h3 {
+    margin-bottom: 15px;
+}
+
+.cita-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.cita-table th,
+.cita-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.cita-table th {
+    background-color: #f5f5f5;
+}
+
+.cita-table tr.cita-row {
+    cursor: pointer;
+}
+
+.styled-input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    width: 100%;
+}
+
+.label-modal {
+    margin-bottom: 15px;
+}
