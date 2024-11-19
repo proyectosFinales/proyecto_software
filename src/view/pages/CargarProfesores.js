@@ -90,7 +90,7 @@ const CargarDatos = () => {
         const contraseña = generarContraseña();
         const mensaje = "Hola, su contraseña generada es: " + contraseña + 
         " y su usuario es su correo electrónico: " + dataToInsert.correo + ". Para acceder a la plataforma, "+
-        "ingrese a https://proyectos.netlify.app/ y use el correo electrónico y la contraseña.\n"+
+        "ingrese a https://proyectosfinales.netlify.app/ y use el correo electrónico y la contraseña.\n"+
         "Para cualquier duda, escriba a bguzman@itcr.ac.cr y NO responda a este mensaje ya que es un correo automatizado.";
 
         // Insertar en la base de datos
