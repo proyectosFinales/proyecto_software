@@ -1,0 +1,156 @@
+/* AnteproyectosEstudiante.module.css */
+
+.contenedor_anteproyectos_estudiante {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: var(--blanco);
+}
+
+.header {
+  height: 80px;
+  background-color: var(--gris_claro);
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-bottom: 2px solid var(--negro);
+}
+
+.menuIcon {
+  font-size: 35px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: absolute;
+  left: 20px;
+}
+
+.contenedor_menu_lateral {
+  display: flex;
+  flex: 1;
+}
+
+.sidebar {
+  width: 250px;
+  background-color: var(--gris_oscuro);
+  color: white;
+  padding-top: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  padding: 15px 20px;
+  font-size: 16px;
+  border-bottom: 1px solid var(--gris_claro);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.sidebar li:hover {
+  background-color: var(--gris_claro);
+}
+
+.lista_anteproyectos_estudiante {
+  width: 70%;
+  margin: auto;
+  margin-top: 30px;
+  text-align: center;
+}
+
+.crear_anteproyecto {
+  background-color: var(--azul);
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 20px;
+}
+
+.crear_anteproyecto:hover {
+  background-color: var(--gris_claro);
+  color: var(--gris_oscuro);
+}
+
+.contenedor_tabla{
+  max-height: 70vh; 
+  overflow-y: auto; 
+}
+
+.tabla_anteproyectos_estudiante {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid var(--primary1);
+  margin: 5px 0 15px 0;
+}
+
+.tabla_anteproyectos_estudiante th,
+.tabla_anteproyectos_estudiante td {
+  padding: 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--gris_claro);
+}
+
+.tabla_anteproyectos_estudiante th {
+  background-color: var(--gris_oscuro);
+  color: white;
+  font-weight: bold;
+}
+
+.tabla_anteproyectos_estudiante td {
+  font-size: 14px;
+  color: var(--negro);
+}
+
+.contenedor_botones_anteproyectos_estudiante {
+  display: flex;
+  gap: 10px;
+}
+
+.btn {
+  margin-right: 5px;
+  padding: 5px 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.editar {
+  background-color: var(--azul);
+  color: white;
+  border-radius: 5px;
+}
+
+.editar:hover {
+  background-color: var(--gris_claro);
+  color: var(--gris_oscuro);
+}
+
+.descargar {
+  background-color: var(--azul);
+  color: var(--blanco);
+  border-radius: 5px;
+}
+
+.descargar:hover {
+  background-color: var(--gris_claro);
+  color: var(--gris_oscuro);
+}
+
+.eliminar {
+  background-color: var(--rojo);
+  color: var(--blanco);
+  border-radius: 5px;
+}
+
+.eliminar:hover {
+  background-color: var(--gris_claro);
+  color: var(--gris_oscuro);
+}

@@ -1,0 +1,90 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: var(--blanco);
+}
+
+.uploadButton {
+    background-color: var(--gris_oscuro);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+    margin-left: 20px;
+}
+
+.selectButton {
+    background-color: var(--gris_oscuro);
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.datos_cargados{
+    width: 70%;
+    margin: auto;
+    margin-top: 30px;
+    text-align: center;
+}
+
+.tableContainer {
+    margin-top: 20px;
+    border: 1px solid black; 
+    width: 80%;
+    margin: 0 auto;
+    background-color: #ddd;
+    height: 400px;
+    overflow-y: scroll;
+}
+
+.infoIcon {
+    cursor: pointer;
+    margin-left: 5px;
+    color: var(--celeste); 
+    margin-right: 10px;
+    font-size: 20px;
+  }
+
+
+.button {
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.tabla_proyectos {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla_proyectos th, .tabla_proyectos td {
+    padding: 10px;
+    border: 1px solid black;
+}
+
+.tabla_proyectos th {
+    background-color: #f2f2f2;
+}
+
+.tabla_proyectos tbody {
+    background-color: #ddd;
+    overflow-y: scroll;
+    max-height: 400px;
+}
+.infoText {
+    font-size: 01rem;
+    color: #6c757d;
+    margin-top: 5px;
+  }
