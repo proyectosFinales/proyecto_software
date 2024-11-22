@@ -12,19 +12,19 @@ const InicioCargaDatos = () => {
     const ReiniciarBaseDatos = async () => {
         if (window.confirm('¿Está seguro(a) de que desea eliminar los registros?')) {
             try {
-                // const { data: usuariosDeleted, error: usuariosError } = await supabase
-                //     .from('usuarios')
-                //     .delete()
-                //     .in('id', supabase.from('anteproyectos').select('idEstudiante').eq('estado', 'Aprobado'))
+                const { data: usuariosDeleted, error: usuariosError } = await supabase
+                    .from('usuarios')
+                    .delete()
+                    .in('id', supabase.from('anteproyectos').select('idEstudiante').eq('estado', 'Aprobado'))
 
-                // if (usuariosError) throw usuariosError;
+                if (usuariosError) throw usuariosError;
 
-                // const { data: disponibilidadDeleted, error: disponibilidadError } = await supabase
-                //     .from('disponibilidadCitas')
-                //     .delete()
-                //     .neq('id', null);
+                const { data: disponibilidadDeleted, error: disponibilidadError } = await supabase
+                    .from('disponibilidadCitas')
+                    .delete()
+                    .neq('id', null);
 
-                // if (disponibilidadError) throw disponibilidadError;
+                if (disponibilidadError) throw disponibilidadError;
 
                 const { data: anteproyectosUpdated, error: anteproyectosError } = await supabase
                     .from('anteproyectos')
