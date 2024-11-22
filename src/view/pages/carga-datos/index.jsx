@@ -15,7 +15,7 @@ const InicioCargaDatos = () => {
                 const { data: usuariosAprobados, error: usuariosAprobadosError } = await supabase
                     .from('anteproyectos')
                     .select('idEstudiante')
-                    .or('estado.eq.Aprobado,estado.eq.Finalizado')
+                    .eq('estado', 'Finalizado')
 
                 if (usuariosAprobadosError) throw usuariosAprobadosError;
 
