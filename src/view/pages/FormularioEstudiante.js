@@ -278,6 +278,18 @@ const EstudianteForm = () => {
             <input
               type="radio"
               name="provinciaEmpresa"
+              value="Alajuela"
+              onChange={(e) => setProvinciaEmpresa(e.target.value)}
+              required
+            />
+            Alajuela
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
               value="Cartago"
               onChange={(e) => setProvinciaEmpresa(e.target.value)}
               required
