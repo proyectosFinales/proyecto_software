@@ -368,6 +368,20 @@ const CoordinadorForm = () => {
             <input
               type="radio"
               name="provinciaEmpresa"
+              value="Alajuela"
+              checked={provinciaEmpresa === "Alajuela" || provinciaEmpresa === " "}
+              onChange={(e) => setProvinciaEmpresa(e.target.value)}
+              required
+              
+            />
+            Alajuela
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
               value="Cartago"
               checked={provinciaEmpresa === "Cartago" || provinciaEmpresa === " "}
               onChange={(e) => setProvinciaEmpresa(e.target.value)}

@@ -345,6 +345,18 @@ const CoordinadorForm = () => {
             <input
               type="radio"
               name="provinciaEmpresa"
+              value="Alajuela"
+              checked={provinciaEmpresa === "Alajuela" || provinciaEmpresa === " "}
+              disabled
+            />
+            Alajuela
+          </label>
+        </div>
+        <div>
+          <label>
+            <input
+              type="radio"
+              name="provinciaEmpresa"
               value="Cartago"
               checked={provinciaEmpresa === "Cartago" || provinciaEmpresa === " "}
               disabled  
