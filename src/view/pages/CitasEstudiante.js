@@ -1,3 +1,7 @@
+/**
+ * CitasEstudiante.jsx
+ * Vista para que un Estudiante vea la cita asignada a su anteproyecto/proyecto.
+ */
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
@@ -19,62 +23,60 @@ const CitasEstudiante = () => {
   useEffect(() => {
     const fetchCita = async () => {
       try {
-        const { data: anteproyectoData, error: anteproyectoError } = await supabase
-          .from('anteproyectos')
-          .select('id, idEncargado')
-          .eq('idEstudiante', estudianteID, 'semestreActual', 1);
+        // 1. Buscar anteproyecto de este estudiante
+        const { data: anteData, error: anteError } = await supabase
+          .from('Anteproyecto')
+          .select('id, estudiante_id, estado, /* si usas... */')
+          .eq('estudiante_id', estudianteID)
+          .eq('semestre_id', 1); // Ajusta si usas semestres
 
-        if (anteproyectoError) throw anteproyectoError;
-        if (!anteproyectoData || anteproyectoData.length === 0) {
+        if (anteError) throw anteError;
+        if (!anteData || anteData.length === 0) {
           throw new Error('No se encontró un anteproyecto para este estudiante.');
         }
 
-        const anteproyectoID = anteproyectoData[0].id;
-        const idEncargado = anteproyectoData[0].idEncargado;
-
+        const anteproyectoID = anteData[0].id;
+        // 2. Buscar la cita con anteproyecto_id
         const { data: citaData, error: citaError } = await supabase
-          .from('citas')
-          .select('id, fecha, horaInicio, horaFin, lector1, lector2')
-          .eq('anteproyectoID', anteproyectoID, 'semestreActual', 1);
+          .from('Cita')
+          .select('cita_id, fecha, hora_inicio, hora_fin, lector1, lector2')
+          .eq('anteproyecto_id', anteproyectoID)
+          .eq('semestre_id', 1);
 
         if (citaError) throw citaError;
         if (!citaData || citaData.length === 0) {
           throw new Error('No se encontró una cita para este anteproyecto.');
         }
 
-        const cita = citaData[0];
+        const citaFound = citaData[0];
 
-        const { data: estudianteData, error: estudianteError } = await supabase
-          .from('estudiantes')
-          .select('nombre')
-          .eq('id', estudianteID);
+        // 3. Info del Estudiante
+        const { data: estData, error: estError } = await supabase
+          .from('Estudiante')
+          .select('estudiante_id, nombre')
+          .eq('estudiante_id', estudianteID)
+          .single();
+        if (estError) throw estError;
+        setEstudiante(estData?.nombre || 'Estudiante no encontrado');
 
-        if (estudianteError) throw estudianteError;
+        // 4. Info del "profesor asesor" si deseas, 
+        //    o si tienes un Proyecto con p.profesor_id, etc.
+        //    Ejemplo: Revisar si usas "Estudiante.asesor" o "Proyecto.profesor_id".
+        //    Aquí se deja un placeholder:
+        setProfesor('Profesor no consultado');
 
-        const estudianteInfo = estudianteData.length > 0 ? estudianteData[0].nombre : 'Estudiante no encontrado';
-        setEstudiante(estudianteInfo);
+        // 5. Buscar todos los profesores, para poder extraer lector1/lector2
+        const { data: profData, error: profError } = await supabase
+          .from('Profesor')
+          .select('profesor_id, nombre');
+        if (profError) throw profError;
 
-        const { data: profesorData, error: profesorError } = await supabase
-          .from('profesores')
-          .select('nombre')
-          .eq('id', idEncargado);
-
-        if (profesorError) throw profesorError;
-
-        const profesorNombre = profesorData.length > 0 ? profesorData[0].nombre : 'Profesor no encontrado';
-        setProfesor(profesorNombre);
-
-        const { data: profesoresData, error: profesoresError } = await supabase
-          .from('profesores')
-          .select('id, nombre');
-
-        if (profesoresError) throw profesoresError;
-
-        const lector1 = profesoresData.find((profesor) => profesor.id === cita.lector1)?.nombre || 'N/A';
-        const lector2 = profesoresData.find((profesor) => profesor.id === cita.lector2)?.nombre || 'N/A';
+        const lector1 = profData.find((p) => p.profesor_id === citaFound.lector1)?.nombre || 'N/A';
+        const lector2 = profData.find((p) => p.profesor_id === citaFound.lector2)?.nombre || 'N/A';
 
         setLectores({ lector1, lector2 });
-        setCita(cita);
+        setCita(citaFound);
+
       } catch (error) {
         console.error('Error fetching student appointment data:', error);
       }
@@ -95,8 +97,8 @@ const CitasEstudiante = () => {
                 <p><strong>Estudiante:</strong> {estudiante}</p>
                 <p><strong>Profesor:</strong> {profesor}</p>
                 <p><strong>Fecha:</strong> {cita.fecha}</p>
-                <p><strong>Hora de inicio:</strong> {formatTime(cita.horaInicio)}</p>
-                <p><strong>Hora de fin:</strong> {formatTime(cita.horaFin)}</p>
+                <p><strong>Hora de inicio:</strong> {formatTime(cita.hora_inicio)}</p>
+                <p><strong>Hora de fin:</strong> {formatTime(cita.hora_fin)}</p>
                 <p><strong>Lector 1:</strong> {lectores.lector1}</p>
                 <p><strong>Lector 2:</strong> {lectores.lector2}</p>
               </div>

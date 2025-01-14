@@ -9,18 +9,18 @@ const RutaProtegida = ({ element, requiredRoles }) => {
   const id = sessionStorage.getItem('token');
 
   useEffect(() => {
-    const getUserRol = async () => {
+    const getUserRolAsync = async () => {
       try {
         const data = await getRol(id);
-        
-        if (requiredRoles.includes(data.rol)) {
+        // data.rol vendrá como un número (1,2,3)
+        if (requiredRoles.includes(data.rol.toString())) {
           setAcceso(true);
-        } else if (data.rol === "1") {
-            navigate("/menuCoordinador");
-        } else if (data.rol === "2") {
-            navigate("/menuProfesor");
-        } else if (data.rol === "3") {
-            navigate("/menuEstudiante");
+        } else if (data.rol === 1) {
+          navigate("/menuCoordinador");
+        } else if (data.rol === 2) {
+          navigate("/menuProfesor");
+        } else if (data.rol === 3) {
+          navigate("/menuEstudiante");
         }
       } catch (error) {
         navigate("/");
@@ -28,10 +28,8 @@ const RutaProtegida = ({ element, requiredRoles }) => {
         setLoading(false);
       }
     };
-  
-    getUserRol();
+    getUserRolAsync();
   }, [id, navigate, requiredRoles]);
-  
 
   if (loading) {
     return <div>Cargando...</div>;

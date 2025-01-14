@@ -1,3 +1,7 @@
+/**
+ * DisponibilidadProfesor.jsx
+ * Permite a un profesor indicar su disponibilidad para cada cita en el semestre.
+ */
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
@@ -18,88 +22,80 @@ const DisponibilidadProfesor = () => {
   };
 
   useEffect(() => {
-    const fetchCitas = async () => {
+    const fetchData = async () => {
       try {
+        // 1. Traer todas las citas de la tabla "Cita"
         const { data: citasData, error: citasError } = await supabase
-          .from('citas')
-          .select('id, fecha, horaInicio, horaFin')
-          .eq('semestreActual', 1);
+          .from('Cita')
+          .select('cita_id, fecha, hora_inicio, hora_fin')
+          .eq('semestre_id', 1); // si usas semestres
 
         if (citasError) throw citasError;
 
-        const { data: disponibilidadData, error: disponibilidadError } = await supabase
-          .from('disponibilidadCitas')
+        // 2. Traer la disponibilidad actual del profesor en la tabla "Disponibilidad"
+        const { data: dispData, error: dispError } = await supabase
+          .from('Disponibilidad')
           .select('*')
-          .eq('profesorID', profesorID);
+          .eq('profesor_id', profesorID);
+        if (dispError) throw dispError;
 
-        if (disponibilidadError) throw disponibilidadError;
-
-        const formattedAppointments = citasData.map((cita) => {
-          const matchedDisponibilidad = disponibilidadData.find(
-            (d) => d.citaID === cita.id
-          );
-
+        // 3. Combinar
+        const formattedAppointments = (citasData || []).map(cita => {
+          const match = dispData.find(d => d.cita_id === cita.cita_id);
           return {
-            id: cita.id,
+            cita_id: cita.cita_id,
             fecha: cita.fecha,
-            horaInicio: cita.horaInicio,
-            horaFin: cita.horaFin,
-            disponible: matchedDisponibilidad ? matchedDisponibilidad.disponible : false,
-            disponibilidadID: matchedDisponibilidad ? matchedDisponibilidad.id : null,
+            hora_inicio: cita.hora_inicio,
+            hora_fin: cita.hora_fin,
+            disponible: match ? match.disponible : false,
+            disponibilidad_id: match ? match.id : null,
           };
         });
 
+        // Ordenar por fecha + hora
         formattedAppointments.sort((a, b) => {
           if (a.fecha === b.fecha) {
-            return a.horaInicio.localeCompare(b.horaInicio);
+            return a.hora_inicio.localeCompare(b.hora_inicio);
           }
           return a.fecha.localeCompare(b.fecha);
         });
 
-        for (let cita of formattedAppointments) {
-          if (cita.disponibilidadID === null) {
-            const { data, error } = await supabase
-              .from('disponibilidadCitas')
-              .insert([
-                { citaID: cita.id, profesorID, disponible: cita.disponible },
-              ])
-              .select('id');
+        // 4. Si no existe registro de disponibilidad para alguna cita, crearlo
+        for (let item of formattedAppointments) {
+          if (!item.disponibilidad_id) {
+            const { data: inserted, error } = await supabase
+              .from('Disponibilidad')
+              .insert([{ profesor_id: profesorID, cita_id: item.cita_id, disponible: item.disponible }])
+              .select('id')
+              .single();
             if (error) throw error;
-            cita.disponibilidadID = data[0].id;
+            item.disponibilidad_id = inserted.id;
           }
         }
 
         setCitas(formattedAppointments);
         setCitasOriginales(JSON.parse(JSON.stringify(formattedAppointments)));
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } catch (err) {
+        console.error('Error fetching data:', err);
         setError('Error al cargar las citas.');
       }
     };
 
-    fetchCitas();
+    fetchData();
   }, [profesorID]);
 
   const handleCheckboxChange = (index) => {
-    const nuevasCitas = [...citas];
-    nuevasCitas[index].disponible = !nuevasCitas[index].disponible;
-    setCitas(nuevasCitas);
+    const updated = [...citas];
+    updated[index].disponible = !updated[index].disponible;
+    setCitas(updated);
   };
 
   const selectAll = () => {
-    const nuevasCitas = citas.map((cita) => ({
-      ...cita,
-      disponible: true,
-    }));
-    setCitas(nuevasCitas);
+    setCitas(c => c.map(item => ({ ...item, disponible: true })));
   };
 
   const deselectAll = () => {
-    const nuevasCitas = citas.map((cita) => ({
-      ...cita,
-      disponible: false,
-    }));
-    setCitas(nuevasCitas);
+    setCitas(c => c.map(item => ({ ...item, disponible: false })));
   };
 
   const hasChanges = () => {
@@ -111,33 +107,34 @@ const DisponibilidadProfesor = () => {
       alert('No hay cambios para guardar.');
       return;
     }
+    if (!window.confirm('¿Está seguro de que desea guardar los cambios?')) {
+      return;
+    }
 
-    if (window.confirm('¿Está seguro de que desea guardar los cambios?')) {
-      try {
-        for (let cita of citas) {
-          const { error } = await supabase
-            .from('disponibilidadCitas')
-            .update({ disponible: cita.disponible })
-            .eq('id', cita.disponibilidadID);
+    try {
+      for (let c of citas) {
+        const { error } = await supabase
+          .from('Disponibilidad')
+          .update({ disponible: c.disponible })
+          .eq('id', c.disponibilidad_id);
 
-          if (error) throw error;
-        }
-        alert('Cambios guardados correctamente.');
-        setCitasOriginales(JSON.parse(JSON.stringify(citas)));
-      } catch (error) {
-        console.error('Error saving data:', error);
-        alert('Error al guardar los cambios.');
+        if (error) throw error;
       }
+      alert('Cambios guardados correctamente.');
+      setCitasOriginales(JSON.parse(JSON.stringify(citas)));
+    } catch (error) {
+      console.error('Error saving data:', error);
+      alert('Error al guardar los cambios.');
     }
   };
 
   const handleGoBack = () => {
     if (!hasChanges()) {
-      navigate('/MenuProfesor');
+      navigate('/menuProfesor');
     } else {
       if (window.confirm('¿Está seguro de que desea descartar los cambios?')) {
         setCitas(JSON.parse(JSON.stringify(citasOriginales)));
-        navigate('/MenuProfesor');
+        navigate('/menuProfesor');
       }
     }
   };
@@ -146,17 +143,18 @@ const DisponibilidadProfesor = () => {
     <div>
       <Header title="Citas" />
       <div className="container citas-div">
-        {/* Tabla de citas */}
         <div className="row justify-content-center cita-table">
           <h2 className="mb-5 w-auto">Lista de citas</h2>
-
-          {/* Botones para seleccionar/deseleccionar */}
           <div className="row justify-content-center mb-4">
             <div className="col-auto">
-              <button className="cita-btn" onClick={selectAll}>Seleccionar todos</button>
+              <button className="cita-btn" onClick={selectAll}>
+                Seleccionar todos
+              </button>
             </div>
             <div className="col-auto">
-              <button className="cita-btn-secondary" onClick={deselectAll}>Deseleccionar todos</button>
+              <button className="cita-btn-secondary" onClick={deselectAll}>
+                Deseleccionar todos
+              </button>
             </div>
           </div>
 
@@ -168,7 +166,6 @@ const DisponibilidadProfesor = () => {
                 <th>Disponible</th>
               </tr>
             </thead>
-
             <tbody>
               {citas.length === 0 ? (
                 <tr>
@@ -178,9 +175,9 @@ const DisponibilidadProfesor = () => {
                 </tr>
               ) : (
                 citas.map((cita, index) => (
-                  <tr key={cita.id}>
+                  <tr key={cita.cita_id}>
                     <td>{cita.fecha}</td>
-                    <td>{`${formatTime(cita.horaInicio)} - ${formatTime(cita.horaFin)}`}</td>
+                    <td>{`${formatTime(cita.hora_inicio)} - ${formatTime(cita.hora_fin)}`}</td>
                     <td>
                       <input
                         type="checkbox"
@@ -195,7 +192,6 @@ const DisponibilidadProfesor = () => {
           </table>
         </div>
 
-        {/* Botones para guardar/volver */}
         <div className="row justify-content-center">
           <div className="col-auto">
             <button className="cita-btn" onClick={handleSave}>Guardar</button>
@@ -204,8 +200,6 @@ const DisponibilidadProfesor = () => {
             <button className="cita-btn-secondary" onClick={handleGoBack}>Volver</button>
           </div>
         </div>
-
-        {/* Error message display */}
         {error && <p style={{ color: 'red' }}>{error}</p>}
       </div>
       <Footer />

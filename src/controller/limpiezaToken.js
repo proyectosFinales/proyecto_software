@@ -3,19 +3,18 @@ import supabase from '../model/supabase';
 
 const LimpiarToken = () => {
   const limpiarTokensExpirados = async () => {
-      const now = new Date().toISOString();
+    const now = new Date().toISOString();
+    const { error } = await supabase
+      .from('Usuario')
+      .update({
+        recovery_token: null,
+        exp_recuperacion: null
+      })
+      .lt('exp_recuperacion', now);
 
-      const { error } = await supabase
-        .from('usuarios')
-        .update({
-          recoveryToken: null,
-          expRecuperacion: null
-        })
-        .lt('expRecuperacion', now);
-
-      if (error) {
-        console.error('Error al limpiar tokens:', error);
-      }
+    if (error) {
+      console.error('Error al limpiar tokens:', error);
+    }
   };
 
   useEffect(() => {

@@ -1,176 +1,213 @@
+/**
+ * pdfUtils.js
+ * 
+ * Funciones que generan y descargan archivos PDF
+ * usando la librería jsPDF.
+ */
+
 import jsPDF from 'jspdf';
 
+/**
+ * Genera un PDF con la información de un anteproyecto.
+ * @param {Object} anteproyecto Objeto con la información necesaria.
+ * Ejemplo esperado:
+ * {
+ *   nombreEmpresa: "Empresa XYZ",
+ *   tipoEmpresa: "Manufactura",
+ *   actividadEmpresa: "Producción de dispositivos",
+ *   ...
+ *   estudiante: {
+ *     nombre: "Juan Pérez",
+ *     carnet: "2019123456",
+ *     telefono: "88888888",
+ *     correo: "juan.perez@estudiantec.cr",
+ *     sede: "Central Cartago"
+ *   },
+ *   ...
+ * }
+ */
 export function descargarAnteproyecto(anteproyecto) {
   const doc = new jsPDF();
 
-  // Obtener la fecha actual
+  // Obtener fecha actual
   const fechaActual = new Date();
-
-  // Formatear la fecha en formato corto (DD/MM/AAAA)
   const dia = fechaActual.getDate();
-  const mes = fechaActual.getMonth() + 1; // Los meses empiezan en 0
-  const año = fechaActual.getFullYear();
-  const fechaFormateada = `${dia}/${mes}/${año}`;
+  const mes = fechaActual.getMonth() + 1;
+  const anio = fechaActual.getFullYear();
+  const fechaFormateada = `${dia}/${mes}/${anio}`;
 
   // Título
   doc.setFontSize(18);
   doc.text('Información del Anteproyecto', 20, 20);
 
+  // Posición inicial del texto
   let yPosition = 40;
   const lineSpacing = 10;
 
-  const pageWidth = doc.internal.pageSize.getWidth(); 
-  const textWidth = pageWidth - 40; // Ancho disponible (20 de margen a cada lado)
+  // Ancho de la página y espacio disponible
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const textWidth = pageWidth - 40; // Margen de 20px a cada lado
   const pageHeight = doc.internal.pageSize.getHeight();
-  
+
+  // Fecha en la esquina superior derecha
   doc.setFontSize(10);
   doc.text(`${fechaFormateada}`, textWidth, 20);
 
-  // Función para añadir texto de manera dinámica, manejando el espacio vertical
+  /**
+   * Añade texto dinámicamente, con salto de página si se supera el límite.
+   * @param {string} label Etiqueta del campo
+   * @param {string} value Contenido a imprimir
+   */
   function addText(label, value) {
     const labelText = `${label} `;
-    const text = value;
-    
-    const labelWidth = doc.getTextWidth(labelText);
-    const textDividido = doc.splitTextToSize(text, textWidth); // Dividir el texto para ajustarse al ancho
-    let requiredHeight = textDividido.length * lineSpacing; // Calcular altura necesaria para este texto
+    const textDividido = doc.splitTextToSize(value || "", textWidth);
+    let requiredHeight = textDividido.length * lineSpacing;
 
-    if(textDividido.length > 1){
+    // Ajustar la altura para texto en varias líneas
+    if (textDividido.length > 1) {
       requiredHeight = (textDividido.length * 5) + 5; 
     }
 
-    // Verificar si hay espacio suficiente en la página actual
-    if (yPosition + requiredHeight > pageHeight - 20) { // Deja un margen de 20 px al final de la página
-      doc.addPage(); // Agregar nueva página
-      yPosition = 20; // Reiniciar la posición Y en la nueva página
+    // Verificar si hay espacio en la página actual
+    if (yPosition + requiredHeight > pageHeight - 20) {
+      doc.addPage();
+      yPosition = 20;
     }
 
-    // Añadir texto con la etiqueta en negrita
+    // Etiqueta en negrita
     doc.setFont("Helvetica", "bold");
     doc.text(labelText, 20, yPosition);
 
-    // Imprimir el texto en la posición actual
+    // Contenido en texto normal
     doc.setFont("Helvetica", "normal");
     doc.text(textDividido, 20, yPosition + 10);
-    yPosition += requiredHeight + 10; 
+    yPosition += requiredHeight + 10;
   }
 
-  // Información del anteproyecto
+  // Sección de datos del estudiante (si existe)
   doc.setFontSize(12);
-  addText("Nombre del estudiante:", anteproyecto.estudiantes.nombre);
-  addText("Carnet:", anteproyecto.estudiantes.carnet);
-  addText("Teléfono:", anteproyecto.estudiantes.telefono);
-  addText("Correo:", anteproyecto.estudiantes.correo);
-  addText("Sede:", anteproyecto.sede);
+  if (anteproyecto.estudiante) {
+    addText("Nombre del estudiante:", anteproyecto.estudiante.nombre);
+    addText("Carnet:", anteproyecto.estudiante.carnet);
+    addText("Teléfono:", anteproyecto.estudiante.telefono);
+    addText("Correo:", anteproyecto.estudiante.correo);
+    addText("Sede:", anteproyecto.estudiante.sede);
+  }
+
+  // Sección de datos de la empresa
   addText("Nombre de la Empresa:", anteproyecto.nombreEmpresa);
   addText("Tipo de Empresa:", anteproyecto.tipoEmpresa);
   addText("Actividad de la empresa:", anteproyecto.actividadEmpresa);
   addText("Ubicación de la empresa (distrito):", anteproyecto.distritoEmpresa);
   addText("Ubicación de la empresa (cantón):", anteproyecto.cantonEmpresa);
   addText("Ubicación de la empresa (provincia):", anteproyecto.provinciaEmpresa);
+
+  // Datos de contactos
   addText("Nombre del asesor industrial:", anteproyecto.nombreAsesor);
-  addText("Puesto que desempeña el asesor industrial en la empresa:", anteproyecto.puestoAsesor);
+  addText("Puesto que desempeña el asesor industrial:", anteproyecto.puestoAsesor);
   addText("Teléfono del contacto:", anteproyecto.telefonoContacto);
   addText("Correo del contacto:", anteproyecto.correoContacto);
   addText("Nombre del contacto de recursos humanos:", anteproyecto.nombreHR);
   addText("Teléfono del contacto de recursos humanos:", anteproyecto.telefonoHR);
   addText("Correo del contacto de recursos humanos:", anteproyecto.correoHR);
+
+  // Datos de contenido del anteproyecto
   addText("Contexto:", anteproyecto.contexto);
   addText("Justificación del trabajo:", anteproyecto.justificacion);
-  addText("Síntomas principales (a lo sumo 3):", anteproyecto.sintomas);
+  addText("Síntomas principales:", anteproyecto.sintomas);
   addText("Efectos o impactos para la empresa:", anteproyecto.impacto);
-  addText("Nombre del departamento a realizar el proyecto:", anteproyecto.nombreDepartamento);
+  addText("Departamento para realizar el proyecto:", anteproyecto.nombreDepartamento);
   addText("Tipo de proyecto:", anteproyecto.tipoProyecto);
-  addText("Estado del proyecto:", anteproyecto.estado); 
+  addText("Estado del proyecto:", anteproyecto.estado);
 
-  // Descarga del PDF
-  doc.save(`Anteproyecto_${anteproyecto.nombreEmpresa}.pdf`);
+  // Descargar PDF (Nombre sugerido)
+  doc.save(`Anteproyecto_${anteproyecto.nombreEmpresa || 'SinNombre'}.pdf`);
 }
 
-export function descargarProyecto(anteproyecto) {
+/**
+ * Genera un PDF con la información de un "proyecto".
+ * Dependiendo de tu estructura, podría ser muy similar a 'descargarAnteproyecto'.
+ * @param {Object} proyecto Objeto con información de Proyecto 
+ *                          (puede ser igual o similar a anteproyecto).
+ */
+export function descargarProyecto(proyecto) {
   const doc = new jsPDF();
 
-  // Obtener la fecha actual
+  // Obtener fecha actual
   const fechaActual = new Date();
-
-  // Formatear la fecha en formato corto (DD/MM/AAAA)
   const dia = fechaActual.getDate();
-  const mes = fechaActual.getMonth() + 1; // Los meses empiezan en 0
-  const año = fechaActual.getFullYear();
-  const fechaFormateada = `${dia}/${mes}/${año}`;
+  const mes = fechaActual.getMonth() + 1;
+  const anio = fechaActual.getFullYear();
+  const fechaFormateada = `${dia}/${mes}/${anio}`;
 
   // Título
   doc.setFontSize(18);
-  doc.text('Información del Anteproyecto', 20, 20);
+  doc.text('Información del Proyecto', 20, 20);
 
   let yPosition = 40;
   const lineSpacing = 10;
 
-  const pageWidth = doc.internal.pageSize.getWidth(); 
-  const textWidth = pageWidth - 40; // Ancho disponible (20 de margen a cada lado)
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const textWidth = pageWidth - 40;
   const pageHeight = doc.internal.pageSize.getHeight();
-  
+
   doc.setFontSize(10);
   doc.text(`${fechaFormateada}`, textWidth, 20);
 
-  // Función para añadir texto de manera dinámica, manejando el espacio vertical
   function addText(label, value) {
     const labelText = `${label} `;
-    const text = value;
-    
-    const labelWidth = doc.getTextWidth(labelText);
-    const textDividido = doc.splitTextToSize(text, textWidth); // Dividir el texto para ajustarse al ancho
-    let requiredHeight = textDividido.length * lineSpacing; // Calcular altura necesaria para este texto
+    const textDividido = doc.splitTextToSize(value || "", textWidth);
+    let requiredHeight = textDividido.length * lineSpacing;
 
-    if(textDividido.length > 1){
-      requiredHeight = (textDividido.length * 5) + 5; 
+    if (textDividido.length > 1) {
+      requiredHeight = (textDividido.length * 5) + 5;
     }
 
-    // Verificar si hay espacio suficiente en la página actual
-    if (yPosition + requiredHeight > pageHeight - 20) { // Deja un margen de 20 px al final de la página
-      doc.addPage(); // Agregar nueva página
-      yPosition = 20; // Reiniciar la posición Y en la nueva página
+    if (yPosition + requiredHeight > pageHeight - 20) {
+      doc.addPage();
+      yPosition = 20;
     }
 
-    // Añadir texto con la etiqueta en negrita
     doc.setFont("Helvetica", "bold");
     doc.text(labelText, 20, yPosition);
 
-    // Imprimir el texto en la posición actual
     doc.setFont("Helvetica", "normal");
     doc.text(textDividido, 20, yPosition + 10);
-    yPosition += requiredHeight + 10; 
+    yPosition += requiredHeight + 10;
   }
 
-  // Información del anteproyecto
+  // Datos del estudiante (si existe)
   doc.setFontSize(12);
-  addText("Nombre del estudiante:", anteproyecto.estudiante.nombre);
-  addText("Carnet:", anteproyecto.estudiante.carnet);
-  addText("Teléfono:", anteproyecto.estudiante.telefono);
-  addText("Correo:", anteproyecto.estudiante.correo);
-  addText("Sede:", anteproyecto.sede);
-  addText("Nombre de la Empresa:", anteproyecto.nombreEmpresa);
-  addText("Tipo de Empresa:", anteproyecto.tipoEmpresa);
-  addText("Actividad de la empresa:", anteproyecto.actividadEmpresa);
-  addText("Ubicación de la empresa (distrito):", anteproyecto.distritoEmpresa);
-  addText("Ubicación de la empresa (cantón):", anteproyecto.cantonEmpresa);
-  addText("Ubicación de la empresa (provincia):", anteproyecto.provinciaEmpresa);
-  addText("Nombre del asesor industrial:", anteproyecto.nombreAsesor);
-  addText("Puesto que desempeña el asesor industrial en la empresa:", anteproyecto.puestoAsesor);
-  addText("Teléfono del contacto:", anteproyecto.telefonoContacto);
-  addText("Correo del contacto:", anteproyecto.correoContacto);
-  addText("Nombre del contacto de recursos humanos:", anteproyecto.nombreHR);
-  addText("Teléfono del contacto de recursos humanos:", anteproyecto.telefonoHR);
-  addText("Correo del contacto de recursos humanos:", anteproyecto.correoHR);
-  addText("Contexto:", anteproyecto.contexto);
-  addText("Justificación del trabajo:", anteproyecto.justificacion);
-  addText("Síntomas principales (a lo sumo 3):", anteproyecto.sintomas);
-  addText("Efectos o impactos para la empresa:", anteproyecto.impacto);
-  addText("Nombre del departamento a realizar el proyecto:", anteproyecto.nombreDepartamento);
-  addText("Tipo de proyecto:", anteproyecto.tipoProyecto);
-  addText("Estado del proyecto:", anteproyecto.estado); 
+  if (proyecto.estudiante) {
+    addText("Nombre del estudiante:", proyecto.estudiante.nombre);
+    addText("Carnet:", proyecto.estudiante.carnet);
+    addText("Teléfono:", proyecto.estudiante.telefono);
+    addText("Correo:", proyecto.estudiante.correo);
+    addText("Sede:", proyecto.estudiante.sede);
+  }
 
-  // Descarga del PDF
-  doc.save(`Anteproyecto_${anteproyecto.nombreEmpresa}.pdf`);
+  // Datos de la empresa (si existe)
+  addText("Nombre de la Empresa:", proyecto.nombreEmpresa);
+  addText("Tipo de Empresa:", proyecto.tipoEmpresa);
+  addText("Actividad de la empresa:", proyecto.actividadEmpresa);
+  addText("Ubicación de la empresa (distrito):", proyecto.distritoEmpresa);
+  addText("Ubicación de la empresa (cantón):", proyecto.cantonEmpresa);
+  addText("Ubicación de la empresa (provincia):", proyecto.provinciaEmpresa);
+
+  // Datos de contactos
+  addText("Nombre del asesor industrial:", proyecto.nombreAsesor);
+  addText("Puesto que desempeña el asesor industrial:", proyecto.puestoAsesor);
+  addText("Teléfono del contacto:", proyecto.telefonoContacto);
+  addText("Correo del contacto:", proyecto.correoContacto);
+
+  // Datos específicos del proyecto
+  addText("Contexto:", proyecto.contexto);
+  addText("Justificación:", proyecto.justificacion);
+  addText("Síntomas principales:", proyecto.sintomas);
+  addText("Impacto:", proyecto.impacto);
+  addText("Departamento:", proyecto.nombreDepartamento);
+  addText("Tipo de proyecto:", proyecto.tipoProyecto);
+  addText("Estado actual:", proyecto.estado);
+
+  doc.save(`Proyecto_${proyecto.nombreEmpresa || 'SinNombre'}.pdf`);
 }
-

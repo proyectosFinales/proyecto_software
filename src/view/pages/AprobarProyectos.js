@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom'; // Importa useNavigate
+/**
+ * AprobarProyectos.jsx
+ * Pantalla para que el coordinador cambie proyectos a "Finalizado" (aprobado) o "Perdido" (reprobado).
+ */
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AprobarProyecto.module.css';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { AiOutlineArrowDown, AiOutlineArrowUp, AiOutlineInfoCircle } from 'react-icons/ai';
 import styles2 from '../styles/table.module.css';
-import {errorToast, successToast} from '../components/toast';
-
+import { errorToast, successToast } from '../components/toast';
 
 const AprobarProyectos = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
   const [expandedRow, setExpandedRow] = useState(null);
-  const navigate = useNavigate();
   const [infoVisible, setInfoVisible] = useState({});
+  const navigate = useNavigate();
 
-  // Función para obtener los datos de la base de datos
   useEffect(() => {
     fetchAnteproyectos();
   }, []);
@@ -26,8 +28,9 @@ const AprobarProyectos = () => {
 
   const fetchAnteproyectos = async () => {
     const { data, error } = await supabase
-    .from('anteproyectos')
-    .select(`id,
+      .from('Anteproyecto')  // Cambia 'anteproyectos'
+      .select(`
+        id,
         sede,
         tipoEmpresa,
         nombreEmpresa,
@@ -42,7 +45,6 @@ const AprobarProyectos = () => {
         nombreHR,
         telefonoHR,
         correoHR,
-        tipoEmpresa,
         contexto,
         justificacion,
         sintomas,
@@ -51,72 +53,75 @@ const AprobarProyectos = () => {
         tipoProyecto,
         observaciones,
         estado,
-        idEstudiante,
-        estudiantes(id, nombre, carnet, telefono, correo)`).or('estado.eq.Aprobado,estado.eq.Perdido,estado.eq.Finalizado')
-        .eq('semestreActual', 1);
+        estudiante_id,
+        Estudiante:estudiante_id (
+          estudiante_id,
+          nombre,
+          carnet,
+          telefono,
+          correo
+        )
+      `)
+      .eq('semestre_id', 1) // ajusta si usas semestres
+      .or('estado.eq.Aprobado,estado.eq.Perdido,estado.eq.Finalizado'); // ajusta a tu enum
     if (error) {
-      alert('No se pudieron obtener los anteproyectos');
+      errorToast('No se pudieron obtener los anteproyectos: ' + error.message);
     } else {
-      setAnteproyectos(data);
-      
+      setAnteproyectos(data || []);
     }
   };
 
   async function aprobar(id) {
-    const confirmAprobar=window.confirm("¿Está seguro de APROBAR el proyecto?");
-
-    if(!confirmAprobar){return;}
+    const confirmAprobar = window.confirm("¿Está seguro de APROBAR el proyecto?");
+    if(!confirmAprobar) return;
 
     try {
-      const { data, error } = await supabase
-        .from('anteproyectos')
-        .update({estado:"Finalizado"})
+      const { error } = await supabase
+        .from('Anteproyecto')
+        .update({ estado: "Finalizado" }) // Ajusta si tu enum final es "Finalizado"
         .eq('id', id);
       if (error) {
         console.error('Error al actualizar proyecto:', error);
+        errorToast(error.message);
         return;
-      
       }
 
       successToast('Proyecto actualizado exitosamente');
-
       fetchAnteproyectos();
-
     } catch (error) {
-      alert('Error al actualizar proyecto:', error);
+      errorToast('Error al actualizar proyecto: ' + error);
     }
   }
 
   async function reprobar(id) {
-    const confirmAprobar=window.confirm("¿Está seguro de REPROBAR el proyecto?");
-
-    if(!confirmAprobar){return;}
+    const confirmReprobar = window.confirm("¿Está seguro de REPROBAR el proyecto?");
+    if(!confirmReprobar) return;
 
     try {
-      const { data, error } = await supabase
-        .from('anteproyectos')
-        .update({estado:"Perdido"})
+      const { error } = await supabase
+        .from('Anteproyecto')
+        .update({ estado: "Perdido" })
         .eq('id', id);
       if (error) {
         console.error('Error al actualizar proyecto:', error);
+        errorToast(error.message);
         return;
       }
 
       successToast('Proyecto actualizado exitosamente');
-
       fetchAnteproyectos();
     } catch (error) {
-      alert('Error al actualizar proyecto:', error);
+      errorToast('Error al actualizar proyecto: ' + error);
     }
   }
 
   const toggleExpandRow = (id) => {
-    setExpandedRow(expandedRow === id ? null : id); // Si la fila está expandida, la colapsa; si no, la expande
+    setExpandedRow(expandedRow === id ? null : id);
   };
 
   return (
     <div className={styles.anteproyectos_coordinador_contenedor}>
-        <Header title="Aprobar proyectos"/> 
+      <Header title="Aprobar proyectos"/>
       <div>
         <main>
           <div className={styles.lista_anteproyectos_coordinador}>
@@ -125,55 +130,90 @@ const AprobarProyectos = () => {
                 <tr>
                   <th>Estudiante</th>
                   <th>Nombre de la empresa</th>
-                  <th>Estado del proyecto
-                      <AiOutlineInfoCircle 
-                        className={styles.infoIcon}
-                        onClick={() => toggleInfo('estados')} 
-                        title="contexto_info"
-                        />
-                        {infoVisible.estados && <p className={styles.infoText}>(Finalizado: Curso aprobado, Perdido: Curso perdido).</p>}
+                  <th>
+                    Estado del proyecto
+                    <AiOutlineInfoCircle
+                      className={styles.infoIcon}
+                      onClick={() => toggleInfo('estados')}
+                      title="Estado_info"
+                    />
+                    {infoVisible.estados && (
+                      <p className={styles.infoText}>
+                        (Finalizado: Curso aprobado, Perdido: Curso perdido).
+                      </p>
+                    )}
                   </th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {anteproyectos.map((anteproyecto) => (
-                <>
-                  <tr key={anteproyecto.id}>
-                    <td>{anteproyecto.estudiantes ? anteproyecto.estudiantes.nombre : 'Sin estudiante asignado'}</td>
-                    <td>{anteproyecto.nombreEmpresa}</td>
-                    <td>{anteproyecto.estado==='Aprobado' ? 'Pendiente' : anteproyecto.estado}</td>
-                    <td>
+                  <React.Fragment key={anteproyecto.id}>
+                    <tr>
+                      <td>
+                        {anteproyecto.Estudiante
+                          ? anteproyecto.Estudiante.nombre
+                          : 'Sin estudiante asignado'}
+                      </td>
+                      <td>{anteproyecto.nombreEmpresa}</td>
+                      <td>{anteproyecto.estado === 'Aprobado' ? 'Pendiente' : anteproyecto.estado}</td>
+                      <td>
                         <div className={styles.contenedor_botones_anteproyectos_coordinador}>
-                            <button onClick={() => aprobar(anteproyecto.id)} className={styles.btn + ' ' + styles.revisar}>Aprobar</button>
-                            <button onClick={() => reprobar(anteproyecto.id)} className={styles.btn + ' ' + styles.descargar}>Reprobar</button>
-                            <button onClick={() => toggleExpandRow(anteproyecto.id)} className={styles.btn + ' ' + styles.descargar}>
-                                {expandedRow === anteproyecto.id ? <AiOutlineArrowUp className={styles.icono_arrow_down} /> : <AiOutlineArrowDown className={styles.icono_arrow_down} />}
-                            </button>
-                        </div>
-                    </td>
-                  </tr>
-                  {expandedRow === anteproyecto.id && (
-                    <tr className={styles.expandedRow}>
-                      <td colSpan="4">
-                        <div className={styles.info_adicional}>
-                          <p><strong>Asesor:</strong> {anteproyecto.nombreAsesor} ({anteproyecto.puestoAsesor})</p>
-                          <p><strong>Teléfono:</strong> {anteproyecto.telefonoContacto}</p>
-                          <p><strong>Correo:</strong> {anteproyecto.correoContacto}</p>
-                          <p><strong>Contexto:</strong> {anteproyecto.contexto}</p>
-                          <p><strong>Justificación:</strong> {anteproyecto.justificacion}</p>
+                          <button
+                            onClick={() => aprobar(anteproyecto.id)}
+                            className={`${styles.btn} ${styles.revisar}`}
+                          >
+                            Aprobar
+                          </button>
+                          <button
+                            onClick={() => reprobar(anteproyecto.id)}
+                            className={`${styles.btn} ${styles.descargar}`}
+                          >
+                            Reprobar
+                          </button>
+                          <button
+                            onClick={() => toggleExpandRow(anteproyecto.id)}
+                            className={`${styles.btn} ${styles.descargar}`}
+                          >
+                            {expandedRow === anteproyecto.id ? (
+                              <AiOutlineArrowUp className={styles.icono_arrow_down} />
+                            ) : (
+                              <AiOutlineArrowDown className={styles.icono_arrow_down} />
+                            )}
+                          </button>
                         </div>
                       </td>
                     </tr>
-                  )}
-                  </>
+                    {expandedRow === anteproyecto.id && (
+                      <tr className={styles.expandedRow}>
+                        <td colSpan="4">
+                          <div className={styles.info_adicional}>
+                            <p>
+                              <strong>Asesor:</strong> {anteproyecto.nombreAsesor} ({anteproyecto.puestoAsesor})
+                            </p>
+                            <p>
+                              <strong>Teléfono:</strong> {anteproyecto.telefonoContacto}
+                            </p>
+                            <p>
+                              <strong>Correo:</strong> {anteproyecto.correoContacto}
+                            </p>
+                            <p>
+                              <strong>Contexto:</strong> {anteproyecto.contexto}
+                            </p>
+                            <p>
+                              <strong>Justificación:</strong> {anteproyecto.justificacion}
+                            </p>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
                 ))}
               </tbody>
             </table>
           </div>
         </main>
       </div>
-      
       <Footer />
     </div>
   );
