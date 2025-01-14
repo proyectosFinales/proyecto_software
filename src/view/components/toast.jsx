@@ -10,29 +10,30 @@ const toastProperties = {
 	draggable: true,
 	progress: undefined,
 	theme: "dark"
-}
+};
 
-const loadToast = (promise, load, success, error) => toast.promise(promise, {
+const loadToast = (promise, load, success, error) => 
+  toast.promise(promise, {
     pending: load,
     success: success,
     error: error
-}, Object.assign(toastProperties));
+  }, { ...toastProperties });
 
 const successToast = (message) => {
-    toast.success(message, Object.assign(toastProperties));
-}
+  toast.success(message, { ...toastProperties });
+};
 
 const errorToast = (message) => {
-    toast.error(message, Object.assign(toastProperties));
-}
+  toast.error(message, { ...toastProperties });
+};
 
 const infoToast = (message) => {
-    toast.info(message, Object.assign(toastProperties));
-}
+  toast.info(message, { ...toastProperties });
+};
 
 const darkToast = (message) => {
-    toast.dark(message, Object.assign(toastProperties));
-}
+  toast.dark(message, { ...toastProperties });
+};
 
 const hideToast = () => toast.dismiss();
 
@@ -45,6 +46,6 @@ export {
 	loadToast,
 	infoToast,
 	hideToast
-}
+};
 
 export default ToastContainer;

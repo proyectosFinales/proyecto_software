@@ -1,78 +1,177 @@
+/**
+ * profesor.js
+ * 
+ * Clase que modela la entidad Profesor,
+ * la cual extiende de Usuario.
+ */
+
 import supabase from "../model/supabase";
-import Anteproyecto from "./anteproyecto";
 import Usuario from "./usuario";
+import Anteproyecto from "./anteproyecto";  // si deseas usarlo para transformaciones
 
 class Profesor extends Usuario {
-    nombre;
-    cantidadProyectos;
-    /** @type {Anteproyecto[]} */
-    anteproyectos = [];
-    original = {};
+  /**
+   * Clave primaria de la tabla Profesor
+   * @type {string}
+   */
+  profesor_id;
 
-    constructor(id, nombre, sede, cantidadProyectos, anteproyectos) {
-        super(id, nombre, sede);
-        this.cantidadProyectos = cantidadProyectos;
-        this.anteproyectos = anteproyectos;
-        this.original.cantidadProyectos = cantidadProyectos;
+  /**
+   * Cantidad de estudiantes que tiene asignados
+   * @type {number}
+   */
+  cantidadEstudiantes;
+
+  /**
+   * Anteproyectos asociados (opcional, se puede obtener vía joins)
+   * @type {Anteproyecto[]}
+   */
+  anteproyectos;
+
+  /**
+   * Estado original para verificar cambios en la cantidad de estudiantes
+   */
+  original = {};
+
+  /**
+   * 
+   * @param {string} profesor_id        - PK en la tabla Profesor
+   * @param {string} id_usuario         - ID de la tabla Usuario
+   * @param {string} nombre             - Nombre del profesor (normalmente en Usuario.nombre)
+   * @param {string} sede               - Sede proveniente de Usuario.sede
+   * @param {number} cantidadEstudiantes - Valor de la columna "cantidad_estudiantes" en la tabla Profesor
+   * @param {Anteproyecto[]} anteproyectos - Lista de anteproyectos asociados (opcional)
+   */
+  constructor(profesor_id, id_usuario, nombre, sede, cantidadEstudiantes, anteproyectos = []) {
+    super(id_usuario, nombre, sede); // Constructor base de Usuario
+    this.profesor_id = profesor_id;
+    this.cantidadEstudiantes = cantidadEstudiantes ?? 0;
+    this.anteproyectos = anteproyectos;
+    this.original.cantidadEstudiantes = this.cantidadEstudiantes;
+  }
+
+  /**
+   * Crea una instancia de Profesor a partir de un objeto
+   * proveniente de Supabase (join con Usuario).
+   * @param {Object} obj
+   * Ejemplo:
+   * {
+   *   profesor_id: "...",
+   *   cantidad_estudiantes: 5,
+   *   Usuario: {
+   *     id: "...",
+   *     nombre: "...",
+   *     sede: "...",
+   *     correo: "..."
+   *   },
+   *   anteproyectos: [ ... ] // si el SELECT anida anteproyectos
+   * }
+   * @returns {Profesor}
+   */
+  static from(obj) {
+    if (!obj) return null;
+    const usuario = obj.Usuario || obj.usuario;
+
+    // Si traes anteproyectos anidados
+    let antepros = [];
+    if (obj.anteproyectos && Array.isArray(obj.anteproyectos)) {
+      antepros = obj.anteproyectos.map(ap => Anteproyecto.from(ap));
     }
 
-    static from(obj) {
-        if(!(obj ?? false)) return null;
-        return new Profesor(
-            obj.id, obj.nombre, obj.usuario.sede, obj.cantidadProyectos,
-            obj.anteproyectos ? obj.anteproyectos.map(ap => Anteproyecto.from(ap)) : []
-        );
-    }
+    return new Profesor(
+      obj.profesor_id,
+      usuario?.id,
+      usuario?.nombre || "",
+      usuario?.sede || "",
+      obj.cantidad_estudiantes ?? 0,
+      antepros
+    );
+  }
 
-    static async fromID(id) {
-        const { data } = await supabase
-            .from("profesores")
-            .select(`
-                id, nombre, cantidadProyectos,
-                usuario:usuarios(sede),
-                anteproyectos(
-                    id, nombreEmpresa, estado, tipoEmpresa, actividadEmpresa, distritoEmpresa, cantonEmpresa,
-                    provinciaEmpresa, nombreAsesor, puestoAsesor, telefonoContacto, correoContacto, nombreHR,
-                    telefonoHR, correoHR, contexto, justificacion, sintomas, impacto, nombreDepartamento,
-                    tipoProyecto, observaciones,
-                    estudiante:estudiantes(id, nombre, usuario:usuarios(sede, correo), carnet, telefono)
-                )
-            `)
-            .eq("id", id);
-        return Profesor.from(data[0]);
-    }
+  /**
+   * Ejemplo de función estática para obtener un profesor
+   * según su PK (profesor_id) y hacer un join con la tabla Usuario.
+   * @param {string} profesor_id 
+   * @returns {Profesor | null}
+   */
+  static async fromID(profesor_id) {
+    const { data, error } = await supabase
+      .from("Profesor")
+      .select(`
+        profesor_id,
+        cantidad_estudiantes,
+        Usuario:id_usuario (
+          id,
+          nombre,
+          sede,
+          correo,
+          telefono
+        ),
+        -- Ejemplo de anidado:
+        -- Estudiante!Estudiante_asesor_fkey (
+        --   estudiante_id,
+        --   carnet,
+        --   Anteproyecto:Anteproyecto_estudiante_id_fkey (
+        --     id,
+        --     estado,
+        --     actividad
+        --   )
+        -- )
+      `)
+      .eq("profesor_id", profesor_id)
+      .single();
 
-    static async obtenerTodos() {
-        const { data } = await supabase
-            .from("profesores")
-            .select("id, nombre, cantidadProyectos, usuario:usuarios(sede)");
-        return data.map(p => new Profesor(p.id, p.nombre, p.usuario.sede, p.cantidadProyectos));
+    if (error || !data) {
+      console.error("Error recuperando profesor:", error);
+      return null;
     }
+    return Profesor.from(data);
+  }
 
-    static async obtenerEncargados() {
-        const { data } = await supabase
-            .from("profesores")
-            .select(`
-                id, nombre, cantidadProyectos,
-                usuario:usuarios(sede),
-                anteproyectos(
-                    id, nombreEmpresa,
-                    estudiante:estudiantes(id, nombre, usuario:usuarios(sede, correo), carnet, telefono)
-                )
-            `);
-        return data.map(p => Profesor.from(p));
-    }
+  /**
+   * Obtiene todos los profesores básicos sin anidar anteproyectos.
+   * @returns {Promise<Profesor[]>}
+   */
+  static async obtenerTodos() {
+    const { data, error } = await supabase
+      .from("Profesor")
+      .select(`
+        profesor_id,
+        cantidad_estudiantes,
+        Usuario:id_usuario (
+          id,
+          nombre,
+          sede,
+          correo
+        )
+      `);
 
-    async actualizarCantidadProyectos() {
-        if(this.original.cantidadProyectos !== this.cantidadProyectos) {
-            const { error } = await supabase
-                .from("profesores")
-                .update({ cantidadProyectos: this.cantidadProyectos })
-                .eq("id", this.id);
-            if(error) return Promise.reject(error.message);
-        }
-        return Promise.resolve();
+    if (error) {
+      console.error("Error al obtener profesores:", error);
+      return [];
     }
+    return data.map(p => Profesor.from(p));
+  }
+
+  /**
+   * Actualiza "cantidad_estudiantes" en la BD
+   * si ha cambiado respecto a la original.
+   */
+  async actualizarCantidadEstudiantes() {
+    if (this.original.cantidadEstudiantes !== this.cantidadEstudiantes) {
+      const { error } = await supabase
+        .from("Profesor")
+        .update({ cantidad_estudiantes: this.cantidadEstudiantes })
+        .eq("profesor_id", this.profesor_id);
+
+      if (error) {
+        return Promise.reject(error.message);
+      }
+      // Actualizamos el valor original
+      this.original.cantidadEstudiantes = this.cantidadEstudiantes;
+    }
+    return Promise.resolve();
+  }
 }
 
 export default Profesor;

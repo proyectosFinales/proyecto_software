@@ -1,15 +1,18 @@
-import React, { useEffect, useState } from 'react';
+/**
+ * AnteproyectosEstudiante.jsx
+ * Muestra los anteproyectos creados por el estudiante logueado (sessionStorage).
+ */
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/AnteproyectosEstudiante.module.css'; // Cambiado a módulo CSS
+import styles from '../styles/AnteproyectosEstudiante.module.css';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import HeaderEstudiante from '../components/HeaderEstudiante';
-import {descargarAnteproyecto} from '../../controller/DescargarPDF';
+import { descargarAnteproyecto } from '../../controller/DescargarPDF';
 import styles2 from '../styles/table.module.css';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
-
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,8 +21,10 @@ const AnteproyectosEstudiante = () => {
 
   async function consultarAnteproyectos() {
     try {
-      const { data, error } = await supabase.from('anteproyectos').
-      select(`id,
+      const { data, error } = await supabase
+        .from('Anteproyecto')
+        .select(`
+          id,
           sede,
           tipoEmpresa,
           nombreEmpresa,
@@ -34,7 +39,6 @@ const AnteproyectosEstudiante = () => {
           nombreHR,
           telefonoHR,
           correoHR,
-          tipoEmpresa,
           contexto,
           justificacion,
           sintomas,
@@ -43,101 +47,118 @@ const AnteproyectosEstudiante = () => {
           tipoProyecto,
           observaciones,
           estado,
-          idEstudiante,
-          estudiantes(id, nombre, carnet, telefono, correo)`)
-          .eq('idEstudiante',sessionStorage.getItem('token'))
-          .eq('semestreActual', 1)
-          .or('estado.eq.Aprobado,estado.eq.Reprobado,estado.eq.Pendiente');;
+          estudiante_id,
+          Estudiante:estudiante_id (
+            estudiante_id,
+            nombre,
+            carnet,
+            telefono,
+            correo
+          )
+        `)
+        .eq('estudiante_id', sessionStorage.getItem('token'))
+        .eq('semestre_id', 1)
+        .or('estado.eq.Aprobado,estado.eq.Reprobado,estado.eq.Pendiente');
       if (error) {
-        alert('No se pudieron obtener los anteproyectos');
+        alert('No se pudieron obtener los anteproyectos. ' + error.message);
         return;
       }
-      setAnteproyectos(data);
+      setAnteproyectos(data || []);
     } catch (error) {
-      alert('Error al consultar anteproyectos:', error);
+      alert('Error al consultar anteproyectos: ' + error);
     }
   }
 
-  async function editarAnteproyecto(id) {
-    console.log(id);
+  function editarAnteproyecto(id) {
     navigate(`/editarFormulario?id=${id}`);
   }
 
-  // Función para eliminar anteproyectos
+  // Función para eliminar anteproyectos (solo si Pendiente o Reprobado)
   async function eliminarAnteproyecto(id, estado) {
-    const confirmarEnvio=window.confirm("¿Está seguro que desea eliminar este anteproyecto?");
+    const confirmarEnvio = window.confirm(
+      "¿Está seguro que desea eliminar este anteproyecto?"
+    );
+    if (!confirmarEnvio) return;
 
-    if(!confirmarEnvio){return;}
-
-    if(estado == 'Aprobado'){
+    if (estado === 'Aprobado') {
       alert("No se puede eliminar un anteproyecto aprobado.");
       return;
     }
 
     try {
-      // Eliminar anteproyecto de la base de datos en Supabase
       const { error } = await supabase
-        .from('anteproyectos')
+        .from('Anteproyecto')
         .delete()
         .eq('id', id)
-        .in('estado', ['Reprobado', 'Pendiente']);
-
+        .in('estado', ['Reprobado', 'Pendiente']); // filtra para no borrar uno aprobado
       if (error) {
-        alert('Error al eliminar anteproyecto:', error);
+        alert('Error al eliminar anteproyecto: ' + error.message);
         return;
       }
 
-      // Actualizar el estado local eliminando el anteproyecto del array
-      setAnteproyectos(anteproyectos.filter((anteproyecto) => anteproyecto.id !== id));
+      setAnteproyectos((prev) => prev.filter((ap) => ap.id !== id));
       console.log(`Anteproyecto con ID ${id} eliminado exitosamente.`);
     } catch (error) {
-      alert('Error al eliminar anteproyecto:', error);
+      alert('Error al eliminar anteproyecto:' + error);
     }
   }
 
   return (
     <div className={styles.contenedor_anteproyectos_estudiante}>
-        <HeaderEstudiante title="Anteproyectos"/>
+      <HeaderEstudiante title="Anteproyectos" />
       <div>
         <main className={styles.lista_anteproyectos_estudiante}>
-          <button className={styles.crear_anteproyecto} onClick={() => navigate('/formulario-estudiantes')}>
+          <button
+            className={styles.crear_anteproyecto}
+            onClick={() => navigate('/formulario-estudiantes')}
+          >
             Crear anteproyecto
           </button>
           <div className={styles.contenedor_tabla}>
-          <table className={styles2.table}>
-            <thead>
-              <tr>
-                <th>Anteproyectos creados</th>
-                <th>Estado</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody>
-              {anteproyectos.map((anteproyecto) => (
-                <tr key={anteproyecto.id}>
-                  <td>{anteproyecto.nombreEmpresa}</td>
-                  <td>{anteproyecto.estado}</td>
-                  <td>
-                    <div className={styles.contenedor_botones_anteproyectos_estudiante}>
-                      <button onClick={() => editarAnteproyecto(anteproyecto.id)} className={styles.btn + ' ' + styles.editar}>
-                        Editar
-                      </button>
-                      <button onClick={() => descargarAnteproyecto(anteproyecto)} className={styles.btn + ' ' + styles.descargar}>
-                        Descargar
-                      </button>
-                      <button onClick={() => eliminarAnteproyecto(anteproyecto.id, anteproyecto.estado)} className={styles.btn + ' ' + styles.eliminar}>
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
+            <table className={styles2.table}>
+              <thead>
+                <tr>
+                  <th>Anteproyectos creados</th>
+                  <th>Estado</th>
+                  <th></th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {anteproyectos.map((anteproyecto) => (
+                  <tr key={anteproyecto.id}>
+                    <td>{anteproyecto.nombreEmpresa}</td>
+                    <td>{anteproyecto.estado}</td>
+                    <td>
+                      <div className={styles.contenedor_botones_anteproyectos_estudiante}>
+                        <button
+                          onClick={() => editarAnteproyecto(anteproyecto.id)}
+                          className={`${styles.btn} ${styles.editar}`}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => descargarAnteproyecto(anteproyecto)}
+                          className={`${styles.btn} ${styles.descargar}`}
+                        >
+                          Descargar
+                        </button>
+                        <button
+                          onClick={() =>
+                            eliminarAnteproyecto(anteproyecto.id, anteproyecto.estado)
+                          }
+                          className={`${styles.btn} ${styles.eliminar}`}
+                        >
+                          Eliminar
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </main>
       </div>
-
       <Footer />
     </div>
   );

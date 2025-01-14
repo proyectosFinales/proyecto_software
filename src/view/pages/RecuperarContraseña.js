@@ -1,21 +1,28 @@
-import { React, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/RecuperarContraseña.css";
 import { FaEnvelope } from "react-icons/fa";
 import Footer from '../components/Footer';
 import sendRecovery from "../../controller/Recovery";
 
+/**
+ * RecuperarContraseña.jsx
+ * 
+ * Permite al usuario ingresar su correo y solicitar un mail de recuperación.
+ * Llama a `sendRecovery(email)` que internamente hará 
+ * `from('Usuario').select(...)` en tu controlador.
+ */
 const RecuperarContraseña = () => {
   const [email, setEmail] = useState('');
   const navigate = useNavigate();
 
-  const handleRecovery = () => {
+  const handleRecovery = async () => {
     try {
-      sendRecovery(email);
+      await sendRecovery(email);
       alert(`Se envió la solicitud al correo electrónico: ${email}`);
       navigate("/");
     } catch (error) {
-      alert(error);
+      alert(error.message || error);
     }
   };
 
@@ -27,7 +34,10 @@ const RecuperarContraseña = () => {
 
       <div className="recover-box">
         <h2>Recuperar Contraseña</h2>
-        <p>Ingresa tu correo electrónico registrado en la plataforma para enviar una solicitud de recuperación de contraseña.</p>
+        <p>
+          Ingresa tu correo electrónico registrado en la plataforma para enviar 
+          una solicitud de recuperación de contraseña.
+        </p>
 
         <div className="input-container-recuperar">
           <FaEnvelope className="icon-recuperar" />
