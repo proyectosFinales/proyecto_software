@@ -1,3 +1,7 @@
+/**
+ * CitasProfesor.jsx
+ * Muestra las citas relacionadas con un profesor (sea como asesor o lector).
+ */
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import { supabase } from '../../model/Cliente';
@@ -26,106 +30,127 @@ const CitasProfesor = () => {
       try {
         let allCitas = [];
 
-        const { data: anteproyectoData, error: anteproyectoError } = await supabase
-          .from('anteproyectos')
-          .select('id, idEncargado, idEstudiante')
-          .eq('idEncargado', profesorID, 'semestreActual', 1);
+        // 1. Buscar anteproyectos donde el profesor es "asesor"
+        //    Si en tu BD se llama 'asesor', ajusta:
+        const { data: anteData, error: anteError } = await supabase
+          .from('Anteproyecto')
+          .select('id, asesor, estudiante_id')
+          .eq('asesor', profesorID) // antes: 'idEncargado'
+          .eq('semestre_id', 1);    // si usas semestres
 
-        if (anteproyectoError) throw anteproyectoError;
+        if (anteError) throw anteError;
 
-        if (anteproyectoData && anteproyectoData.length > 0) {
-          for (let anteproyecto of anteproyectoData) {
-            const estudianteID = anteproyecto.idEstudiante;
-            const anteproyectoID = anteproyecto.id;
-
+        // 2. Para cada anteproyecto, obtener su(s) cita(s)
+        if (anteData?.length) {
+          for (let ap of anteData) {
+            const anteID = ap.id;
             const { data: citasData, error: citasError } = await supabase
-              .from('citas')
-              .select('id, fecha, horaInicio, horaFin, lector1, lector2, anteproyectoID')
-              .eq('anteproyectoID', anteproyectoID, 'semestreActual', 1);
+              .from('Cita')
+              .select('cita_id, fecha, hora_inicio, hora_fin, lector1, lector2, anteproyecto_id')
+              .eq('anteproyecto_id', anteID)
+              .eq('semestre_id', 1);  // si usas semestres
 
             if (citasError) throw citasError;
 
             allCitas = [...allCitas, ...citasData];
-            const { data: estudianteData } = await supabase
-              .from('estudiantes')
-              .select('id, nombre')
-              .eq('id', estudianteID);
 
-            setEstudiantesMap(prevState => ({
-              ...prevState,
-              [anteproyectoID]: estudianteData[0].nombre,
-            }));
+            // 2.1. Llenar info de estudiante y profesor(asesor):
+            if (ap.estudiante_id) {
+              const { data: estData } = await supabase
+                .from('Estudiante')
+                .select('estudiante_id, nombre')
+                .eq('estudiante_id', ap.estudiante_id)
+                .single();
+              if (estData) {
+                setEstudiantesMap(prev => ({
+                  ...prev,
+                  [anteID]: estData.nombre
+                }));
+              }
+            }
 
-            const { data: profesorData } = await supabase
-              .from('profesores')
-              .select('id, nombre')
-              .eq('id', profesorID);
+            const { data: profAsesorData } = await supabase
+              .from('Profesor')
+              .select('profesor_id, nombre')
+              .eq('profesor_id', profesorID)
+              .single();
 
-            setProfesoresMap(prevState => ({
-              ...prevState,
-              [anteproyectoID]: profesorData[0].nombre,
-            }));
-          }
-        }
-
-        const { data: lectorCitasData, error: lectorError } = await supabase
-          .from('citas')
-          .select('id, anteproyectoID, fecha, horaInicio, horaFin, lector1, lector2')
-          .or(`lector1.eq.${profesorID},lector2.eq.${profesorID}`)
-          .eq('semestreActual', 1);
-
-        if (lectorError) throw lectorError;
-
-        if (lectorCitasData && lectorCitasData.length > 0) {
-          for (let cita of lectorCitasData) {
-            allCitas.push(cita);
-
-            const anteproyectoID = cita.anteproyectoID;
-
-            const { data: anteproyectoData } = await supabase
-              .from('anteproyectos')
-              .select('idEstudiante, idEncargado')
-              .eq('id', anteproyectoID);
-
-            if (anteproyectoData && anteproyectoData.length > 0) {
-              const estudianteID = anteproyectoData[0].idEstudiante;
-              const idEncargado = anteproyectoData[0].idEncargado;
-
-              const { data: estudianteData } = await supabase
-                .from('estudiantes')
-                .select('id, nombre')
-                .eq('id', estudianteID);
-
-              setEstudiantesMap(prevState => ({
-                ...prevState,
-                [anteproyectoID]: estudianteData[0].nombre,
-              }));
-
-              const { data: profesorData } = await supabase
-                .from('profesores')
-                .select('id, nombre')
-                .eq('id', idEncargado);
-
-              setProfesoresMap(prevState => ({
-                ...prevState,
-                [anteproyectoID]: profesorData[0].nombre,
+            if (profAsesorData) {
+              setProfesoresMap(prev => ({
+                ...prev,
+                [anteID]: profAsesorData.nombre
               }));
             }
           }
         }
 
-        const { data: profesoresData, error: profesoresError } = await supabase
-          .from('profesores')
-          .select('id, nombre');
+        // 3. Buscar citas donde el profesor sea lector1 o lector2
+        const { data: lectorCitasData, error: lectorError } = await supabase
+          .from('Cita')
+          .select('cita_id, anteproyecto_id, fecha, hora_inicio, hora_fin, lector1, lector2')
+          .or(`lector1.eq.${profesorID},lector2.eq.${profesorID}`)
+          .eq('semestre_id', 1); // si usas semestres
 
-        if (profesoresError) throw profesoresError;
+        if (lectorError) throw lectorError;
 
-        let lectoresMap = {};
-        profesoresData.forEach(profesor => {
-          lectoresMap[profesor.id] = profesor.nombre;
+        if (lectorCitasData?.length) {
+          for (let cita of lectorCitasData) {
+            allCitas.push(cita);
+
+            // Llenar info de ese anteproyecto
+            const anteID = cita.anteproyecto_id;
+            const { data: anteRow } = await supabase
+              .from('Anteproyecto')
+              .select('estudiante_id, asesor')
+              .eq('id', anteID)
+              .single();
+
+            if (anteRow) {
+              // Estudiante
+              if (anteRow.estudiante_id) {
+                const { data: est2 } = await supabase
+                  .from('Estudiante')
+                  .select('nombre')
+                  .eq('estudiante_id', anteRow.estudiante_id)
+                  .single();
+                if (est2) {
+                  setEstudiantesMap(prev => ({
+                    ...prev,
+                    [anteID]: est2.nombre
+                  }));
+                }
+              }
+              // Asesor
+              if (anteRow.asesor) {
+                const { data: prof2 } = await supabase
+                  .from('Profesor')
+                  .select('nombre')
+                  .eq('profesor_id', anteRow.asesor)
+                  .single();
+                if (prof2) {
+                  setProfesoresMap(prev => ({
+                    ...prev,
+                    [anteID]: prof2.nombre
+                  }));
+                }
+              }
+            }
+          }
+        }
+
+        // 4. Mapa de lectores
+        const { data: profesoresData, error: profsError } = await supabase
+          .from('Profesor')
+          .select('profesor_id, nombre');
+
+        if (profsError) throw profsError;
+
+        const tempLectores = {};
+        (profesoresData || []).forEach(prof => {
+          tempLectores[prof.profesor_id] = prof.nombre;
         });
-        setLectoresMap(lectoresMap);
 
+        setLectoresMap(tempLectores);
         setCitas(allCitas);
       } catch (error) {
         console.error('Error fetching appointment data:', error);
@@ -146,14 +171,13 @@ const CitasProfesor = () => {
               <thead>
                 <tr className="cita-row">
                   <th>Estudiante</th>
-                  <th>Profesor</th>
+                  <th>Profesor asesor</th>
                   <th>Día</th>
                   <th>Hora</th>
                   <th>Lector 1</th>
                   <th>Lector 2</th>
                 </tr>
               </thead>
-
               <tbody>
                 {citas.length === 0 ? (
                   <tr>
@@ -162,18 +186,16 @@ const CitasProfesor = () => {
                     </td>
                   </tr>
                 ) : (
-                  citas.map((cita) => {
-                    return (
-                      <tr className='cita-row' key={cita.id}>
-                        <td>{estudiantesMap[cita.anteproyectoID] || 'N/A'}</td>
-                        <td>{profesoresMap[cita.anteproyectoID] || 'N/A'}</td>
-                        <td>{formatDateDDMMYYYY(cita.fecha)}</td>
-                        <td>{`${formatTime(cita.horaInicio)} - ${formatTime(cita.horaFin)}`}</td>
-                        <td>{lectoresMap[cita.lector1] || 'N/A'}</td>
-                        <td>{lectoresMap[cita.lector2] || 'N/A'}</td>
-                      </tr>
-                    );
-                  })
+                  citas.map((cita) => (
+                    <tr className="cita-row" key={cita.cita_id}>
+                      <td>{estudiantesMap[cita.anteproyecto_id] || 'N/A'}</td>
+                      <td>{profesoresMap[cita.anteproyecto_id] || 'N/A'}</td>
+                      <td>{formatDateDDMMYYYY(cita.fecha)}</td>
+                      <td>{`${formatTime(cita.hora_inicio)} - ${formatTime(cita.hora_fin)}`}</td>
+                      <td>{lectoresMap[cita.lector1] || 'N/A'}</td>
+                      <td>{lectoresMap[cita.lector2] || 'N/A'}</td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>

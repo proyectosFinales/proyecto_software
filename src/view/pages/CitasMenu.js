@@ -1,109 +1,128 @@
+/**
+ * CitasMenu.jsx
+ *
+ * Menú para el coordinador, con opción de administrar citas y
+ * realizar la asignación automática de lectores.
+ */
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styles from '../styles/MenuPrincipal.module.css';
-import Header from '../components/HeaderCoordinador'
-import Footer from '../components/Footer'
+import Header from '../components/HeaderCoordinador';
+import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
 import { supabase } from '../../model/Cliente';
 
 const CitasMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navigate = useNavigate();
+
   const assignLecturersToAppointments = async () => {
     try {
-      // 1. Fetch all appointments (`citas`) where `semestreActual = 1`
+      // 1. Fetch all appointments (Cita) where semestre_id = 1
       const { data: appointments, error: appointmentError } = await supabase
-        .from('citas')
-        .select('id, anteproyectoID, lector1, lector2')
-        .eq('semestreActual', 1);
+        .from('Cita')  // Antes 'citas'
+        .select('cita_id, anteproyecto_id, lector1, lector2')
+        .eq('semestre_id', 1);
       if (appointmentError) throw appointmentError;
 
-      // 2. Fetch all students with an `anteproyecto` in the current semester that don’t have an appointment
+      // 2. Fetch all anteproyectos con estado 'Aprobado' en este semestre
       const { data: allAnteproyectos, error: anteproyectosError } = await supabase
-        .from('anteproyectos')
-        .select('id, idEstudiante')
+        .from('Anteproyecto')
+        .select('id, estudiante_id')
         .eq('estado', 'Aprobado')
-        .eq('semestreActual', 1);
+        .eq('semestre_id', 1);
       if (anteproyectosError) throw anteproyectosError;
 
-      const assignedAnteproyectoIds = new Set(appointments.map(app => app.anteproyectoID));
-      const unassignedAnteproyectos = allAnteproyectos.filter(anteproyecto => !assignedAnteproyectoIds.has(anteproyecto.id));
+      // Asignar IDs de anteproyecto que ya tienen cita
+      const assignedAnteproyectoIds = new Set(appointments.map(app => app.anteproyecto_id));
+      // Filtrar anteproyectos sin cita
+      const unassignedAnteproyectos = allAnteproyectos.filter(
+        ap => !assignedAnteproyectoIds.has(ap.id)
+      );
 
       // 3. Loop through each appointment and attempt to assign two lecturers
       for (const appointment of appointments) {
         // 4. Fetch available professors for this appointment
+        // Suponiendo que tu tabla "Disponibilidad" o "DisponibilidadCitas" se llame "Disponibilidad"
         const { data: availableProfessors, error: professorsError } = await supabase
-          .from('disponibilidadCitas')
-          .select('profesorID')
-          .eq('citaID', appointment.id)
-          .eq('disponible', 1);
+          .from('Disponibilidad')
+          .select('profesor_id')
+          .eq('cita_id', appointment.cita_id)
+          .eq('disponible', true); // Ajusta si tu campo es boolean
         if (professorsError) throw professorsError;
 
-        const availableProfessorIds = availableProfessors.map(prof => prof.profesorID);
+        const availableProfessorIds = availableProfessors.map(prof => prof.profesor_id);
 
-        // 5. Loop through unassigned students to find one with two eligible lecturers
-        let selectedStudent = null;
+        // 5. Buscar un anteproyecto sin asignar que tenga al menos 2 profesores elegibles
+        let selectedStudentAnteproyecto = null;
         let selectedLecturers = [];
 
         for (const studentAnteproyecto of unassignedAnteproyectos) {
-          // Query to check professors who have been `idEncargado` for this student in any `anteproyecto`
-          const { data: previousEncargados, error: encargadosError } = await supabase
-            .from('anteproyectos')
-            .select('idEncargado')
-            .eq('idEstudiante', studentAnteproyecto.idEstudiante);
-          if (encargadosError) throw encargadosError;
+          // 5.1. Revisar profesores que hayan sido "encargados" (asesor/profesor_id)
+          //      en algún anteproyecto anterior de este estudiante
+          //      (o que hayan sido lector1/lector2).
+          // Ejemplo:
+          const { data: previousAnte, error: pAnteError } = await supabase
+            .from('Anteproyecto')
+            .select('asesor')
+            .eq('estudiante_id', studentAnteproyecto.estudiante_id);
+          if (pAnteError) throw pAnteError;
 
-          const previousEncargadoIds = new Set(previousEncargados.map(enc => enc.idEncargado));
+          const previousEncargadoIds = new Set(previousAnte.map(a => a.asesor));
 
-          // Fetch all anteproyecto IDs for this student to check for previous lecturer assignments
-          const { data: studentAnteproyectoIds, error: anteproyectoIdsError } = await supabase
-            .from('anteproyectos')
-            .select('id')
-            .eq('idEstudiante', studentAnteproyecto.idEstudiante);
-          if (anteproyectoIdsError) throw anteproyectoIdsError;
-
-          const anteproyectoIds = studentAnteproyectoIds.map(anteproyecto => anteproyecto.id);
-
-          // Query to check professors who have previously been lecturers for any of the student’s anteproyectos
-          const { data: previousLectures, error: lectureError } = await supabase
-            .from('citas')
+          // 5.2. Revisar citas anteriores donde lector1/lector2 = ...
+          // Si quieres, harías un join. Ejemplo sencillo:
+          const { data: previousLectures, error: lecturesError } = await supabase
+            .from('Cita')
             .select('lector1, lector2')
-            .in('anteproyectoID', anteproyectoIds);
-          if (lectureError) throw lectureError;
+            .in('anteproyecto_id',
+              (await supabase
+                .from('Anteproyecto')
+                .select('id')
+                .eq('estudiante_id', studentAnteproyecto.estudiante_id)
+              ).data?.map(a => a.id) || []
+            );
+          if (lecturesError) throw lecturesError;
 
           const previousLecturerIds = new Set(
-            previousLectures.flatMap(lecture => [lecture.lector1, lecture.lector2])
+            previousLectures.flatMap(lec => [lec.lector1, lec.lector2])
           );
 
-          // Filter eligible professors who have not been the student's `idEncargado` and not previously lecturers
-          const eligibleProfessors = availableProfessorIds.filter(professorId =>
-            !previousEncargadoIds.has(professorId) &&
-            !previousLecturerIds.has(professorId)
-          );
+          // 5.3. Filtrar los profesores elegibles
+          const eligibleProfessors = availableProfessorIds.filter(pid => {
+            return pid && !previousEncargadoIds.has(pid) && !previousLecturerIds.has(pid);
+          });
 
+          // Si hay >= 2 elegibles, se elige 2 (random)
           if (eligibleProfessors.length >= 2) {
-            selectedStudent = studentAnteproyecto;
-            // Randomly select two from eligible professors
-            selectedLecturers = eligibleProfessors.sort(() => Math.random() - 0.5).slice(0, 2);
+            selectedStudentAnteproyecto = studentAnteproyecto;
+            selectedLecturers = eligibleProfessors
+              .sort(() => Math.random() - 0.5)
+              .slice(0, 2);
             break;
           }
         }
 
-        // 6. If a student with two eligible lecturers is found, assign them to the appointment
-        if (selectedStudent && selectedLecturers.length === 2) {
+        // 6. Si se encontró un anteproyecto con 2 profesores elegibles => Asignar
+        if (selectedStudentAnteproyecto && selectedLecturers.length === 2) {
           const { error: updateError } = await supabase
-            .from('citas')
+            .from('Cita')
             .update({
-              anteproyectoID: selectedStudent.id,
+              anteproyecto_id: selectedStudentAnteproyecto.id,
               lector1: selectedLecturers[0],
-              lector2: selectedLecturers[1],
+              lector2: selectedLecturers[1]
             })
-            .eq('id', appointment.id);
+            .eq('cita_id', appointment.cita_id);
+
           if (updateError) throw updateError;
 
-          // Remove the student from unassigned list to avoid reassignment
-          const index = unassignedAnteproyectos.findIndex(anteproyecto => anteproyecto.id === selectedStudent.id);
-          if (index > -1) unassignedAnteproyectos.splice(index, 1);
+          // Quitar el anteproyecto de la lista "unassigned"
+          const index = unassignedAnteproyectos.findIndex(
+            ap => ap.id === selectedStudentAnteproyecto.id
+          );
+          if (index > -1) {
+            unassignedAnteproyectos.splice(index, 1);
+          }
         }
       }
 
@@ -111,12 +130,10 @@ const CitasMenu = () => {
       alert('Se asignaron correctamente los lectores');
     } catch (error) {
       console.error('Error assigning lecturers:', error.message);
-      alert('Hubo un error al realizar la asignaron de los lectores');
+      alert('Hubo un error al realizar la asignación de los lectores');
     }
     navigate('/citas');
   };
-
-
 
   return (
     <div>

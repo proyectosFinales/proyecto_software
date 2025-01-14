@@ -1,3 +1,7 @@
+/**
+ * CargarDatos.jsx
+ * Carga un Excel con datos de profesores (o usuarios) y los registra en la BD.
+ */
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from '../../model/Cliente';
@@ -6,6 +10,10 @@ import Header from '../components/HeaderCoordinador';
 import sendMail from '../../controller/Email';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 
+/**
+ * Nota: Ajusta si en tu BD no manejas 'carnet' en la tabla 'Profesor'.
+ *       Igual para la columna 'telefono'. 
+ */
 const CargarDatos = () => {
   const [excelData, setExcelData] = useState([]);
   const [infoVisible, setInfoVisible] = useState({});
@@ -26,20 +34,20 @@ const CargarDatos = () => {
 
   // Función para procesar el archivo de Excel
   const handleFileUpload = (e) => {
-    const file = e.target.files[0]; // Obtenemos el archivo seleccionado
+    const file = e.target.files[0];
     const reader = new FileReader();
-  
+
     reader.onload = (event) => {
       const data = event.target.result;
       const workbook = XLSX.read(data, { type: 'binary' });
-  
+
       // Leer la primera hoja del archivo
       const firstSheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[firstSheetName];
-  
+
       // Convertir la hoja de cálculo en un arreglo de objetos
       const sheetData = XLSX.utils.sheet_to_json(worksheet);
-  
+
       // Filtrar solo las columnas que necesitamos
       const filteredData = sheetData.map(row => ({
         Nombre: row.Nombre,
@@ -48,141 +56,141 @@ const CargarDatos = () => {
         Sede: row.Sede,
         Telefono: row.Telefono
       }));
-  
-      setExcelData(filteredData); // Guardamos los datos filtrados en el estado
+
+      setExcelData(filteredData);
     };
-  
+
     reader.readAsBinaryString(file);
   };
-  
 
   const subirDatos = async (e) => {
     e.preventDefault();
-    const confirmAprobar = window.confirm("Los datos mostrados en el recuadro de abajo serán insertados en la base de datos y se enviará un correo a cada uno de los profesores con sus credenciales. \n¿Estás seguro de que deseas proceder?");
-
-    if (!confirmAprobar) { return; }
+    const confirmAprobar = window.confirm(
+      "Los datos mostrados abajo serán insertados en la base de datos y se enviará un correo a cada profesor con sus credenciales.\n¿Deseas continuar?"
+    );
+    if (!confirmAprobar) return;
 
     for (const row of excelData) {
-        const dataToInsert = {
-            nombre: row.Nombre,
-            carnet: row.Carnet,
-            correo: row.Correo,
-            sede: row.Sede,
-            telefono: row.Telefono
-        };
+      const dataToInsert = {
+        nombre: row.Nombre,
+        carnet: row.Carnet,
+        correo: row.Correo,
+        sede: row.Sede,
+        telefono: row.Telefono
+      };
 
-        // Verificación si ya existe el carnet
-        const { data: existingUser, error: errorCheck } = await supabase
-            .from('profesores')
-            .select('carnet')
-            .eq('carnet', dataToInsert.carnet);
+      // Verificación si ya existe un profesor con ese 'carnet'
+      const { data: existingProf, error: errorCheck } = await supabase
+        .from('Profesor') // En tu nueva BD
+        .select('carnet')
+        .eq('carnet', dataToInsert.carnet);
 
-        if (errorCheck) {
-            alert('Error al verificar carnet:', errorCheck.message);
-            continue;
-        }
+      if (errorCheck) {
+        alert('Error al verificar carnet: ' + errorCheck.message);
+        continue;
+      }
+      if (existingProf && existingProf.length > 0) {
+        alert(`El carnet ${dataToInsert.carnet} ya existe. No se insertará este registro.`);
+        continue;
+      }
 
-        if (existingUser && existingUser.length > 0) {
-            alert(`El carnet ${dataToInsert.carnet} ya existe. No se insertará este registro.`);
-            continue;
-        }
+      // Generar contraseña aleatoria
+      const contraseña = generarContraseña();
+      const mensaje = 
+        "Hola, su contraseña generada es: " + contraseña + 
+        " y su usuario es su correo electrónico: " + dataToInsert.correo + 
+        ". Para acceder a la plataforma, ingrese a ... y use el correo y la contraseña.\n" +
+        "No responda a este mensaje ya que es un correo automatizado.";
 
-        const contraseña = generarContraseña();
-        const mensaje = "Hola, su contraseña generada es: " + contraseña + 
-        " y su usuario es su correo electrónico: " + dataToInsert.correo + ". Para acceder a la plataforma, "+
-        "ingrese a https://proyectosfinales.netlify.app/ y use el correo electrónico y la contraseña.\n"+
-        "Para cualquier duda, escriba a bguzman@itcr.ac.cr y NO responda a este mensaje ya que es un correo automatizado.";
+      // 1. Insertar en la tabla Usuario
+      const { data: usuarioData, error: errorInsertUser } = await supabase
+        .from('Usuario')
+        .insert({
+          correo: dataToInsert.correo,
+          rol: 2,                       // 2 => Profesor
+          contrasena: contraseña,
+          sede: dataToInsert.sede
+        })
+        .select('id')
+        .single();
 
-        // Insertar en la base de datos
-        const { data: usuarioData, error: errorInsertUser } = await supabase
-            .from('usuarios')
-            .insert({
-                correo: dataToInsert.correo,
-                rol: '2',
-                contraseña: contraseña,
-                sede: dataToInsert.sede
-            })
-            .select('id') // Selecciona el ID del usuario insertado
-            .single(); // Obtén solo el primer resultado (esperando un solo registro)
+      if (errorInsertUser) {
+        alert('Error al cargar datos en la tabla Usuario: ' + errorInsertUser.message);
+        continue;
+      }
 
-        if (errorInsertUser) {
-            alert('Error al cargar datos en la tabla usuarios:', errorInsertUser.message);
-            continue;
-        }
+      const usuarioId = usuarioData.id;
 
-        const usuarioId = usuarioData.id;
+      // 2. Insertar en la tabla Profesor
+      //    Cambiamos 'id' => 'id_usuario'
+      const { error: errorInsertProf } = await supabase
+        .from('Profesor')
+        .insert({
+          nombre: dataToInsert.nombre,
+          carnet: dataToInsert.carnet,    // si tu BD lo maneja
+          id_usuario: usuarioId,         // clave FK a Usuario
+          // si tienes 'telefono' en Profesor, agrégalo:
+          telefono: dataToInsert.telefono || ''
+        });
 
-        
-        const { error: errorInsertProf } = await supabase
-          .from('profesores')
-          .insert({
-              nombre: dataToInsert.nombre,
-              carnet: dataToInsert.carnet,
-              id: usuarioId,
-              telefono: dataToInsert.carnet
-          });
-        
-
-        // Enviar correo si se insertó correctamente
-        if (errorInsertProf) {
-            alert('Error al cargar datos en la base de datos:', errorInsertProf.message);
-        } else {
-            sendMail(dataToInsert.correo, "Credenciales", mensaje);
-        }
+      if (errorInsertProf) {
+        alert('Error al cargar datos en la tabla Profesor: ' + errorInsertProf.message);
+      } else {
+        // Enviar correo si todo salió bien
+        sendMail(dataToInsert.correo, "Credenciales", mensaje);
+      }
     }
-};   
+  };
 
   return (
     <div className={styles.container}>
       <Header title="Carga de datos"/>
       <div className={styles.datos_cargados}>
-        <AiOutlineInfoCircle 
-                className={styles.infoIcon} 
-                onClick={() => toggleInfo('formato')} 
-                title="contexto_info"
-              />
-          
+        <AiOutlineInfoCircle
+          className={styles.infoIcon}
+          onClick={() => toggleInfo('formato')}
+          title="contexto_info"
+        />
         <button className={styles.selectButton}>
-            <label htmlFor="file-upload">
-            Seleccionar archivo
-            </label>
+          <label htmlFor="file-upload">Seleccionar archivo</label>
         </button>
         <button className={styles.uploadButton} onClick={subirDatos}>
-            <label>
-            Cargar datos
-            </label>
+          <label>Cargar datos</label>
         </button>
-        {infoVisible.formato && <p className={styles.infoText}>Seleccione una archivo excel que contenga las columnas: Nombre, Carnet, Correo, Sede y Telefono.
-          Puede contener más columnas pero solo se subiran los datos de las columnas solicitadas.</p>}
+        {infoVisible.formato && (
+          <p className={styles.infoText}>
+            El archivo Excel debe tener las columnas: Nombre, Carnet, Correo, Sede y Telefono. 
+            Puede contener más columnas, pero solo se subirán esos datos solicitados.
+          </p>
+        )}
+
         <input
-            type="file"
-            id="file-upload"
-            accept=".xlsx, .xls"
-            className={{ display: 'none' }} // Escondemos el input real
-            onChange={handleFileUpload}
+          type="file"
+          id="file-upload"
+          accept=".xlsx, .xls"
+          style={{ display: 'none' }}
+          onChange={handleFileUpload}
         />
 
         {/* Tabla para mostrar los datos cargados */}
         <div className={styles.tableContainer}>
-            <table className={styles.tabla_proyectos}>
+          <table className={styles.tabla_proyectos}>
             <thead>
-                <tr>
-                {/* Aquí puedes generar los encabezados dinámicamente según tus datos */}
-                {excelData.length > 0 && Object.keys(excelData[0]).map((key) => (
-                    <th key={key}>{key}</th>
-                ))}
-                </tr>
+              <tr>
+                {excelData.length > 0 &&
+                  Object.keys(excelData[0]).map((key) => <th key={key}>{key}</th>)}
+              </tr>
             </thead>
             <tbody>
-                {excelData.map((row, index) => (
+              {excelData.map((row, index) => (
                 <tr key={index}>
-                    {Object.values(row).map((cell, i) => (
+                  {Object.values(row).map((cell, i) => (
                     <td key={i}>{cell}</td>
-                    ))}
+                  ))}
                 </tr>
-                ))}
+              ))}
             </tbody>
-            </table>
+          </table>
         </div>
       </div>
     </div>

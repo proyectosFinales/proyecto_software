@@ -1,100 +1,137 @@
+/**
+ * InicioCargaDatos.jsx
+ * Menú para registrar profesores, modificar cantidad de proyectos,
+ * y reiniciar (limpiar) datos de un semestre anterior.
+ */
 import { Link } from "react-router-dom";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 import Modal from '../../components/Modal';
 import React, { useState } from 'react';
+// Ajusta la importación a tu propia instancia supabase
 import { supabase } from '../../../model/Cliente';
 
+/**
+ * Menú de carga de datos, con opción de "Reiniciar Base de Datos".
+ */
 const InicioCargaDatos = () => {
-    const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState(false);
 
-    const ReiniciarBaseDatos = async () => {
-        if (window.confirm('¿Está seguro(a) de que desea eliminar los registros?')) {
-            try {
-                const { data: usuariosAprobados, error: usuariosAprobadosError } = await supabase
-                    .from('anteproyectos')
-                    .select('idEstudiante')
-                    .eq('estado', 'Finalizado')
+  /**
+   * Ejemplo de limpieza de la BD:
+   * - Buscamos Anteproyectos con estado "Finalizado"
+   * - Eliminamos sus estudiantes en 'Usuario'
+   * - Borramos disponibilidad, etc.
+   * - Actualizamos 'semestre_id' a 0 o nulo en Anteproyecto, Cita
+   */
+  const ReiniciarBaseDatos = async () => {
+    if (!window.confirm('¿Está seguro(a) de que desea eliminar los registros?')) return;
+    try {
+      // 1. Anteproyectos finalizados => obtener sus estudiante_id
+      const { data: anteFinalizados, error: anteFinalError } = await supabase
+        .from('Anteproyecto')
+        .select('estudiante_id')
+        .eq('estado', 'Finalizado'); // Ajusta si en tu enum existe "Finalizado"
 
-                if (usuariosAprobadosError) throw usuariosAprobadosError;
+      if (anteFinalError) throw anteFinalError;
 
-                const idEstudiantes = usuariosAprobados.map((item) => item.idEstudiante);
-                const { data: usuariosDeleted, error: usuariosError } = await supabase
-                    .from('usuarios')
-                    .delete()
-                    .in('id', idEstudiantes)
+      // 2. Tomar esos estudiante_id y borrar de 'Usuario'
+      const idEstudiantes = anteFinalizados.map(a => a.estudiante_id);
+      if (idEstudiantes.length > 0) {
+        const { error: userDeleteError } = await supabase
+          .from('Usuario')
+          .delete()
+          .in('id', idEstudiantes);
 
-                if (usuariosError) throw usuariosError;
+        if (userDeleteError) throw userDeleteError;
+      }
 
-                const { data: disponibilidadDeleted, error: disponibilidadError } = await supabase
-                    .from('disponibilidadCitas')
-                    .delete()
-                    .neq('id', -1);
+      // 3. Borrar todas las disponibilidades
+      //    (antes se llamaba 'disponibilidadCitas', ahora 'Disponibilidad').
+      const { error: dispError } = await supabase
+        .from('Disponibilidad')
+        .delete()
+        .neq('id', '-1'); // Si tenías esa lógica especial, sino quítalo
 
-                if (disponibilidadError) throw disponibilidadError;
+      if (dispError) throw dispError;
 
-                const { data: anteproyectosUpdated, error: anteproyectosError } = await supabase
-                    .from('anteproyectos')
-                    .update({ semestreActual: 0 })
-                    .eq('semestreActual', 1);
-                if (anteproyectosError) throw anteproyectosError;
+      // 4. Actualizar Anteproyecto para limpiar semestres
+      const { error: anteUpdateError } = await supabase
+        .from('Anteproyecto')
+        .update({ /* semestre_id: null */ })
+        // .eq('semestre_id', 1)  // si manejas semestres con ID=1
+        .neq('id', ''); // Para forzar actualizaciones, ajusta tu lógica
 
-                const { data: citasUpdated, error: citasError } = await supabase
-                    .from('citas')
-                    .update({ semestreActual: 0 })
-                    .eq('semestreActual', 1);
-                if (citasError) throw citasError;
+      if (anteUpdateError) throw anteUpdateError;
 
-                alert('Los registros han sido eliminados correctamente.');
-            } catch (error) {
-                console.error('Error al eliminar registros:', error);
-                alert('Hubo un error al eliminar los registros.');
-            }
-        }
-    };
+      // 5. Actualizar Cita (antes 'citas')
+      const { error: citaUpdateError } = await supabase
+        .from('Cita')
+        .update({ /* semestre_id: null */ })
+        // .eq('semestre_id', 1)
+        .neq('cita_id', ''); // ajusta a tu lógica
+      if (citaUpdateError) throw citaUpdateError;
 
+      alert('Los registros han sido limpiados correctamente.');
+    } catch (error) {
+      console.error('Error al eliminar registros:', error);
+      alert('Hubo un error al eliminar los registros.');
+    }
+  };
 
-    return (
+  return (
+    <>
+      <Header title="Menú de carga de datos" />
+      <div className="menu-grid" style={{ textAlign: "center" }}>
+        <Link
+          className="menu-item"
+          to="/carga-datos/cantidad-proyectos-profesor"
+          style={{ textDecoration: "none", color: "var(--azul)" }}
+        >
+          <i className="fa-solid fa-chalkboard-user" style={{ color: "var(--azul)" }}></i>
+          <p>Cantidad de proyectos por profesor</p>
+        </Link>
+
+        <Link
+          className="menu-item"
+          to="/cargarProfesores"
+          style={{ textDecoration: "none", color: "var(--azul)" }}
+        >
+          <AiOutlineCloudUpload style={{ color: "var(--azul)", fontSize: "80px" }} />
+          <p>Registrar profesores</p>
+        </Link>
+
+        <div className="menu-item" onClick={() => setModal(true)}>
+          <i className="fas fa-clock"></i>
+          <p>Reiniciar base de datos</p>
+        </div>
+      </div>
+
+      <Modal show={modal} onClose={() => setModal(false)}>
         <>
-            <Header title="Menú de carga de datos" />
-            <div className="menu-grid" style={{ textAlign: "center" }}>
-                <Link
-                    className="menu-item"
-                    to="/carga-datos/cantidad-proyectos-profesor"
-                    style={{ textDecoration: "none", color: "var(--azul)" }}
-                >
-                    <i className="fa-solid fa-chalkboard-user" style={{ color: "var(--azul)" }}></i>
-                    <p>Cantidad de proyectos por profesor</p>
-                </Link>
-                <Link
-                    className="menu-item"
-                    to="/cargarProfesores"
-                    style={{ textDecoration: "none", color: "var(--azul)" }}
-                >
-                    <AiOutlineCloudUpload
-                        style={{ color: "var(--azul)", fontSize: "80px" }}
-                    />
-                    <p>Registrar profesores</p>
-                </Link>
-                <div className="menu-item" onClick={() => setModal(true)}>
-                    <i className="fas fa-clock"></i>
-                    <p>Reiniciar base de datos</p>
-                </div>
-            </div>
-            <Modal show={modal} onClose={() => setModal(false)}>
-                <>
-                    <h2>LEA CUIDADOSAMENTE!</h2>
-                    <p>¿Está seguro(a) que quiere borrar toda la información de este semestre? Si preciona el botón de eliminar se perderá permantemente la información del semestre actual. Esta funcionalidad se debe utilizar únicamente cuando ya haya finalizado el semestre lectivo. Asegúrese de que ya no quiera realizar ninguna otra acción en el sistema este semestre antes de borrar la base de datos. (Algunos registros se mantendrán en la base de datos para realizar asignaciones en el futuro, pero no se mostrarán en el sistema.)  </p>
-                    <div className="modal-actions">
-                        <button className="cita-btn cita-btn-error w-50" onClick={() => ReiniciarBaseDatos()}>Eliminar</button>
-                        <button className="cita-btn w-50" onClick={() => setModal(false)}>Cancelar</button>
-                    </div>
-                </>
-            </Modal>
-            <Footer />
+          <h2>LEA CUIDADOSAMENTE!</h2>
+          <p>
+            ¿Está seguro(a) que quiere borrar toda la información de este semestre? 
+            Si presiona el botón de eliminar se perderá permanentemente la información 
+            del semestre actual. 
+            Asegúrese de que ya no quiera realizar ninguna otra acción en el sistema 
+            este semestre antes de borrar la base de datos.
+          </p>
+          <div className="modal-actions">
+            <button className="cita-btn cita-btn-error w-50" onClick={ReiniciarBaseDatos}>
+              Eliminar
+            </button>
+            <button className="cita-btn w-50" onClick={() => setModal(false)}>
+              Cancelar
+            </button>
+          </div>
         </>
-    );
+      </Modal>
+
+      <Footer />
+    </>
+  );
 };
 
 export default InicioCargaDatos;

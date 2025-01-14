@@ -1,17 +1,31 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/FormularioEstudiante.module.css'
+import styles from '../styles/FormularioEstudiante.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import {supabase} from '../../model/Cliente';
+import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
-import {errorToast, successToast} from '../components/toast';
+import { errorToast, successToast } from '../components/toast';
+
+/**
+ * EstudianteForm.jsx
+ * 
+ * Permite a un estudiante crear un nuevo anteproyecto.
+ * 
+ * Se asume la BD:
+ *  - Usuario(id, nombre, correo, telefono, sede, rol, ...)
+ *  - Estudiante(estudiante_id, id_usuario (FK), carnet, ...)
+ *  - Anteproyecto(id, estudiante_id (FK), estado, tipoEmpresa, ...)
+ */
 
 const EstudianteForm = () => {
+  // Datos del estudiante (vienen de la relación con Usuario + Estudiante)
   const [nombre, setNombre] = useState('');
   const [carnet, setCarnet] = useState('');
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
   const [sede, setSede] = useState('');
+
+  // Datos de la empresa y anteproyecto a crear
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [actividadEmpresa, setActividadEmpresa] = useState('');
   const [distritoEmpresa, setDistritoEmpresa] = useState('');
@@ -24,88 +38,128 @@ const EstudianteForm = () => {
   const [nombreHR, setNombreHR] = useState('');
   const [telefonoHR, setTelefonoHR] = useState('');
   const [correoHR, setCorreoHR] = useState('');
-  const [tipoEmpresa, setEmpresa] = useState('');
+  const [tipoEmpresa, setTipoEmpresa] = useState('');
   const [contexto, setContexto] = useState('');
   const [justificacion, setJustificacion] = useState('');
   const [sintomas, setSintomas] = useState('');
   const [impacto, setImpacto] = useState('');
   const [nombreDepartamento, setNombreDepartamento] = useState('');
-  const [tipoProyecto, setProyecto] = useState('');
+  const [tipoProyecto, setTipoProyecto] = useState('');
 
   const navigate = useNavigate();
   const [infoVisible, setInfoVisible] = useState({});
 
+  // Guardar el ID del estudiante (estudiante_id) que necesitamos para insertar en Anteproyecto
+  const [estudianteId, setEstudianteId] = useState(null);
+
   useEffect(() => {
     consultarEstudiante();
-  },);
+  }, []);
 
+  /**
+   * Consulta datos del Usuario y Estudiante asociados al token.
+   *  - En la nueva BD: "Usuario" en singular, "Estudiante" en singular.
+   */
   async function consultarEstudiante() {
     try {
+      const userToken = sessionStorage.getItem('token');
+
+      // Obtenemos la relación: Usuario -> Estudiante
+      // Ajusta el naming "!Estudiante_id_usuario_fkey" según tu constraint
       const { data, error } = await supabase
-        .from('usuarios')
-        .select(`id,
+        .from('Usuario')
+        .select(`
+          id,
           sede,
           correo,
-          estudiantes(id, nombre, carnet, telefono)`)
-          .eq('id', sessionStorage.getItem('token'));
-      if (error) {
-        console.error('Error al consultar estudiante:', error);
+          Estudiante:Estudiante!Estudiante_id_usuario_fkey (
+            estudiante_id,
+            nombre,
+            carnet,
+            telefono
+          )
+        `)
+        .eq('id', userToken)
+        .single();
+
+      if (error) throw error;
+      if (!data) {
+        errorToast('No se encontró la información del usuario/estudiante.');
         return;
       }
-      setNombre(data[0].estudiantes.nombre);
-      setCarnet(data[0].estudiantes.carnet);
-      setTelefono(data[0].estudiantes.telefono);
-      setCorreo(data[0].correo);
-      setSede(data[0].sede);
 
-    } catch (error) {
-      alert('Error al consultar estudiante o usuario');
+      // Llenar datos
+      setCorreo(data.correo || '');
+      setSede(data.sede || '');
+
+      if (data.Estudiante) {
+        setEstudianteId(data.Estudiante.estudiante_id);
+        setNombre(data.Estudiante.nombre || '');
+        setCarnet(data.Estudiante.carnet || '');
+        setTelefono(data.Estudiante.telefono || '');
+      } else {
+        // Caso: no existe Estudiante vinculado
+        errorToast('Este usuario no está registrado como estudiante.');
+      }
+    } catch (err) {
+      console.error('Error al consultar estudiante o usuario', err);
+      errorToast('Error al consultar estudiante o usuario: ' + err.message);
     }
   }
 
+  /**
+   * Inserta el anteproyecto en la tabla "Anteproyecto".
+   * Usamos 'estudiante_id: estudianteId' como FK.
+   */
   async function insertarAnteproyecto(e) {
     e.preventDefault();
-    const confirmarEnvio=window.confirm("¿Está seguro que desea enviar el anteproyecto?");
+    const confirmarEnvio = window.confirm(
+      "¿Está seguro que desea enviar el anteproyecto?"
+    );
+    if (!confirmarEnvio) return;
 
-    if(!confirmarEnvio){return;}
+    if (!estudianteId) {
+      errorToast("No se encontró un 'estudiante_id' válido. No se puede insertar.");
+      return;
+    }
 
     try {
-      const { data2, error2 } = await supabase
-        .from('anteproyectos')
+      // Insertar en la tabla "Anteproyecto"
+      const { error } = await supabase
+        .from('Anteproyecto')
         .insert({
-          sede:sede,
-          tipoEmpresa:tipoEmpresa,
-          nombreEmpresa:nombreEmpresa,
-          actividadEmpresa:actividadEmpresa,
-          distritoEmpresa:distritoEmpresa,
-          cantonEmpresa:cantonEmpresa,
-          provinciaEmpresa:provinciaEmpresa,
-          nombreAsesor:nombreAsesor,
-          puestoAsesor:puestoAsesor,
-          telefonoContacto:telefonoContacto,
-          correoContacto:correoContacto,
-          nombreHR:nombreHR,
-          telefonoHR:telefonoHR,
-          correoHR:correoHR,
-          tipoEmpresa:tipoEmpresa,
-          contexto:contexto,
-          justificacion:justificacion,
-          sintomas:sintomas,
-          impacto:impacto,
-          nombreDepartamento:nombreDepartamento,
-          tipoProyecto:tipoProyecto,
-          idEstudiante: sessionStorage.getItem('token')
+          estudiante_id: estudianteId,      // fk
+          sede: sede,
+          tipoEmpresa: tipoEmpresa,
+          nombreEmpresa: nombreEmpresa,
+          actividadEmpresa: actividadEmpresa,
+          distritoEmpresa: distritoEmpresa,
+          cantonEmpresa: cantonEmpresa,
+          provinciaEmpresa: provinciaEmpresa,
+          nombreAsesor: nombreAsesor,
+          puestoAsesor: puestoAsesor,
+          telefonoContacto: telefonoContacto,
+          correoContacto: correoContacto,
+          nombreHR: nombreHR,
+          telefonoHR: telefonoHR,
+          correoHR: correoHR,
+          contexto: contexto,
+          justificacion: justificacion,
+          sintomas: sintomas,
+          impacto: impacto,
+          nombreDepartamento: nombreDepartamento,
+          tipoProyecto: tipoProyecto,
+          // estado inicial (opcional): "Pendiente"
+          estado: 'Pendiente'
         });
 
-      if (error2) throw error2;
-      
+      if (error) throw error;
 
-      alert('Anteproyecto insertado exitosamente');
-
+      successToast('Anteproyecto insertado exitosamente');
       navigate('/anteproyectosEstudiante');
-
-    } catch (error) {
-      alert('Error al insertar anteproyecto:', error);
+    } catch (err) {
+      console.error('Error al insertar anteproyecto:', err);
+      errorToast('Error al insertar anteproyecto: ' + err.message);
     }
   }
 
@@ -119,436 +173,454 @@ const EstudianteForm = () => {
 
   return (
     <div>
-
-    <header className={styles.header_estudiante}>
+      <header className={styles.header_estudiante}>
         <h1>Crear anteproyecto</h1>
-        </header>
+      </header>
 
-    <form className={styles.form} onSubmit={insertarAnteproyecto}>
-      <h2>Datos del estudiante</h2>
-      
-      <div className={styles.formGroup}>
-        <label>1. Nombre del estudiante: *
-        </label>
-        <input
-          type="text"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-          readOnly
-        />
-      </div>
+      <form className={styles.form} onSubmit={insertarAnteproyecto}>
+        <h2>Datos del estudiante</h2>
 
-      <div className={styles.formGroup}>
-        <label>2. Carnet: *</label>
-        <input
-          type="text"
-          value={carnet}
-          onChange={(e) => setCarnet(e.target.value)}
-          readOnly
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>1. Nombre del estudiante: *</label>
+          <input
+            type="text"
+            value={nombre}
+            readOnly
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>3. Teléfono: *</label>
-        <input
-          type="text"
-          value={telefono}
-          onChange={(e) => setTelefono(e.target.value)}
-          readOnly
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>2. Carnet: *</label>
+          <input
+            type="text"
+            value={carnet}
+            readOnly
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>4. Correo electrónico: *</label>
-        <input
-          type="email"
-          value={correo}
-          onChange={(e) => setCorreo(e.target.value)}
-          readOnly
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>3. Teléfono: *</label>
+          <input
+            type="text"
+            value={telefono}
+            readOnly
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>5. Sede: *</label>
-        <input
-          type="text"
-          value={sede}
-          onChange={(e) => setSede(e.target.value)}
-          readOnly
-        />
-      </div>
-    
+        <div className={styles.formGroup}>
+          <label>4. Correo electrónico: *</label>
+          <input
+            type="email"
+            value={correo}
+            readOnly
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>5. Sede: *</label>
+          <input
+            type="text"
+            value={sede}
+            readOnly
+          />
+        </div>
+
         <h2>Datos de la empresa</h2>
+        <div className={styles.formGroup}>
+          <label>6. Tipo de empresa: *</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="Zona franca"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Zona franca
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="Régimen definitivo"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Régimen definitivo
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="Perfeccionamiento activo"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Perfeccionamiento activo
+            </label>
+          </div>
+        </div>
 
         <div className={styles.formGroup}>
-        <label>6. Tipo de empresa: *</label>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="tipoEmpresa"
-              value="Zona franca"
-              onChange={(e) => setEmpresa(e.target.value)}
-              required
-            />
-            Zona franca
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="tipoEmpresa"
-              value="Régimen definitivo"
-              onChange={(e) => setEmpresa(e.target.value)}
-              required
-            />
-            Régimen definitivo
-          </label>
-        </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="tipoEmpresa"
-              value="Perfeccionamiento activo"
-              onChange={(e) => setEmpresa(e.target.value)}
-              required
-            />
-            Perfeccionamiento activo
-          </label>
+          <label>7. Nombre de la empresa: *</label>
+          <input
+            type="text"
+            value={nombreEmpresa}
+            onChange={(e) => setNombreEmpresa(e.target.value)}
+            required
+          />
         </div>
 
         <div className={styles.formGroup}>
-        <label>7. Nombre de la empresa: *</label>
-        <input
-          type="text"
-          value={nombreEmpresa}
-          onChange={(e) => setNombreEmpresa(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>8. Actividad a la que se dedica la empresa: *</label>
-        <input
-          type="text"
-          value={actividadEmpresa}
-          onChange={(e) => setActividadEmpresa(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>9. Ubicación de la empresa (Distrito): *</label>
-        <input
-          type="text"
-          value={distritoEmpresa}
-          onChange={(e) => setDistritoEmpresa(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>10. Ubicación de la empresa (Cantón): *</label>
-        <input
-          type="text"
-          value={cantonEmpresa}
-          onChange={(e) => setCantonEmpresa(e.target.value)}
-          required
-        />
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>11. Ubicación de la empresa (Provincia): *</label>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="provinciaEmpresa"
-              value="Heredia"
-              onChange={(e) => setProvinciaEmpresa(e.target.value)}
-              required
-            />
-            Heredia
-          </label>
+          <label>8. Actividad de la empresa: *</label>
+          <input
+            type="text"
+            value={actividadEmpresa}
+            onChange={(e) => setActividadEmpresa(e.target.value)}
+            required
+          />
         </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="provinciaEmpresa"
-              value="Alajuela"
-              onChange={(e) => setProvinciaEmpresa(e.target.value)}
-              required
-            />
-            Alajuela
-          </label>
+
+        <div className={styles.formGroup}>
+          <label>9. Ubicación de la empresa (Distrito): *</label>
+          <input
+            type="text"
+            value={distritoEmpresa}
+            onChange={(e) => setDistritoEmpresa(e.target.value)}
+            required
+          />
         </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="provinciaEmpresa"
-              value="Cartago"
-              onChange={(e) => setProvinciaEmpresa(e.target.value)}
-              required
-            />
-            Cartago
-          </label>
+
+        <div className={styles.formGroup}>
+          <label>10. Ubicación de la empresa (Cantón): *</label>
+          <input
+            type="text"
+            value={cantonEmpresa}
+            onChange={(e) => setCantonEmpresa(e.target.value)}
+            required
+          />
         </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="provinciaEmpresa"
-              value="San José"
-              onChange={(e) => setProvinciaEmpresa(e.target.value)}
-              required
-            />
-            San José
-          </label>
+
+        <div className={styles.formGroup}>
+          <label>11. Ubicación de la empresa (Provincia): *</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Heredia"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              Heredia
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Alajuela"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              Alajuela
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Cartago"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              Cartago
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="San José"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              San José
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Limón"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              Limón
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Puntarenas"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              Puntarenas
+            </label>
+          </div>
         </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="provinciaEmpresa"
-              value="Limón"
-              onChange={(e) => setProvinciaEmpresa(e.target.value)}
-              required
-            />
-            Limón
-          </label>
+
+        <div className={styles.formGroup}>
+          <label>12. Nombre del asesor industrial: *</label>
+          <input
+            type="text"
+            value={nombreAsesor}
+            onChange={(e) => setNombreAsesor(e.target.value)}
+            required
+          />
         </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="provinciaEmpresa"
-              value="Puntarenas"
-              onChange={(e) => setProvinciaEmpresa(e.target.value)}
-              required
-            />
-            Puntarenas
-          </label>
+
+        <div className={styles.formGroup}>
+          <label>13. Puesto que desempeña el asesor industrial: *</label>
+          <input
+            type="text"
+            value={puestoAsesor}
+            onChange={(e) => setPuestoAsesor(e.target.value)}
+            required
+          />
         </div>
-      </div>
 
-      <div className={styles.formGroup}>
-        <label>12. Nombre del asesor industrial: *</label>
-        <input
-          type="text"
-          value={nombreAsesor}
-          onChange={(e) => setNombreAsesor(e.target.value)}
-          required
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>14. Teléfono del contacto: *</label>
+          <input
+            type="text"
+            value={telefonoContacto}
+            onChange={(e) => setTelefonoContacto(e.target.value)}
+            required
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>13. Puesto que desempeña el asesor industrial en la empresa: *</label>
-        <input
-          type="text"
-          value={puestoAsesor}
-          onChange={(e) => setPuestoAsesor(e.target.value)}
-          required
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>15. Correo del contacto: *</label>
+          <input
+            type="email"
+            value={correoContacto}
+            onChange={(e) => setCorreoContacto(e.target.value)}
+            required
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>14. Teléfono del contacto: *</label>
-        <input
-          type="text"
-          value={telefonoContacto}
-          onChange={(e) => setTelefonoContacto(e.target.value)}
-          required
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>16. Nombre del contacto de RRHH: *</label>
+          <input
+            type="text"
+            value={nombreHR}
+            onChange={(e) => setNombreHR(e.target.value)}
+            required
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>15. Correo del contacto: *</label>
-        <input
-          type="email"
-          value={correoContacto}
-          onChange={(e) => setCorreoContacto(e.target.value)}
-          required
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>17. Teléfono de RRHH: *</label>
+          <input
+            type="text"
+            value={telefonoHR}
+            onChange={(e) => setTelefonoHR(e.target.value)}
+            required
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>16. Nombre del contacto de recursos humanos: *</label>
-        <input
-          type="text"
-          value={nombreHR}
-          onChange={(e) => setNombreHR(e.target.value)}
-          required
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>18. Correo de RRHH: *</label>
+          <input
+            type="email"
+            value={correoHR}
+            onChange={(e) => setCorreoHR(e.target.value)}
+            required
+          />
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>17. Teléfono del contacto de recursos humanos: *</label>
-        <input
-          type="text"
-          value={telefonoHR}
-          onChange={(e) => setTelefonoHR(e.target.value)}
-          required
-        />
-      </div>
-      
-      <div className={styles.formGroup}>
-        <label>18. Correo del contacto de recursos humanos: *</label>
-        <input
-          type="email"
-          value={correoHR}
-          onChange={(e) => setCorreoHR(e.target.value)}
-          required
-        />
-      </div>
+        <h2>Datos del proyecto</h2>
+        <h3 className={styles.aviso}>
+          (Si la información es extensa, puede arrastrar la esquina para agrandar.)
+        </h3>
 
-      <h2>Datos del proyecto a realizar</h2>
-      <h3 className={styles.aviso}>(En caso de que la cantidad de información supere la altura del campo puede expandir el campo al arrastrar la esquina inferior derecha del mismo)</h3>
-
-      <div className={styles.formGroup}>
-        <label>19. Contexto: *
-        <AiOutlineInfoCircle 
-              className={styles.infoIcon} 
-              onClick={() => toggleInfo('contexto')} 
-              title="contexto_info"
-            />
-        </label>
-        <textarea
-          type="text"
-          value={contexto}
-          onChange={(e) => setContexto(e.target.value)}
-          required
-        />
-         {infoVisible.contexto && <p className={styles.infoText}>Que ha pasado en la empresa, cuales son las circunstancias que rodean al hecho
-          o a interpretar la situación que desea abordar.</p>}
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>20. Justitificación del trabajo a realizar: *
-        <AiOutlineInfoCircle 
+        <div className={styles.formGroup}>
+          <label>
+            19. Contexto: *
+            <AiOutlineInfoCircle
               className={styles.infoIcon}
-              onClick={() => toggleInfo('justificacion')} 
+              onClick={() => toggleInfo('contexto')}
               title="contexto_info"
             />
-        </label>
-        <textarea
-          type="text"
-          value={justificacion}
-          onChange={(e) => setJustificacion(e.target.value)}
-          required
-        />
-        {infoVisible.justificacion && <p className={styles.infoText}>La razón por la cual debe de realizarse el proyecto y el 
-          porqué es necesario e importante para la empresa. Se debe tener claro que la justificación no es el análisis del
-           problema, sino la que indica que hay un problema que amerita ser resuelta.</p>}
-      </div>
+          </label>
+          <textarea
+            type="text"
+            value={contexto}
+            onChange={(e) => setContexto(e.target.value)}
+            required
+          />
+          {infoVisible.contexto && (
+            <p className={styles.infoText}>
+              Describa el contexto de la empresa y la situación actual...
+            </p>
+          )}
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>21. Síntomas principales (a lo sumo 3): *
-        <AiOutlineInfoCircle 
-              className={styles.infoIcon} 
-              onClick={() => toggleInfo('sintomas')} 
-              title="contexto_info"
-            />
-        </label>
-        <textarea
-          type="text"
-          value={sintomas}
-          onChange={(e) => setSintomas(e.target.value)}
-          required
-        />
-        {infoVisible.sintomas && <p className={styles.infoText}>Cuáles son los indicios, que indican que algo está ocurriendo
-          y no está funcionando bien.</p>}
-      </div>
-
-      <div className={styles.formGroup}>
-        <label>22. Efectos o impactos para la empresa: *
-        <AiOutlineInfoCircle 
+        <div className={styles.formGroup}>
+          <label>
+            20. Justificación: *
+            <AiOutlineInfoCircle
               className={styles.infoIcon}
-              onClick={() => toggleInfo('impacto')} 
+              onClick={() => toggleInfo('justificacion')}
               title="contexto_info"
             />
-        </label>
-        <textarea
-          type="text"
-          value={impacto}
-          onChange={(e) => setImpacto(e.target.value)}
-          required
-        />
-        {infoVisible.impacto && <p className={styles.infoText}>Cuáles son los efectos o resultados no conformes que 
-          alertan sobre la necesidad de desarrollar el proyecto. Tome en cuenta que esta sección es parte de un 
-          trabajo de ingeniería, por lo tanto, debe mostrarse la dimensión (cuantificación) de los efectos 
-          (incluir cifras, métricas, indicadores que evidencien lo que está ocurriendo y por ende justifiquen el estudio).</p>}
-      </div>
+          </label>
+          <textarea
+            type="text"
+            value={justificacion}
+            onChange={(e) => setJustificacion(e.target.value)}
+            required
+          />
+          {infoVisible.justificacion && (
+            <p className={styles.infoText}>
+              Explique por qué se necesita este proyecto...
+            </p>
+          )}
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>23. Nombre del departamento a realizar el proyecto: *</label>
-        <input
-          type="text"
-          value={nombreDepartamento}
-          onChange={(e) => setNombreDepartamento(e.target.value)}
-          required
-        />
-      </div>
+        <div className={styles.formGroup}>
+          <label>
+            21. Síntomas principales: *
+            <AiOutlineInfoCircle
+              className={styles.infoIcon}
+              onClick={() => toggleInfo('sintomas')}
+              title="contexto_info"
+            />
+          </label>
+          <textarea
+            type="text"
+            value={sintomas}
+            onChange={(e) => setSintomas(e.target.value)}
+            required
+          />
+          {infoVisible.sintomas && (
+            <p className={styles.infoText}>
+              Indicios de que algo no funciona...
+            </p>
+          )}
+        </div>
 
-      <div className={styles.formGroup}>
-        <label>24. Tipo de proyecto: *</label>
-        <div>
+        <div className={styles.formGroup}>
           <label>
-            <input
-              type="radio"
-              name="tipoProyecto"
-              value="Extension"
-              onChange={(e) => setProyecto(e.target.value)}
-              required
+            22. Efectos o impactos para la empresa: *
+            <AiOutlineInfoCircle
+              className={styles.infoIcon}
+              onClick={() => toggleInfo('impacto')}
+              title="contexto_info"
             />
-            Extensión
           </label>
+          <textarea
+            type="text"
+            value={impacto}
+            onChange={(e) => setImpacto(e.target.value)}
+            required
+          />
+          {infoVisible.impacto && (
+            <p className={styles.infoText}>
+              Describa los impactos cuantificables...
+            </p>
+          )}
         </div>
-        <div>
+
+        <div className={styles.formGroup}>
           <label>
-            <input
-              type="radio"
-              name="tipoProyecto"
-              value="Investigación"
-              onChange={(e) => setProyecto(e.target.value)}
-            />
-            Investigación
+            23. Nombre del departamento: *
           </label>
+          <input
+            type="text"
+            value={nombreDepartamento}
+            onChange={(e) => setNombreDepartamento(e.target.value)}
+            required
+          />
         </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="tipoProyecto"
-              value="Aplicado a empresa"
-              onChange={(e) => setProyecto(e.target.value)}
-            />
-            Aplicado a empresa
-          </label>
+
+        <div className={styles.formGroup}>
+          <label>24. Tipo de proyecto: *</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoProyecto"
+                value="Extensión"
+                onChange={(e) => setTipoProyecto(e.target.value)}
+                required
+              />
+              Extensión
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoProyecto"
+                value="Investigación"
+                onChange={(e) => setTipoProyecto(e.target.value)}
+              />
+              Investigación
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoProyecto"
+                value="Aplicado a empresa"
+                onChange={(e) => setTipoProyecto(e.target.value)}
+              />
+              Aplicado a empresa
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoProyecto"
+                value="Aplicado a PYME"
+                onChange={(e) => setTipoProyecto(e.target.value)}
+              />
+              Aplicado a PYME
+            </label>
+          </div>
         </div>
-        <div>
-          <label>
-            <input
-              type="radio"
-              name="tipoProyecto"
-              value="Aplicado a PYME"
-              onChange={(e) => setProyecto(e.target.value)}
-            />
-            Aplicado a PYME
-          </label>
+
+        <div className={styles.contenedorBotonesFormEstudiante}>
+          <button type="submit" className={`${styles.button} ${styles.enviar}`}>
+            Enviar
+          </button>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.cancelar}`}
+            onClick={handleGoBack}
+          >
+            Cancelar
+          </button>
         </div>
-      </div>
-    </div>
-    <div className={styles.contenedorBotonesFormEstudiante}>
-          <button type="submit" className={styles.button + ' ' + styles.enviar}>Enviar</button>
-          <button type="button" className={styles.button + ' ' + styles.cancelar} onClick={handleGoBack}>Cancelar</button>
-    </div>
-    </form>
-    
-    <Footer />
+      </form>
+
+      <Footer />
     </div>
   );
 };

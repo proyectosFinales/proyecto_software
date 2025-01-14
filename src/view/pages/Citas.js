@@ -1,3 +1,7 @@
+/**
+ * Citas.jsx
+ * Vista para que el coordinador gestione (cree, edite, elimine) citas de defensas.
+ */
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import Modal from '../components/Modal';
@@ -20,7 +24,6 @@ const Citas = () => {
   const getEndDate = (time) => {
     const [hours, minutes] = time.split(':');
     const endHour = (parseInt(hours, 10) + duracion) % 24;
-
     return `${endHour.toString().padStart(2, '0')}:${minutes}`;
   };
 
@@ -35,87 +38,73 @@ const Citas = () => {
   };
 
   useEffect(() => {
-    const fetchCitas = async () => {
-      const { data, error } = await supabase
-        .from('citas')
+    const fetchAll = async () => {
+      // 1. Citas
+      const { data: citasData, error: citasError } = await supabase
+        .from('Cita') // Cambia 'citas' => 'Cita'
         .select(`
-          id,
+          cita_id,
           fecha,
-          horaInicio,
-          horaFin,
+          hora_inicio,
+          hora_fin,
           lector1,
           lector2,
-          anteproyectoID
+          anteproyecto_id
         `)
-        .eq('semestreActual', 1);
-      if (error) {
-        console.error('Error al obtener citas:', error);
-      } else {
-        data.sort((a, b) => {
+        .eq('semestre_id', 1); // Ajusta si manejas 'semestre_id'
+      if (!citasError && citasData) {
+        // Ordenar las citas por fecha y hora
+        citasData.sort((a, b) => {
           if (a.fecha < b.fecha) return -1;
           if (a.fecha > b.fecha) return 1;
-          return a.horaInicio.localeCompare(b.horaInicio);
+          return a.hora_inicio.localeCompare(b.hora_inicio);
         });
-        setCitas(data);
+        setCitas(citasData);
       }
-    };
 
-    const fetchProfesores = async () => {
-      const { data, error } = await supabase
-        .from('profesores')
-        .select(`id, nombre`);
-      if (error) {
-        console.error('Error al obtener profesores:', error);
-      } else {
-        setLectores(data);
+      // 2. Lectores (profesores)
+      const { data: profData, error: profError } = await supabase
+        .from('Profesor')
+        .select('profesor_id, nombre');
+      if (!profError && profData) {
+        setLectores(profData);
       }
-    };
 
-    const fetchEstudiantes = async () => {
-      const { data, error } = await supabase
-        .from('anteproyectos')
+      // 3. Anteproyectos + Estudiantes
+      const { data: antData, error: antError } = await supabase
+        .from('Anteproyecto')
         .select(`
           id,
-          idEstudiante,
-          estudiantes (nombre),
-          idEncargado,
-          profesores (nombre)
+          estudiante_id,
+          Estudiante:estudiante_id (
+            nombre
+          ),
+          empresa_id
         `)
-        .eq('semestreActual', 1);
-      if (error) {
-        console.error('Error al obtener estudiantes:', error);
-      } else {
-        const estudiantesMap = data.reduce((acc, anteproyecto) => {
-          acc[anteproyecto.id] = anteproyecto.estudiantes.nombre;
-          return acc;
-        }, {});
-        setEstudiantes(estudiantesMap);
+        .eq('semestre_id', 1);
+      // ^ Ajusta si deseas filtrar
+      if (!antError && antData) {
+        // Mapa de {anteproyecto_id -> nombre estudiante}
+        const estMap = {};
+        for (const ap of antData) {
+          estMap[ap.id] = ap.Estudiante?.nombre || 'N/A';
+        }
+        setEstudiantes(estMap);
+      }
 
-        const profesoresMap = data.reduce((acc, anteproyecto) => {
-          acc[anteproyecto.id] = anteproyecto.profesores?.nombre || "N/A";
-          return acc;
-        }, {});
-        setProfesores(profesoresMap);
+      // 4. Duración
+      const { data: durData, error: durError } = await supabase
+        .from('duraciones') // si tu tabla se llama así
+        .select('horas')
+        .eq('id', 1)
+        .single();
+
+      if (!durError && durData) {
+        setDuracion(durData.horas);
       }
     };
 
-    const fetchDuracion = async () => {
-      const { data, error } = await supabase
-        .from('duraciones')
-        .select('horas')
-        .eq('id', 1);
-
-      if (error) {
-        console.error("Error obteniendo duration:", error);
-      } else {
-        setDuracion(data[0].horas);
-      }
-    }
-
-    fetchCitas();
-    fetchProfesores();
-    fetchEstudiantes();
-    fetchDuracion();
+    fetchAll();
   }, []);
 
   const handleAsignarCita = async () => {
@@ -127,67 +116,64 @@ const Citas = () => {
 
     const nuevaCita = {
       fecha: fecha,
-      horaInicio: horaInicio,
-      horaFin: getEndDate(horaInicio),
+      hora_inicio: horaInicio,    // col en la nueva BD
+      hora_fin: getEndDate(horaInicio),
       lector1: null,
       lector2: null,
-      anteproyectoID: null,
+      anteproyecto_id: null,
+      semestre_id: 1              // Ajusta si usas semestres
     };
 
     try {
-      const { data, error } = await supabase
-        .from('citas')
+      const { data, error: insertError } = await supabase
+        .from('Cita')
         .insert([nuevaCita])
         .select();
 
-      if (error) {
-        console.error('Error al agregar cita:', error, data);
+      if (insertError) {
+        console.error('Error al agregar cita:', insertError);
         setError('Ocurrió un error al guardar la cita.');
         return;
       }
 
       setCitas([...citas, data[0]]);
-
       setFecha('');
       setHoraInicio('');
-
     } catch (error) {
       console.error('Error al guardar la cita:', error);
       setError('Ocurrió un error inesperado.');
     }
   };
 
-
   const handleCitaClick = (cita) => {
+    // Almacena la cita seleccionada en estado
     setCitaActual({
       ...cita,
-      horaInicio: cita.horaInicio,
-      horaFin: cita.horaFin,
+      hora_inicio: cita.hora_inicio,
+      hora_fin: cita.hora_fin
     });
     setModal(true);
   };
 
-  const updateCita = async (citaModificada) => {
+  const updateCita = async (citaMod) => {
     try {
       const { error } = await supabase
-        .from('citas')
+        .from('Cita')
         .update({
-          lector1: citaModificada.lector1,
-          lector2: citaModificada.lector2,
-          horaInicio: citaModificada.horaInicio,
-          horaFin: citaModificada.horaFin,
+          lector1: citaMod.lector1,
+          lector2: citaMod.lector2,
+          hora_inicio: citaMod.hora_inicio,
+          hora_fin: citaMod.hora_fin
         })
-        .eq('id', citaModificada.id);
+        .eq('cita_id', citaMod.cita_id);
 
       if (error) {
         console.error('Error al actualizar la cita en la base de datos:', error);
         return;
       }
 
-      const citasModificadas = citas.map((cita) =>
-        cita.id === citaModificada.id ? citaModificada : cita
-      );
-
+      // Actualiza en el estado local
+      const citasModificadas = citas.map((c) => (c.cita_id === citaMod.cita_id ? citaMod : c));
       setCitas(citasModificadas);
       setCitaActual(null);
       setModal(false);
@@ -196,22 +182,22 @@ const Citas = () => {
     }
   };
 
-  const deleteCita = async (cita) => {
+  const deleteCita = async (citaDel) => {
     const confirmDelete = window.confirm("¿Está seguro de que desea eliminar esta cita?");
     if (!confirmDelete) return;
 
     try {
       const { error } = await supabase
-        .from('citas')
+        .from('Cita')
         .delete()
-        .eq('id', cita.id);
+        .eq('cita_id', citaDel.cita_id);
 
       if (error) {
         console.error('Error al eliminar la cita:', error);
         return;
       }
 
-      setCitas(citas.filter((c) => c.id !== cita.id));
+      setCitas(citas.filter((c) => c.cita_id !== citaDel.cita_id));
       setModal(false);
       alert('Cita eliminada correctamente.');
     } catch (error) {
@@ -251,19 +237,20 @@ const Citas = () => {
                     className="styled-input"
                     value={horaInicio}
                     onChange={(e) => setHoraInicio(e.target.value)}
-                    step="300" // 300 seconds = 5 minutes
+                    step="300"
                   />
                 </label>
               </div>
 
               <div className="col-12 d-flex justify-content-center">
-                <button className="cita-btn w-50" onClick={handleAsignarCita}>Guardar cita</button>
+                <button className="cita-btn w-50" onClick={handleAsignarCita}>
+                  Guardar cita
+                </button>
               </div>
 
               <div className="col-12">
                 {error && <p style={{ color: 'red' }}>{error}</p>}
               </div>
-
             </div>
           </div>
         </div>
@@ -284,7 +271,6 @@ const Citas = () => {
                 <th>Lector 2</th>
               </tr>
             </thead>
-
             <tbody>
               {citas.length === 0 ? (
                 <tr>
@@ -294,15 +280,21 @@ const Citas = () => {
                 </tr>
               ) : (
                 citas.map((cita) => {
-                  const lector1 = lectores.find((lect) => lect.id === cita.lector1);
-                  const lector2 = lectores.find((lect) => lect.id === cita.lector2);
-                  const estudianteNombre = estudiantes[cita.anteproyectoID]
+                  const lector1 = lectores.find((l) => l.profesor_id === cita.lector1);
+                  const lector2 = lectores.find((l) => l.profesor_id === cita.lector2);
+                  const estName = estudiantes[cita.anteproyecto_id]; // Mapa con la info del estudiante
 
                   return (
-                    <tr className='cita-row' key={cita.id} onClick={() => handleCitaClick(cita)}>
+                    <tr
+                      className="cita-row"
+                      key={cita.cita_id}
+                      onClick={() => handleCitaClick(cita)}
+                    >
                       <td>{formatDateDDMMYYYY(cita.fecha)}</td>
-                      <td>{`${formatTime(cita.horaInicio)} - ${formatTime(cita.horaFin)}`}</td>
-                      <td>{estudianteNombre ? estudianteNombre : 'N/A'}</td>
+                      <td>
+                        {`${formatTime(cita.hora_inicio)} - ${formatTime(cita.hora_fin)}`}
+                      </td>
+                      <td>{estName || 'N/A'}</td>
                       <td>{lector1 ? lector1.nombre : 'N/A'}</td>
                       <td>{lector2 ? lector2.nombre : 'N/A'}</td>
                     </tr>
@@ -313,83 +305,88 @@ const Citas = () => {
           </table>
         </div>
 
-        {/* Modal */}
+        {/* Modal para editar la cita */}
         <Modal show={modal} onClose={() => setModal(false)}>
           {citaActual && (
             <>
               <h2>Editar Cita</h2>
-
               <label className="label-modal">
-                Estudiante: {estudiantes[citaActual.anteproyectoID] || 'N/A'}
+                Estudiante: {estudiantes[citaActual.anteproyecto_id] || 'N/A'}
               </label>
-
               <label className="label-modal">
-                Profesor: {profesores[citaActual.anteproyectoID] || 'N/A'}
+                {/* Suponiendo que no guardas info del profesor orientador en la cita */}
+                Profesor: N/A
               </label>
-
               <label className="label-modal">
                 Lector 1:
                 <select
-                  name="lector1"
                   className="styled-input"
                   value={citaActual.lector1 || ''}
                   onChange={(e) => {
-                    const updatedAppt = { ...citaActual, lector1: e.target.value || null };
-                    setCitaActual(updatedAppt);
+                    const updated = { ...citaActual, lector1: e.target.value || null };
+                    setCitaActual(updated);
                   }}
                 >
                   <option value="">Seleccione un lector</option>
                   {lectores.map((lector) => (
-                    <option key={lector.id} value={lector.id}>
+                    <option key={lector.profesor_id} value={lector.profesor_id}>
                       {lector.nombre}
                     </option>
                   ))}
                 </select>
               </label>
-
               <label className="label-modal">
                 Lector 2:
                 <select
-                  name="lector2"
                   className="styled-input"
                   value={citaActual.lector2 || ''}
                   onChange={(e) => {
-                    const updatedAppt = { ...citaActual, lector2: e.target.value || null };
-                    setCitaActual(updatedAppt);
+                    const updated = { ...citaActual, lector2: e.target.value || null };
+                    setCitaActual(updated);
                   }}
                 >
                   <option value="">Seleccione un lector</option>
                   {lectores.map((lector) => (
-                    <option key={lector.id} value={lector.id}>
+                    <option key={lector.profesor_id} value={lector.profesor_id}>
                       {lector.nombre}
                     </option>
                   ))}
                 </select>
               </label>
-
               <label className="label-modal">
                 Hora de inicio:
                 <input
                   type="time"
                   className="styled-input"
-                  value={citaActual.horaInicio}
+                  value={citaActual.hora_inicio}
                   onChange={(e) => {
                     const updatedTime = e.target.value;
                     const updatedCita = {
                       ...citaActual,
-                      horaInicio: updatedTime,
-                      horaFin: getEndDate(updatedTime),
+                      hora_inicio: updatedTime,
+                      hora_fin: getEndDate(updatedTime)
                     };
                     setCitaActual(updatedCita);
                   }}
-                  step="300" // 300 seconds = 5 minutes
+                  step="300"
                 />
               </label>
-
               <div className="modal-actions">
-                <button className="cita-btn cita-btn-error w-50" onClick={() => deleteCita(citaActual)}>Eliminiar</button>
-                <button className="cita-btn w-50" onClick={() => updateCita(citaActual)}>Guardar</button>
-                <button className="cita-btn w-50" onClick={() => setModal(false)}>Cancelar</button>
+                <button
+                  className="cita-btn cita-btn-error w-50"
+                  onClick={() => deleteCita(citaActual)}
+                >
+                  Eliminar
+                </button>
+                <button
+                  className="cita-btn w-50"
+                  onClick={() => updateCita(citaActual)}
+                >
+                  Guardar
+                </button>
+                <button className="cita-btn w-50" onClick={() => setModal(false)}>
+                  Cancelar
+                </button>
               </div>
             </>
           )}

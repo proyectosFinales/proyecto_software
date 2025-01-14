@@ -7,6 +7,11 @@ import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
 import Modal from "../components/Modal";
 
+/**
+ * GestionPerfiles.jsx
+ * Permite al coordinador listar usuarios (estudiantes/profesores),
+ * ver su información (rol, correo, etc.) y editarlos o eliminarlos.
+ */
 const GestionPerfiles = () => {
   const [users, setUsers] = useState([]);
   const [editableUser, setEditableUser] = useState({});
@@ -15,34 +20,45 @@ const GestionPerfiles = () => {
 
   const navigate = useNavigate();
 
+  /**
+   * Al dar clic en un usuario de la lista, se carga su info detallada
+   * usando la función gestionUserInfo(id).
+   */
   const handleUserClick = async (id) => {
     try {
-      const data = await gestionUserInfo(id);
+      const data = await gestionUserInfo(id); 
+      // data: { id, correo, contrasena, rol, sede, profesor:{...}, estudiante:{...} }
 
       setEditableUser({
         id: id,
         correo: data.correo,
         contraseña: data.contraseña,
-        rol: data.rol,
+        rol: data.rol.toString(),  // Aseguramos string
         sede: data.sede,
-        ...(data.rol === '2' && { nombre: data.profesor.nombre }),
-        ...(data.rol === '3' && {
+        ...(data.rol == 2 && { nombre: data.profesor.nombre }),
+        ...(data.rol == 3 && {
           nombre: data.estudiante.nombre,
           carnet: data.estudiante.carnet,
           telefono: data.estudiante.telefono,
-          ...(data.estudiante.estado.length !== 0 && {
-            estado: data.estudiante.estado.at(-1).estado,
-          }),
-          ...(data.estudiante.estado.length === 0 && {
-            estado: "-",
-          }),
-        }),
+          // data.estudiante.estado: un array de anteproyectos con 'estado'?
+          //   (dependerá de cómo lo definiste en tu userInfo).
+          ...(data.estudiante.estado?.length
+            ? { estado: data.estudiante.estado.at(-1).estado }
+            : { estado: "-" }
+          ),
+        })
       });
     } catch (error) {
-      alert("El usuario presente no está registrado. Por favor, elimínelo del sistema seleccionando la casilla correspondiente y presionando el botón 'Eliminar usuario(s)'.");
+      alert(
+        "El usuario presente no está registrado correctamente. " +
+        "Por favor, elimínelo del sistema (marque su casilla y presione 'Eliminar usuario(s)')."
+      );
     }
   };
 
+  /**
+   * Manejador para modificar 'editableUser'
+   */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditableUser((prevState) => ({
@@ -51,76 +67,89 @@ const GestionPerfiles = () => {
     }));
   };
 
+  /**
+   * Marcar/desmarcar un usuario en la lista para su eliminación
+   */
   const handleCheckboxChange = (userId) => {
     setCheckedUsers((prevState) => {
-      const updatedCheckedUsers = new Set(prevState);
-      if (updatedCheckedUsers.has(userId)) {
-        updatedCheckedUsers.delete(userId);
+      const updated = new Set(prevState);
+      if (updated.has(userId)) {
+        updated.delete(userId);
       } else {
-        updatedCheckedUsers.add(userId);
+        updated.add(userId);
       }
-      return updatedCheckedUsers;
+      return updated;
     });
   };
 
+  /**
+   * Eliminar usuarios seleccionados en la lista y/o el usuario en edición
+   */
   const handleDeleteUsers = async () => {
     try {
       const usersToDelete = new Set(checkedUsers);
 
+      // Si tenemos un usuario cargado en edición, también lo incluimos
       if (editableUser.id) {
         usersToDelete.add(editableUser.id);
       }
 
+      // Eliminar cada uno
       for (const userId of usersToDelete) {
         await delUser(userId);
       }
 
-      const updatedUsers = users.filter((user) => !usersToDelete.has(user.id));
-
+      // Actualizar la lista local
+      const updatedUsers = users.filter((u) => !usersToDelete.has(u.id));
       setUsers(updatedUsers);
       setCheckedUsers(new Set());
       setEditableUser({});
     } catch (error) {
-      console.error('Error al eliminar el usuario:', error.message);
+      console.error('Error al eliminar usuario(s):', error.message);
+      alert("Hubo un error al eliminar los usuarios.");
     }
   };
 
+  /**
+   * Editar (guardar) los cambios hechos a 'editableUser'
+   */
   const handleUserEdit = async () => {
     try {
       await editUserGestion(editableUser);
-      alert("El usuario ha sido modificado con éxito.");
+      alert("El usuario se modificó con éxito.");
     } catch (error) {
       alert(error.message);
     }
   };
 
-  const handleUserAdd = async () => {
-    try {
-      navigate("/gestion-perfiles/agregar-usuario");
-    } catch (error) {
-      console.error("Error al editar el usuario: ", error.message);
-    }
+  /**
+   * Navegar a la pantalla para agregar un nuevo usuario
+   */
+  const handleUserAdd = () => {
+    navigate("/gestion-perfiles/agregar-usuario");
   };
 
+  /**
+   * Volver a menú coordinador
+   */
   const handleNavigate = () => {
     navigate("/menuCoordinador");
   };
 
+  /**
+   * Al montar, obtener la lista de usuarios
+   */
   useEffect(() => {
     const getAllUsersInfo = async () => {
       try {
         const data = await getAllUsers();
-        if (data) {
-          setUsers(data);
-        }
+        if (data) setUsers(data);
       } catch (error) {
-        console.error('Error al obtener la información del usuario:', error.message);
+        console.error('Error al obtener usuarios:', error.message);
       }
     };
-
     getAllUsersInfo();
   }, []);
-
 
   return (
     <div className="gestion-container">
@@ -130,6 +159,7 @@ const GestionPerfiles = () => {
           Volver
         </button>
         <div className="gestion-perfiles">
+          {/* Lista de usuarios */}
           <div className="users-list">
             <ul>
               {users.length > 0 ? (
@@ -143,7 +173,7 @@ const GestionPerfiles = () => {
                         className="user-name"
                         onClick={() => handleUserClick(user.id)}
                       >
-                        {user.rol === "2"
+                        {user.rol == 2
                           ? user.profesor.nombre
                           : user.estudiante.nombre || "Usuario no registrado"}
                       </span>
@@ -162,15 +192,18 @@ const GestionPerfiles = () => {
             </ul>
           </div>
 
+          {/* Información del usuario editable */}
           <div className="info-container">
             <div className="user-info">
               <h2>Información del usuario</h2>
-              {editableUser.rol === '2' ? (
+
+              {/* Profesor (rol = 2) */}
+              {editableUser.rol === '2' && (
                 <>
                   <label>
                     Nombre
                     <div className="input-container-gestion">
-                    <FaUser className="icon-gestion" />
+                      <FaUser className="icon-gestion" />
                       <input
                         type="text"
                         name="nombre"
@@ -180,10 +213,11 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Correo electrónico
                     <div className="input-container-gestion">
-                    <FaEnvelope className="icon-gestion" />
+                      <FaEnvelope className="icon-gestion" />
                       <input
                         type="email"
                         name="correo"
@@ -193,10 +227,11 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Contraseña
                     <div className="input-container-gestion">
-                    <FaLock className="icon-registro" />
+                      <FaLock className="icon-registro" />
                       <input
                         type="text"
                         name="contraseña"
@@ -206,14 +241,15 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Sede
                     <div className="input-container-gestion">
-                    <FaMapMarked className="icon-sede" />
+                      <FaMapMarked className="icon-sede" />
                       <select
                         name="sede"
                         className="sede-dropdown"
-                        value={editableUser.sede}
+                        value={editableUser.sede || ''}
                         onChange={handleInputChange}
                         required
                       >
@@ -227,12 +263,15 @@ const GestionPerfiles = () => {
                     </div>
                   </label>
                 </>
-              ) : (
+              )}
+
+              {/* Estudiante (rol = 3) */}
+              {editableUser.rol === '3' && (
                 <>
                   <label>
                     Nombre
                     <div className="input-container-gestion">
-                    <FaUser className="icon-gestion" />
+                      <FaUser className="icon-gestion" />
                       <input
                         type="text"
                         name="nombre"
@@ -242,10 +281,11 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Carnet
                     <div className="input-container-gestion">
-                    <FaIdCard className="icon-gestion" />
+                      <FaIdCard className="icon-gestion" />
                       <input
                         type="text"
                         name="carnet"
@@ -255,10 +295,11 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Correo electrónico
                     <div className="input-container-gestion">
-                    <FaEnvelope className="icon-gestion" />
+                      <FaEnvelope className="icon-gestion" />
                       <input
                         type="email"
                         name="correo"
@@ -268,10 +309,11 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Teléfono
                     <div className="input-container-gestion">
-                    <FaPhone className="icon-gestion" />
+                      <FaPhone className="icon-gestion" />
                       <input
                         type="text"
                         name="telefono"
@@ -281,10 +323,11 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Contraseña
                     <div className="input-container-gestion">
-                    <FaLock className="icon-registro" />
+                      <FaLock className="icon-registro" />
                       <input
                         type="text"
                         name="contraseña"
@@ -294,14 +337,15 @@ const GestionPerfiles = () => {
                       />
                     </div>
                   </label>
+
                   <label>
                     Sede
                     <div className="input-container-gestion">
-                    <FaMapMarked className="icon-sede" />
+                      <FaMapMarked className="icon-sede" />
                       <select
                         name="sede"
                         className="sede-dropdown"
-                        value={editableUser.sede}
+                        value={editableUser.sede || ''}
                         onChange={handleInputChange}
                         required
                       >
@@ -314,10 +358,11 @@ const GestionPerfiles = () => {
                       </select>
                     </div>
                   </label>
+
                   <label>
                     Estado
                     <div className="input-container-gestion">
-                    <FaFileAlt className="icon-gestion" />
+                      <FaFileAlt className="icon-gestion" />
                       <input
                         type="text"
                         name="estado"
@@ -329,23 +374,37 @@ const GestionPerfiles = () => {
                   </label>
                 </>
               )}
-            </div>
 
+              {/* Rol 1 (Coordinador) no tiene secciones en el snippet,
+                  pero si llegase un user con rol=1, no habría 'profesor' ni 'estudiante' 
+                  e igual se podría mostrar correo/sede/contraseña. */}
+
+            </div>
             <div className="actions">
-              <button className="btn-delete" onClick={() => setModal(true)}>Borrar usuario(s)</button>
-              <button className="btn-edit" onClick={handleUserEdit}>Editar usuario</button>
-              <button className="btn-add-user" onClick={handleUserAdd}>Agregar usuario</button>
+              <button className="btn-delete" onClick={() => setModal(true)}>
+                Borrar usuario(s)
+              </button>
+              <button className="btn-edit" onClick={handleUserEdit}>
+                Editar usuario
+              </button>
+              <button className="btn-add-user" onClick={handleUserAdd}>
+                Agregar usuario
+              </button>
             </div>
           </div>
         </div>
       </div>
       <Footer />
-      <Modal show={modal} onClose={() => setModal(false)} className="modal confirm-delete-modal">
+
+      <Modal
+        show={modal}
+        onClose={() => setModal(false)}
+        className="modal confirm-delete-modal"
+      >
         <h2>¿Deseas eliminar todos los usuarios seleccionados?</h2>
         <p>
-          Al confirmar la eliminación, se borrarán tanto el usuario mostrado como los usuarios seleccionados.
-          Debe tener en cuenta que una vez que se eliminen, estos NO SE PUEDEN RECUPERAR. Se recomienda
-          revisar que los usuarios a eliminar son los deseados antes de proceder.
+          Al confirmar, se borrarán tanto el usuario mostrado como los usuarios 
+          seleccionados. Esta acción es irreversible.
         </p>
         <p>¿Desea proceder con la eliminación de los usuarios seleccionados?</p>
 
@@ -353,10 +412,13 @@ const GestionPerfiles = () => {
           <button className="delModalBtn btnCancelar" onClick={() => setModal(false)}>
             Cancelar
           </button>
-          <button className="delModalBtn btnConfirmar" onClick={() => {
-            handleDeleteUsers();
-            setModal(false);
-          }}>
+          <button
+            className="delModalBtn btnConfirmar"
+            onClick={() => {
+              handleDeleteUsers();
+              setModal(false);
+            }}
+          >
             Confirmar
           </button>
         </div>
