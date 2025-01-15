@@ -32,20 +32,13 @@ const GestionPerfiles = () => {
       setEditableUser({
         id: id,
         correo: data.correo,
-        contraseña: data.contraseña,
+        contraseña: data.contrasena,
         rol: data.rol.toString(),  // Aseguramos string
         sede: data.sede,
-        ...(data.rol == 2 && { nombre: data.profesor.nombre }),
+        nombre: data.nombre,
+        telefono: data.telefono,
         ...(data.rol == 3 && {
-          nombre: data.estudiante.nombre,
-          carnet: data.estudiante.carnet,
-          telefono: data.estudiante.telefono,
-          // data.estudiante.estado: un array de anteproyectos con 'estado'?
-          //   (dependerá de cómo lo definiste en tu userInfo).
-          ...(data.estudiante.estado?.length
-            ? { estado: data.estudiante.estado.at(-1).estado }
-            : { estado: "-" }
-          ),
+          carnet: data.estudiante[0].carnet
         })
       });
     } catch (error) {
