@@ -229,3 +229,14 @@ h1 {
 .btnConfirmar:hover {
   background-color: darkred;
 }
+
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 10px;
+}
