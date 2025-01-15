@@ -17,8 +17,14 @@ const GestionPerfiles = () => {
   const [editableUser, setEditableUser] = useState({});
   const [checkedUsers, setCheckedUsers] = useState(new Set());
   const [modal, setModal] = useState(false);
+  const [filter, setFilter] = useState('');
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   const navigate = useNavigate();
+
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
+  };
 
   /**
    * Al dar clic en un usuario de la lista, se carga su info detallada
@@ -144,19 +150,37 @@ const GestionPerfiles = () => {
     getAllUsersInfo();
   }, []);
 
+  useEffect(() => {
+    setFilteredUsers(users.filter(user => {
+      if (filter === 'profesores') return user.rol === 2;
+      if (filter === 'estudiantes') return user.rol === 3;
+      return true;
+    }));
+
+  }, [users, filter]);
+
   return (
     <div className="gestion-container">
       <Header title={"Gestión de perfiles"} />
       <div className="content">
-        <button onClick={handleNavigate} className="btn-volver-menu">
-          Volver
-        </button>
+        <div className="top-bar">
+          <button onClick={handleNavigate} className="btn-volver-menu">
+            Volver
+          </button>
+          <div className="filter-buttons">
+            <select value={filter} onChange={handleFilterChange}>
+              <option value="">Todos</option>
+              <option value="profesores">Profesores</option>
+              <option value="estudiantes">Estudiantes</option>
+            </select>
+          </div>
+        </div>
         <div className="gestion-perfiles">
           {/* Lista de usuarios */}
           <div className="users-list">
             <ul>
-              {users.length > 0 ? (
-                users.map((user, index) => {
+              {filteredUsers.length > 0 ? (
+                filteredUsers.map((user, index) => {
                   return (
                     <li
                       key={user.id || index}
