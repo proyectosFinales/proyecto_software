@@ -50,7 +50,8 @@ const GestionPerfiles = () => {
         nombre: data.nombre,
         telefono: data.telefono,
         ...(data.rol == 3 && {
-          carnet: data.estudiante[0].carnet
+          carnet: data.estudiante[0].carnet,
+          estado: data.estudiante[0].estado
         })
       });
     } catch (error) {
@@ -370,13 +371,19 @@ const GestionPerfiles = () => {
                     Estado
                     <div className="input-container-gestion">
                       <FaFileAlt className="icon-gestion" />
-                      <input
-                        type="text"
+                      <select
                         name="estado"
                         className="input-field-gestion"
                         value={editableUser.estado || ''}
                         onChange={handleInputChange}
-                      />
+                      >
+                        <option value="">Seleccione un estado</option>
+                        <option value="aprobado">Aprobado</option>
+                        <option value="defensa">Defensa</option>
+                        <option value="en progreso">En progreso</option>
+                        <option value="reprobado">Reprobado</option>
+                        <option value="retirado">Retirado</option>
+                      </select>
                     </div>
                   </label>
                 </>
