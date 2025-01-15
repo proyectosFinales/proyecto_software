@@ -48,10 +48,6 @@ const EditarPerfil = () => {
         // data vendrá con { id, correo, contrasena, rol, sede, 
         //   Profesor: {...} (si rol=2), Estudiante: {...} (si rol=3) }
 
-        // CASO: Si es Coordinador (rol=1) no hay data.Estudiante ni data.Profesor
-        // CASO: Si es profesor y la DB devolvió data.Profesor
-        // CASO: Si es estudiante y la DB devolvió data.Estudiante
-        // fix: comparamos data.Profesor / data.Estudiante, no data.profesor / data.estudiante
         if (!data.Estudiante && !data.Profesor && data.rol !== 1) {
           // Manejo de "información incompleta"
           setUserData({
@@ -76,16 +72,9 @@ const EditarPerfil = () => {
             contraseña: data.contrasena,
             sede: data.sede,
             rol: data.rol.toString(),
-
-            // si es rol=2, proveniente de data.Profesor
             ...(data.rol === 2 && {
-              // No olvides poner "nombre" = data.nombre si es que lo guardas en la tabla Usuario
-              // o si en la BD lo tienes en la subobjeto Profesor, ajusta así:
-              // nombre: data.Profesor?.algúnCampo 
               nombre: data.nombre 
             }),
-
-            // si es rol=3, proveniente de data.Estudiante
             ...(data.rol === 3 && {
               nombre: data.Estudiante?.nombre || data.nombre || "",
               carnet: data.Estudiante?.carnet || "",
