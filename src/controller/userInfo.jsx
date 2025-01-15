@@ -126,38 +126,53 @@ export async function getRol(id) {
 
 export async function updateUserInfo(userData) {
   try {
-    // Valida correo
+    // 1) Recuperar el rol original de la BD:
+    const { data: oldData, error: oldError } = await supabase
+      .from("Usuario")
+      .select("rol")
+      .eq("id", userData.id)
+      .single();
+
+    if (oldError || !oldData) {
+      throw new Error("No se pudo recuperar el rol actual. " + (oldError?.message || ""));
+    }
+
+    // Guardamos en una variable local
+    const realRol = oldData.rol;  // un número (1,2,3)
+
+    // 2) Validar correo
     if (!validarCorreo(userData.correo)) {
       throw new Error("El correo no cumple con un formato válido.");
     }
 
-    // Valida contraseña a detalle
+    // 3) Validar contraseña a detalle
     const passError = validarContraseñaDetallada(userData.contrasena);
     if (passError) {
       throw new Error(passError);
     }
 
-    // Verifica duplicado de correo
+    // 4) Verificar duplicado de correo
     const result = await validarCorreoExistente(userData.correo, userData.id);
     if (!result) {
       throw new Error("El correo ingresado ya se encuentra registrado.");
     }
 
-    // Valida sede
+    // 5) Validar sede
     if (!userData.sede) {
       throw new Error("Debes seleccionar una sede.");
     }
 
-    // Actualiza en Usuario
+    // 6) Actualizar la tabla Usuario,
+    //    forzando el rol que ya tenía en la BD (realRol).
     const { error } = await supabase
       .from("Usuario")
-      .upsert({
-        id: userData.id,
+      .update({
         nombre: userData.nombre,
         correo: userData.correo,
-        contrasena: userData.contrasena,  // <--- sin ñ
+        contrasena: userData.contrasena,
         sede: userData.sede,
-        telefono: userData.telefono
+        telefono: userData.telefono,
+        rol: realRol           // <-- obligamos a usar el rol que había antes
       })
       .eq("id", userData.id);
 
@@ -165,22 +180,24 @@ export async function updateUserInfo(userData) {
       throw new Error("Error al actualizar el usuario: " + error.message);
     }
 
-    // Si es profesor:
-    if (userData.rol == 2) {
+    // 7) Dependiendo del rol (ver oldData.rol o realRol, no userData.rol):
+    if (realRol === 2) {
+      // Si es profesor, actualiza la tabla "Profesor" 
+      // sin cambiar "cantidad_estudiantes" (ni rol).
       const { error: errorProf } = await supabase
         .from("Profesor")
-        .upsert({
-          id_usuario: userData.id
-          // otros campos en Profesor si los tuvieras
+        .update({
+          // Ejemplo: no tocamos "cantidad_estudiantes"
+          // ni "id_usuario" (ya está asociado)
         })
         .eq("id_usuario", userData.id);
+
       if (errorProf) {
         throw new Error("Error al actualizar el profesor: " + errorProf.message);
       }
-    }
-    // Si es estudiante:
-    else if (userData.rol == 3) {
-      // Validar otros campos (carnet, tel, etc.) sin password
+    } 
+    else if (realRol === 3) {
+      // Estudiante: validamos otros campos (carnet, tel, etc.) sin password
       validateInfo(
         userData.carnet,
         userData.telefono,
@@ -192,8 +209,7 @@ export async function updateUserInfo(userData) {
 
       const { error: errorEst } = await supabase
         .from("Estudiante")
-        .upsert({
-          id_usuario: userData.id,
+        .update({
           carnet: userData.carnet,
           asesor: userData.asesor,
           estado: userData.estado
@@ -204,6 +220,8 @@ export async function updateUserInfo(userData) {
         throw new Error("Error al actualizar el estudiante: " + errorEst.message);
       }
     }
+    
+    // Si realRol === 1 (Coordinador), no hay tabla aparte.
 
   } catch (err) {
     throw new Error(err.message);
