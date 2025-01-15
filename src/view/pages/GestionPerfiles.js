@@ -1,7 +1,7 @@
 import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaFileAlt, FaMapMarked } from 'react-icons/fa';
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaFileAlt, FaMapMarked, FaSearch } from 'react-icons/fa';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
@@ -19,11 +19,16 @@ const GestionPerfiles = () => {
   const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState('');
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const navigate = useNavigate();
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value);
+  };
+
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
   };
 
   /**
@@ -151,13 +156,18 @@ const GestionPerfiles = () => {
   }, []);
 
   useEffect(() => {
+    console.log('users:', users);
     setFilteredUsers(users.filter(user => {
       if (filter === 'profesores') return user.rol === 2;
       if (filter === 'estudiantes') return user.rol === 3;
       return true;
-    }));
+    }).filter(user => 
+      user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (user.estudiante?.[0].carnet && user.estudiante?.[0].carnet.toLowerCase().includes(searchTerm.toLowerCase()))
+    ));
 
-  }, [users, filter]);
+  }, [users, filter, searchTerm]);
 
   return (
     <div className="gestion-container">
@@ -173,6 +183,15 @@ const GestionPerfiles = () => {
               <option value="profesores">Profesores</option>
               <option value="estudiantes">Estudiantes</option>
             </select>
+          </div>
+          <div className="search-bar">
+            <input
+              type="text"
+              placeholder="Buscar..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <i className="fas fa-search search-icon"></i>
           </div>
         </div>
         <div className="gestion-perfiles">

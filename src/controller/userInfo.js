@@ -209,6 +209,7 @@ export async function getAllUsers() {
       id,
       rol,
       nombre,
+      correo,
       estudiante:Estudiante(
         estudiante_id,
         carnet
@@ -222,6 +223,7 @@ export async function getAllUsers() {
       id,
       rol,
       nombre,
+      correo,
       profesor:Profesor (
         profesor_id,
         cantidad_estudiantes
