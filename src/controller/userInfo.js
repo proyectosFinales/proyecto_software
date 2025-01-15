@@ -36,7 +36,17 @@ export async function getUserInfo(id) {
 }
 
 export async function gestionUserInfo(id) {
-  const { data, error } = await supabase
+  const { data: userData, error: userError } = await supabase
+    .from('Usuario')
+    .select('rol')
+    .eq('id', id)
+    .single();
+
+  if (userError || !userData) {
+    throw new Error("Usuario no encontrado");
+  }
+
+  let query = supabase
     .from('Usuario')
     .select(`
       id,
@@ -45,27 +55,56 @@ export async function gestionUserInfo(id) {
       contrasena,
       rol,
       sede,
-      telefono,
-      Profesor:Profesor!Profesor_id_usuario_fkey (
-        profesor_id,
-        cantidad_estudiantes
-      ),
-      Estudiante:Estudiante!Estudiante_id_usuario_fkey (
-        estudiante_id,
-        carnet,
-        cedula
-        -- Si quieres ver sus anteproyectos:
-        , Anteproyecto:Anteproyecto_estudiante_id_fkey (
-          id,
-          estado
-        )
-      )
+      telefono
     `)
-    .eq('id', id)
-    .single();
+    .eq('id', id);
 
-  if (!data || error) {
-    throw new Error("Hubo un problema al consultar datos.");
+  if (userData.rol === 2) {
+    query = supabase
+      .from('Usuario')
+      .select(`
+        id,
+        nombre,
+        correo,
+        contrasena,
+        rol,
+        sede,
+        telefono,
+        profesor:Profesor (
+          profesor_id,
+          cantidad_estudiantes
+        )
+      `)
+      .eq('id', id);
+  } else if (userData.rol === 3) {
+    query = supabase
+      .from('Usuario')
+      .select(`
+        id,
+        nombre,
+        correo,
+        contrasena,
+        rol,
+        sede,
+        telefono,
+        estudiante:Estudiante (
+          estudiante_id,
+          carnet
+        )
+      `)
+      .eq('id', id);
+  }
+
+  const { data, error } = await query.single();
+  console.log(data);
+
+  if (error) {
+    console.error('Error detallado:', error);
+    throw new Error("Hubo un problema al consultar datos: " + error.message);
+  }
+
+  if (!data) {
+    throw new Error("No se encontraron datos para el usuario especificado.");
   }
 
   return data;
@@ -170,25 +209,26 @@ export async function getAllUsers() {
       id,
       rol,
       nombre,
-      Estudiante:Estudiante!Estudiante_id_usuario_fkey (
+      estudiante:Estudiante(
         estudiante_id,
         carnet
       )
     `)
     .eq("rol", 3);
-
+  
   const { data: dataP, error: errorP } = await supabase
     .from('Usuario')
     .select(`
       id,
       rol,
       nombre,
-      Profesor:Profesor!Profesor_id_usuario_fkey (
-        profesor_id
+      profesor:Profesor (
+        profesor_id,
+        cantidad_estudiantes
       )
     `)
     .eq("rol", 2);
-
+  
   if (errorE || errorP) {
     throw new Error("Hubo problemas para extraer los usuarios.");
   }
