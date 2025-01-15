@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import supabase from "../model/supabase";
-import sendMail from "../controller/Email";
+import {CorreoRecuperacion} from "../controller/Email";
 
 export async function sendRecovery(email) {
   // Buscamos en tabla "Usuario"
@@ -40,7 +40,8 @@ Si no realizaste ninguna solicitud, ignora este mensaje.
 Instituto Tecnológico de Costa Rica,
 Escuela de Producción Industrial.`;
 
-  sendMail(email, "Recuperación de contraseña", mensaje);
+  console.log("puta sal");
+  CorreoRecuperacion(resetLink, email, "template_recovery");
   return resetLink;
 }
 
