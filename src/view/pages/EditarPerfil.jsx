@@ -123,21 +123,6 @@ const EditarPerfil = () => {
           <div className="edit-user-info">
             <h2>Editar Información</h2>
 
-            {/* ID (readOnly) - si deseas mostrarlo en la UI */}
-            <label>
-              ID (no modificable)
-              <div className="input-container-editar">
-                <FaIdCard className="icon-editar" />
-                <input
-                  type="text"
-                  name="id"
-                  className="input-field-editar"
-                  value={userData.id || ""}
-                  readOnly
-                />
-              </div>
-            </label>
-
             {/* Rol (readOnly) */}
             <label>
               Rol (no modificable)
@@ -236,7 +221,7 @@ const EditarPerfil = () => {
             {userData.rol === "2" && (
               <>
                 <label>
-                  Cantidad de estudiantes asignados (no modificable)
+                  Cantidad de estudiantes asignados
                   <div className="input-container-editar">
                     <FaUsers className="icon-editar" />
                     <input
