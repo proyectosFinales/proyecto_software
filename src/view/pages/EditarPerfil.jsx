@@ -15,6 +15,7 @@ const EditarPerfil = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // Asignamos la propiedad con el mismo "name" que en el input
     setUserData({
       ...userData,
       [name]: value,
@@ -53,7 +54,7 @@ const EditarPerfil = () => {
           setUserData({
             id,
             correo: data.correo,
-            contraseña: data.contrasena,
+            contrasena: data.contrasena, // <-- sin ñ
             sede: data.sede,
             rol: data.rol.toString(),
             ...(data.rol === 2 && { nombre: "" }),
@@ -69,7 +70,7 @@ const EditarPerfil = () => {
           setUserData({
             id,
             correo: data.correo,
-            contraseña: data.contrasena,
+            contrasena: data.contrasena, // <-- sin ñ
             sede: data.sede,
             rol: data.rol.toString(),
             ...(data.rol === 2 && {
@@ -165,15 +166,16 @@ const EditarPerfil = () => {
               </div>
             </label>
 
+            {/* Importante: usar name="contrasena", NO "contraseña" */}
             <label>
               Contraseña
               <div className="input-container-editar">
                 <FaLock className="icon-editar" />
                 <input
                   type="text"
-                  name="contraseña"
+                  name="contrasena"
                   className="input-field-editar"
-                  value={userData.contraseña || ""}
+                  value={userData.contrasena || ""}
                   onChange={handleChange}
                 />
               </div>
