@@ -45,22 +45,21 @@ const EditarPerfil = () => {
     const obtenerInfoUsuario = async () => {
       try {
         const data = await getUserInfo(id);
-        // data tendrá la forma:
-        // {
-        //   id, correo, contraseña, rol, sede, ...
-        //   Profesor: { profesor_id, nombre, ... } (si rol=2)
-        //   Estudiante: { estudiante_id, nombre, carnet, telefono, ... } (si rol=3)
-        // }
+        // data vendrá con { id, correo, contrasena, rol, sede, 
+        //   Profesor: {...} (si rol=2), Estudiante: {...} (si rol=3) }
 
-        // Caso: Si es Coordinador (rol=1) no hay data.estudiante ni data.profesor.
-        if (!data.estudiante && !data.profesor && data.rol !== 1) {
+        // CASO: Si es Coordinador (rol=1) no hay data.Estudiante ni data.Profesor
+        // CASO: Si es profesor y la DB devolvió data.Profesor
+        // CASO: Si es estudiante y la DB devolvió data.Estudiante
+        // fix: comparamos data.Profesor / data.Estudiante, no data.profesor / data.estudiante
+        if (!data.Estudiante && !data.Profesor && data.rol !== 1) {
           // Manejo de "información incompleta"
           setUserData({
             id,
             correo: data.correo,
-            contraseña: data.contraseña,
+            contraseña: data.contrasena,
             sede: data.sede,
-            rol: data.rol.toString(), // Asegurar que sea string
+            rol: data.rol.toString(),
             ...(data.rol === 2 && { nombre: "" }),
             ...(data.rol === 3 && {
               nombre: "",
@@ -74,16 +73,23 @@ const EditarPerfil = () => {
           setUserData({
             id,
             correo: data.correo,
-            contraseña: data.contraseña,
+            contraseña: data.contrasena,
             sede: data.sede,
             rol: data.rol.toString(),
+
+            // si es rol=2, proveniente de data.Profesor
             ...(data.rol === 2 && {
-              nombre: data.profesor?.nombre || ""
+              // No olvides poner "nombre" = data.nombre si es que lo guardas en la tabla Usuario
+              // o si en la BD lo tienes en la subobjeto Profesor, ajusta así:
+              // nombre: data.Profesor?.algúnCampo 
+              nombre: data.nombre 
             }),
+
+            // si es rol=3, proveniente de data.Estudiante
             ...(data.rol === 3 && {
-              nombre: data.estudiante?.nombre || "",
-              carnet: data.estudiante?.carnet || "",
-              telefono: data.estudiante?.telefono || ""
+              nombre: data.Estudiante?.nombre || data.nombre || "",
+              carnet: data.Estudiante?.carnet || "",
+              telefono: data.Estudiante?.telefono || ""
             })
           });
         }
@@ -108,7 +114,6 @@ const EditarPerfil = () => {
           <div className="edit-user-info">
             <h2>Editar Información</h2>
 
-            {/* Nombre (Rol 2 o 3) */}
             {(userData.rol === "2" || userData.rol === "3") && (
               <label>
                 Nombre
@@ -125,91 +130,85 @@ const EditarPerfil = () => {
               </label>
             )}
 
-            {/* Carnet (Rol 3) */}
             {userData.rol === "3" && (
-              <label>
-                Carnet
-                <div className="input-container-editar">
-                  <FaIdCard className="icon-editar" />
-                  <input
-                    type="text"
-                    name="carnet"
-                    className="input-field-editar"
-                    value={userData.carnet || ""}
-                    onChange={handleChange}
-                  />
-                </div>
-              </label>
-            )}
-
-            {/* Teléfono (Rol 3) */}
-            {userData.rol === "3" && (
-              <label>
-                Teléfono
-                <div className="input-container-editar">
-                  <FaPhone className="icon-editar" />
-                  <input
-                    type="text"
-                    name="telefono"
-                    className="input-field-editar"
-                    value={userData.telefono || ""}
-                    onChange={handleChange}
-                  />
-                </div>
-              </label>
-            )}
-
-            {/* Correo, contraseña, sede (Rol 1,2,3) */}
-            {(userData.rol === "1" || userData.rol === "2" || userData.rol === "3") && (
               <>
                 <label>
-                  Correo electrónico
+                  Carnet
                   <div className="input-container-editar">
-                    <FaEnvelope className="icon-editar" />
+                    <FaIdCard className="icon-editar" />
                     <input
-                      type="email"
-                      name="correo"
+                      type="text"
+                      name="carnet"
                       className="input-field-editar"
-                      value={userData.correo || ""}
+                      value={userData.carnet || ""}
                       onChange={handleChange}
                     />
                   </div>
                 </label>
 
                 <label>
-                  Contraseña
+                  Teléfono
                   <div className="input-container-editar">
-                    <FaLock className="icon-editar" />
+                    <FaPhone className="icon-editar" />
                     <input
                       type="text"
-                      name="contraseña"
+                      name="telefono"
                       className="input-field-editar"
-                      value={userData.contraseña || ""}
+                      value={userData.telefono || ""}
                       onChange={handleChange}
                     />
                   </div>
                 </label>
-
-                <label>Seleccione una sede:</label>
-                <div className="input-container-editar">
-                  <FaMapMarked className="icon-sede" />
-                  <select
-                    name="sede"
-                    className="sede-dropdown"
-                    value={userData.sede || ""}
-                    onChange={handleChange}
-                    required
-                  >
-                    <option value="">Seleccione una sede</option>
-                    <option value="Central Cartago">Central Cartago</option>
-                    <option value="Local San José">Local San José</option>
-                    <option value="Local San Carlos">Local San Carlos</option>
-                    <option value="Limón">Centro Académico de Limón</option>
-                    <option value="Alajuela">Centro Académico de Alajuela</option>
-                  </select>
-                </div>
               </>
             )}
+
+            <label>
+              Correo electrónico
+              <div className="input-container-editar">
+                <FaEnvelope className="icon-editar" />
+                <input
+                  type="email"
+                  name="correo"
+                  className="input-field-editar"
+                  value={userData.correo || ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </label>
+
+            <label>
+              Contraseña
+              <div className="input-container-editar">
+                <FaLock className="icon-editar" />
+                <input
+                  type="text"
+                  name="contraseña"
+                  className="input-field-editar"
+                  value={userData.contraseña || ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </label>
+
+            <label>Seleccione una sede:</label>
+            <div className="input-container-editar">
+              <FaMapMarked className="icon-sede" />
+              <select
+                name="sede"
+                className="sede-dropdown"
+                value={userData.sede || ""}
+                onChange={handleChange}
+                required
+              >
+                <option value="">Seleccione una sede</option>
+                <option value="Central Cartago">Central Cartago</option>
+                <option value="Local San José">Local San José</option>
+                <option value="Local San Carlos">Local San Carlos</option>
+                <option value="Limón">Centro Académico de Limón</option>
+                <option value="Alajuela">Centro Académico de Alajuela</option>
+              </select>
+            </div>
+
           </div>
 
           <div className="edit-actions">

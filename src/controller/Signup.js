@@ -1,7 +1,7 @@
 import supabase from "../model/supabase";
 import validateInfo, { validarContraseña, validarCorreo, validarCorreoExistente } from "./validarEntradas";
 
-export async function signUpNewUser(fullName, carnet, cedula, tel, email, password, sede) {
+export async function signUpNewUser(fullName, carnet, tel, email, password, sede) {
   try {
     const result = await validarCorreoExistente(email, "");
     if (!result) {
@@ -38,7 +38,7 @@ export async function signUpNewUser(fullName, carnet, cedula, tel, email, passwo
         {
           id_usuario: usuarioID,
           carnet: carnet,
-          cedula: cedula
+          estado: 'en progreso'
         }
       ]);
 
