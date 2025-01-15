@@ -52,7 +52,6 @@ export async function gestionUserInfo(id) {
       id,
       nombre,
       correo,
-      contrasena,
       rol,
       sede,
       telefono
@@ -66,7 +65,6 @@ export async function gestionUserInfo(id) {
         id,
         nombre,
         correo,
-        contrasena,
         rol,
         sede,
         telefono,
@@ -83,7 +81,6 @@ export async function gestionUserInfo(id) {
         id,
         nombre,
         correo,
-        contrasena,
         rol,
         sede,
         telefono,
@@ -96,7 +93,6 @@ export async function gestionUserInfo(id) {
   }
 
   const { data, error } = await query.single();
-  console.log(data);
 
   if (error) {
     console.error('Error detallado:', error);
