@@ -43,7 +43,6 @@ const GestionPerfiles = () => {
       setEditableUser({
         id: id,
         correo: data.correo,
-        contraseña: data.contrasena,
         rol: data.rol.toString(),  // Aseguramos string
         sede: data.sede,
         nombre: data.nombre,
@@ -100,6 +99,7 @@ const GestionPerfiles = () => {
 
       // Eliminar cada uno
       for (const userId of usersToDelete) {
+        console.log('Eliminando usuario:', userId);
         await delUser(userId);
       }
 
@@ -156,7 +156,6 @@ const GestionPerfiles = () => {
   }, []);
 
   useEffect(() => {
-    console.log('users:', users);
     setFilteredUsers(users.filter(user => {
       if (filter === 'profesores') return user.rol === 2;
       if (filter === 'estudiantes') return user.rol === 3;
@@ -263,20 +262,6 @@ const GestionPerfiles = () => {
                   </label>
 
                   <label>
-                    Contraseña
-                    <div className="input-container-gestion">
-                      <FaLock className="icon-registro" />
-                      <input
-                        type="text"
-                        name="contraseña"
-                        className="input-field-gestion"
-                        value={editableUser.contraseña || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
                     Sede
                     <div className="input-container-gestion">
                       <FaMapMarked className="icon-sede" />
@@ -353,20 +338,6 @@ const GestionPerfiles = () => {
                         name="telefono"
                         className="input-field-gestion"
                         value={editableUser.telefono || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
-                    Contraseña
-                    <div className="input-container-gestion">
-                      <FaLock className="icon-registro" />
-                      <input
-                        type="text"
-                        name="contraseña"
-                        className="input-field-gestion"
-                        value={editableUser.contraseña || ''}
                         onChange={handleInputChange}
                       />
                     </div>
