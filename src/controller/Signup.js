@@ -1,5 +1,5 @@
 import supabase from "../model/supabase";
-import validateInfo, { validarContraseña, validarCorreo, validarCorreoExistente } from "./validarEntradas";
+import validateInfo, { validarContraseñaDetallada, validarCorreo, validarCorreoExistente } from "./validarEntradas";
 
 export async function signUpNewUser(fullName, carnet, tel, email, password, sede) {
   try {
@@ -60,7 +60,7 @@ export async function registroProfesor(nombre, correo, contrasena, sede, telefon
   try {
     if (!validarCorreo(correo)) {
       throw new Error("El correo no cumple con un formato válido.");
-    } else if (!validarContraseña(contrasena)) {
+    } else if (!validarContraseñaDetallada(contrasena)) {
       throw new Error("La contraseña no es válida. Debe contener al menos 8 caracteres ...");
     }
 

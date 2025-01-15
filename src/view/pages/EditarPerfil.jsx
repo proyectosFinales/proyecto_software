@@ -1,6 +1,15 @@
 import { React, useState, useEffect } from "react";
 import "../styles/EditarPerfil.css";
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'react-icons/fa';
+import { 
+  FaUser, 
+  FaIdCard, 
+  FaPhone, 
+  FaEnvelope, 
+  FaLock, 
+  FaMapMarked, 
+  FaUsers,    // Para mostrar cantidad de estudiantes (ejemplo)
+  FaShieldAlt // Para mostrar rol (ejemplo)
+} from 'react-icons/fa';
 import Footer from "../components/Footer";
 import { getUserInfo, updateUserInfo } from "../../controller/userInfo";
 import { useNavigate } from "react-router-dom";
@@ -23,6 +32,10 @@ const EditarPerfil = () => {
 
   const handleSave = async () => {
     try {
+      // IMPORTANTE: no modificar el rol en el upsert
+      // si quieres evitar que se cambie. 
+      // O sea, tu back puede ignorar userData.rol.
+
       await updateUserInfo(userData);
       alert("Usuario modificado con éxito.");
       handleCancel();
@@ -45,43 +58,39 @@ const EditarPerfil = () => {
     const obtenerInfoUsuario = async () => {
       try {
         const data = await getUserInfo(id);
-        // data vendrá con { id, correo, contrasena, rol, sede, 
-        //   Profesor: {...} (si rol=2), Estudiante: {...} (si rol=3) }
+        // data vendrá con { 
+        //   id, correo, contrasena, rol, sede, telefono, nombre,
+        //   Profesor: { profesor_id, cantidad_estudiantes },
+        //   Estudiante: { estudiante_id, carnet, asesor, estado }, 
+        // }
 
-        if (!data.Estudiante && !data.Profesor && data.rol !== 1) {
-          // Manejo de "información incompleta"
-          setUserData({
-            id,
-            correo: data.correo,
-            contraseña: data.contrasena,
-            sede: data.sede,
-            rol: data.rol.toString(),
-            ...(data.rol === 2 && { nombre: "" }),
-            ...(data.rol === 3 && {
-              nombre: "",
-              carnet: "",
-              telefono: ""
-            })
-          });
-          alert("Este usuario tiene información incompleta. Por favor actualice su información.");
-        } else {
-          // Llenar userData según el rol
-          setUserData({
-            id,
-            correo: data.correo,
-            contraseña: data.contrasena,
-            sede: data.sede,
-            rol: data.rol.toString(),
-            ...(data.rol === 2 && {
-              nombre: data.nombre 
-            }),
-            ...(data.rol === 3 && {
-              nombre: data.Estudiante?.nombre || data.nombre || "",
-              carnet: data.Estudiante?.carnet || "",
-              telefono: data.Estudiante?.telefono || ""
-            })
-          });
+        // Construimos userData para el front
+        // Nota: 'rol' siempre en string para compararlo fácilmente
+        const baseData = {
+          id: data.id,
+          rol: data.rol?.toString(),
+          correo: data.correo,
+          contrasena: data.contrasena,
+          sede: data.sede,
+          telefono: data.telefono,
+          nombre: data.nombre
+        };
+
+        // Si es profesor
+        if (data.rol == 2 && data.Profesor) {
+          baseData.profesor_id = data.Profesor.profesor_id;
+          baseData.cantidad_estudiantes = data.Profesor.cantidad_estudiantes ?? 0;
         }
+
+        // Si es estudiante
+        if (data.rol == 3 && data.Estudiante) {
+          baseData.estudiante_id = data.Estudiante.estudiante_id;
+          baseData.carnet = data.Estudiante.carnet || "";
+          baseData.asesor = data.Estudiante.asesor || "";
+          baseData.estado = data.Estudiante.estado || "";
+        }
+
+        setUserData(baseData);
       } catch (error) {
         alert(error.message);
       }
@@ -91,6 +100,17 @@ const EditarPerfil = () => {
       obtenerInfoUsuario();
     }
   }, [id]);
+
+  // Pequeña función auxiliar: 
+  // Mapea rol numérico → nombre textual
+  const getRolLabel = (rolNum) => {
+    switch (rolNum) {
+      case "1": return "Coordinador";
+      case "2": return "Profesor";
+      case "3": return "Estudiante";
+      default: return "Desconocido";
+    }
+  };
 
   return (
     <>
@@ -103,22 +123,120 @@ const EditarPerfil = () => {
           <div className="edit-user-info">
             <h2>Editar Información</h2>
 
-            {(userData.rol === "2" || userData.rol === "3") && (
-              <label>
-                Nombre
-                <div className="input-container-editar">
-                  <FaUser className="icon-editar" />
-                  <input
-                    type="text"
-                    name="nombre"
-                    className="input-field-editar"
-                    value={userData.nombre || ""}
-                    onChange={handleChange}
-                  />
-                </div>
-              </label>
+            {/* Rol (readOnly) */}
+            <label>
+              Rol (no modificable)
+              <div className="input-container-editar">
+                <FaShieldAlt className="icon-editar" />
+                <input
+                  type="text"
+                  name="rol"
+                  className="input-field-editar"
+                  value={getRolLabel(userData.rol) || ""}
+                  readOnly
+                />
+              </div>
+            </label>
+
+            {/* Nombre (todos los roles lo pueden editar, excepto si no quieres...) */}
+            <label>
+              Nombre
+              <div className="input-container-editar">
+                <FaUser className="icon-editar" />
+                <input
+                  type="text"
+                  name="nombre"
+                  className="input-field-editar"
+                  value={userData.nombre || ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </label>
+
+            {/* Para todos: Correo electrónico */}
+            <label>
+              Correo electrónico
+              <div className="input-container-editar">
+                <FaEnvelope className="icon-editar" />
+                <input
+                  type="email"
+                  name="correo"
+                  className="input-field-editar"
+                  value={userData.correo || ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </label>
+
+            {/* Contraseña */}
+            <label>
+              Contraseña
+              <div className="input-container-editar">
+                <FaLock className="icon-editar" />
+                <input
+                  type="text"
+                  name="contrasena"
+                  className="input-field-editar"
+                  value={userData.contrasena || ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </label>
+
+            {/* Sede */}
+            <label>Sede</label>
+            <div className="input-container-editar">
+              <FaMapMarked className="icon-sede" />
+              <select
+                name="sede"
+                className="sede-dropdown"
+                value={userData.sede || ""}
+                onChange={handleChange}
+              >
+                <option value="">Seleccione una sede</option>
+                <option value="Central Cartago">Central Cartago</option>
+                <option value="Local San José">Local San José</option>
+                <option value="Local San Carlos">Local San Carlos</option>
+                <option value="Limón">Centro Académico de Limón</option>
+                <option value="Alajuela">Centro Académico de Alajuela</option>
+              </select>
+            </div>
+
+            {/* Teléfono */}
+            <label>
+              Teléfono
+              <div className="input-container-editar">
+                <FaPhone className="icon-editar" />
+                <input
+                  type="text"
+                  name="telefono"
+                  className="input-field-editar"
+                  value={userData.telefono || ""}
+                  onChange={handleChange}
+                />
+              </div>
+            </label>
+
+            {/* Si es PROFESOR (rol=2): mostrar cantidad_estudiantes en modo readOnly */}
+            {userData.rol === "2" && (
+              <>
+                <label>
+                  Cantidad de estudiantes asignados
+                  <div className="input-container-editar">
+                    <FaUsers className="icon-editar" />
+                    <input
+                      type="number"
+                      name="cantidad_estudiantes"
+                      className="input-field-editar"
+                      value={userData.cantidad_estudiantes || 0}
+                      readOnly
+                    />
+                  </div>
+                </label>
+              </>
             )}
 
+            {/* Si es ESTUDIANTE (rol=3): mostrar carnet, estado, asesor, etc. */}
             {userData.rol === "3" && (
               <>
                 <label>
@@ -135,71 +253,38 @@ const EditarPerfil = () => {
                   </div>
                 </label>
 
+                {/* Asesor (si quieres que sea editable o no) */}
                 <label>
-                  Teléfono
+                  Asesor (no modificable)
                   <div className="input-container-editar">
-                    <FaPhone className="icon-editar" />
+                    <FaUser className="icon-editar" />
                     <input
                       type="text"
-                      name="telefono"
+                      name="asesor"
                       className="input-field-editar"
-                      value={userData.telefono || ""}
-                      onChange={handleChange}
+                      value={userData.asesor || ""}
+                      readOnly
+                    />
+                  </div>
+                </label>
+
+                <label>
+                  Estado (no modificable)
+                  <div className="input-container-editar">
+                    <FaIdCard className="icon-editar" />
+                    <input
+                      type="text"
+                      name="estado"
+                      className="input-field-editar"
+                      value={userData.estado || ""}
+                      readOnly
                     />
                   </div>
                 </label>
               </>
             )}
 
-            <label>
-              Correo electrónico
-              <div className="input-container-editar">
-                <FaEnvelope className="icon-editar" />
-                <input
-                  type="email"
-                  name="correo"
-                  className="input-field-editar"
-                  value={userData.correo || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </label>
-
-            <label>
-              Contraseña
-              <div className="input-container-editar">
-                <FaLock className="icon-editar" />
-                <input
-                  type="text"
-                  name="contraseña"
-                  className="input-field-editar"
-                  value={userData.contraseña || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </label>
-
-            <label>Seleccione una sede:</label>
-            <div className="input-container-editar">
-              <FaMapMarked className="icon-sede" />
-              <select
-                name="sede"
-                className="sede-dropdown"
-                value={userData.sede || ""}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Seleccione una sede</option>
-                <option value="Central Cartago">Central Cartago</option>
-                <option value="Local San José">Local San José</option>
-                <option value="Local San Carlos">Local San Carlos</option>
-                <option value="Limón">Centro Académico de Limón</option>
-                <option value="Alajuela">Centro Académico de Alajuela</option>
-              </select>
-            </div>
-
           </div>
-
           <div className="edit-actions">
             <button className="btn-cancel" onClick={handleCancel}>
               Cancelar
