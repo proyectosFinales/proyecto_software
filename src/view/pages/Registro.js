@@ -31,7 +31,7 @@ const Registro = () => {
       await signUpNewUser(fullName, carnet, number, email, password, sede);
 
       alert('Usuario registrado con éxito.');
-      navigate('/login');
+      navigate('/');
     } catch (error) {
       alert(error.message || error);
     }
