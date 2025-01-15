@@ -1,12 +1,18 @@
 import supabase from "../model/supabase";
-import validateInfo, { validarCorreo, validarContraseña, validarCorreoEstudiante, validarCorreoExistente } from "./validarEntradas";
+import validateInfo, {
+  validarCorreo,
+  validarContraseña,
+  validarCorreoEstudiante,
+  validarCorreoExistente
+} from "./validarEntradas";
 
 /**
  * Obtiene info de un usuario, incluyendo si es profesor o estudiante.
  */
 export async function getUserInfo(id) {
+  // Realiza la consulta con la sintaxis JSON-like:
   const { data, error } = await supabase
-    .from('Usuario')
+    .from("Usuario")
     .select(`
       id,
       nombre,
@@ -15,26 +21,38 @@ export async function getUserInfo(id) {
       rol,
       sede,
       telefono,
-      Profesor:Profesor!Profesor_id_usuario_fkey (
+      Profesor:Profesor!profesor_id_usuario_fkey (
         profesor_id,
         cantidad_estudiantes
       ),
-      Estudiante:Estudiante!Estudiante_id_usuario_fkey (
+      Estudiante:Estudiante!estudiante_id_usuario_fkey (
         estudiante_id,
         carnet,
         cedula
       )
     `)
-    .eq('id', id)
+    .eq("id", id)
     .single();
+    
+  // DEBUG: imprimir en consola qué devolvió Supabase
+  console.log("[getUserInfo] data:", data);
+  console.log("[getUserInfo] error:", error);
 
+  // Verificamos si hubo error o si no vino data
   if (!data || error) {
-    throw new Error("Hubo un problema al consultar datos de usuario.");
+    // Mensaje más detallado
+    const msg = error
+      ? `Hubo un problema al consultar datos de usuario. Detalle Supabase: ${error.message}`
+      : "No se encontraron datos para ese usuario.";
+    throw new Error(msg);
   }
 
   return data;
 }
 
+/**
+ * Igual que getUserInfo, pero con la anidación extendida (Anteproyecto).
+ */
 export async function gestionUserInfo(id) {
   const { data: userData, error: userError } = await supabase
     .from('Usuario')
@@ -110,11 +128,14 @@ export async function gestionUserInfo(id) {
   return data;
 }
 
+/**
+ * Obtiene solo el rol de un usuario para la ruta protegida
+ */
 export async function getRol(id) {
   const { data, error } = await supabase
-    .from('Usuario')
-    .select('rol')
-    .eq('id', id)
+    .from("Usuario")
+    .select("rol")
+    .eq("id", id)
     .single();
 
   if (!data || error) {
@@ -124,12 +145,17 @@ export async function getRol(id) {
   return data;
 }
 
+/**
+ * Actualiza datos de un usuario (tabla Usuario) y, si corresponde, en Estudiante o Profesor.
+ */
 export async function updateUserInfo(userData) {
   try {
     if (!validarCorreo(userData.correo)) {
       throw new Error("El correo no cumple con un formato válido.");
     } else if (!validarContraseña(userData.contrasena)) {
-      throw new Error("La contraseña no es válida, debe contener al menos 8 caracteres...");
+      throw new Error(
+        "La contraseña no es válida, debe contener al menos 8 caracteres..."
+      );
     }
 
     const result = await validarCorreoExistente(userData.correo, userData.id);
@@ -143,7 +169,7 @@ export async function updateUserInfo(userData) {
 
     // 1. Actualizar en Usuario
     const { error } = await supabase
-      .from('Usuario')
+      .from("Usuario")
       .upsert({
         id: userData.id,
         nombre: userData.nombre,
@@ -152,42 +178,46 @@ export async function updateUserInfo(userData) {
         sede: userData.sede,
         telefono: userData.telefono
       })
-      .eq('id', userData.id);
+      .eq("id", userData.id);
 
     if (error) {
-      throw new Error('Error al actualizar el usuario: ' + error.message);
+      throw new Error("Error al actualizar el usuario: " + error.message);
     }
 
     // 2. Si es profesor:
     if (userData.rol === 2) {
       const { error: errorProf } = await supabase
-        .from('Profesor')
+        .from("Profesor")
         .upsert({
-          id_usuario: userData.id,
-          // si ya existía, se actualizará
-          // Si manejas nombre duplicado aquí, 
-          // agrégalo con un campo adicional en la tabla Profesor
+          id_usuario: userData.id
+          // Si hay otros campos en Profesor, agrégalos aquí
         })
-        .eq('id_usuario', userData.id);
+        .eq("id_usuario", userData.id);
 
       if (errorProf) {
         throw new Error("Error al actualizar el profesor: " + errorProf.message);
       }
-
+    }
     // 3. Si es estudiante:
-    } else if (userData.rol === 3) {
-      // Validaciones
-      validateInfo(userData.carnet, userData.telefono, userData.correo, userData.contrasena, "", false);
+    else if (userData.rol === 3) {
+      validateInfo(
+        userData.carnet,
+        userData.telefono,
+        userData.correo,
+        userData.contrasena,
+        "",
+        false
+      );
       validarCorreoEstudiante(userData.correo);
 
       const { error: errorEst } = await supabase
-        .from('Estudiante')
+        .from("Estudiante")
         .upsert({
           id_usuario: userData.id,
           carnet: userData.carnet,
           cedula: userData.cedula
         })
-        .eq('id_usuario', userData.id);
+        .eq("id_usuario", userData.id);
 
       if (errorEst) {
         throw new Error("Error al actualizar el estudiante: " + errorEst.message);
@@ -204,7 +234,7 @@ export async function updateUserInfo(userData) {
  */
 export async function getAllUsers() {
   const { data: dataE, error: errorE } = await supabase
-    .from('Usuario')
+    .from("Usuario")
     .select(`
       id,
       rol,
@@ -218,7 +248,7 @@ export async function getAllUsers() {
     .eq("rol", 3);
   
   const { data: dataP, error: errorP } = await supabase
-    .from('Usuario')
+    .from("Usuario")
     .select(`
       id,
       rol,
@@ -250,11 +280,12 @@ export async function getAllUsers() {
   return [...updatedDataE, ...updatedDataP];
 }
 
+/**
+ * Elimina un usuario (y en cascada su registro en Profesor/Estudiante si la FK está configurada con ON DELETE CASCADE)
+ */
 export async function delUser(id) {
-  // Al borrar un usuario, se debería borrar en cascada Estudiante/Profesor
-  // según la FK con ON DELETE CASCADE. Si no lo tienes, hazlo manual.
   const { error } = await supabase
-    .from('Usuario')
+    .from("Usuario")
     .delete()
     .eq("id", id);
 
@@ -265,7 +296,7 @@ export async function delUser(id) {
 }
 
 /**
- * Edición de usuario desde la gestión (simil a updateUserInfo).
+ * Edición de usuario desde la gestión (similar a updateUserInfo).
  */
 export async function editUserGestion(user) {
   try {
@@ -279,11 +310,11 @@ export async function editUserGestion(user) {
 
     // 1. Actualizamos en Usuario
     const { error } = await supabase
-      .from('Usuario')
+      .from("Usuario")
       .update({
         nombre: user.nombre,
         correo: user.correo,
-        contrasena: user.contrasena,
+        contrasena: user.contraseña,  // Nota: en DB es "contrasena" sin ñ, ajústalo
         sede: user.sede,
         telefono: user.telefono
       })
@@ -293,14 +324,13 @@ export async function editUserGestion(user) {
       throw new Error("No se pudo editar la información del usuario.");
     }
 
-    // 2. Si es profesor
+    // 2. Si es profesor (rol=2)
     if (user.rol === 2) {
       // Actualiza profesor si es necesario
-      // p.e. la categoría, etc.
       const { error: error2 } = await supabase
-        .from('Profesor')
+        .from("Profesor")
         .update({
-          // ejemplo de un campo extra:
+          // ejemplo de un campo extra si lo tuvieras:
           // categoria_id: user.categoria_id
         })
         .eq("id_usuario", user.id);
@@ -308,13 +338,14 @@ export async function editUserGestion(user) {
       if (error2) {
         throw new Error("No se pudo editar la información del profesor.");
       }
-    } else {
-      // 3. Si es estudiante
+    } 
+    // 3. Si es estudiante (rol=3)
+    else {
       if (!validateInfo(user.carnet, user.telefono, user.correo, "", false)) {
         throw new Error("Datos no válidos para el estudiante.");
       }
       const { error: errorEst } = await supabase
-        .from('Estudiante')
+        .from("Estudiante")
         .update({
           carnet: user.carnet,
           cedula: user.cedula
@@ -324,9 +355,6 @@ export async function editUserGestion(user) {
       if (errorEst) {
         throw new Error("No se pudo editar la información del estudiante.");
       }
-
-      // Si quisieras actualizar el estado de su anteproyecto, 
-      // ajústalo en la tabla "Anteproyecto" -> 'estado'
     }
   } catch (error) {
     throw new Error(error.message);
