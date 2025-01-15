@@ -173,9 +173,7 @@ const GestionPerfiles = () => {
                         className="user-name"
                         onClick={() => handleUserClick(user.id)}
                       >
-                        {user.rol == 2
-                          ? user.profesor.nombre
-                          : user.estudiante.nombre || "Usuario no registrado"}
+                        {user.nombre}
                       </span>
                       <input
                         type="checkbox"
