@@ -1,3 +1,5 @@
+// ==================== GestionPerfiles.jsx ====================
+
 import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import "../styles/GestionPerfiles.css";
@@ -380,10 +382,9 @@ const GestionPerfiles = () => {
                 </>
               )}
 
-              {/* Rol 1 (Coordinador) no tiene secciones en el snippet,
-                  pero si llegase un user con rol=1, no habría 'profesor' ni 'estudiante' 
-                  e igual se podría mostrar correo/sede/contraseña. */}
-
+              {/* Rol 1 (Coordinador) no se muestra en este snippet, 
+                  pero si llegase un user con rol=1, 
+                  podrías mostrar datos básicos sin Estudiante/Profesor. */}
             </div>
             <div className="actions">
               <button className="btn-delete" onClick={() => setModal(true)}>

@@ -1,13 +1,8 @@
-/**
- * profesor.js
- * 
- * Clase que modela la entidad Profesor,
- * la cual extiende de Usuario.
- */
+// ==================== profesor.js ====================
 
 import supabase from "../model/supabase";
 import Usuario from "./usuario";
-import Anteproyecto from "./anteproyecto";  // si deseas usarlo para transformaciones
+import Anteproyecto from "./anteproyecto";  
 
 class Profesor extends Usuario {
   /**
@@ -106,17 +101,7 @@ class Profesor extends Usuario {
           sede,
           correo,
           telefono
-        ),
-        -- Ejemplo de anidado:
-        -- Estudiante!Estudiante_asesor_fkey (
-        --   estudiante_id,
-        --   carnet,
-        --   Anteproyecto:Anteproyecto_estudiante_id_fkey (
-        --     id,
-        --     estado,
-        --     actividad
-        --   )
-        -- )
+        )
       `)
       .eq("profesor_id", profesor_id)
       .single();
