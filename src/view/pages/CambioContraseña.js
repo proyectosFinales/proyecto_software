@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import "../styles/CambioContraseña.css";
 import { FaLock } from "react-icons/fa";
 import { validarToken, cambiarContraseña } from "../../controller/Recovery";
-import { validarContraseña } from "../../controller/validarEntradas"
+import { validarContraseñaDetallada } from "../../controller/validarEntradas"
 import "../styles/ErrorCambioContraseña.css";
 import "../styles/CargandoCambioContraseña.css";
 import Footer from '../components/Footer';
@@ -39,7 +39,7 @@ const CambioContraseña = () => {
       return;
     }
 
-    if (validarContraseña(newPassword)) {
+    if (validarContraseñaDetallada(newPassword)) {
       cambiarContraseña(id, newPassword);
       alert("La constraseña fue cambiada exitósamente. Por favor, inicia sesión con las nuevas credenciales.");
       navigate("/");
