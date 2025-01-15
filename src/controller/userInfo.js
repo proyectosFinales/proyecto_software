@@ -310,7 +310,6 @@ export async function editUserGestion(user) {
       .update({
         nombre: user.nombre,
         correo: user.correo,
-        contrasena: user.contraseña,  // Nota: en DB es "contrasena" sin ñ, ajústalo
         sede: user.sede,
         telefono: user.telefono
       })
