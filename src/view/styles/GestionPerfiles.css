@@ -236,7 +236,29 @@ h1 {
   gap: 10px;
 }
 
-.filter-buttons {
+.search-bar {
+  position: relative;
   display: flex;
-  gap: 10px;
+  align-items: center;
+}
+
+.search-bar input {
+  padding: 5px 10px;
+  padding-left: 30px; /* Espacio para el ícono */
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-bar .search-icon {
+  position: absolute;
+  left: 10px;
+  font-size: 16px;
+  color: #aaa;
+}
+
+.filter-buttons select {
+  height: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
