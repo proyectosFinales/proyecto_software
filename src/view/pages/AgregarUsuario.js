@@ -57,7 +57,6 @@ const AgregarUsuario = () => {
         await signUpNewUser(
           nuevoUsuario.nombre,
           nuevoUsuario.carnet,
-          "",                   // sin cédula
           nuevoUsuario.numero,  // usaremos "numero" como teléfono
           nuevoUsuario.correo,
           nuevoUsuario.contraseña,

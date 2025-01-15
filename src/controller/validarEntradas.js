@@ -39,6 +39,7 @@ export function validateInfo(carnet, tel, email, password, checkPass = true) {
       "El carnet no cumple con un formato válido (debe tener 10 dígitos)."
     );
   } else if (!telRegex.test(tel)) {
+    console.log("Teléfono:", tel);
     throw new Error(
       "El número de teléfono no cumple con un formato válido. Asegúrese de que sean 8 dígitos, con o sin prefijo +506."
     );
