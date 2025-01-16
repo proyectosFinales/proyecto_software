@@ -1,9 +1,9 @@
 import "../styles/Calendario.css";
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
-import { supabase } from '../../model/Cliente';
+import { getEventos, addEvento } from '../../controller/Calendario';
 
 const Calendario = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -16,12 +16,27 @@ const Calendario = () => {
     { value: 'Defensas', label: 'Defensas' },
     { value: 'Actas', label: 'Actas' }
   ]
-  const [events, setEvents] = useState([
-    { id: 1, nombre: 'Actas', fechaInicio: '2024-01-01', fechaFin: '2024-01-02' },
-    { id: 2, nombre: 'Plazo para establecer disponibilidad', fechaInicio: '2024-02-01', fechaFin: '2024-02-02' }
-  ]);
+  const [events, setEvents] = useState([]);
   const [editableEvent, setEditableEvent] = useState(null);
   const [newEvent, setNewEvent] = useState({ nombre: '', fechaInicio: '', fechaFin: '' });
+
+  useEffect(() => {
+    const fetchEventos = async () => {
+      try {
+        const data = await getEventos();
+        setEvents(data.map(event => ({
+          id: event.calendario_id,
+          nombre: event.nombre,
+          fechaInicio: event.fecha_inicio,
+          fechaFin: event.fecha_fin
+        })));
+      } catch (error) {
+        console.error('Error fetching events:', error.message);
+      }
+    };
+
+    fetchEventos();
+  }, []);
   
   const handleInputChange = (id, field, value) => {
     setEvents(events.map(event => 
@@ -48,8 +63,23 @@ const Calendario = () => {
     setEvents(events.filter(event => event.id !== id));
   };
 
-  const handleAddEvent = () => {
-    
+  const handleAddEvent = async () => {
+    try {
+      const data = await addEvento({
+        nombre: newEvent.nombre,
+        fecha_inicio: newEvent.fechaInicio,
+        fecha_fin: newEvent.fechaFin
+      });
+      setEvents([...events, {
+        id: data.calendario_id, 
+        nombre: data.nombre, 
+        fechaInicio: data.fecha_inicio, 
+        fechaFin: data.fecha_fin
+      }]);
+      setNewEvent({ nombre: '', fechaInicio: '', fechaFin: '' });
+    } catch (error) {
+      alert('Error adding event:', error.message);
+    }
   };
 
   return (
