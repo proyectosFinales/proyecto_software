@@ -9,7 +9,7 @@ import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
 import sendMail from '../../controller/Email';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { generarContraseña } from '../../controller/Signup';
+import { generarContraseña, sendMailToNewUser, registroProfesor } from '../../controller/Signup';
 
 /**
  * Nota: Ajusta si en tu BD no manejas 'carnet' en la tabla 'Profesor'.
@@ -43,7 +43,6 @@ const CargarDatos = () => {
       const filteredData = sheetData.map(row => ({
         Nombre: row.Nombre,
         Correo: row.Correo,
-        Carnet: row.Carnet,
         Sede: row.Sede,
         Telefono: row.Telefono
       }));
@@ -62,73 +61,18 @@ const CargarDatos = () => {
     if (!confirmAprobar) return;
 
     for (const row of excelData) {
-      const dataToInsert = {
-        nombre: row.Nombre,
-        carnet: row.Carnet,
-        correo: row.Correo,
-        sede: row.Sede,
-        telefono: row.Telefono
-      };
-
-      // Verificación si ya existe un profesor con ese 'carnet'
-      const { data: existingProf, error: errorCheck } = await supabase
-        .from('Profesor') // En tu nueva BD
-        .select('carnet')
-        .eq('carnet', dataToInsert.carnet);
-
-      if (errorCheck) {
-        alert('Error al verificar carnet: ' + errorCheck.message);
-        continue;
-      }
-      if (existingProf && existingProf.length > 0) {
-        alert(`El carnet ${dataToInsert.carnet} ya existe. No se insertará este registro.`);
-        continue;
-      }
-
-      // Generar contraseña aleatoria
-      const contraseña = generarContraseña();
-      const mensaje = 
-        "Hola, su contraseña generada es: " + contraseña + 
-        " y su usuario es su correo electrónico: " + dataToInsert.correo + 
-        ". Para acceder a la plataforma, ingrese a ... y use el correo y la contraseña.\n" +
-        "No responda a este mensaje ya que es un correo automatizado.";
-
-      // 1. Insertar en la tabla Usuario
-      const { data: usuarioData, error: errorInsertUser } = await supabase
-        .from('Usuario')
-        .insert({
-          correo: dataToInsert.correo,
-          rol: 2,                       // 2 => Profesor
-          contrasena: contraseña,
-          sede: dataToInsert.sede
-        })
-        .select('id')
-        .single();
-
-      if (errorInsertUser) {
-        alert('Error al cargar datos en la tabla Usuario: ' + errorInsertUser.message);
-        continue;
-      }
-
-      const usuarioId = usuarioData.id;
-
-      // 2. Insertar en la tabla Profesor
-      //    Cambiamos 'id' => 'id_usuario'
-      const { error: errorInsertProf } = await supabase
-        .from('Profesor')
-        .insert({
-          nombre: dataToInsert.nombre,
-          carnet: dataToInsert.carnet,    // si tu BD lo maneja
-          id_usuario: usuarioId,         // clave FK a Usuario
-          // si tienes 'telefono' en Profesor, agrégalo:
-          telefono: dataToInsert.telefono || ''
-        });
-
-      if (errorInsertProf) {
-        alert('Error al cargar datos en la tabla Profesor: ' + errorInsertProf.message);
-      } else {
-        // Enviar correo si todo salió bien
-        sendMail(dataToInsert.correo, "Credenciales", mensaje);
+      try {
+        const contrasena = generarContraseña();
+        await registroProfesor(
+          row.Nombre,
+          row.Correo,
+          contrasena,
+          row.Sede,
+          row.Telefono // usaremos "numero" como teléfono
+        );
+        sendMailToNewUser(row.Correo, contrasena);
+      } catch(error) {
+        alert(`Error al insertar el profesor ${row.Correo}\n${error.message}`);
       }
     }
   };
@@ -150,7 +94,7 @@ const CargarDatos = () => {
         </button>
         {infoVisible.formato && (
           <p className={styles.infoText}>
-            El archivo Excel debe tener las columnas: Nombre, Carnet, Correo, Sede y Telefono. 
+            El archivo Excel debe tener las columnas: Nombre, Correo, Sede y Telefono. 
             Puede contener más columnas, pero solo se subirán esos datos solicitados.
           </p>
         )}
