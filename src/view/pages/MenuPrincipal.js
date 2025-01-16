@@ -40,6 +40,10 @@ const Menu = () => {
           <i className="fas fa-clock"></i>
           <p>Citas y Calendario</p>
         </Link>
+        <Link to="/dashboard-menu" className={styles.menuItem}>
+          <i className="fas fa-chart-bar"></i>
+          <p>Reportes y gráficos</p>
+        </Link>
       </div>
       <Footer />
     </div>
