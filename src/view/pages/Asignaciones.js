@@ -1,6 +1,6 @@
 import React from 'react';
 import Header from '../components/Header';
-import Assignations from '../components/Assignations';
+import MenuAsignaciones from '../components/Assignations';
 import '../styles/Asignacion.css';
 
 function Asignacion() {
@@ -8,7 +8,7 @@ function Asignacion() {
     <div className="Asig">
       <Header />
       <main>
-        <Assignations />
+        <MenuAsignaciones />
       </main>
       <footer>
         <p>Instituto Tecnológico de Costa Rica 2024</p>

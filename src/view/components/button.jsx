@@ -1,21 +1,19 @@
-// Button.jsx (no more .module.css)
+// src/components/Button.jsx
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const Button = ({ children, type = "blue", ...props }) => {
-  // Define a small mapping of button “types” to Tailwind color classes
   let typeClasses = "";
 
   switch (type) {
     case "dark":
-      // e.g. "bg-primary1 text-background1 hover:bg-primary2"
       typeClasses = "bg-primary1 text-background1 hover:bg-primary2";
       break;
     case "light":
-      // e.g. "bg-background1 text-primary1 border border-primary1 hover:bg-secondary1"
-      typeClasses = "bg-background1 text-primary1 border-2 border-primary1 hover:bg-secondary1";
+      typeClasses =
+        "bg-background1 text-primary1 border-2 border-primary1 hover:bg-secondary1";
       break;
     case "blue":
-      // e.g. "bg-azul text-background1 hover:bg-celeste"
       typeClasses = "bg-azul text-background1 hover:bg-celeste";
       break;
     default:
@@ -38,6 +36,13 @@ const Button = ({ children, type = "blue", ...props }) => {
       {children}
     </button>
   );
+};
+
+Button.propTypes = {
+  /** The button’s inner text or elements */
+  children: PropTypes.node.isRequired,
+  /** Determines which styling variant to use: "dark", "light", or "blue" */
+  type: PropTypes.oneOf(["dark", "light", "blue"]),
 };
 
 export default Button;

@@ -1,20 +1,15 @@
 /* index.css */
-
-/* 1) Tailwind Directives */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+
 html, body {
   margin: 0;
   padding: 0;
-  font-family: Arial, sans-serif; /* or whatever you prefer */
+  font-family: Arial, sans-serif;
 }
-
-:root {
-  --azul: #060953;
-  --blanco: #ffffff;
-  --rojo: #BD3737;
-  --gris_oscuro: #2C2C2C;
-  --gris_claro: #D9D9D9;
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
