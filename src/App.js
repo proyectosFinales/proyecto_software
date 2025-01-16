@@ -16,6 +16,8 @@ import EditarFormulario from './view/pages/EditarFormulario';
 import Citas from './view/pages/Citas';
 import CitasMenu from './view/pages/CitasMenu';
 import Calendario from './view/pages/Calendario';
+import DashboardEstudiantes from './view/pages/DashboardEstudiantes';
+import DashboardMenu from './view/pages/DashboardMenu.jsx';
 import DisponibilidadProfesor from './view/pages/DisponibilidadProfesor.js';
 import CitasEstudiante from './view/pages/CitasEstudiante.js';
 import CitasProfesor from './view/pages/CitasProfesor.js';
@@ -62,6 +64,8 @@ function App() {
 				<Route path="/citas" element={<RutaProtegida element={<Citas />} requiredRoles={["1"]} />} />
 				<Route path="/citasMenu" element={<RutaProtegida element={<CitasMenu />} requiredRoles={["1"]} />} />
 				<Route path="/calendario" element={<RutaProtegida element={<Calendario />} requiredRoles={["1"]} />} />
+				<Route path="/dashboard-estudiantes" element={<RutaProtegida element={<DashboardEstudiantes />} requiredRoles={["1"]} />} />
+				<Route path="/dashboard-menu" element={<RutaProtegida element={<DashboardMenu />} requiredRoles={["1"]} />} />
 				<Route path="/disponibilidad-profesor" element={<RutaProtegida element={<DisponibilidadProfesor />} requiredRoles={["2"]} />} />
 				<Route path="/citas-estudiante" element={<RutaProtegida element={<CitasEstudiante />} requiredRoles={["3"]} />} />
 				<Route path="/citas-profesor" element={<RutaProtegida element={<CitasProfesor />} requiredRoles={["2"]} />} />
