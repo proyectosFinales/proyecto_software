@@ -1,26 +1,24 @@
+// Assignations.jsx
 import React from 'react';
 
 const Assignations = () => {
   return (
-    <div 
+    <div
       className="
-        flex 
+        flex flex-col
+        sm:flex-row               /* horizontal on small screens and up */
         justify-center 
         items-center 
-        gap-[50px]   /* If you want exactly 50px; or use gap-12 for ~48px */
-        p-4          /* some padding if needed */
-        flex-wrap    /* optional: wrap on small screens */
+        gap-12                    /* roughly ~48px gap, similar to 50px */
+        p-8                       /* spacing around the container */
       "
     >
       <div className="text-center">
-        {/* Icono de asignar profesores */}
-        <i className="fas fa-user text-[48px] text-gray-600"></i>
+        <i className="fas fa-user text-4xl text-gray-600" /> 
         <p className="mt-2 text-base">Asignar profesores</p>
       </div>
-
       <div className="text-center">
-        {/* Icono de asignar lectores */}
-        <i className="fas fa-user text-[48px] text-gray-600"></i>
+        <i className="fas fa-user text-4xl text-gray-600" /> 
         <p className="mt-2 text-base">Asignar lectores</p>
       </div>
     </div>
