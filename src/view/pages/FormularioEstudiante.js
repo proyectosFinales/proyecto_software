@@ -276,7 +276,7 @@ const EstudianteForm = () => {
         insertarAnteContact(data[0].id, contactID);
       }
       successToast('Anteproyecto insertado exitosamente');
-      // navigate('/anteproyectosEstudiante');
+      navigate('/anteproyectosEstudiante');
     } catch (err) {
       console.error('Error al insertar anteproyecto:', err);
       errorToast('Error al insertar anteproyecto: ' + err.message);

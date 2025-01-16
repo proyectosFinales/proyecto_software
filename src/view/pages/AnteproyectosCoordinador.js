@@ -24,43 +24,27 @@ const AnteproyectosCoordinador = () => {
   // Función para obtener los datos de la base de datos
   useEffect(() => {
     const fetchAnteproyectos = async () => {
-      const { data, error } = await supabase
-        .from('Anteproyecto') // Cambia 'anteproyectos'
-        .select(`
-          id,
-          sede,
-          tipoEmpresa,
-          nombreEmpresa,
-          actividadEmpresa,
-          distritoEmpresa,
-          cantonEmpresa,
-          provinciaEmpresa,
-          nombreAsesor,
-          puestoAsesor,
-          telefonoContacto,
-          correoContacto,
-          nombreHR,
-          telefonoHR,
-          correoHR,
-          contexto,
-          justificacion,
-          sintomas,
-          impacto,
-          nombreDepartamento,
-          tipoProyecto,
-          observaciones,
-          estado,
-          estudiante_id,
-          Estudiante:estudiante_id (
-            estudiante_id,
-            nombre,
-            carnet,
-            telefono,
-            correo
+    const { data, error } = await supabase
+      .from('Anteproyecto')
+      .select(`
+        id,
+        empresa_id,
+        estado,
+        estudiante_id,
+        Empresa:Empresa!anteproyecto_empresa_id_fkey (
+          nombre         
+        ),
+        Estudiante:estudiante_id (
+          nombre
+          Usuario:id_usuario (
+            nombre
           )
-        `)
-        .eq('semestre_id', 1) // Cambia 'semestreActual' -> 'semestre_id' (si procede)
-        .or('estado.eq.Aprobado,estado.eq.Reprobado,estado.eq.Pendiente');
+        )
+      `);
+      if (error) {
+        alert('No se pudieron obtener los anteproyectos. ' + error.message);
+        return;
+      }
       if (error) {
         errorToast('No se pudieron obtener los anteproyectos');
       } else {
@@ -140,10 +124,10 @@ const AnteproyectosCoordinador = () => {
                     <tr key={anteproyecto.id}>
                       <td>
                         {anteproyecto.Estudiante
-                          ? anteproyecto.Estudiante.nombre
+                          ? anteproyecto.Estudiante.nombreUsuario.nombre
                           : 'Sin estudiante asignado'}
                       </td>
-                      <td>{anteproyecto.nombreEmpresa}</td>
+                      <td>{anteproyecto.Empresa.nombre}</td>
                       <td>{anteproyecto.estado}</td>
                       <td>
                         <div className={styles.contenedor_botones_anteproyectos_coordinador}>
