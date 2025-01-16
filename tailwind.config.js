@@ -17,6 +17,11 @@ module.exports = {
         blanco: '#ffffff',
         rojo: '#BD3737',
         gris_oscuro: '#2C2C2C',
+        primary1: '#123456',    // or whatever var(--primary1) was
+        primary2: '#654321',
+        background1: '#ffffff',
+        secondary1: '#f3f4f6',
+        celeste: '#85d7ff',
         gris_claro: '#D9D9D9',
       },
     },

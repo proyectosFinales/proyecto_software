@@ -1,20 +1,40 @@
-// Button.jsx
+// Button.jsx (no more .module.css)
 import React from 'react';
 
 const Button = ({ children, type = "blue", ...props }) => {
-  const baseClasses = "font-semibold py-2 px-4 rounded transition duration-200";
-  
-  // Map your custom 'type' to Tailwind color combos
-  const variants = {
-    dark: "bg-black text-white hover:bg-gray-800",
-    light: "bg-white text-black hover:bg-gray-200 border border-gray-400",
-    blue: "bg-azul text-blanco hover:bg-blue-800", 
-    // If you put azul/blanco in tailwind.config.js or use hex
-    // e.g., "bg-[#060953] text-[#ffffff]"
-  };
+  // Define a small mapping of button “types” to Tailwind color classes
+  let typeClasses = "";
+
+  switch (type) {
+    case "dark":
+      // e.g. "bg-primary1 text-background1 hover:bg-primary2"
+      typeClasses = "bg-primary1 text-background1 hover:bg-primary2";
+      break;
+    case "light":
+      // e.g. "bg-background1 text-primary1 border border-primary1 hover:bg-secondary1"
+      typeClasses = "bg-background1 text-primary1 border-2 border-primary1 hover:bg-secondary1";
+      break;
+    case "blue":
+      // e.g. "bg-azul text-background1 hover:bg-celeste"
+      typeClasses = "bg-azul text-background1 hover:bg-celeste";
+      break;
+    default:
+      typeClasses = "bg-azul text-white hover:opacity-80";
+  }
 
   return (
-    <button className={`${baseClasses} ${variants[type] || variants.blue}`} {...props}>
+    <button
+      className={`
+        ${typeClasses}
+        text-base
+        py-2 px-5
+        rounded-lg
+        cursor-pointer
+        transition-colors
+        duration-150
+      `}
+      {...props}
+    >
       {children}
     </button>
   );
