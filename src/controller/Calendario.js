@@ -23,3 +23,14 @@ export const addEvento = async (evento) => {
 
   return data[0];
 };
+
+export const deleteEvento = async (id) => {
+  const { error } = await supabase
+    .from('Calendario')
+    .delete()
+    .eq('calendario_id', id);
+
+  if (error) {
+    throw error;
+  }
+}

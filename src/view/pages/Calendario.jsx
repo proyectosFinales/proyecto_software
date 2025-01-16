@@ -3,7 +3,7 @@ import {useState, useEffect} from "react";
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
-import { getEventos, addEvento } from '../../controller/Calendario';
+import { getEventos, addEvento, deleteEvento } from '../../controller/Calendario';
 
 const Calendario = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -72,16 +72,18 @@ const Calendario = () => {
     }
   };
 
-  const handleEdit = (event) => {
-    setEditableEvent(event);
-  };
-
   const handleSave = (id) => {
     setEditableEvent(null);
   };
 
-  const handleDelete = (id) => {
-    setEvents(events.filter(event => event.id !== id));
+  const handleDelete = async (event) => {
+    if (!window.confirm(`¿Está seguro que desea eliminar el evento ${event.nombre}?`)) return;
+    try {
+      await deleteEvento(event.id);
+      setEvents(events.filter(e => event.id !== e.id));
+    } catch (error) {
+      alert(`Error al eliminar evento: ${error.message}`);
+    }
   };
 
   const handleAddEvent = async () => {
@@ -164,11 +166,11 @@ const Calendario = () => {
                         <i className="fas fa-save"></i> Guardar
                         </button>
                     ) : (
-                      <button className="btn-edit-event" onClick={() => handleEdit(event)}>
+                      <button className="btn-edit-event" onClick={() => setEditableEvent(event)}>
                         <i className="fas fa-edit"></i> Editar
                         </button>
                     )}
-                    <button className="btn-delete-event" onClick={() => handleDelete(event.id)}>
+                    <button className="btn-delete-event" onClick={() => handleDelete(event)}>
                       <i className="fas fa-trash"></i> Borrar
                       </button>
                   </td>
