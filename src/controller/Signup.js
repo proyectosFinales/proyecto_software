@@ -1,5 +1,6 @@
 import supabase from "../model/supabase";
 import validateInfo, { validarContraseñaDetallada, validarCorreo, validarCorreoExistente } from "./validarEntradas";
+import sendMail from "../controller/Email";
 
 export async function signUpNewUser(fullName, carnet, tel, email, password, sede) {
   try {
@@ -60,9 +61,7 @@ export async function registroProfesor(nombre, correo, contrasena, sede, telefon
   try {
     if (!validarCorreo(correo)) {
       throw new Error("El correo no cumple con un formato válido.");
-    } else if (!validarContraseñaDetallada(contrasena)) {
-      throw new Error("La contraseña no es válida. Debe contener al menos 8 caracteres ...");
-    }
+    } 
 
     const result = await validarCorreoExistente(correo, "");
     if (!result) {
@@ -110,3 +109,24 @@ export async function registroProfesor(nombre, correo, contrasena, sede, telefon
     throw new Error(error.message);
   }
 }
+
+export function generarContraseña(longitud = 12) {
+  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+  let contraseña = '';
+  for (let i = 0; i < longitud; i++) {
+    const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
+    contraseña += caracteres.charAt(indiceAleatorio);
+  }
+  return contraseña;
+}
+
+export const sendMailToNewUser = async (to, password) => {
+  const mensaje = "Buenas,\n" +
+    "Usted ha sido registrado en la plataforma de proyectos finales.\n" +
+    `Usuario: ${to}\n` +
+    `Contraseña ${password}\n\n` +
+    "\nInstituto Tecnológico de Costar Rica,\n" +
+    "Escuela de Producción Industrial.";
+  console.log(mensaje);
+  sendMail(to, "Acceso a plataforma Proyectos Finales", mensaje);
+};

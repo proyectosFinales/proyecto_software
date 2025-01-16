@@ -9,7 +9,7 @@ import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'reac
 import '../styles/AgregarUsuario.css';
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
-import { signUpNewUser, registroProfesor } from '../../controller/Signup';
+import { signUpNewUser, registroProfesor, generarContraseña, sendMailToNewUser } from '../../controller/Signup';
 
 const AgregarUsuario = () => {
   const [tipoUsuario, setTipoUsuario] = useState('estudiante');
@@ -18,7 +18,7 @@ const AgregarUsuario = () => {
     carnet: '',
     numero: '',
     correo: '',
-    contraseña: '',
+    contraseña: generarContraseña(),
     sede: ''
   });
 
@@ -40,6 +40,7 @@ const AgregarUsuario = () => {
   const handleAgregarUsuario = async () => {
     try {
       const nuevoUsuario = { ...usuario, tipo: tipoUsuario };
+      console.log(nuevoUsuario);
 
       if (tipoUsuario === "profesor") {
         // registroProfesor(nombre, correo, contraseña, sede, telefono)
@@ -59,11 +60,11 @@ const AgregarUsuario = () => {
           nuevoUsuario.carnet,
           nuevoUsuario.numero,  // usaremos "numero" como teléfono
           nuevoUsuario.correo,
-          nuevoUsuario.contraseña,
           nuevoUsuario.sede
         );
         alert('Estudiante agregado con éxito.');
       }
+      sendMailToNewUser(nuevoUsuario.correo, nuevoUsuario.contraseña);
       navigate('/gestion-perfiles');
     } catch (error) {
       alert(error.message);
@@ -71,14 +72,14 @@ const AgregarUsuario = () => {
   };
 
   const handleLimpiarEntradas = () => {
-    setUsuario({
+    setUsuario((prev) => ({
       nombre: '',
       carnet: '',
       numero: '',
       correo: '',
-      contraseña: '',
+      contraseña: prev.contraseña,
       sede: ''
-    });
+    }));
   };
 
   return (
@@ -175,19 +176,6 @@ const AgregarUsuario = () => {
               name="correo"
               className="input-field"
               value={usuario.correo}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-
-          <label>Contraseña:</label>
-          <div className="input-container-add">
-            <FaLock className="icon-add" />
-            <input
-              type="text"
-              name="contraseña"
-              className="input-field"
-              value={usuario.contraseña}
               onChange={handleInputChange}
               required
             />
