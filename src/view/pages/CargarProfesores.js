@@ -9,6 +9,7 @@ import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
 import sendMail from '../../controller/Email';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
+import { generarContraseña } from '../../controller/Signup';
 
 /**
  * Nota: Ajusta si en tu BD no manejas 'carnet' en la tabla 'Profesor'.
@@ -21,16 +22,6 @@ const CargarDatos = () => {
   const toggleInfo = (field) => {
     setInfoVisible((prev) => ({ ...prev, [field]: !prev[field] }));
   };
-
-  function generarContraseña(longitud = 12) {
-    const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-    let contraseña = '';
-    for (let i = 0; i < longitud; i++) {
-      const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
-      contraseña += caracteres.charAt(indiceAleatorio);
-    }
-    return contraseña;
-  }
 
   // Función para procesar el archivo de Excel
   const handleFileUpload = (e) => {
