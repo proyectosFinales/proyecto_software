@@ -38,7 +38,7 @@ const Menu = () => {
         </Link>
         <Link to="/citasMenu" className={styles.menuItem}>
           <i className="fas fa-clock"></i>
-          <p>Citas</p>
+          <p>Citas y Calendario</p>
         </Link>
       </div>
       <Footer />
