@@ -34,3 +34,14 @@ export const deleteEvento = async (id) => {
     throw error;
   }
 }
+
+export const updateEvento = async (id, updatedEvento) => {
+  const { error } = await supabase
+    .from('Calendario')
+    .update(updatedEvento)
+    .eq('calendario_id', id);
+
+  if (error) {
+    throw error;
+  }
+};
