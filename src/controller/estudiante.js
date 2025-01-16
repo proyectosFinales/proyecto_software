@@ -6,6 +6,7 @@
  */
 
 import Usuario from "./usuario";
+import supabase from "../model/supabase";
 
 class Estudiante extends Usuario {
   /**
@@ -78,6 +79,28 @@ class Estudiante extends Usuario {
       usuario?.telefono || ""
     );
   }
+
+  static async obtenerTodos() {
+    const { data, error } = await supabase
+      .from("Estudiante")
+      .select(`
+        estudiante_id,
+        estado,
+        carnet,
+        Usuario:id_usuario (
+          id,
+          nombre,
+          sede,
+          correo
+        )
+      `);
+    
+    if (error) {
+      throw error; 
+    }
+    return data;
+  }
+
 }
 
 export default Estudiante;

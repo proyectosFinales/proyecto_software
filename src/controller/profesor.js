@@ -130,10 +130,9 @@ class Profesor extends Usuario {
           correo
         )
       `);
-
+    
     if (error) {
-      console.error("Error al obtener profesores:", error);
-      return [];
+      throw error; 
     }
     return data.map(p => Profesor.from(p));
   }
