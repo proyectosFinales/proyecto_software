@@ -50,10 +50,12 @@ const AnteproyectosEstudiante = () => {
           estudiante_id,
           Estudiante:estudiante_id (
             estudiante_id,
-            nombre,
-            carnet,
+            usuario_id          
+          )
+          Usuario:usuario_id (
             telefono,
-            correo
+            correo,
+            nombre
           )
         `)
         .eq('estudiante_id', sessionStorage.getItem('token'))
