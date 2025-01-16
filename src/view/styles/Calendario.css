@@ -1,0 +1,128 @@
+.content-container {
+  padding-bottom: 20px;
+}
+
+.table-container {
+    margin-top: 20px;
+}
+
+.calendario-table {
+  width: 90%;
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
+}
+
+.calendario-table th, .calendario-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.calendario-table th {
+  background-color: #f2f2f2;
+  color: var(--azul);
+  text-align: left;
+}
+
+.calendario-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.calendario-table tr:hover {
+  background-color: #ddd;
+}
+
+.calendario-table td select,
+.calendario-table td input[type="date"] {
+  width: 100%;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.calendario-table td button {
+  margin-right: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: var(--blanco);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 90%;
+  margin: 20px auto;
+  align-items: start;
+}
+
+.input-container-gestion {
+  position: relative;
+  margin-bottom: 15px;
+}
+
+.input-field-gestion {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.btn-add-event {
+  padding: 10px 20px;
+  background-color: var(--azul);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-add-event:hover {
+  background-color: #0056b3;
+}
+
+.btn-edit-event {
+  background-color: var(--azul);
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-edit-event:hover {
+  background-color: #0056b3;
+}
+
+.btn-delete-event {
+  background-color: red;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-delete-event:hover {
+  background-color: darkred;
+}
+
+.btn-save-event {
+  background-color: green;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px 10px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-save-event:hover {
+  background-color: darkgreen;
+}
