@@ -19,48 +19,44 @@ const AnteproyectosEstudiante = () => {
     consultarAnteproyectos();
   }, []);
 
+  async function consultarInfoEstudiante() {
+    try {
+      const userToken = sessionStorage.getItem('token');
+      const { data, error } = await supabase
+        .from('Usuario')
+        .select(`
+          Estudiante:Estudiante!Estudiante_id_usuario_fkey (
+            estudiante_id,
+            carnet
+          )
+        `)
+        .eq('id', userToken)
+        .single();
+      if (error) throw error;
+      if (!data) {
+        return;
+      }
+      return data.Estudiante[0].estudiante_id;
+    } catch (error) {
+      alert('Error al buscar estudiante' + error);
+    }
+  }
+
   async function consultarAnteproyectos() {
     try {
+      const studentID = await consultarInfoEstudiante();
       const { data, error } = await supabase
         .from('Anteproyecto')
         .select(`
           id,
-          sede,
-          tipoEmpresa,
-          nombreEmpresa,
-          actividadEmpresa,
-          distritoEmpresa,
-          cantonEmpresa,
-          provinciaEmpresa,
-          nombreAsesor,
-          puestoAsesor,
-          telefonoContacto,
-          correoContacto,
-          nombreHR,
-          telefonoHR,
-          correoHR,
-          contexto,
-          justificacion,
-          sintomas,
-          impacto,
-          nombreDepartamento,
-          tipoProyecto,
-          observaciones,
+          empresa_id,
           estado,
           estudiante_id,
-          Estudiante:estudiante_id (
-            estudiante_id,
-            usuario_id          
-          )
-          Usuario:usuario_id (
-            telefono,
-            correo,
-            nombre
+          Empresa:Empresa!anteproyecto_empresa_id_fkey (
+            nombre         
           )
         `)
-        .eq('estudiante_id', sessionStorage.getItem('token'))
-        .eq('semestre_id', 1)
-        .or('estado.eq.Aprobado,estado.eq.Reprobado,estado.eq.Pendiente');
+        .eq('estudiante_id', studentID);
       if (error) {
         alert('No se pudieron obtener los anteproyectos. ' + error.message);
         return;
@@ -128,7 +124,7 @@ const AnteproyectosEstudiante = () => {
               <tbody>
                 {anteproyectos.map((anteproyecto) => (
                   <tr key={anteproyecto.id}>
-                    <td>{anteproyecto.nombreEmpresa}</td>
+                    <td>{anteproyecto.Empresa.nombre}</td>
                     <td>{anteproyecto.estado}</td>
                     <td>
                       <div className={styles.contenedor_botones_anteproyectos_estudiante}>
