@@ -38,17 +38,38 @@ const Calendario = () => {
     fetchEventos();
   }, []);
   
-  const handleInputChange = (id, field, value) => {
-    setEvents(events.map(event => 
-      event.id === id ? { ...event, [field]: value } : event
-    ));
+  const handleInputChange = (field, value) => {
+    if (field === 'fechaInicio' 
+      && editableEvent.fechaFin 
+      && new Date(value) > new Date(editableEvent.fechaFin)) {
+      setEditableEvent(prevEvent => ({
+        ...prevEvent,
+        [field]: value,
+        fechaFin: value
+      }));
+    } else { 
+      setEditableEvent(prevEvent => ({
+        ...prevEvent,
+        [field]: value
+      }));
+    }
   };
 
   const handleNewEventChange = (field, value) => {
-    setNewEvent(prevEvent => ({
-      ...prevEvent,
-      [field]: value
-    }));
+    if (field === 'fechaInicio' 
+      && newEvent.fechaFin 
+      && new Date(value) > new Date(newEvent.fechaFin)) {
+      setNewEvent(prevEvent => ({
+        ...prevEvent,
+        [field]: value,
+        fechaFin: value
+      }));
+    } else { 
+      setNewEvent(prevEvent => ({
+        ...prevEvent,
+        [field]: value
+      }));
+    }
   };
 
   const handleEdit = (event) => {
@@ -78,7 +99,7 @@ const Calendario = () => {
       }]);
       setNewEvent({ nombre: '', fechaInicio: '', fechaFin: '' });
     } catch (error) {
-      alert('Error adding event:', error.message);
+      alert(`Error al agregar evento: ${error.message}`);
     }
   };
 
@@ -104,7 +125,7 @@ const Calendario = () => {
                     {editableEvent?.id === event.id ? (
                       <select
                         value={editableEvent.nombre}
-                        onChange={(e) => handleInputChange(editableEvent.id, 'nombre', e.target.value)}
+                        onChange={(e) => handleInputChange('nombre', e.target.value)}
                       >
                         {eventOptions.map(option => (
                           <option key={option.value} value={option.value}>{option.label}</option>
@@ -119,7 +140,7 @@ const Calendario = () => {
                       <input
                         type="date"
                         value={editableEvent.fechaInicio}
-                        onChange={(e) => handleInputChange(editableEvent.id, 'fechaInicio', e.target.value)}
+                        onChange={(e) => handleInputChange('fechaInicio', e.target.value)}
                       />
                     ) : (
                       event.fechaInicio
@@ -130,7 +151,8 @@ const Calendario = () => {
                       <input
                         type="date"
                         value={editableEvent.fechaFin}
-                        onChange={(e) => handleInputChange(editableEvent.id, 'fechaFin', e.target.value)}
+                        min={editableEvent.fechaInicio}
+                        onChange={(e) => handleInputChange('fechaFin', e.target.value)}
                       />
                     ) : (
                       event.fechaFin
@@ -170,23 +192,28 @@ const Calendario = () => {
               ))}
             </select>
           </div>
-          <div className="input-container-gestion">
-            <input
-              type="date"
-              name="fechaInicio"
-              className="input-field-gestion"
-              value={newEvent.fechaInicio}
-              onChange={(e) => handleNewEventChange('fechaInicio', e.target.value)}
-            />
-          </div>
-          <div className="input-container-gestion">
-            <input
-              type="date"
-              name="fechaFin"
-              className="input-field-gestion"
-              value={newEvent.fechaFin}
-              onChange={(e) => handleNewEventChange('fechaFin', e.target.value)}
-            />
+          <div className="input-row">
+            <div className="input-container-gestion">
+              <label htmlFor="fechaInicio">Fecha Inicio</label>
+              <input
+                type="date"
+                name="fechaInicio"
+                className="input-field-gestion"
+                value={newEvent.fechaInicio}
+                onChange={(e) => handleNewEventChange('fechaInicio', e.target.value)}
+              />
+            </div>
+            <div className="input-container-gestion">
+              <label htmlFor="fechaFin">Fecha Fin</label>
+              <input
+                type="date"
+                name="fechaFin"
+                className="input-field-gestion"
+                value={newEvent.fechaFin}
+                min={newEvent.fechaInicio}
+                onChange={(e) => handleNewEventChange('fechaFin', e.target.value)}
+              />
+            </div>
           </div>
           <button className="btn-add-event" onClick={handleAddEvent}>Agregar Evento</button>
         </div>
