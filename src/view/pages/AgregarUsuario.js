@@ -40,7 +40,6 @@ const AgregarUsuario = () => {
   const handleAgregarUsuario = async () => {
     try {
       const nuevoUsuario = { ...usuario, tipo: tipoUsuario };
-      console.log(nuevoUsuario);
 
       if (tipoUsuario === "profesor") {
         // registroProfesor(nombre, correo, contraseña, sede, telefono)
