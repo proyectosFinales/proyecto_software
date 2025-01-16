@@ -3,7 +3,7 @@ import {useState, useEffect} from "react";
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
-import { getEventos, addEvento, deleteEvento } from '../../controller/Calendario';
+import { getEventos, addEvento, deleteEvento, updateEvento } from '../../controller/Calendario';
 
 const Calendario = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -72,8 +72,19 @@ const Calendario = () => {
     }
   };
 
-  const handleSave = (id) => {
-    setEditableEvent(null);
+  const handleSave = async (id) => {
+    try {
+      const updatedEvent = {
+        nombre: editableEvent.nombre,
+        fecha_inicio: editableEvent.fechaInicio,
+        fecha_fin: editableEvent.fechaFin
+      };
+      const data = await updateEvento(id, updatedEvent);
+      setEvents(events.map(event => (event.id === id ? editableEvent : event)));
+      setEditableEvent(null);
+    } catch (error) {
+      alert(`Error al actualizar evento: ${error.message}`);
+    }
   };
 
   const handleDelete = async (event) => {
