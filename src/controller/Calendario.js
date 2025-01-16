@@ -18,7 +18,7 @@ export const addEvento = async (evento) => {
     .select('calendario_id, nombre, fecha_inicio, fecha_fin');
 
   if (error) {
-    throw new Error(error.message);
+    throw error;
   }
 
   return data[0];

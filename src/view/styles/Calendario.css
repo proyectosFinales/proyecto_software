@@ -59,9 +59,13 @@
   align-items: start;
 }
 
+.input-row {
+  display: flex;
+  gap: 20px;
+}
+
 .input-container-gestion {
-  position: relative;
-  margin-bottom: 15px;
+  flex: 1;
 }
 
 .input-field-gestion {
@@ -69,6 +73,11 @@
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+.input-container-gestion label {
+  display: block;
+  margin-bottom: 5px;
 }
 
 .btn-add-event {
