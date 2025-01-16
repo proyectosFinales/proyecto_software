@@ -137,7 +137,7 @@ const CitasMenu = () => {
 
   return (
     <div>
-      <Header title="Citas" />
+      <Header title="Citas y Calendario" />
       <SettingsCoordinador show={isMenuOpen} />
       <div className={styles.menuGrid}>
         <Link to="/citas" className={styles.menuItem}>
@@ -148,6 +148,10 @@ const CitasMenu = () => {
           <i className="fas fa-users"></i>
           <p>Asignación Automática</p>
         </div>
+        <Link to="/calendario" className={styles.menuItem}>
+          <i className="fas fa-calendar-alt"></i>
+          <p>Calendario</p>
+        </Link>
       </div>
       <Footer />
     </div>
