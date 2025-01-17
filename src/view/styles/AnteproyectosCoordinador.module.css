@@ -95,4 +95,14 @@
   color: white;
 }
 
+.pendiente {
+  background-color: red;
+  color: white;
+  border-radius: 5px;
+}
+
+.pendiente:hover {
+  background-color: darkred;
+}
+
 

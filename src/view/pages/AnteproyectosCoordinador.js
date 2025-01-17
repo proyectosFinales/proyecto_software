@@ -6,7 +6,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AnteproyectosCoordinador.module.css';
 import * as XLSX from 'xlsx';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { descargarAnteproyecto } from '../../controller/DescargarPDF';
@@ -97,6 +97,33 @@ const AnteproyectosCoordinador = () => {
     XLSX.writeFile(workbook, 'Reporte_Anteproyectos.xlsx');
   };
 
+  const cambiarEstado = async (anteproyecto) => {
+    try {
+      const { error } = await supabase
+        .from('Anteproyecto')
+        .update({ estado: 'Pendiente' })
+        .eq('id', anteproyecto.id);
+  
+      if (error) {
+        alert('No se pudo cambiar el estado del anteproyecto. ' + error.message);
+      } else {
+        // Actualizar el estado local de anteproyectos
+        setAnteproyectos((prev) =>
+          prev.map((item) =>
+            item.id === anteproyecto.id
+              ? { ...item, estado: 'Pendiente' }
+              : item
+          )
+        );
+        alert('Estado del anteproyecto cambiado exitosamente.');
+      }
+    } catch (err) {
+      console.error('Error cambiando el estado:', err);
+      alert('Ocurrió un error al intentar cambiar el estado.');
+    }
+  };
+  
+
   return (
     <div className={styles.anteproyectos_coordinador_contenedor}>
       <Header title="Anteproyectos"/>
@@ -143,6 +170,15 @@ const AnteproyectosCoordinador = () => {
                           >
                             Descargar
                           </button>
+                          {anteproyecto.estado === 'Aprobado' && (
+                            <button
+                              onClick={() => cambiarEstado(anteproyecto)}
+                              className={`${styles.btn} ${styles.pendiente}`}
+                            >
+                              Pendiente
+                            </button>
+                          )}
+
                         </div>
                       </td>
                     </tr>
