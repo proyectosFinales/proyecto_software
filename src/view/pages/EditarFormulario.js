@@ -87,76 +87,83 @@ const CoordinadorForm = () => {
         .from('Anteproyecto')
         .select(`
           id,
-          tipoEmpresa,
-          nombreEmpresa,
-          actividadEmpresa,
-          distritoEmpresa,
-          cantonEmpresa,
-          provinciaEmpresa,
-          nombreAsesor,
-          puestoAsesor,
-          telefonoContacto,
-          correoContacto,
-          nombreHR,
-          telefonoHR,
-          correoHR,
+          empresa_id,
           contexto,
           justificacion,
           sintomas,
           impacto,
-          nombreDepartamento,
-          tipoProyecto,
-          observaciones,
+          tipo,
+          comentario,
           estudiante_id,
+          actividad,
+          departamento,
           Estudiante:estudiante_id (
-            estudiante_id,
             carnet,
-            id_usuario,   -- FK a Usuario
+            id_usuario,
             Usuario:id_usuario (
-              id,
               nombre,
               correo,
               telefono,
               sede
             )
+          ),
+          Empresa:empresa_id (
+            nombre,
+            tipo,
+            provincia,
+            canton,
+            distrito
+          ),
+          AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
+            ContactoEmpresa:contacto_id(
+              nombre,
+              correo,
+              departamento,
+              telefono
+            ),
+            RRHH:rrhh_id(
+              nombre,
+              correo,
+              telefono
+            )
           )
+
         `)
         .eq('id', id)
         .single();
-
       if (error) throw error;
 
       // Llenar estados
       setIdAnteproyecto(data.id);
-      setTipoEmpresa(data.tipoEmpresa || '');
-      setNombreEmpresa(data.nombreEmpresa || '');
-      setActividadEmpresa(data.actividadEmpresa || '');
-      setDistritoEmpresa(data.distritoEmpresa || '');
-      setCantonEmpresa(data.cantonEmpresa || '');
-      setProvinciaEmpresa(data.provinciaEmpresa || '');
-      setNombreAsesor(data.nombreAsesor || '');
-      setPuestoAsesor(data.puestoAsesor || '');
-      setTelefonoContacto(data.telefonoContacto || '');
-      setCorreoContacto(data.correoContacto || '');
-      setNombreHR(data.nombreHR || '');
-      setTelefonoHR(data.telefonoHR || '');
-      setCorreoHR(data.correoHR || '');
+      setTipoEmpresa(data.Empresa.tipo || '');
+      setNombreEmpresa(data.Empresa.nombre || '');
+      setActividadEmpresa(data.actividad || '');
+      setDistritoEmpresa(data.Empresa.distrito || '');
+      setCantonEmpresa(data.Empresa.canton || '');
+      setProvinciaEmpresa(data.Empresa.provincia || '');
+      setNombreAsesor(data.AnteproyectoContacto[0].ContactoEmpresa.nombre || '');
+      setPuestoAsesor(data.AnteproyectoContacto[0].ContactoEmpresa.departamento || '');
+      setTelefonoContacto(data.AnteproyectoContacto[0].ContactoEmpresa.telefono || '');
+      setCorreoContacto(data.AnteproyectoContacto[0].ContactoEmpresa.correo || '');
+      setNombreHR(data.AnteproyectoContacto[0].RRHH.nombre || '');
+      setTelefonoHR(data.AnteproyectoContacto[0].RRHH.telefono || '');
+      setCorreoHR(data.AnteproyectoContacto[0].RRHH.correo || '');
       setContexto(data.contexto || '');
       setJustificacion(data.justificacion || '');
       setSintomas(data.sintomas || '');
       setImpacto(data.impacto || '');
-      setNombreDepartamento(data.nombreDepartamento || '');
-      setTipoProyecto(data.tipoProyecto || '');
-      setObservaciones(data.observaciones || '');
+      setNombreDepartamento(data.departamento || '');
+      setTipoProyecto(data.tipo || '');
+      setObservaciones(data.comentario || '');
 
       // Datos del Estudiante
       if (data.Estudiante) {
-        setEstudianteId(data.Estudiante.estudiante_id);
+        setEstudianteId(data.estudiante_id);
         setCarnet(data.Estudiante.carnet || '');
 
         // Usuario anidado
         if (data.Estudiante.Usuario) {
-          setUserId(data.Estudiante.Usuario.id);
+          setUserId(data.Estudiante.id_usuario);
           setNombre(data.Estudiante.Usuario.nombre || '');
           setCorreo(data.Estudiante.Usuario.correo || '');
           setTelefono(data.Estudiante.Usuario.telefono || '');
@@ -262,205 +269,165 @@ const CoordinadorForm = () => {
         <h2>Datos del estudiante</h2>
 
         <div className={styles.formGroup}>
-          <label>Nombre del estudiante:</label>
+          <label>1. Nombre del estudiante:</label>
           <input
             type="text"
             value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            readOnly
             /* readOnly si no quieres que lo edite */
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Carnet:</label>
+          <label>2. Carnet:</label>
           <input
             type="text"
             value={carnet}
-            onChange={(e) => setCarnet(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Teléfono:</label>
+          <label>3. Teléfono:</label>
           <input
             type="text"
             value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Correo electrónico:</label>
+          <label>4. Correo electrónico:</label>
           <input
             type="email"
             value={correo}
-            onChange={(e) => setCorreo(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Sede:</label>
+          <label>5. Sede:</label>
           <input
             type="text"
             value={sede}
-            onChange={(e) => setSede(e.target.value)}
+            readOnly
           />
         </div>
 
         {/* DATOS DE LA EMPRESA */}
         <h2>Datos de la empresa</h2>
         <div className={styles.formGroup}>
-          <label>Tipo de empresa:</label>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
-                value="Zona franca"
-                checked={tipoEmpresa === "Zona franca"}
-                onChange={(e) => setTipoEmpresa(e.target.value)}
-              />
-              Zona franca
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
-                value="Régimen definitivo"
-                checked={tipoEmpresa === "Régimen definitivo"}
-                onChange={(e) => setTipoEmpresa(e.target.value)}
-              />
-              Régimen definitivo
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
-                value="Perfeccionamiento activo"
-                checked={tipoEmpresa === "Perfeccionamiento activo"}
-                onChange={(e) => setTipoEmpresa(e.target.value)}
-              />
-              Perfeccionamiento activo
-            </label>
-          </div>
+          <label>6. Tipo de Empresa:</label>
+          <input
+            type="text"
+            value={tipoEmpresa}
+            readOnly
+          />
         </div>
 
         <div className={styles.formGroup}>
-          <label>Nombre de la empresa:</label>
+          <label>7. Nombre de la empresa:</label>
           <input
             type="text"
             value={nombreEmpresa}
-            onChange={(e) => setNombreEmpresa(e.target.value)}
+            readOnly
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label>Actividad de la empresa:</label>
+          <label>8. Actividad de la empresa:</label>
           <input
             type="text"
             value={actividadEmpresa}
-            onChange={(e) => setActividadEmpresa(e.target.value)}
+            readOnly
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label>Distrito:</label>
+          <label>9. Distrito:</label>
           <input
             type="text"
             value={distritoEmpresa}
-            onChange={(e) => setDistritoEmpresa(e.target.value)}
+            readOnly
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label>Cantón:</label>
+          <label>10. Cantón:</label>
           <input
             type="text"
             value={cantonEmpresa}
-            onChange={(e) => setCantonEmpresa(e.target.value)}
+            readOnly
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label>Provincia:</label>
-          {/* Igual que con tipoEmpresa, un radio group o un input textual */}
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="provinciaEmpresa"
-                value="Heredia"
-                checked={provinciaEmpresa === "Heredia"}
-                onChange={(e) => setProvinciaEmpresa(e.target.value)}
-              />
-              Heredia
-            </label>
-          </div>
-          {/* ... las demás provincias ... */}
+          <label>11. Provincia:</label>
+          <input
+            type="text"
+            value={provinciaEmpresa}
+            readOnly
+          />
         </div>
 
         {/* DATOS DE CONTACTOS EN LA EMPRESA */}
         <div className={styles.formGroup}>
-          <label>Nombre del asesor industrial:</label>
+          <label>12. Nombre del asesor industrial:</label>
           <input
             type="text"
             value={nombreAsesor}
-            onChange={(e) => setNombreAsesor(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Puesto que desempeña el asesor:</label>
+          <label>13. Puesto que desempeña el asesor:</label>
           <input
             type="text"
             value={puestoAsesor}
-            onChange={(e) => setPuestoAsesor(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Teléfono del contacto:</label>
+          <label>14. Teléfono del contacto:</label>
           <input
             type="text"
             value={telefonoContacto}
-            onChange={(e) => setTelefonoContacto(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Correo del contacto:</label>
+          <label>15. Correo del contacto:</label>
           <input
             type="email"
             value={correoContacto}
-            onChange={(e) => setCorreoContacto(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Nombre del contacto de RRHH:</label>
+          <label>16. Nombre del contacto de RRHH:</label>
           <input
             type="text"
             value={nombreHR}
-            onChange={(e) => setNombreHR(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Teléfono RRHH:</label>
+          <label>17. Teléfono RRHH:</label>
           <input
             type="text"
             value={telefonoHR}
-            onChange={(e) => setTelefonoHR(e.target.value)}
+            readOnly
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Correo RRHH:</label>
+          <label>18. Correo RRHH:</label>
           <input
             type="email"
             value={correoHR}
-            onChange={(e) => setCorreoHR(e.target.value)}
+            readOnly
           />
         </div>
 
         {/* DATOS DEL PROYECTO */}
         <h2>Datos del proyecto</h2>
         <div className={styles.formGroup}>
-          <label>Contexto:</label>
+          <label>19. Contexto:</label>
           <AiOutlineInfoCircle
             className={styles.infoIcon}
             onClick={() => toggleInfo('contexto')}
@@ -473,7 +440,7 @@ const CoordinadorForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>Justificación:</label>
+          <label>20. Justificación:</label>
           <AiOutlineInfoCircle
             className={styles.infoIcon}
             onClick={() => toggleInfo('justificacion')}
@@ -486,7 +453,7 @@ const CoordinadorForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>Síntomas:</label>
+          <label>21. Síntomas:</label>
           <AiOutlineInfoCircle
             className={styles.infoIcon}
             onClick={() => toggleInfo('sintomas')}
@@ -499,7 +466,7 @@ const CoordinadorForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>Impacto:</label>
+          <label>22. Impacto:</label>
           <AiOutlineInfoCircle
             className={styles.infoIcon}
             onClick={() => toggleInfo('impacto')}
@@ -512,29 +479,21 @@ const CoordinadorForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>Departamento:</label>
+          <label>23. Departamento:</label>
           <input
             type="text"
             value={nombreDepartamento}
-            onChange={(e) => setNombreDepartamento(e.target.value)}
+            readOnly
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label>Tipo de proyecto:</label>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoProyecto"
-                value="Extensión"
-                checked={tipoProyecto === "Extensión"}
-                onChange={(e) => setTipoProyecto(e.target.value)}
-              />
-              Extensión
-            </label>
-          </div>
-          {/* Agrega las demás opciones */}
+          <label>24. Tipo de Proyecto:</label>
+          <input
+            type="text"
+            value={tipoProyecto}
+            readOnly
+          />
         </div>
 
         <div className={styles.formGroup}>

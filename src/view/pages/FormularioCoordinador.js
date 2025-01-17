@@ -78,77 +78,84 @@ const FormularioCoordinador = () => {
       // Estudiante -> { estudiante_id, carnet, id_usuario, ... }
       // Usuario -> { id, nombre, correo, telefono, sede, ... }
       const { data, error } = await supabase
-        .from('Anteproyecto')
-        .select(`
-          id,
-          tipoEmpresa,
-          nombreEmpresa,
-          actividadEmpresa,
-          distritoEmpresa,
-          cantonEmpresa,
-          provinciaEmpresa,
-          nombreAsesor,
-          puestoAsesor,
-          telefonoContacto,
-          correoContacto,
-          nombreHR,
-          telefonoHR,
-          correoHR,
-          contexto,
-          justificacion,
-          sintomas,
-          impacto,
-          nombreDepartamento,
-          tipoProyecto,
-          observaciones,
-          estudiante_id,
-          Estudiante:estudiante_id (
-            estudiante_id,
-            carnet,
-            id_usuario,
-            Usuario:id_usuario (
-              nombre,
-              correo,
-              telefono,
-              sede
-            )
-          )
-        `)
-        .eq('id', id)
-        .single();
-
+              .from('Anteproyecto')
+              .select(`
+                id,
+                empresa_id,
+                contexto,
+                justificacion,
+                sintomas,
+                impacto,
+                tipo,
+                comentario,
+                estudiante_id,
+                actividad,
+                departamento,
+                Estudiante:estudiante_id (
+                  carnet,
+                  id_usuario,
+                  Usuario:id_usuario (
+                    nombre,
+                    correo,
+                    telefono,
+                    sede
+                  )
+                ),
+                Empresa:empresa_id (
+                  nombre,
+                  tipo,
+                  provincia,
+                  canton,
+                  distrito
+                ),
+                AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
+                  ContactoEmpresa:contacto_id(
+                    nombre,
+                    correo,
+                    departamento,
+                    telefono
+                  ),
+                  RRHH:rrhh_id(
+                    nombre,
+                    correo,
+                    telefono
+                  )
+                )
+      
+              `)
+              .eq('id', id)
+              .single();
+      console.log(data,id);
       if (error) throw error;
-
-      setIdAnteproyecto(data.id);
-
       // Rellenar campos de anteproyecto
-      setTipoEmpresa(data.tipoEmpresa || '');
-      setNombreEmpresa(data.nombreEmpresa || '');
-      setActividadEmpresa(data.actividadEmpresa || '');
-      setDistritoEmpresa(data.distritoEmpresa || '');
-      setCantonEmpresa(data.cantonEmpresa || '');
-      setProvinciaEmpresa(data.provinciaEmpresa || '');
-      setNombreAsesor(data.nombreAsesor || '');
-      setPuestoAsesor(data.puestoAsesor || '');
-      setTelefonoContacto(data.telefonoContacto || '');
-      setCorreoContacto(data.correoContacto || '');
-      setNombreHR(data.nombreHR || '');
-      setTelefonoHR(data.telefonoHR || '');
-      setCorreoHR(data.correoHR || '');
+      setIdAnteproyecto(data.id);
+      setTipoEmpresa(data.Empresa.tipo || '');
+      setNombreEmpresa(data.Empresa.nombre || '');
+      setActividadEmpresa(data.actividad || '');
+      setDistritoEmpresa(data.Empresa.distrito || '');
+      setCantonEmpresa(data.Empresa.canton || '');
+      setProvinciaEmpresa(data.Empresa.provincia || '');
+      setNombreAsesor(data.AnteproyectoContacto[0].ContactoEmpresa.nombre || '');
+      setPuestoAsesor(data.AnteproyectoContacto[0].ContactoEmpresa.departamento || '');
+      setTelefonoContacto(data.AnteproyectoContacto[0].ContactoEmpresa.telefono || '');
+      setCorreoContacto(data.AnteproyectoContacto[0].ContactoEmpresa.correo || '');
+      setNombreHR(data.AnteproyectoContacto[0].RRHH.nombre || '');
+      setTelefonoHR(data.AnteproyectoContacto[0].RRHH.telefono || '');
+      setCorreoHR(data.AnteproyectoContacto[0].RRHH.correo || '');
       setContexto(data.contexto || '');
       setJustificacion(data.justificacion || '');
       setSintomas(data.sintomas || '');
       setImpacto(data.impacto || '');
-      setNombreDepartamento(data.nombreDepartamento || '');
-      setTipoProyecto(data.tipoProyecto || '');
-      setObservaciones(data.observaciones || '');
+      setNombreDepartamento(data.departamento || '');
+      setTipoProyecto(data.tipo || '');
+      setObservaciones(data.comentario || '');
 
       // Rellenar campos de estudiante (read-only)
       if (data.Estudiante?.Usuario) {
-        setNombre(data.Estudiante.Usuario.nombre || '');
         setCarnet(data.Estudiante.carnet || '');
-        setTelefono(data.Estudiante.Usuario.telefono || '');
+        setNombre(data.Estudiante.Usuario.nombre || '');
         setCorreo(data.Estudiante.Usuario.correo || '');
+        setTelefono(data.Estudiante.Usuario.telefono || '');
         setSede(data.Estudiante.Usuario.sede || '');
       }
     } catch (err) {
@@ -280,43 +287,12 @@ const FormularioCoordinador = () => {
 
         <h2>Datos de la empresa</h2>
         <div className={styles.formGroup}>
-          <label>6. Tipo de empresa:</label>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
-                value="Zona franca"
-                checked={tipoEmpresa === "Zona franca"}
-                disabled
-              />
-              Zona franca
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
-                value="Régimen definitivo"
-                checked={tipoEmpresa === "Régimen definitivo"}
-                disabled
-              />
-              Régimen definitivo
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
-                value="Perfeccionamiento activo"
-                checked={tipoEmpresa === "Perfeccionamiento activo"}
-                disabled
-              />
-              Perfeccionamiento activo
-            </label>
-          </div>
+          <label>6. Tipo de Empresa:</label>
+          <input
+            type="text"
+            value={tipoEmpresa}
+            readOnly
+          />
         </div>
 
         <div className={styles.formGroup}>
@@ -340,20 +316,12 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>11. Ubicación (Provincia):</label>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="provinciaEmpresa"
-                value="Heredia"
-                checked={provinciaEmpresa === "Heredia"}
-                disabled
-              />
-              Heredia
-            </label>
-          </div>
-          {/* ... y así para las demás provincias ... */}
+          <label>11. Provincia:</label>
+          <input
+            type="text"
+            value={provinciaEmpresa}
+            readOnly
+          />
         </div>
 
         <div className={styles.formGroup}>
@@ -466,20 +434,12 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>24. Tipo de proyecto:</label>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoProyecto"
-                value="Extensión"
-                checked={tipoProyecto === "Extensión"}
-                disabled
-              />
-              Extensión
-            </label>
-          </div>
-          {/* ...Más radios para tipos de proyecto... */}
+          <label>24. Tipo de Proyecto:</label>
+          <input
+            type="text"
+            value={tipoProyecto}
+            readOnly
+          />
         </div>
 
         <div className={styles.formGroup}>

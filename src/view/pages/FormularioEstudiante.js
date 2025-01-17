@@ -24,9 +24,6 @@ const EstudianteForm = () => {
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
   const [sede, setSede] = useState('');
-  const [newEmpresa, setNewEmpresa] = useState('');
-  const [newContacto, setNewContacto] = useState('');
-  const [newAnte, setNewAnte] = useState('');
 
   // Datos de la empresa y anteproyecto a crear
   const [nombreEmpresa, setNombreEmpresa] = useState('');
@@ -127,9 +124,6 @@ const EstudianteForm = () => {
         if (error){
           throw error;
         }
-        else{
-          setNewEmpresa(data[0].id);
-        }
     } catch(err){
       console.error('Error con los datos de empresa', err);
       errorToast('Error con los datos de empresa' + err.message);
@@ -151,24 +145,20 @@ const EstudianteForm = () => {
         if (error){
           throw error;
         }
-        else{
-          if(dept != 'Recursos Humanos'){
-            setNewContacto(data[0].id);
-          }
-        }
     } catch(err){
       console.error('Error con los datos de contacto', err);
       errorToast('Error con los datos de contacto' + err.message);
     }
   }
 
-  async function insertarAnteContact(anteproyecto, contacto){
+  async function insertarAnteContact(anteproyecto, contacto, rrhh){
     try{
       const { data, error } = await supabase
         .from('AnteproyectoContacto')
         .insert({
           anteproyecto_id: anteproyecto,      // fk
-          contacto_id: contacto
+          contacto_id: contacto,
+          rrhh_id: rrhh
         });
         if (error){
           throw error;
@@ -245,12 +235,13 @@ const EstudianteForm = () => {
       }
       const empresID = await consultarEmpresas();
       if(contactoCount == "empty"){
-        await insertarContacto(nombreAsesor, nombreDepartamento, correoContacto, telefonoContacto, empresID);
+        await insertarContacto(nombreAsesor, puestoAsesor, correoContacto, telefonoContacto, empresID);
       }
       const contactID = await consultarContactos(nombreAsesor);
       if(rhCount == "empty"){
         await insertarContacto(nombreHR, 'Recursos Humanos', correoHR, telefonoHR, empresID);
       }
+      const rrhhID = await consultarContactos(nombreHR);
       // Insertar en la tabla "Anteproyecto"
       const { data, error } = await supabase
         .from('Anteproyecto')
@@ -263,6 +254,7 @@ const EstudianteForm = () => {
           sintomas: sintomas,
           impacto: impacto,
           tipo: tipoProyecto,
+          departamento: nombreDepartamento,
           // estado inicial (opcional): "Pendiente"
           estado: 'Pendiente'
         })
@@ -273,7 +265,7 @@ const EstudianteForm = () => {
         throw error;
       }
       else{
-        insertarAnteContact(data[0].id, contactID);
+        insertarAnteContact(data[0].id, contactID, rrhhID);
       }
       successToast('Anteproyecto insertado exitosamente');
       navigate('/anteproyectosEstudiante');
