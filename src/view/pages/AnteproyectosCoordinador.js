@@ -1,7 +1,3 @@
-/**
- * AnteproyectosCoordinador.jsx
- * Muestra una lista de anteproyectos con posibilidad de descargar y revisar (coord).
- */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AnteproyectosCoordinador.module.css';
@@ -15,32 +11,32 @@ import { errorToast } from '../components/toast';
 
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
+  const [searchText, setSearchText] = useState('');
   const navigate = useNavigate();
 
   const handleRevisar = (id) => {
     navigate('/formulario-coordinador?id=' + id);
   };
 
-  // Función para obtener los datos de la base de datos
   useEffect(() => {
     const fetchAnteproyectos = async () => {
-    const { data, error } = await supabase
-      .from('Anteproyecto')
-      .select(`
-        id,
-        empresa_id,
-        estado,
-        estudiante_id,
-        Empresa:Empresa!anteproyecto_empresa_id_fkey (
-          nombre         
-        ),
-        Estudiante:estudiante_id (
-          nombre
-          Usuario:id_usuario (
+      const { data, error } = await supabase
+        .from('Anteproyecto')
+        .select(`
+          id,
+          empresa_id,
+          estado,
+          estudiante_id,
+          Empresa:Empresa!anteproyecto_empresa_id_fkey (
+            nombre         
+          ),
+          Estudiante:estudiante_id (
             nombre
+            Usuario:id_usuario (
+              nombre
+            )
           )
-        )
-      `);
+        `);
       if (error) {
         alert('No se pudieron obtener los anteproyectos. ' + error.message);
         return;
@@ -54,41 +50,16 @@ const AnteproyectosCoordinador = () => {
     fetchAnteproyectos();
   }, []);
 
-  // Función para generar el reporte en Excel
   const handleGenerateReport = () => {
     if (anteproyectos.length === 0) {
-      alert("No hay anteproyectos para generar el reporte");
+      alert('No hay anteproyectos para generar el reporte');
       return;
     }
 
-    // Preparamos los datos para el archivo Excel
     const dataToExport = anteproyectos.map((proyecto) => ({
       ID: proyecto.id,
       'Nombre del Estudiante': proyecto.Estudiante?.nombre || 'N/A',
-      Carnet: proyecto.Estudiante?.carnet || 'N/A',
-      Teléfono: proyecto.Estudiante?.telefono || 'N/A',
-      Correo: proyecto.Estudiante?.correo || 'N/A',
-      Sede: proyecto.sede,
-      'Nombre de la Empresa': proyecto.nombreEmpresa,
-      'Tipo de Empresa': proyecto.tipoEmpresa,
-      'Actividad de la empresa': proyecto.actividadEmpresa,
-      Distrito: proyecto.distritoEmpresa,
-      Cantón: proyecto.cantonEmpresa,
-      Provincia: proyecto.provinciaEmpresa,
-      'Nombre del asesor industrial': proyecto.nombreAsesor,
-      'Puesto del Asesor': proyecto.puestoAsesor,
-      'Teléfono de Contacto': proyecto.telefonoContacto,
-      'Correo del Contacto': proyecto.correoContacto,
-      'Nombre del contacto de RRHH': proyecto.nombreHR,
-      'Teléfono RRHH': proyecto.telefonoHR,
-      'Correo RRHH': proyecto.correoHR,
-      Contexto: proyecto.contexto,
-      'Justificación del trabajo': proyecto.justificacion,
-      'Síntomas principales': proyecto.sintomas,
-      'Efectos o impactos': proyecto.impacto,
-      Departamento: proyecto.nombreDepartamento,
-      'Tipo de Proyecto': proyecto.tipoProyecto,
-      'Estado del proyecto': proyecto.estado
+      'Estado del proyecto': proyecto.estado,
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -103,11 +74,10 @@ const AnteproyectosCoordinador = () => {
         .from('Anteproyecto')
         .update({ estado: 'Pendiente' })
         .eq('id', anteproyecto.id);
-  
+
       if (error) {
         alert('No se pudo cambiar el estado del anteproyecto. ' + error.message);
       } else {
-        // Actualizar el estado local de anteproyectos
         setAnteproyectos((prev) =>
           prev.map((item) =>
             item.id === anteproyecto.id
@@ -122,14 +92,35 @@ const AnteproyectosCoordinador = () => {
       alert('Ocurrió un error al intentar cambiar el estado.');
     }
   };
-  
+
+  const filteredAnteproyectos = anteproyectos.filter((anteproyecto) => {
+    const lowerSearchText = searchText.toLowerCase();
+
+    return Object.values(anteproyecto).some((value) => {
+      if (typeof value === 'object' && value !== null) {
+        // Si es un objeto, revisamos sus valores
+        return Object.values(value).some((subValue) =>
+          String(subValue).toLowerCase().includes(lowerSearchText)
+        );
+      }
+      // Si no es un objeto, revisamos el valor directamente
+      return String(value).toLowerCase().includes(lowerSearchText);
+    });
+  });
 
   return (
     <div className={styles.anteproyectos_coordinador_contenedor}>
-      <Header title="Anteproyectos"/>
+      <Header title="Anteproyectos" />
       <div>
         <main>
           <div className={styles.lista_anteproyectos_coordinador}>
+            <input
+              type="text"
+              placeholder="Buscar en todos los campos"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className={styles.barra_busqueda}
+            />
             <button
               className={styles.generar_reporte}
               onClick={handleGenerateReport}
@@ -147,7 +138,7 @@ const AnteproyectosCoordinador = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {anteproyectos.map((anteproyecto) => (
+                  {filteredAnteproyectos.map((anteproyecto) => (
                     <tr key={anteproyecto.id}>
                       <td>
                         {anteproyecto.Estudiante
@@ -157,7 +148,11 @@ const AnteproyectosCoordinador = () => {
                       <td>{anteproyecto.Empresa.nombre}</td>
                       <td>{anteproyecto.estado}</td>
                       <td>
-                        <div className={styles.contenedor_botones_anteproyectos_coordinador}>
+                        <div
+                          className={
+                            styles.contenedor_botones_anteproyectos_coordinador
+                          }
+                        >
                           <button
                             onClick={() => handleRevisar(anteproyecto.id)}
                             className={`${styles.btn} ${styles.revisar}`}
@@ -178,7 +173,6 @@ const AnteproyectosCoordinador = () => {
                               Pendiente
                             </button>
                           )}
-
                         </div>
                       </td>
                     </tr>
