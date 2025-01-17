@@ -42,6 +42,30 @@ const AnteproyectosEstudiante = () => {
     }
   }
 
+  async function crearAnteproyecto() {
+    try {
+      const studentID = await consultarInfoEstudiante();
+      const { data, error } = await supabase
+        .from('Anteproyecto')
+        .select(`
+          id
+        `)
+        .eq('estudiante_id', studentID);
+      if (error) {
+        alert('No se pudieron obtener los anteproyectos. ' + error.message);
+        return;
+      }
+      if(data.length != 0){
+        alert("Ya tiene un anteproyecto activo");
+      }
+      else{
+        navigate('/formulario-estudiantes');
+      }
+    } catch (error) {
+      alert('Error al consultar anteproyectos: ' + error);
+    }
+  }
+
   async function consultarAnteproyectos() {
     try {
       const studentID = await consultarInfoEstudiante();
@@ -108,7 +132,7 @@ const AnteproyectosEstudiante = () => {
         <main className={styles.lista_anteproyectos_estudiante}>
           <button
             className={styles.crear_anteproyecto}
-            onClick={() => navigate('/formulario-estudiantes')}
+            onClick={() => crearAnteproyecto()}
           >
             Crear anteproyecto
           </button>
@@ -116,7 +140,7 @@ const AnteproyectosEstudiante = () => {
             <table className={styles2.table}>
               <thead>
                 <tr>
-                  <th>Anteproyectos creados</th>
+                  <th>Empresa</th>
                   <th>Estado</th>
                   <th></th>
                 </tr>
