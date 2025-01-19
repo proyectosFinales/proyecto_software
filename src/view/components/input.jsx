@@ -1,3 +1,4 @@
+/*input.jsx*/
 import styles from "../styles/input.module.css"
 
 const FloatInput = ({ text, children }) => <>
