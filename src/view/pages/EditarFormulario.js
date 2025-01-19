@@ -213,6 +213,8 @@ const CoordinadorForm = () => {
       }
 
       // 3. Actualizar el Anteproyecto (campos de la empresa, etc.)
+      // ESTO ESTA MAL, SE NECESITA EL NOMBRE DE LA COLUMNA
+      const estado = "Pendiente"
       const { error: antError } = await supabase
         .from('Anteproyecto')
         .update({
@@ -234,9 +236,9 @@ const CoordinadorForm = () => {
           sintomas,
           impacto,
           nombreDepartamento,
-          tipoProyecto
-          // Observaciones suele ser del profesor, tal vez no se edita desde aquí, o sí:
-          //observaciones
+          tipoProyecto,
+          estado
+
         })
         .eq('id', idAnteproyecto);
 

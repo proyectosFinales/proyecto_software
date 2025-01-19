@@ -153,19 +153,21 @@ const AnteproyectosCoordinador = () => {
                             styles.contenedor_botones_anteproyectos_coordinador
                           }
                         >
-                          <button
+                          {(anteproyecto.estado !== 'Correccion') && (
+                            <button
                             onClick={() => handleRevisar(anteproyecto.id)}
                             className={`${styles.btn} ${styles.revisar}`}
                           >
                             Revisar
                           </button>
+                          )}
                           <button
                             onClick={() => descargarAnteproyecto(anteproyecto)}
                             className={`${styles.btn} ${styles.descargar}`}
                           >
                             Descargar
                           </button>
-                          {anteproyecto.estado === 'Aprobado' && (
+                          {(anteproyecto.estado === 'Aprobado' || anteproyecto.estado === 'Reprobado') && (
                             <button
                               onClick={() => cambiarEstado(anteproyecto)}
                               className={`${styles.btn} ${styles.pendiente}`}
