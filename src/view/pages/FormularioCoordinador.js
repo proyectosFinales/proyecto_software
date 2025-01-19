@@ -16,6 +16,7 @@ import styles from '../styles/FormularioCoordinador.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
+import { FaEdit } from "react-icons/fa";
 
 const FormularioCoordinador = () => {
   // Datos del estudiante (read-only)
@@ -46,6 +47,11 @@ const FormularioCoordinador = () => {
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  const [revision, setRevision] = useState('');
+  const [correccionC, setCorrecionC] = useState('');
+  const [correccionJ, setCorrecionJ] = useState('');
+  const [correccionS, setCorrecionS] = useState('');
+  const [correccionE, setCorrecionE] = useState('');
 
   // ID del anteproyecto actual
   const [idAnteproyecto, setIdAnteproyecto] = useState(null);
@@ -125,7 +131,6 @@ const FormularioCoordinador = () => {
               `)
               .eq('id', id)
               .single();
-      console.log(data,id);
       if (error) throw error;
       // Rellenar campos de anteproyecto
       setIdAnteproyecto(data.id);
@@ -173,16 +178,15 @@ const FormularioCoordinador = () => {
     if (!confirmAprobar) return;
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('Anteproyecto')
         .update({
-          observaciones: observaciones,
+          comentario: observaciones,
           estado: "Aprobado"
         })
-        .eq('id', idAnteproyecto);
-
+        .eq('id', idAnteproyecto)
+        .select();
       if (error) throw error;
-
       alert('Anteproyecto actualizado exitosamente (Aprobado).');
       navigate('/anteproyectosCoordinador');
     } catch (error) {
@@ -190,9 +194,60 @@ const FormularioCoordinador = () => {
     }
   }
 
+  async function insertarCorreccion(section, content) {
+    try{
+      const { error } = await supabase
+      .from('Correcciones')
+      .insert({
+        anteproyecto_id: idAnteproyecto,      // fk
+        seccion: section,
+        contenido: content
+      })
+    if (error) throw error;
+    }catch (error) {
+      alert('Error al registrar las correcciones: ' + error.message);
+    }
+  }
+
+  async function corregirAnteproyecto(e) {
+    e.preventDefault();
+    const confirmAprobar = window.confirm("¿Está seguro de enviar las CORRECIONES solicitadas al anteproyecto?");
+    if (!confirmAprobar) return;
+
+    try {
+      const { error } = await supabase
+        .from('Anteproyecto')
+        .update({
+          comentario: observaciones,
+          estado: "Correccion"
+        })
+        .eq('id', idAnteproyecto);
+      if(correccionC != ''){
+        await insertarCorreccion("Contexto",correccionC);
+      }
+      if(correccionE != ''){
+        await insertarCorreccion("Impacto",correccionE);
+      }
+      if(correccionS != ''){
+        await insertarCorreccion("Sintomas",correccionS);
+      }
+      if(correccionJ != ''){
+        await insertarCorreccion("Justificacion",correccionJ);
+      }
+      
+      if (error) throw error;
+      
+      alert('Las correcciones fueron solicitadas exitosamente.');
+      navigate('/anteproyectosCoordinador');
+    } catch (error) {
+      alert('Error al enviar correcciones: ' + error.message);
+    }
+  }
+
   /**
    * Reprobar => estado = "Reprobado" + guardar observaciones
    */
+
   async function reprobarAnteproyecto(e) {
     e.preventDefault();
     const confirmReprobar = window.confirm("¿Está seguro de REPROBAR el anteproyecto?");
@@ -202,7 +257,7 @@ const FormularioCoordinador = () => {
       const { error } = await supabase
         .from('Anteproyecto')
         .update({
-          observaciones: observaciones,
+          comentario: observaciones,
           estado: "Reprobado"
         })
         .eq('id', idAnteproyecto);
@@ -367,64 +422,73 @@ const FormularioCoordinador = () => {
         <div className={styles.formGroup}>
           <label>
             19. Contexto:
-            <AiOutlineInfoCircle
+            <FaEdit
               className={styles.infoIcon}
-              onClick={() => toggleInfo('contexto')}
+              onClick={() => toggleInfo('correccionC')}
+              size={20}
             />
           </label>
           <textarea value={contexto} readOnly />
-          {infoVisible.contexto && (
-            <p className="info-text">
-              Explicación sobre el contexto...
-            </p>
+          {infoVisible.correccionC && (
+            <textarea
+              value={correccionC}
+              onChange={(e) => setCorrecionC(e.target.value)}
+            />
           )}
         </div>
 
         <div className={styles.formGroup}>
           <label>
             20. Justificación:
-            <AiOutlineInfoCircle
+            <FaEdit
               className={styles.infoIcon}
-              onClick={() => toggleInfo('justificacion')}
+              onClick={() => toggleInfo('correccionJ')}
+              size={20}
             />
           </label>
           <textarea value={justificacion} readOnly />
-          {infoVisible.justificacion && (
-            <p className="info-text">
-              Texto explicativo de la justificación...
-            </p>
+          {infoVisible.correccionJ && (
+            <textarea
+              value={correccionJ}
+              onChange={(e) => setCorrecionJ(e.target.value)}
+            />
           )}
+          
         </div>
 
         <div className={styles.formGroup}>
           <label>
             21. Síntomas principales:
-            <AiOutlineInfoCircle
+            <FaEdit
               className={styles.infoIcon}
-              onClick={() => toggleInfo('sintomas')}
+              onClick={() => toggleInfo('correccionS')}
+              size={20}
             />
           </label>
           <textarea value={sintomas} readOnly />
-          {infoVisible.sintomas && (
-            <p className="info-text">
-              Descripción de los síntomas...
-            </p>
+          {infoVisible.correccionS && (
+            <textarea
+              value={correccionS}
+              onChange={(e) => setCorrecionS(e.target.value)}
+            />
           )}
         </div>
 
         <div className={styles.formGroup}>
           <label>
             22. Efectos o impactos para la empresa:
-            <AiOutlineInfoCircle
+            <FaEdit
               className={styles.infoIcon}
-              onClick={() => toggleInfo('impacto')}
+              onClick={() => toggleInfo('correccionE')}
+              size={20}
             />
           </label>
           <textarea value={impacto} readOnly />
-          {infoVisible.impacto && (
-            <p className="info-text">
-              Detalle de los impactos...
-            </p>
+          {infoVisible.correccionE && (
+            <textarea
+              value={correccionE}
+              onChange={(e) => setCorrecionE(e.target.value)}
+            />
           )}
         </div>
 
@@ -451,12 +515,22 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.contenedor_botones_formCoordinador}>
+          {(correccionC === '' && correccionE === '' && correccionS === '' && correccionJ === '') && (
           <button
             type="submit"
             className={`${styles.button} ${styles.aprobar}`}
           >
             Aprobar
           </button>
+          )}
+          {(correccionC !== '' || correccionE !== '' || correccionS !== '' || correccionJ !== '') && (
+            <button
+            onClick={corregirAnteproyecto}
+            className={`${styles.button} ${styles.aprobar}`}
+          >
+            Enviar
+          </button>
+          )}
           <button
             type="submit"
             className={`${styles.button} ${styles.reprobar}`}
