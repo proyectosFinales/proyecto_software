@@ -1,3 +1,4 @@
+/*layout.jsx*/
 import { useState } from "react";
 import styles from "../styles/layout.module.css";
 import ToastContainer from "./toast";

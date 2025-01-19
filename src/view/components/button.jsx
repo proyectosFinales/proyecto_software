@@ -1,3 +1,4 @@
+/*button.jsx*/
 import styles from "../styles/button.module.css";
 
 /**

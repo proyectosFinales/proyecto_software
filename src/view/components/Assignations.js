@@ -1,3 +1,4 @@
+/*Assignation.js*/
 import React from 'react';
 import './Assignations.css'; // Añadir estilos específicos para la sección de asignaciones
 

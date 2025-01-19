@@ -1,3 +1,4 @@
+/*HeaderEstudiante.js*/
 import React, { useState } from 'react';
 import styles from './Header.module.css';
 import SidebarEstudiante from './SidebarEstudiante';
