@@ -4,14 +4,17 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        azul: '#060953',
-        blanco: '#ffffff',
-        rojo: '#BD3737',
-        gris_oscuro: '#2C2C2C',
-        gris_claro: '#D9D9D9',
-        celeste: '#85d7ff',
+        azul: "#060953",
+        blanco: "#ffffff",
+        rojo: "#BD3737",
+        gris_oscuro: "#2C2C2C",
+        gris_claro: "#D9D9D9",
+        celeste: "#85d7ff",
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require("@tailwindcss/forms"), 
+    require("@tailwindcss/typography"), 
+  ],
 };
