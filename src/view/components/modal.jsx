@@ -1,3 +1,4 @@
+/*modal.jsx */
 import { useState, useEffect } from "react";
 import Button from "./button";
 import styles from "../styles/modal.module.css";

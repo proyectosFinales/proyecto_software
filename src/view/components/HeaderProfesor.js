@@ -1,3 +1,4 @@
+/*HeaderProfesor.js*/
 import React, { useState } from 'react';
 import styles from './Header.module.css';
 import SidebarProfesor from './SidebarProfesor';

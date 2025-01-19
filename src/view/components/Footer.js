@@ -1,3 +1,4 @@
+/*footer.js*/
 import React from "react";
 import './Footer.css'; // Asegúrate de importar el CSS para los estilos
 
