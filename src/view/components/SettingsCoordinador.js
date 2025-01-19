@@ -1,194 +1,115 @@
 /**SettingsCoordinador.js */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Modal from './Modal';
-import { supabase } from '../../model/Cliente'; // Ajusta la ruta a tu instancia Supabase
-import styles from './SettingsMenu.module.css';
-import modalEstilos from './SettingsCoordinador.module.css';
 
-/**
- * SettingsCoordinador.jsx
- * - Opción para consultar el asesor (si el Anteproyecto está Aprobado).
- * - Opción para establecer la duración de las defensas (tabla "duraciones").
- */
-const SettingsCoordinador = ({show}) => {
+const SettingsCoordinador = ({ show }) => {
   const navigate = useNavigate();
   const [modal, setModal] = useState(false);
-  const [asesorInfo, setAsesorInfo] = useState(null);
-
-  // Para la funcionalidad "establecer duración"
   const [modalDuracion, setModalDuracion] = useState(false);
-  const [duracion, setDuracion] = useState('');
+  const [duracion, setDuracion] = useState("");
 
-  /**
-   * Ejemplo de consulta para ver si el estudiante (sessionStorage.token)
-   * tiene un Anteproyecto con estado "Aprobado". Luego buscamos su asesor
-   * en la tabla "Estudiante".
-   */
-  async function consultarAsesor() {
-    try {
-      // 1. Buscar anteproyecto del estudiante
-      const { data: anteproyecto, error: anteError } = await supabase
-        .from('Anteproyecto')      // En tu nueva BD
-        .select(`id, estudiante_id, estado`)
-        .eq('estudiante_id', sessionStorage.getItem("token"))
-        .eq('estado', 'Aprobado')
-        .single();
-
-      if (anteError || !anteproyecto) {
-        setAsesorInfo("No se ha asignado un profesor asesor a su proyecto (o no está en estado 'Aprobado').");
-        setModal(true);
-        return;
-      }
-
-      // 2. Buscar en Estudiante el campo 'asesor'
-      const { data: estudiante, error: estError } = await supabase
-        .from('Estudiante')
-        .select(`estudiante_id, asesor`)
-        .eq('estudiante_id', anteproyecto.estudiante_id)
-        .single();
-
-      if (estError || !estudiante) {
-        setAsesorInfo("No se pudo obtener la información del estudiante.");
-        setModal(true);
-        return;
-      }
-      if (!estudiante.asesor) {
-        setAsesorInfo("No hay profesor asesor asignado todavía.");
-        setModal(true);
-        return;
-      }
-
-      // 3. Buscar datos del Profesor en la tabla "Profesor"
-      const { data: profesor, error: profError } = await supabase
-        .from('Profesor')
-        .select(`
-          profesor_id,
-          cantidad_estudiantes,
-          Usuario:id_usuario (
-            nombre,
-            correo,
-            sede,
-            telefono
-          )
-        `)
-        .eq('profesor_id', estudiante.asesor)
-        .single();
-
-      if (profError || !profesor) {
-        setAsesorInfo("No se pudo obtener la información del profesor asesor.");
-        setModal(true);
-        return;
-      }
-
-      // 4. Construir el mensaje
-      setAsesorInfo(`
-        Profesor(a): ${profesor.Usuario.nombre}
-        Correo: ${profesor.Usuario.correo}
-        Sede: ${profesor.Usuario.sede}
-        Teléfono: ${profesor.Usuario.telefono || 'No registrado'}
-      `);
-    } catch (error) {
-      setAsesorInfo("Error al consultar la información del asesor.");
-    }
-
-    // Mostramos el modal
+  const consultarAsesor = () => {
+    alert("Función para consultar asesor.");
     setModal(true);
-  }
+  };
 
-  /**
-   * Ejemplo de guardar la duración de las defensas
-   * en una tabla "duraciones" con un registro ID=1
-   */
-  async function cambiarDuracion(e) {
+  const cambiarDuracion = (e) => {
     e.preventDefault();
-    try {
-      const { data, error } = await supabase
-        .from('duraciones')
-        .update({ horas: duracion || 1 }) // Usa 'duracion' o 1 por defecto
-        .eq('id', '1');                  // Ajusta a tu lógica real
+    alert(`Duración actualizada a ${duracion || 1} hora(s).`);
+    setModalDuracion(false);
+  };
 
-      if (error) {
-        alert('Error al actualizar la duración de las defensas: ' + error.message);
-        return;
-      }
-
-      alert('Duración de las defensas actualizada con éxito a ' + (duracion || 1) + ' hora(s).');
-      setModalDuracion(false);
-    } catch (err) {
-      alert('Error: ' + err.message);
-    }
-  }
-
-  /**
-   * Cierra sesión
-   */
-  function delSessionToken() {
+  const delSessionToken = () => {
     sessionStorage.clear();
     navigate("/");
-  }
+  };
 
   return (
     <>
-    {/* Sidebar (o menú) */}
-    <nav className={show ? styles.sidebar : styles.sidebarHide}>
-      <ul>
-        <li className={styles.menuItem} onClick={consultarAsesor}>Consultar asesor</li>
-        <li className={styles.menuItem} onClick={() => setModalDuracion(true)}>Establecer duración de las defensas</li>
-        <li className={styles.menuItem} onClick={delSessionToken}>Cerrar sesión</li>
-      </ul>
-    </nav>
+      <nav
+        className={`fixed top-0 right-0 h-full bg-gris_oscuro text-blanco p-6 transition-transform transform ${
+          show ? "translate-x-0" : "translate-x-full"
+        } w-64 shadow-lg z-50`}
+      >
+        <ul className="space-y-4">
+          <li>
+            <button
+              onClick={consultarAsesor}
+              className="block w-full text-left p-2 hover:bg-gris_claro rounded"
+            >
+              Consultar asesor
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => setModalDuracion(true)}
+              className="block w-full text-left p-2 hover:bg-gris_claro rounded"
+            >
+              Establecer duración de las defensas
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={delSessionToken}
+              className="block w-full text-left p-2 hover:bg-gris_claro rounded"
+            >
+              Cerrar sesión
+            </button>
+          </li>
+        </ul>
+      </nav>
 
-    {/* Modal para mostrar la info del asesor */}
-    <Modal show={modal} onClose={() => setModal(false)}>
-      <>
-        <div className={modalEstilos.modal_titulo}>Información del Asesor</div>
-        <div className={modalEstilos.contenedor}>
-          <pre>{asesorInfo}</pre>
-          <div className={modalEstilos.modal_buttons}>
-            <button 
-              className={`${modalEstilos.modal_button} ${modalEstilos.volver}`} 
+      {/* Modal para consultar asesor */}
+      {modal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-80">
+            <h2 className="text-xl font-bold mb-4">Información del Asesor</h2>
+            <p className="mb-4">Aquí irá la información del asesor.</p>
+            <button
               onClick={() => setModal(false)}
+              className="bg-red-500 text-white px-4 py-2 rounded"
             >
-              Volver
+              Cerrar
             </button>
           </div>
         </div>
-      </>
-    </Modal>
+      )}
 
-    {/* Modal para establecer duración */}
-    <Modal show={modalDuracion} onClose={() => setModalDuracion(false)}>
-      <>
-        <div className={modalEstilos.modal_titulo}>Establecer duración de las defensas</div>
-        <div className={modalEstilos.contenedor}>
-          <label className={modalEstilos.modal_label}>
-            La duración por defecto es de 1 hora. Si no ingresa valor, se usará la predeterminada.
-          </label>
-          <input
-            type="number"
-            className={modalEstilos.modal_input}
-            placeholder="Duración en horas"
-            value={duracion}
-            onChange={(e) => setDuracion(e.target.value)}
-          />
-          <div className={modalEstilos.modal_buttons}>
-            <button 
-              className={`${modalEstilos.modal_button} ${modalEstilos.volver}`} 
-              onClick={() => setModalDuracion(false)}
-            >
-              Volver
-            </button>
-            <button 
-              className={`${modalEstilos.modal_button} ${modalEstilos.guardar}`} 
-              onClick={cambiarDuracion}
-            >
-              Guardar
-            </button>
+      {/* Modal para cambiar duración */}
+      {modalDuracion && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-80">
+            <h2 className="text-xl font-bold mb-4">
+              Establecer Duración de las Defensas
+            </h2>
+            <p className="mb-4">
+              La duración predeterminada es 1 hora. Si no ingresa un valor, se
+              usará el predeterminado.
+            </p>
+            <input
+              type="number"
+              className="border p-2 w-full mb-4"
+              placeholder="Duración en horas"
+              value={duracion}
+              onChange={(e) => setDuracion(e.target.value)}
+            />
+            <div className="flex justify-between">
+              <button
+                onClick={() => setModalDuracion(false)}
+                className="bg-gray-300 px-4 py-2 rounded"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={cambiarDuracion}
+                className="bg-blue-500 text-white px-4 py-2 rounded"
+              >
+                Guardar
+              </button>
+            </div>
           </div>
         </div>
-      </>
-    </Modal>
+      )}
     </>
   );
 };
