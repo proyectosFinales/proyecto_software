@@ -51,12 +51,21 @@ const CoordinadorForm = () => {
   const [telefonoHR, setTelefonoHR] = useState('');
   const [correoHR, setCorreoHR] = useState('');
   const [contexto, setContexto] = useState('');
+  const [oldContexto, setOldContexto] = useState('');
+  const [contextoC, setContextoC] = useState('');
   const [justificacion, setJustificacion] = useState('');
+  const [oldJustificacion, setOldJustificacion] = useState('');
+  const [justificacionC, setJustificacionC] = useState('');
   const [sintomas, setSintomas] = useState('');
+  const [oldSintomas, setOldSintomas] = useState('');
+  const [sintomasC, setSintomasC] = useState('');
   const [impacto, setImpacto] = useState('');
+  const [oldImpacto, setOldImpacto] = useState('');
+  const [impactoC, setImpactoC] = useState('');
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
+  const [estado, setEstado] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,6 +89,7 @@ const CoordinadorForm = () => {
    * Consulta datos del anteproyecto y su estudiante,
    * uniendo con Usuario a través de Estudiante.id_usuario => Usuario.id.
    */
+
   async function consultarAnteproyecto(id) {
     try {
       // Anteproyecto se relaciona con Estudiante, y Estudiante con Usuario
@@ -93,6 +103,7 @@ const CoordinadorForm = () => {
           sintomas,
           impacto,
           tipo,
+          estado,
           comentario,
           estudiante_id,
           actividad,
@@ -126,15 +137,40 @@ const CoordinadorForm = () => {
               correo,
               telefono
             )
+          ),
+          Correcciones:correcciones_anteproyecto_id_fkey (
+            seccion,
+            contenido
           )
+
 
         `)
         .eq('id', id)
         .single();
       if (error) throw error;
-
       // Llenar estados
       setIdAnteproyecto(data.id);
+      setEstado(data.estado);
+      if(data.estado == "Correccion"){
+        data.Correcciones.forEach(item => {
+          switch(item.seccion) {
+            case "Justificacion":
+              setJustificacionC(item.contenido);
+              break;
+            case "Contexto":
+              setContextoC(item.contenido);
+              break;
+            case "Sintomas":
+              setSintomasC(item.contenido);
+              break;
+            case "Impacto":
+              setImpactoC(item.contenido);
+              break;
+            default:
+              break;
+          }
+        });
+      }
       setTipoEmpresa(data.Empresa.tipo || '');
       setNombreEmpresa(data.Empresa.nombre || '');
       setActividadEmpresa(data.actividad || '');
@@ -149,9 +185,13 @@ const CoordinadorForm = () => {
       setTelefonoHR(data.AnteproyectoContacto[0].RRHH.telefono || '');
       setCorreoHR(data.AnteproyectoContacto[0].RRHH.correo || '');
       setContexto(data.contexto || '');
+      setOldContexto(data.contexto || '');
       setJustificacion(data.justificacion || '');
+      setOldJustificacion(data.justificacion || '');
       setSintomas(data.sintomas || '');
+      setOldSintomas(data.sintomas || '');
       setImpacto(data.impacto || '');
+      setOldImpacto(data.impacto || '');
       setNombreDepartamento(data.departamento || '');
       setTipoProyecto(data.tipo || '');
       setObservaciones(data.comentario || '');
@@ -178,75 +218,67 @@ const CoordinadorForm = () => {
   /**
    * Editar la información del anteproyecto y los datos del estudiante (Usuario/Estudiante).
    */
+  function verificarCorrecion(){
+    if(contextoC != '' && (contexto == oldContexto)){
+      return false;
+    }
+    else if(justificacionC != '' && (justificacion == oldJustificacion)){
+      return false;
+    }
+    else if(impactoC != '' && (impacto == oldImpacto)){
+      return false;
+    }
+    else if(sintomasC != '' && (sintomas == oldSintomas)){
+      return false;
+    }
+    else{
+      return true;
+    }
+  }
+
+  async function borrarCorrecciones() {
+    try{
+      const {error: correctionError} = await supabase
+        .from('Correcciones')
+        .delete()
+        .eq('anteproyecto_id',idAnteproyecto);
+        if (correctionError) throw correctionError;
+    }catch(error){
+      errorToast('Error al borrar correcciones: ' + error.message);
+    }
+  }
+
   async function editarAnteproyecto(e) {
     e.preventDefault();
     const confirmUpdate = window.confirm("¿Está seguro de ACTUALIZAR el anteproyecto?");
     if (!confirmUpdate) return;
-
+    if(estado == "Correccion" && (verificarCorrecion() == false)) {
+      alert("Todavía hay correcciones pendientes, estas se ven en texto de color rojo");
+      return;
+    }
     try {
-      // 1. Actualizar primero el Usuario (datos personales):
-      //    - nombre, correo, telefono, sede
-      if (userId) {
-        const { error: userError } = await supabase
-          .from('Usuario')
-          .update({
-            nombre: nombre,
-            correo: correo,
-            telefono: telefono,
-            sede: sede
-          })
-          .eq('id', userId);
-        if (userError) throw userError;
-      }
-
-      // 2. Actualizar Estudiante (carnet, cedula, etc.)
-      //    En tu script final no usas 'cedula', pero si la tuvieras, la incluyes.
-      if (estudianteId) {
-        const { error: estError } = await supabase
-          .from('Estudiante')
-          .update({
-            carnet: carnet
-            // cedula: cedula, etc.
-          })
-          .eq('estudiante_id', estudianteId);
-        if (estError) throw estError;
-      }
-
-      // 3. Actualizar el Anteproyecto (campos de la empresa, etc.)
-      // ESTO ESTA MAL, SE NECESITA EL NOMBRE DE LA COLUMNA
+      // Actualizar el Anteproyecto (campos de la empresa, etc.)
       const estado = "Pendiente"
       const { error: antError } = await supabase
         .from('Anteproyecto')
         .update({
-          tipoEmpresa,
-          nombreEmpresa,
-          actividadEmpresa,
-          distritoEmpresa,
-          cantonEmpresa,
-          provinciaEmpresa,
-          nombreAsesor,
-          puestoAsesor,
-          telefonoContacto,
-          correoContacto,
-          nombreHR,
-          telefonoHR,
-          correoHR,
-          contexto,
-          justificacion,
-          sintomas,
-          impacto,
-          nombreDepartamento,
-          tipoProyecto,
-          estado
-
+          estado: estado,
+          contexto: contexto,
+          justificacion: justificacion,
+          sintomas: sintomas,
+          impacto: impacto
         })
         .eq('id', idAnteproyecto);
-
+        const {error: correctionError} = await supabase
+          .from('Correcciones')
+          .delete()
+          .eq('anteproyecto_id',idAnteproyecto);
+      if (correctionError) throw correctionError;
       if (antError) throw antError;
 
-      successToast('Anteproyecto y datos de estudiante actualizados exitosamente');
+      successToast('Modificaciones realizadas exitosamente');
       // Redirigir a donde gustes
-      navigate('/anteproyectosCoordinador');
+      navigate('/anteproyectosEstudiante');
     } catch (error) {
       errorToast('Error al actualizar anteproyecto: ' + error.message);
     }
@@ -429,55 +461,75 @@ const CoordinadorForm = () => {
         {/* DATOS DEL PROYECTO */}
         <h2>Datos del proyecto</h2>
         <div className={styles.formGroup}>
-          <label>19. Contexto:</label>
-          <AiOutlineInfoCircle
-            className={styles.infoIcon}
-            onClick={() => toggleInfo('contexto')}
-          />
+          <label>
+            19. Contexto:
+            <AiOutlineInfoCircle
+              className={styles.infoIcon}
+              onClick={() => toggleInfo('contexto')}
+            />
+          </label>
           <textarea
             value={contexto}
             onChange={(e) => setContexto(e.target.value)}
           />
           {infoVisible.contexto && <p className="info-text">Explicación sobre el contexto...</p>}
+          <p className={styles.correctionText}>
+            {contextoC}
+          </p>
         </div>
 
         <div className={styles.formGroup}>
-          <label>20. Justificación:</label>
-          <AiOutlineInfoCircle
-            className={styles.infoIcon}
-            onClick={() => toggleInfo('justificacion')}
-          />
+          <label>
+            20. Justificación:
+            <AiOutlineInfoCircle
+              className={styles.infoIcon}
+              onClick={() => toggleInfo('justificacion')}
+            />
+          </label>
           <textarea
             value={justificacion}
             onChange={(e) => setJustificacion(e.target.value)}
           />
           {infoVisible.justificacion && <p className="info-text">Información sobre la justificación...</p>}
+          <p className={styles.correctionText}>
+            {justificacionC}
+          </p>
         </div>
 
         <div className={styles.formGroup}>
-          <label>21. Síntomas:</label>
-          <AiOutlineInfoCircle
-            className={styles.infoIcon}
-            onClick={() => toggleInfo('sintomas')}
-          />
+          <label>
+            21. Síntomas:
+            <AiOutlineInfoCircle
+              className={styles.infoIcon}
+              onClick={() => toggleInfo('sintomas')}
+            />
+          </label>
           <textarea
             value={sintomas}
             onChange={(e) => setSintomas(e.target.value)}
           />
           {infoVisible.sintomas && <p className="info-text">Descripción de los síntomas...</p>}
+          <p className={styles.correctionText}>
+            {sintomasC}
+          </p>
         </div>
 
         <div className={styles.formGroup}>
-          <label>22. Impacto:</label>
-          <AiOutlineInfoCircle
-            className={styles.infoIcon}
-            onClick={() => toggleInfo('impacto')}
-          />
+          <label>
+            22. Efectos o impactos para la empresa:
+            <AiOutlineInfoCircle
+              className={styles.infoIcon}
+              onClick={() => toggleInfo('impacto')}
+            />
+          </label>
           <textarea
             value={impacto}
             onChange={(e) => setImpacto(e.target.value)}
           />
           {infoVisible.impacto && <p className="info-text">Descripción del impacto...</p>}
+          <p className={styles.correctionText}>
+            {impactoC}
+          </p>
         </div>
 
         <div className={styles.formGroup}>
