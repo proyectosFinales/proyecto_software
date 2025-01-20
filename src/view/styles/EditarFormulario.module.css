@@ -97,6 +97,12 @@ form {
     color: #6c757d;
     margin-top: 5px;
   }
+
+  .correctionText {
+    font-size: 1.1rem;
+    color: #d40000;
+    margin-top: 5px;
+  }
   
   .aviso{
     font-size: 20px;
