@@ -25,6 +25,10 @@ const MenuEstudiante = () => {
           <i className="fas fa-clock"></i>
           <p>Citas</p>
         </Link>
+        <Link to="/bitacoras" className={styles.menuItem}>
+          <i className="fas fa-folder-open"></i>
+          <p>Bitácoras</p>
+        </Link>
       </div>
       <Footer />
     </div>
