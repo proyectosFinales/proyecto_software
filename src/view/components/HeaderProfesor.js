@@ -1,6 +1,5 @@
 /*HeaderProfesor.js*/
 import React, { useState } from 'react';
-import styles from './Header.module.css';
 import SidebarProfesor from './SidebarProfesor';
 import SettingsProfesor from './SettingsProfesor';
 
@@ -9,19 +8,25 @@ const HeaderProfesor = ({title}) => {
   const [isMenuOpenSettings, setIsMenuOpenSettings] = useState(false);
   return (
     <div>
-    <div className={styles.header}>
-      <button className={styles.menuIcon} onClick={() => setIsMenuOpen(!isMenuOpen)}>
-        &#9776;
-      </button>
-      <button className={styles.settingsIcon} onClick={() => setIsMenuOpenSettings(!isMenuOpenSettings)}>
+      <div className="h-20 flex items-center justify-center bg-gray-300 border-b border-black relative">
+        <button
+          className="absolute left-5 text-2xl bg-transparent border-none cursor-pointer"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          &#9776;
+        </button>
+        <button
+          className="absolute right-5 text-2xl bg-transparent border-none cursor-pointer"
+          onClick={() => setIsMenuOpenSettings(!isMenuOpenSettings)}
+        >
           <i className="fas fa-cog"></i>
         </button>
-      <h1>{title}</h1>
-    </div>
-    <div>
-    <SidebarProfesor show={isMenuOpen} />
-    <SettingsProfesor show={isMenuOpenSettings} />
-    </div>
+        <h1 className="text-xl font-bold">{title}</h1>
+      </div>
+      <div>
+        <SidebarProfesor show={isMenuOpen} />
+        <SettingsProfesor show={isMenuOpenSettings} />
+      </div>
     </div>
   );
 };
