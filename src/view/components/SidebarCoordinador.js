@@ -66,6 +66,14 @@ const SidebarCoordinador = ({ show }) => {
             Gestionar perfiles
           </Link>
         </li>
+        <li>
+          <Link
+            to="/empresas"
+            className="block p-2 hover:bg-gris_claro rounded"
+          >
+            Empresas
+          </Link>
+        </li>
       </ul>
     </nav>
   );

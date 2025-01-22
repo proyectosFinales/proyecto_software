@@ -19,6 +19,12 @@ import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante.js';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador.js';
 import CargarProfesores from './view/pages/CargarProfesores.js';
 import EditarFormulario from './view/pages/EditarFormulario.js';
+import Empresas from './view/pages/Empresas.js';
+import EditarEmpresa from './view/pages/EditarEmpresa.js';
+import CrearContacto from './view/pages/CrearContacto.js';
+import Contactos from './view/pages/Contactos.js';
+import EditarContacto from './view/pages/EditarContacto.js';
+import FormularioEmpresa from './view/pages/FormularioEmpresa.js';
 import Citas from './view/pages/Citas.js';
 import CitasMenu from './view/pages/CitasMenu.js';
 import Calendario from './view/pages/Calendario.jsx';
@@ -99,6 +105,30 @@ function App() {
         <Route
           path="/editarFormulario"
           element={<RutaProtegida element={<EditarFormulario />} requiredRoles={["3"]} />}
+        />
+        <Route
+          path="/empresas"
+          element={<RutaProtegida element={<Empresas />} requiredRoles={["1"]} />}
+        />
+        <Route
+          path="/editarEmpresa"
+          element={<RutaProtegida element={<EditarEmpresa />} requiredRoles={["1"]} />}
+        />
+        <Route
+          path="/contactos"
+          element={<RutaProtegida element={<Contactos />} requiredRoles={["1"]} />}
+        />
+        <Route
+          path="/editarContacto"
+          element={<RutaProtegida element={<EditarContacto />} requiredRoles={["1"]} />}
+        />
+        <Route
+          path="/crearContacto"
+          element={<RutaProtegida element={<CrearContacto />} requiredRoles={["1"]} />}
+        />
+        <Route
+          path="/formularioEmpresa"
+          element={<RutaProtegida element={<FormularioEmpresa />} requiredRoles={["1"]} />}
         />
         <Route
           path="/cargarProfesores"
