@@ -28,6 +28,10 @@ const Menu = () => {
           <i className="fas fa-user"></i>
           <p>Gestión de perfiles</p>
         </Link>
+        <Link to="/empresas" className={styles.menuItem}>
+          <i className="fa-solid fa-building"></i>
+          <p>Empresas</p>
+        </Link>
         <Link to="/aprobarProyectos" className={styles.menuItem}>
           <i className="fas fa-folder-open"></i>
           <p>Proyectos</p>
