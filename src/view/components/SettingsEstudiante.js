@@ -1,107 +1,133 @@
 /*SettingsEStudiante.js */
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import styles from './SettingsMenu.module.css';
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { 
+  LogOut, 
+  User
+} from "lucide-react";
 import Modal from './Modal';
-import { supabase } from '../../model/Cliente';
-import modalEstilos from './SettingsCoordinador.module.css'
 
-const SettingsCoordinador = ({show}) => {
+const SettingsEstudiante = ({ show, setShow }) => {
   const navigate = useNavigate();
   const [modal, setModal] = useState(false);
-  const [asesorInfo, setAsesorInfo] = useState(null);
 
-  async function consultarAsesor() {
-    try {
-      // Consulta para verificar si el anteproyecto tiene un `idEncargado`
-      const { data: anteproyecto, error: anteproyectoError } = await supabase
-        .from('anteproyectos')
-        .select(`id,
-          idEncargado`
-        )
-        .eq('idEstudiante', sessionStorage.getItem("token"))
-        .eq('estado', 'Aprobado')
-        .single();
-
-      if (anteproyectoError || !anteproyecto?.idEncargado) {
-        setAsesorInfo("No se ha asignado un profesor asesor a su proyecto.");
-        setModal(true);
-        return;
-      }
-
-      // Si existe un idEncargado, consultar la tabla `profesores`
-      const { data: profesor, error: profesorError } = await supabase
-        .from('profesores')
-        .select('nombre, telefono')
-        .eq('id', anteproyecto.idEncargado)
-        .single();
-
-      if (profesorError || !profesor) {
-        setAsesorInfo("No se pudo obtener la información del asesor.");
-        setModal(true);
-        return;
-      }
-
-      // Si existe un idEncargado, consultar la tabla `profesores`
-      const { data: usuario, error: usuarioError } = await supabase
-        .from('usuarios')
-        .select('correo, sede')
-        .eq('id', anteproyecto.idEncargado)
-        .single();
-
-      if (usuarioError || !usuario) {
-        setAsesorInfo("No se pudo obtener la información del asesor.");
-        setModal(true);
-        return;
-      }
-
-      // Configurar la información del asesor
-      setAsesorInfo(`
-        Nombre: ${profesor.nombre}
-        Sede: ${usuario.sede} 
-        Correo: ${usuario.correo} 
-        Telefono: ${profesor.telefono}
-      `);
-    } catch (error) {
-      setAsesorInfo("Error al consultar la información del asesor.");
-    }
-
-    setModal(true);
-  }
-
-  function delSessionToken () {
+  const delSessionToken = () => {
     sessionStorage.clear();
     navigate("/");
-  }
+  };
+
+  const menuItems = [
+    { path: "/editar-perfil", text: "Perfil", icon: User },
+    { text: "Cerrar sesión", icon: LogOut, onClick: () => setModal(true) }
+  ];
 
   return (
     <>
-    <nav className={show ? styles.sidebar : styles.sidebarHide}>
-    <ul>
-        <Link to="/editar-perfil" className={styles.menuItem}><li>Perfil</li></Link>
-        <Link to="/darseBaja" className={styles.menuItem}><li>Darse de baja</li></Link>
-        <li className={styles.menuItem} onClick={consultarAsesor}>Consultar asesor</li>
-        <li className={styles.menuItem} onClick={delSessionToken}>Cerrar sesión</li>
-    </ul>
-    </nav>
-    <Modal show={modal} onClose={() => setModal(false)}>
-    {
-    <>
-      <div className={modalEstilos.modal_titulo}>Información del Asesor</div>
-        <div className={modalEstilos.contenedor}>
-          <pre>{asesorInfo}</pre>
-          <div className={modalEstilos.modal_buttons}>
-            <button className={`${modalEstilos.modal_button} ${modalEstilos.volver}`} onClick={() => setModal(false)}>
-              Volver
+      {show && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40"
+          onClick={() => setShow(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <nav 
+        className={`
+          fixed top-20 right-0 
+          h-[calc(100vh-80px)] w-64
+          bg-white
+          shadow-lg
+          z-50
+          transition-transform duration-300 ease-in-out
+          ${show ? 'translate-x-0' : 'translate-x-full'}
+        `}
+      >
+        <ul className="list-none p-0 m-0">
+          {menuItems.map((item, index) => {
+            const Icon = item.icon;
+            if (item.path) {
+              return (
+                <Link
+                  key={index}
+                  to={item.path}
+                  className="block no-underline group transition-all duration-200"
+                >
+                  <li className="
+                    flex items-center gap-3
+                    px-6 py-4
+                    text-gray-900
+                    border-b border-gray-100
+                    cursor-pointer
+                    transition-colors duration-200
+                    hover:bg-gray-50
+                    active:bg-gray-100
+                  ">
+                    <Icon 
+                      size={20} 
+                      className="text-azul transition-transform duration-200 group-hover:scale-110" 
+                    />
+                    <span className="text-base font-medium">
+                      {item.text}
+                    </span>
+                  </li>
+                </Link>
+              );
+            } else {
+              return (
+                <li
+                  key={index}
+                  onClick={item.onClick}
+                  className="
+                    flex items-center gap-3
+                    px-6 py-4
+                    text-gray-900
+                    border-b border-gray-100
+                    cursor-pointer
+                    transition-colors duration-200
+                    hover:bg-gray-50
+                    active:bg-gray-100
+                    group
+                  "
+                >
+                  <Icon 
+                    size={20} 
+                    className="text-azul transition-transform duration-200 group-hover:scale-110" 
+                  />
+                  <span className="text-base font-medium">
+                    {item.text}
+                  </span>
+                </li>
+              );
+            }
+          })}
+        </ul>
+
+        <div className="absolute bottom-0 w-full p-4 text-center text-gray-600 text-sm border-t border-gray-200 bg-white">
+          Instituto Tecnológico de Costa Rica
+        </div>
+      </nav>
+
+      <Modal show={modal} onClose={() => setModal(false)}>
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-bold mb-4">¿Desea cerrar sesión?</h2>
+          <div className="flex justify-center gap-4">
+            <button
+              className="px-4 py-2 bg-azul text-white rounded hover:bg-opacity-90"
+              onClick={delSessionToken}
+            >
+              Sí
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-opacity-90"
+              onClick={() => setModal(false)}
+            >
+              No
             </button>
           </div>
-      </div>
+        </div>
+      </Modal>
     </>
-    }
-  </Modal>
-  </>
   );
 };
 
-export default SettingsCoordinador;
+export default SettingsEstudiante;

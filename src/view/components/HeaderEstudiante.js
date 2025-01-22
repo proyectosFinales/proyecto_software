@@ -26,8 +26,8 @@ const HeaderEstudiante = ({ title }) => {
         <h1 className="text-xl font-bold">{title}</h1>
       </div>
       <div>
-        <SidebarEstudiante show={isMenuOpen} />
-        <SettingsEstudiante show={isMenuOpenSettings} />
+        <SidebarEstudiante show={isMenuOpen} setShow={setIsMenuOpen} />
+        <SettingsEstudiante show={isMenuOpenSettings} setShow={setIsMenuOpenSettings} />
       </div>
     </div>
   );
