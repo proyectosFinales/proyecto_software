@@ -4,6 +4,7 @@ import styles from '../styles/MenuPrincipal.module.css';
 import Footer from '../components/Footer'
 import SettingsProfesor from '../components/SettingsProfesor';
 
+
 const Menu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   return (
@@ -27,6 +28,10 @@ const Menu = () => {
         <Link to="/citas-profesor" className={styles.menuItem}>
           <i className="fas fa-clock"></i>
           <p>Consultar citas</p>
+        </Link>
+        <Link to="/bitacoras" className={styles.menuItem}>
+          <i className="fas fa-folder-open"></i>
+          <p>Bitácoras</p>
         </Link>
 
       </div>

@@ -44,6 +44,9 @@ import InicioAsignaciones from './view/pages/asignacion-proyectos/index.jsx';
 import CambioContraseña from './view/pages/CambioContraseña.js';
 import AprobarProyectos from './view/pages/AprobarProyectos.js';
 import ProyectosAsignadosProfesor from './view/pages/asignacion-proyectos/proyectos-profesor.jsx';
+import Bitacoras from './view/pages/Bitacoras.js';
+import AgregarBitacora from './view/pages/agregarBitacora.js';
+import Entrada from './view/pages/verEntrada.js';
 
 function App() {
   return (
@@ -211,6 +214,9 @@ function App() {
           path="/proyectos-profesor"
           element={<RutaProtegida element={<ProyectosAsignadosProfesor />} requiredRoles={["2"]} />}
         />
+        <Route path='bitacoras' element={<RutaProtegida element={<Bitacoras />} requiredRoles={["2", "3"]} />} />
+        <Route path="agregarBitacora" element={<RutaProtegida element={<AgregarBitacora />} requiredRoles={["2", "3"]} />}/>
+        <Route path="entrada" element={<RutaProtegida element={<Entrada />} requiredRoles={["2", "3"]} />}/>
       </Routes>
     </Router>
   );
