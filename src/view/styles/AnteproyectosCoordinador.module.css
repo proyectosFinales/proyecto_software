@@ -84,6 +84,17 @@
   color: var(--gris_oscuro);
 }
 
+.eliminar {
+  background-color: var(--rojo);
+  color: var(--blanco);
+  border-radius: 5px;
+}
+
+.eliminar:hover {
+  background-color: var(--gris_claro);
+  color: var(--gris_oscuro);
+}
+
 .descargar {
   background-color: var(--azul);
   color: white;

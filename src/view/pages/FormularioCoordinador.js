@@ -16,6 +16,7 @@ import styles from '../styles/FormularioCoordinador.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
+import Header from '../components/HeaderCoordinador';
 import { FaEdit } from "react-icons/fa";
 
 const FormularioCoordinador = () => {
@@ -244,24 +245,155 @@ const FormularioCoordinador = () => {
     }
   }
 
+  async function consultarHR(nombreContact){
+    try{
+      const { data, error } = await supabase
+        .from('ContactoEmpresa')
+        .select(`
+          id,
+          nombre,
+          AnteproyectoContact:AnteproyectoContacto_rrhh_id_fkey (
+            contacto_id         
+          )
+        `)
+        .eq('nombre', nombreContact)
+        .single();
+      if(data.AnteproyectoContact.length==1){
+        return true;
+      }
+      else{
+        return false;
+      }
+    } catch(err){
+      console.error('Error al buscar contacto', err);
+      alert('Error al buscar contacto' + err.message);
+    }
+  }
+
+  async function eliminarAnteproyecto(){
+    try{
+      const { error } = await supabase
+        .from('Anteproyecto')
+        .delete()
+        .eq('id', idAnteproyecto);
+        if (error) {
+        alert('Error al eliminar anteproyecto: ' + error.message);
+        return;
+      }
+    }catch(error){
+      alert('Error al eliminar anteproyecto:' + error);
+    }
+  }
+
+  async function consultarEmpresas(){
+    try{
+      const { data, error } = await supabase
+        .from('Empresa')
+        .select(`
+          id,
+          nombre,
+          ContactoEmpresa:contactoempresa_empresa_id_fkey(
+            nombre
+          )
+        `)
+        .eq('nombre', nombreEmpresa)
+        .single();
+      if(data.ContactoEmpresa.length == 0){
+        return true;
+      }
+      else{
+        return false;
+      }
+    } catch(err){
+      console.error('Error al buscar empresas', err);
+      alert('Error al buscar empresas' + err.message);
+    }
+  }
+
+  async function eliminarContacto(name){
+    try{
+      const { error } = await supabase
+        .from('ContactoEmpresa')
+        .delete()
+        .eq('nombre', name);
+        if (error) {
+        alert('Error al eliminar contacto: ' + error.message);
+        return;
+      }
+    }catch(error){
+      alert('Error al eliminar contacto:' + error);
+    }
+  }
+
+  async function eliminarAnteContact(){
+    try{
+      const { error } = await supabase
+        .from('AnteproyectoContacto')
+        .delete()
+        .eq('anteproyecto_id', idAnteproyecto);
+        if (error) {
+        alert('Error al eliminar contacto: ' + error.message);
+        return;
+      }
+    }catch(error){
+      alert('Error al eliminar contacto:' + error);
+    }
+  }
+
+  async function consultarContactos(nombreContact){
+    try{
+      const { data, error } = await supabase
+        .from('ContactoEmpresa')
+        .select(`
+          id,
+          nombre,
+          AnteproyectoContact:anteproyectocontacto_contacto_id_fkey (
+            contacto_id         
+          )
+        `)
+        .eq('nombre', nombreContact)
+        .single();
+      if(error) throw error;
+      if(data.AnteproyectoContact.length==1){
+        return true;
+      }
+      else{
+        return false;
+      }
+    } catch(err){
+      console.error('Error al buscar contacto', err);
+      alert('Error al buscar contacto' + err.message);
+    }
+  }
+
   /**
    * Reprobar => estado = "Reprobado" + guardar observaciones
    */
 
   async function reprobarAnteproyecto(e) {
     e.preventDefault();
-    const confirmReprobar = window.confirm("¿Está seguro de REPROBAR el anteproyecto?");
+    const confirmReprobar = window.confirm("¿Está seguro de REPROBAR el anteproyecto? Asegúrese de incluir la razón en las observaciones");
     if (!confirmReprobar) return;
 
     try {
-      const { error } = await supabase
-        .from('Anteproyecto')
-        .update({
-          comentario: observaciones,
-          estado: "Reprobado"
-        })
-        .eq('id', idAnteproyecto);
-      if (error) throw error;
+      const contactoCount = await consultarContactos(nombreAsesor);
+      const rhCount = await consultarHR(nombreHR);
+      await eliminarAnteContact();
+      await eliminarAnteproyecto();
+      if(contactoCount==true){
+        await eliminarContacto(nombreAsesor);
+      }
+      if(rhCount==true){
+        await eliminarContacto(nombreHR);
+      }
+      const empresaCount = await consultarEmpresas();
+      if(empresaCount == true){
+        const { error } = await supabase
+        .from('Empresa')
+        .delete()
+        .eq('nombre', nombreEmpresa);
+        if (error) throw error;
+      }
 
       alert('Anteproyecto actualizado exitosamente (Reprobado).');
       navigate('/anteproyectosCoordinador');
@@ -286,9 +418,7 @@ const FormularioCoordinador = () => {
 
   return (
     <div>
-      <header className={styles.header_coordinador}>
-        <h1>Revisar Anteproyecto</h1>
-      </header>
+      <Header title="Revisar Anteproyecto"/>
 
       {/* Al hacer submit se llama aprobarAnteproyecto; 
           para reprobar hay un botón aparte. */}
@@ -430,10 +560,19 @@ const FormularioCoordinador = () => {
           </label>
           <textarea value={contexto} readOnly />
           {infoVisible.correccionC && (
+            <>
             <textarea
               value={correccionC}
               onChange={(e) => setCorrecionC(e.target.value)}
             />
+            <button
+              type="button"
+              className={`${styles.button} ${styles.cancelar}`}
+              onClick={() => setCorrecionC("")}
+            >
+            Borrar
+            </button>
+            </>
           )}
         </div>
 
@@ -448,10 +587,19 @@ const FormularioCoordinador = () => {
           </label>
           <textarea value={justificacion} readOnly />
           {infoVisible.correccionJ && (
+            <>
             <textarea
               value={correccionJ}
               onChange={(e) => setCorrecionJ(e.target.value)}
             />
+            <button
+              type="button"
+              className={`${styles.button} ${styles.cancelar}`}
+              onClick={() => setCorrecionJ("")}
+            >
+            Borrar
+            </button>
+            </>
           )}
           
         </div>
@@ -467,10 +615,19 @@ const FormularioCoordinador = () => {
           </label>
           <textarea value={sintomas} readOnly />
           {infoVisible.correccionS && (
+            <>
             <textarea
               value={correccionS}
               onChange={(e) => setCorrecionS(e.target.value)}
             />
+            <button
+              type="button"
+              className={`${styles.button} ${styles.cancelar}`}
+              onClick={() => setCorrecionS("")}
+            >
+            Borrar
+            </button>
+            </>
           )}
         </div>
 
@@ -485,10 +642,19 @@ const FormularioCoordinador = () => {
           </label>
           <textarea value={impacto} readOnly />
           {infoVisible.correccionE && (
+            <>
             <textarea
               value={correccionE}
               onChange={(e) => setCorrecionE(e.target.value)}
             />
+            <button
+              type="button"
+              className={`${styles.button} ${styles.cancelar}`}
+              onClick={() => setCorrecionE("")}
+            >
+            Borrar
+            </button>
+          </>
           )}
         </div>
 
