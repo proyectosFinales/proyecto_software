@@ -1,115 +1,138 @@
 /**SettingsCoordinador.js */
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { 
+  LogOut, 
+  User,
+  Calendar,
+  Clock
+} from "lucide-react";
+import Modal from './Modal';
 
-const SettingsCoordinador = ({ show }) => {
+const SettingsCoordinador = ({ show, setShow }) => {
   const navigate = useNavigate();
   const [modal, setModal] = useState(false);
   const [modalDuracion, setModalDuracion] = useState(false);
-  const [duracion, setDuracion] = useState("");
-
-  const consultarAsesor = () => {
-    alert("Función para consultar asesor.");
-    setModal(true);
-  };
-
-  const cambiarDuracion = (e) => {
-    e.preventDefault();
-    alert(`Duración actualizada a ${duracion || 1} hora(s).`);
-    setModalDuracion(false);
-  };
 
   const delSessionToken = () => {
     sessionStorage.clear();
     navigate("/");
   };
 
+  const menuItems = [
+    { path: "/editar-perfil", text: "Perfil", icon: User },
+    { path: "/calendario", text: "Calendario", icon: Calendar },
+    { path: "/duracion-semestre", text: "Duración del semestre", icon: Clock },
+    { text: "Cerrar sesión", icon: LogOut, onClick: () => setModal(true) }
+  ];
+
   return (
     <>
-      <nav
-        className={`fixed top-0 right-0 h-full bg-gris_oscuro text-blanco p-6 transition-transform transform ${
-          show ? "translate-x-0" : "translate-x-full"
-        } w-64 shadow-lg z-50`}
+      {show && (
+        <div 
+          className="fixed inset-0 bg-black/20 z-40"
+          onClick={() => setShow(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <nav 
+        className={`
+          fixed top-20 right-0 
+          h-[calc(100vh-80px)] w-64
+          bg-white
+          shadow-lg
+          z-50
+          transition-transform duration-300 ease-in-out
+          ${show ? 'translate-x-0' : 'translate-x-full'}
+        `}
       >
-        <ul className="space-y-4">
-          <li>
-            <button
-              onClick={consultarAsesor}
-              className="block w-full text-left p-2 hover:bg-gris_claro rounded"
-            >
-              Consultar asesor
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={() => setModalDuracion(true)}
-              className="block w-full text-left p-2 hover:bg-gris_claro rounded"
-            >
-              Establecer duración de las defensas
-            </button>
-          </li>
-          <li>
-            <button
-              onClick={delSessionToken}
-              className="block w-full text-left p-2 hover:bg-gris_claro rounded"
-            >
-              Cerrar sesión
-            </button>
-          </li>
+        <ul className="list-none p-0 m-0">
+          {menuItems.map((item, index) => {
+            const Icon = item.icon;
+            if (item.path) {
+              return (
+                <Link
+                  key={index}
+                  to={item.path}
+                  className="block no-underline group transition-all duration-200"
+                >
+                  <li className="
+                    flex items-center gap-3
+                    px-6 py-4
+                    text-gray-900
+                    border-b border-gray-100
+                    cursor-pointer
+                    transition-colors duration-200
+                    hover:bg-gray-50
+                    active:bg-gray-100
+                  ">
+                    <Icon 
+                      size={20} 
+                      className="text-azul transition-transform duration-200 group-hover:scale-110" 
+                    />
+                    <span className="text-base font-medium">
+                      {item.text}
+                    </span>
+                  </li>
+                </Link>
+              );
+            } else {
+              return (
+                <li
+                  key={index}
+                  onClick={item.onClick}
+                  className="
+                    flex items-center gap-3
+                    px-6 py-4
+                    text-gray-900
+                    border-b border-gray-100
+                    cursor-pointer
+                    transition-colors duration-200
+                    hover:bg-gray-50
+                    active:bg-gray-100
+                    group
+                  "
+                >
+                  <Icon 
+                    size={20} 
+                    className="text-azul transition-transform duration-200 group-hover:scale-110" 
+                  />
+                  <span className="text-base font-medium">
+                    {item.text}
+                  </span>
+                </li>
+              );
+            }
+          })}
         </ul>
+
+        <div className="absolute bottom-0 w-full p-4 text-center text-gray-600 text-sm border-t border-gray-200 bg-white">
+          Instituto Tecnológico de Costa Rica
+        </div>
       </nav>
 
-      {/* Modal para consultar asesor */}
-      {modal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-80">
-            <h2 className="text-xl font-bold mb-4">Información del Asesor</h2>
-            <p className="mb-4">Aquí irá la información del asesor.</p>
+      {/* Modal de cierre de sesión */}
+      <Modal show={modal} onClose={() => setModal(false)}>
+        <div className="p-6 text-center">
+          <h2 className="text-xl font-bold mb-4">¿Desea cerrar sesión?</h2>
+          <div className="flex justify-center gap-4">
             <button
-              onClick={() => setModal(false)}
-              className="bg-red-500 text-white px-4 py-2 rounded"
+              className="px-4 py-2 bg-azul text-white rounded hover:bg-opacity-90"
+              onClick={delSessionToken}
             >
-              Cerrar
+              Sí
+            </button>
+            <button
+              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-opacity-90"
+              onClick={() => setModal(false)}
+            >
+              No
             </button>
           </div>
         </div>
-      )}
-
-      {/* Modal para cambiar duración */}
-      {modalDuracion && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <div className="bg-white p-6 rounded shadow-lg w-80">
-            <h2 className="text-xl font-bold mb-4">
-              Establecer Duración de las Defensas
-            </h2>
-            <p className="mb-4">
-              La duración predeterminada es 1 hora. Si no ingresa un valor, se
-              usará el predeterminado.
-            </p>
-            <input
-              type="number"
-              className="border p-2 w-full mb-4"
-              placeholder="Duración en horas"
-              value={duracion}
-              onChange={(e) => setDuracion(e.target.value)}
-            />
-            <div className="flex justify-between">
-              <button
-                onClick={() => setModalDuracion(false)}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={cambiarDuracion}
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-              >
-                Guardar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </Modal>
     </>
   );
 };

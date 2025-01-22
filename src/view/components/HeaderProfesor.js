@@ -6,6 +6,7 @@ import SettingsProfesor from './SettingsProfesor';
 const HeaderProfesor = ({title}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuOpenSettings, setIsMenuOpenSettings] = useState(false);
+
   return (
     <div>
       <div className="h-20 flex items-center justify-center bg-gray-300 border-b border-black relative">
@@ -24,8 +25,8 @@ const HeaderProfesor = ({title}) => {
         <h1 className="text-xl font-bold">{title}</h1>
       </div>
       <div>
-        <SidebarProfesor show={isMenuOpen} />
-        <SettingsProfesor show={isMenuOpenSettings} />
+        <SidebarProfesor show={isMenuOpen} setShow={setIsMenuOpen} />
+        <SettingsProfesor show={isMenuOpenSettings} setShow={setIsMenuOpenSettings} />
       </div>
     </div>
   );

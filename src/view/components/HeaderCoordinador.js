@@ -25,7 +25,7 @@ const HeaderCoordinador = ({ title }) => {
         </button>
       </header>
       <SidebarCoordinador show={isMenuOpen} setShow={setIsMenuOpen} />
-      <SettingsCoordinador show={isMenuOpenSettings} />
+      <SettingsCoordinador show={isMenuOpenSettings} setShow={setIsMenuOpenSettings} />
     </div>
   );
 };
