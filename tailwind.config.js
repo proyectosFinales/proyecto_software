@@ -11,10 +11,27 @@ module.exports = {
         gris_claro: "#D9D9D9",
         celeste: "#85d7ff",
       },
+      zIndex: {
+        '40': '40',
+        '50': '50',
+      },
+      transitionProperty: {
+        'height': 'height',
+        'spacing': 'margin, padding',
+      },
+      screens: {
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
     },
   },
   plugins: [
     require("@tailwindcss/forms"), 
     require("@tailwindcss/typography"), 
   ],
+  // Enable dark mode if needed
+  darkMode: 'class',
 };

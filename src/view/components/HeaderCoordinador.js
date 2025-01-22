@@ -9,22 +9,22 @@ const HeaderCoordinador = ({ title }) => {
 
   return (
     <div>
-      <header className="flex items-center justify-between bg-gris_oscuro text-blanco p-4 shadow-md">
+      <header className="h-20 bg-gray-300 text-black p-4 shadow-md flex items-center justify-center relative border-b border-black">
         <button
-          className="text-xl md:text-2xl"
+          className="text-xl md:text-2xl absolute left-5"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           &#9776;
         </button>
         <h1 className="text-lg md:text-2xl font-bold">{title}</h1>
         <button
-          className="text-xl"
+          className="text-xl absolute right-5"
           onClick={() => setIsMenuOpenSettings(!isMenuOpenSettings)}
         >
           <i className="fas fa-cog"></i>
         </button>
       </header>
-      <SidebarCoordinador show={isMenuOpen} />
+      <SidebarCoordinador show={isMenuOpen} setShow={setIsMenuOpen} />
       <SettingsCoordinador show={isMenuOpenSettings} />
     </div>
   );
