@@ -137,75 +137,135 @@ const Entrada = () => {
   
 
   return (
-    <div className="agregar-usuario-container">
-      <Header />
-      <div className="form-container">
+  <div className="agregar-usuario-container">
+    <Header />
+    <div 
+      className="form-container" 
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: '20px',
+        padding: '20px',
+      }}
+    >
+      {/* Botón Volver y Título */}
+      <div 
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          width: '100%',
+          maxWidth: '75%',
+          marginBottom: '20px',
+        }}
+      >
         <button
           className="btn-back-addUser"
           onClick={() => navigate("/bitacoras")}
+          style={{ marginLeft: '10px' }}
         >
           Volver
         </button>
-        <h2>Entrada</h2>
+        <h2 style={{ textAlign: 'center', margin: '0 auto', flex: 1 }}>
+          Entrada
+        </h2>
+      </div>
 
-        <form className="form-addUser" style={{ width: "75%"}}>
-          <label>Fecha ultima actualizacion:</label>
-          <div className="input-container-add">
-            <FaMapMarked className="icon-add" />
-            <input
-              type="text"
-              name="fecha"
-              className="input-field"
-              value={entrada.fecha}
-              readOnly
-            />
+      {/* Formulario */}
+      <form 
+        className="form-addUser" 
+        style={{ 
+          width: '75%', 
+          display: 'flex', 
+          flexDirection: 'column', 
+          gap: '15px' 
+        }}
+      >
+        {/* Fecha Última Actualización */}
+        <label>Fecha última actualización:</label>
+        <div className="input-container-add" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <FaMapMarked className="icon-add" />
+          <input
+            type="text"
+            name="fecha"
+            className="input-field"
+            value={entrada.fecha}
+            readOnly
+            style={{ flex: 1 }}
+          />
         </div>
 
-
+        {/* Contenido */}
         <label>Contenido:</label>
-        <div className="input-container-add">
-        <textarea
-          name="contenido"
-          className="input-field"
-          value={entrada.contenido}
-          onChange={handleInputChange}
-          rows="4"
-          style={{
-            resize: "none",
-            width: "100%",
-            height: "auto",
-            overflow: "hidden",
-          }}
-          onInput={(e) => {
-            e.target.style.height = "auto";
-            e.target.style.height = `${e.target.scrollHeight}px`;
-          }}
-          readOnly={(entrada.aprobada_prof === true) && (entrada.aprobada_est === true)}
-        />
-        
+        <div className="input-container-add" style={{ width: '100%' }}>
+          <textarea
+            name="contenido"
+            className="input-field"
+            value={entrada.contenido}
+            onChange={handleInputChange}
+            rows="4"
+            style={{
+              resize: 'none',
+              width: '100%',
+              height: 'auto',
+              overflow: 'hidden',
+            }}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            readOnly={entrada.aprobada_prof === true && entrada.aprobada_est === true}
+          />
         </div>
 
-
-        <div className="buttons">
-          {(entrada.aprobada_prof === false) && (esProfesor === true) && (
-            <button type="button" onClick={() => handleAprobarEntrada(true)}>
+        {/* Botones */}
+        <div 
+          className="buttons" 
+          style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            gap: '10px', 
+            marginTop: '20px' 
+          }}
+        >
+          {/* Botón Aprobar (Profesores) */}
+          {entrada.aprobada_prof === false && esProfesor === true && (
+            <button 
+              type="button" 
+              onClick={() => handleAprobarEntrada(true)} 
+              style={{ flex: 1 }}
+            >
               Aprobar
             </button>
           )}
 
-          {(entrada.aprobada_est === false) && (esProfesor === false) && (
-            <button type="button" onClick={() => handleAprobarEntrada(false)}>
+          {/* Botón Aprobar (Estudiantes) */}
+          {entrada.aprobada_est === false && esProfesor === false && (
+            <button 
+              type="button" 
+              onClick={() => handleAprobarEntrada(false)} 
+              style={{ flex: 1 }}
+            >
               Aprobar
             </button>
           )}
-          <button type="button" onClick={handleGuardarBitacora} disabled={(entrada.aprobada_prof === true) && (entrada.aprobada_est === true)}>
+
+          {/* Botón Guardar */}
+          <button 
+            type="button" 
+            onClick={handleGuardarBitacora} 
+            disabled={entrada.aprobada_prof === true && entrada.aprobada_est === true}
+            style={{ flex: 1 }}
+          >
             Guardar
           </button>
         </div>
-        </form>
-      </div>
-      <Footer />
+      </form>
     </div>
+    <Footer />
+  </div>
+
   );
 };
 
