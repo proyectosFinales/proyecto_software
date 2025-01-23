@@ -1,43 +1,53 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import styles from '../styles/MenuPrincipal.module.css';
-import Footer from '../components/Footer'
+import Footer from '../components/Footer';
 import SettingsProfesor from '../components/SettingsProfesor';
 
+const MenuProfesor = () => {
+  const [isMenuOpenSettings, setIsMenuOpenSettings] = useState(false);
 
-const Menu = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuItems = [
+    { to: "/proyectos-profesor", icon: "fas fa-folder-open", text: "Proyectos" },
+    { to: "/disponibilidad-profesor", icon: "fas fa-calendar-days", text: "Disponibilidad para defensas" },
+    { to: "/citas-profesor", icon: "fas fa-clock", text: "Consultar citas" },
+    { to: "/bitacoras", icon: "fas fa-folder-open", text: "Bitácoras" }
+  ];
+
   return (
-    <div>
-      <header className={styles.AppHeader}>
-        <h1>Inicio</h1>
-        <button className={styles.settingsIcon} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <header className="h-20 bg-white flex justify-between items-center px-4 border-b-2 border-black shadow-sm">
+        <h1 className="text-2xl font-bold text-gray-800">Inicio</h1>
+        <button 
+          className="text-2xl hover:scale-110 transition-transform text-gray-700"
+          onClick={() => setIsMenuOpenSettings(!isMenuOpenSettings)}
+        >
           <i className="fas fa-cog"></i>
         </button>
       </header>
-      <SettingsProfesor show={isMenuOpen} />
-      <div className={styles.menuGrid}>
-        <Link to="/proyectos-profesor" className={styles.menuItem}>
-          <i className="fas fa-folder-open"></i>
-          <p>Proyectos asignados</p>
-        </Link>
-        <Link to="/disponibilidad-profesor" className={styles.menuItem}>
-          <i className="fas fa-calendar-days"></i>
-          <p>Disponibilidad para defensas</p>
-        </Link>
-        <Link to="/citas-profesor" className={styles.menuItem}>
-          <i className="fas fa-clock"></i>
-          <p>Consultar citas</p>
-        </Link>
-        <Link to="/bitacoras" className={styles.menuItem}>
-          <i className="fas fa-folder-open"></i>
-          <p>Bitácoras</p>
-        </Link>
 
-      </div>
+      <SettingsProfesor 
+        show={isMenuOpenSettings} 
+        setShow={setIsMenuOpenSettings} 
+      />
+
+      <main className="flex-grow p-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {menuItems.map((item, index) => (
+            <Link 
+              key={index}
+              to={item.to} 
+              className="flex flex-col items-center justify-center p-8 bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 hover:scale-105"
+            >
+              <i className={`${item.icon} text-azul text-5xl mb-4`}></i>
+              <p className="text-center text-gray-700 font-semibold text-lg">{item.text}</p>
+            </Link>
+          ))}
+        </div>
+      </main>
+
       <Footer />
     </div>
   );
 };
 
-export default Menu;
+export default MenuProfesor;
