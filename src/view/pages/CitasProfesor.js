@@ -3,10 +3,9 @@
  * Muestra las citas relacionadas con un profesor (sea como asesor o lector).
  */
 import React, { useState, useEffect } from 'react';
-import '../styles/Citas.css';
-import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderProfesor';
+import { supabase } from '../../model/Cliente';
 
 const CitasProfesor = () => {
   const profesorID = sessionStorage.getItem('token');
@@ -161,45 +160,39 @@ const CitasProfesor = () => {
   }, [profesorID]);
 
   return (
-    <div>
+    <div className="min-h-screen flex flex-col">
       <Header title="Citas" />
-      <div className="citas-div container">
-        <div className="row justify-content-center">
-          <div className="cita-table col-12">
-            <h2 className="w-100 text-center">Citas del profesor</h2>
-            <table className="w-100">
-              <thead>
-                <tr className="cita-row">
-                  <th>Estudiante</th>
-                  <th>Profesor asesor</th>
-                  <th>Día</th>
-                  <th>Hora</th>
-                  <th>Lector 1</th>
-                  <th>Lector 2</th>
-                </tr>
-              </thead>
-              <tbody>
-                {citas.length === 0 ? (
-                  <tr>
-                    <td colSpan="6" style={{ textAlign: 'center' }}>
-                      No se ha encontrado ninguna cita relacionada con este profesor.
-                    </td>
+      <div className="flex-grow p-4">
+        <h2 className="text-xl font-bold mb-4">Citas asignadas</h2>
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-collapse border border-slate-300">
+            <thead className="bg-gray-100 border-b">
+              <tr>
+                <th className="p-3 border-b border-slate-300 text-left">Estudiante</th>
+                <th className="p-3 border-b border-slate-300 text-left">Profesor</th>
+                <th className="p-3 border-b border-slate-300 text-left">Fecha</th>
+                <th className="p-3 border-b border-slate-300 text-left">Hora</th>
+                <th className="p-3 border-b border-slate-300 text-left">Lector 1</th>
+                <th className="p-3 border-b border-slate-300 text-left">Lector 2</th>
+              </tr>
+            </thead>
+            <tbody>
+              {citas.length === 0 ? (
+                <tr><td colSpan="6" className="p-3 text-center text-gray-500">No se han encontrado citas.</td></tr>
+              ) : (
+                citas.map((cita) => (
+                  <tr key={cita.cita_id} className="border-b hover:bg-gray-50">
+                    <td className="p-3">{estudiantesMap[cita.anteproyecto_id] || 'N/A'}</td>
+                    <td className="p-3">{profesoresMap[cita.anteproyecto_id] || 'N/A'}</td>
+                    <td className="p-3">{formatDateDDMMYYYY(cita.fecha)}</td>
+                    <td className="p-3">{`${formatTime(cita.hora_inicio)} - ${formatTime(cita.hora_fin)}`}</td>
+                    <td className="p-3">{lectoresMap[cita.lector1] || 'N/A'}</td>
+                    <td className="p-3">{lectoresMap[cita.lector2] || 'N/A'}</td>
                   </tr>
-                ) : (
-                  citas.map((cita) => (
-                    <tr className="cita-row" key={cita.cita_id}>
-                      <td>{estudiantesMap[cita.anteproyecto_id] || 'N/A'}</td>
-                      <td>{profesoresMap[cita.anteproyecto_id] || 'N/A'}</td>
-                      <td>{formatDateDDMMYYYY(cita.fecha)}</td>
-                      <td>{`${formatTime(cita.hora_inicio)} - ${formatTime(cita.hora_fin)}`}</td>
-                      <td>{lectoresMap[cita.lector1] || 'N/A'}</td>
-                      <td>{lectoresMap[cita.lector2] || 'N/A'}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
       <Footer />
