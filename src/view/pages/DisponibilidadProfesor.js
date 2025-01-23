@@ -202,78 +202,36 @@ const DisponibilidadProfesor = () => {
   };
 
   return (
-    <div>
-      <Header title="Citas" />
-      <div className="container citas-div">
-        <div className="row justify-content-center cita-table">
-          <h2 className="mb-5 w-auto">Lista de citas</h2>
-          <div className="row justify-content-center mb-4">
-            <div className="col-auto">
-              <button className="cita-btn" onClick={selectAll}>
-                Seleccionar todos
-              </button>
+    <div className="min-h-screen flex flex-col">
+      <Header title="Disponibilidad Profesor" />
+      <div className="flex-grow p-4">
+        <h2 className="text-xl font-bold mb-4">Indique su disponibilidad</h2>
+        <div className="flex flex-wrap gap-4">
+          {citas.map((cita, index) => (
+            <div key={index} className="border border-gray-300 rounded p-4 flex flex-col w-full sm:w-1/2 lg:w-1/3">
+              <p className="font-semibold">Fecha: {cita.fecha}</p>
+              <p>Hora inicio: {cita.hora_inicio}</p>
+              <div className="mt-2">
+                <input
+                  type="checkbox"
+                  checked={cita.disponible}
+                  onChange={() => handleCheckboxChange(index)}
+                  className="mr-2"
+                />
+                <label>Disponible</label>
+              </div>
             </div>
-            <div className="col-auto">
-              <button className="cita-btn-secondary" onClick={deselectAll}>
-                Deseleccionar todos
-              </button>
-            </div>
-          </div>
-
-          <table className="mb-4">
-            <thead>
-              <tr>
-                <th>Día</th>
-                <th>Hora</th>
-                <th>Disponible</th>
-              </tr>
-            </thead>
-            <tbody>
-              {citas.length === 0 ? (
-                <tr>
-                  <td colSpan="3" style={{ textAlign: 'center' }}>
-                    No hay citas disponibles.
-                  </td>
-                </tr>
-              ) : (
-                citas.map((cita, index) => (
-                  <tr key={cita.cita_id}>
-                    <td>{cita.fecha}</td>
-                    <td>
-                      {`${formatTime(cita.hora_inicio)} - ${formatTime(cita.hora_fin)}`}
-                    </td>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={cita.disponible}
-                        onChange={() => handleCheckboxChange(index)}
-                      />
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+          ))}
         </div>
-
-        <div className="row justify-content-center">
-          <div className="col-auto">
-            <button className="cita-btn" onClick={handleSave}>
-              Guardar
-            </button>
-          </div>
-          <div className="col-auto">
-            <button className="cita-btn-secondary" onClick={handleGoBack}>
-              Volver
-            </button>
-          </div>
+        <div className="pt-6 flex space-x-4">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" onClick={handleSave}>
+            Guardar
+          </button>
+          <button className="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400" onClick={handleGoBack}>
+            Volver
+          </button>
         </div>
-        {/* Aquí mostramos un mensaje de error más claro */}
-        {error && (
-          <p style={{ color: 'red', marginTop: '20px' }}>
-            {error}
-          </p>
-        )}
+        {error && <p className="text-red-600 mt-4">{error}</p>}
       </div>
       <Footer />
     </div>

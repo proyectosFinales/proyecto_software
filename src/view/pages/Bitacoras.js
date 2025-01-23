@@ -207,135 +207,159 @@ const Bitacoras = () => {
   };
   
   return (
-    <div>
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header title="Bitácoras" />
-      <div className="citas-div container">
-        <div className="row justify-content-center">
-          <div className="cita-table col-12">
-            <div className="d-flex justify-content-between align-items-center">
-              <h2 className="w-100 text-center">Bitácoras del {rol === 2 ? 'Profesor' : 'Estudiante'}</h2>
+      <div className="flex-grow p-2 sm:p-4 container mx-auto">
+        {/* Header con título y botón de agregar */}
+        <div className="flex justify-between items-center mb-6 px-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
+            Bitácoras del {rol === 2 ? 'Profesor' : 'Estudiante'}
+          </h2>
+          <button
+            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xl shadow-md transition-colors duration-200"
+            onClick={handleAgregarBitacora}
+          >
+            +
+          </button>
+        </div>
+
+        {/* Contenedor con scroll horizontal para tablas responsivas */}
+        <div className="overflow-x-auto bg-white rounded-lg shadow-md">
+          <table className="w-full table-auto">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Fecha de Creación
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Estudiante
+                </th>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Profesor
+                </th>
+                <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {bitacoras.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="px-4 py-4 text-center text-gray-500">
+                    No se ha encontrado ninguna bitácora relacionada.
+                  </td>
+                </tr>
+              ) : (
+                bitacoras.map((bitacora) => (
+                  <tr 
+                    key={bitacora.id}
+                    className="hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
+                      {bitacora.fecha_creacion}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
+                      {bitacora.Estudiante.nombreUsuario.nombre}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
+                      {bitacora.Profesor.nombreUsuario.nombre}
+                    </td>
+                    <td className="px-4 py-4 text-right text-sm font-medium whitespace-nowrap">
+                      <button
+                        onClick={() => handleVerDetallesBitacora(bitacora.id)}
+                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Ver detalles
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal de detalles */}
+        <Modal
+          isOpen={modalIsOpen}
+          onRequestClose={handleCloseModal}
+          contentLabel="Detalles de la Bitácora"
+          className="mx-auto w-11/12 max-w-4xl bg-white rounded-lg shadow-xl p-4 sm:p-6 overflow-y-auto max-h-[90vh]"
+          overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4"
+        >
+          <div className="flex flex-col h-full">
+            {/* Encabezado del modal */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Entradas de la Bitácora</h2>
               <button
-                className="btn btn-primary"
-                style={{ position: 'relative', right: '20px'}}
-                onClick={handleAgregarBitacora}
+                className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center text-xl shadow transition-colors duration-200"
+                onClick={handleAgregarEntrada}
               >
                 +
               </button>
             </div>
-            <table className="w-100">
-              <thead>
-                <tr className="cita-row">
-                  <th>Fecha de Creación</th>
-                  <th>Estudiante</th>
-                  <th>Profesor</th>
-                  <th> </th>
-                </tr>
-              </thead>
-              <tbody>
-                {bitacoras.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" style={{ textAlign: 'center' }}>
-                      No se ha encontrado ninguna bitácora relacionada.
-                    </td>
-                  </tr>
-                ) : (
-                  bitacoras.map((bitacora) => (
-                    <tr className="cita-row" key={bitacora.id}>
-                      <td>{bitacora.fecha_creacion}</td>
-                      <td>{bitacora.Estudiante.nombreUsuario.nombre}</td>
-                      <td>{bitacora.Profesor.nombreUsuario.nombre}</td>
-                      <td>
-                        <button
-                          className="cita-btn w-50 mx-auto"
-                          onClick={() => handleVerDetallesBitacora(bitacora.id)}
-                        >
-                          Ver detalles
-                        </button>
-                      </td>
+
+            {/* Contenido del modal con scroll */}
+            <div className="overflow-x-auto">
+              {entradas.length > 0 ? (
+                <table className="w-full table-auto">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Fecha
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Contenido
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Estado
+                      </th>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {entradas.map((entrada) => (
+                      <tr 
+                        key={entrada.id}
+                        className="hover:bg-gray-50 transition-colors duration-200"
+                      >
+                        <td className="px-4 py-4 text-sm text-gray-900 whitespace-nowrap">
+                          {entrada.fecha}
+                        </td>
+                        <td className="px-4 py-4 text-sm text-gray-900">
+                          {entrada.contenido.slice(0, 100)}...
+                        </td>
+                        <td className="px-4 py-4 text-right text-sm font-medium whitespace-nowrap">
+                          <button
+                            onClick={() => handleVerDetallesEntrada(entrada.id)}
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          >
+                            Ver detalles
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <p className="text-center text-gray-500 py-4">
+                  No hay entradas para mostrar.
+                </p>
+              )}
+            </div>
+
+            {/* Footer del modal */}
+            <div className="mt-6 flex justify-end">
+              <button
+                onClick={handleCloseModal}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-gray-700 bg-gray-100 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+              >
+                Cerrar
+              </button>
+            </div>
           </div>
-        </div>
+        </Modal>
       </div>
       <Footer />
-
-      {/* Modal para ver los detalles de la bitácora */}
-      <Modal
-      isOpen={modalIsOpen}
-      onRequestClose={handleCloseModal}
-      contentLabel="Detalles de la Bitácora"
-      className="modal-content-small"
-      overlayClassName="modal-overlay"
-      >
-      {/* Contenedor para el título y el botón */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>Entradas de la Bitácora</h2>
-        <button
-          className="btn btn-primary"
-          onClick={handleAgregarEntrada}
-        >
-          +
-        </button>
-      </div>
-
-      {/* Entradas */}
-      {entradas.length > 0 ? (
-        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-          <table className="w-100">
-            <thead>
-              <tr className="cita-row">
-                <th>Fecha</th>
-                <th>Profesor</th>
-                <th>Estudiante</th>
-                <th>Estado</th>
-                <th> </th>
-              </tr>
-            </thead>
-            <tbody>
-              {entradas.map((entrada) => (
-                <tr key={entrada.id}>
-                  <td>{entrada.fecha}</td>
-                  <td>
-                    {(entrada.aprobada_prof === true)
-                      ? 'Aprobado'
-                      : 'Pendiente'}
-                  </td>
-                  <td>
-                    {(entrada.aprobada_est === true)
-                      ? 'Aprobado'
-                      : 'Pendiente'}
-                  </td>
-                  <td>
-                    {(entrada.aprobada_prof === true) && (entrada.aprobada_est === true)
-                      ? 'Aprobado'
-                      : 'Pendiente'}
-                  </td>
-                  <td>
-                    <button
-                      className="cita-btn w-auto mx-auto"
-                      onClick={() => handleVerDetallesEntrada(entrada.id)}
-                    >
-                      Ver detalles
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      ) : (
-        <p style={{ textAlign: 'center' }}>No hay entradas para mostrar.</p>
-      )}
-
-      {/* Botón para cerrar el modal */}
-      <button onClick={handleCloseModal} className="btn btn-secondary mt-3">
-        Cerrar
-      </button>
-    </Modal>
-
     </div>
   );
 };

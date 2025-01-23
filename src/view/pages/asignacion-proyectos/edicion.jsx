@@ -38,47 +38,51 @@ const EdicionAsignacionProyectos = () => {
   };
 
   return (
-    <Layout title="Edición de asignación de proyectos">
-      <Button onClick={() => generarReporteAsignaciones(profesores)}>
-        Generar reporte de asignaciones
-      </Button>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Profesor</th>
-            <th>Estudiantes</th>
-          </tr>
-        </thead>
-        <tbody>
-          {profesores.map((profesor, i) => (
-            <tr key={`profesor-${i}`}>
-              <td>
-                <p style={{margin: "0 0 5px 0"}}>
-                  {profesor.nombre} (Proyectos permitidos: {profesor.cantidadEstudiantes})
-                </p>
-                <AdicionAnteproyectoProfesor
-                  profesor={profesor}
-                  onAdicion={actualizarProfesores}
-                />
-              </td>
-              <td>
-                <ul className="anteproyectos-profesores">
-                  {profesor.anteproyectos.map((ap, j) => (
-                    <li key={`anteproyecto-${j}-profesor-${i}`}>
-                      <p><b>Estudiante</b>: {ap.estudiante.nombre}</p>
-                      <p><b>Empresa</b>: {ap.nombreEmpresa}</p>
-                      <Button onClick={() => desencargarAnteproyecto(ap)}>
-                        Deasignar proyecto
-                      </Button>
-                    </li>
-                  ))}
-                </ul>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </Layout>
+    <>
+      <h2 className="text-xl font-bold my-4">Edición de Asignaciones</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="border border-gray-300 rounded p-4">
+          {/* Sección con tabla de profesores */}
+          <table className="min-w-full border-collapse">
+            <thead className="bg-gray-100 border-b">
+              <tr>
+                <th className="p-2 text-left font-semibold">Profesor</th>
+                <th className="p-2 text-left font-semibold">Proyectos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {profesores.map((prof) => (
+                <tr key={prof.profesor_id} className="border-b">
+                  <td className="p-2">{prof.nombre}</td>
+                  <td className="p-2">
+                    {/* Muestra sus anteproyectos asignados */}
+                    {prof.anteproyectos?.map((ap) => (
+                      <div key={ap.id} className="my-2">
+                        {ap.estudiante?.nombre} — {ap.nombreEmpresa}
+                      </div>
+                    ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* Botón para generar reporte */}
+          <button
+            onClick={() => generarReporteAsignaciones(profesores)}
+            className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            Generar Reporte
+          </button>
+        </div>
+        <div className="border border-gray-300 rounded p-4">
+          {/* Modal add project, etc. */}
+          <AdicionAnteproyectoProfesor
+            profesor={profesores[0]}
+            onAdicion={actualizarProfesores}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 
