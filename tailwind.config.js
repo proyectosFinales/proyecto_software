@@ -1,6 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx,html}",
+    "./public/index.html"
+  ],
   theme: {
     extend: {
       colors: {
@@ -25,6 +28,9 @@ module.exports = {
         'lg': '1024px',
         'xl': '1280px',
         '2xl': '1536px',
+      },
+      fontFamily: {
+        'montserrat': ['Montserrat', 'sans-serif'],
       },
     },
   },

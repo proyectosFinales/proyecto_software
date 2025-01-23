@@ -1,9 +1,11 @@
 /*Assignation.css*/
 .assignations {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 50px;
+    gap: 20px;
+    padding: 10px;
   }
   
   .assign-icon {
@@ -11,12 +13,12 @@
   }
   
   .assign-icon i {
-    font-size: 48px;
+    font-size: 2rem;
     color: #3a3a3a;
   }
   
   .assign-icon p {
-    margin-top: 10px;
-    font-size: 16px;
+    margin-top: 8px;
+    font-size: 1rem;
   }
   
