@@ -5,7 +5,6 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "../../components/button";
 import Layout from "../../components/layout";
-import tableStyles from "../../styles/table.module.css";
 import listStyles from "../../styles/list.module.css";
 import Anteproyecto from "../../../controller/anteproyecto";
 import Profesor from "../../../controller/profesor";
@@ -51,9 +50,12 @@ const AsignacionAutomatica = () => {
 
   return (
     <Layout title="Asignación Automática de profesores a proyectos">
-      <Button onClick={calcularAsignacion} disabled={calculando}>Inicializar asignación</Button>
-      <TablaAnteproyectos title="Anteproyectos asignables" anteproyectos={anteproyectos}/>
-      <TablaProfesores profesores={profesores}/>
+      <div className="flex flex-col space-y-4">
+        <h1 className="text-2xl font-bold">Asignación Automática</h1>
+        <Button onClick={calcularAsignacion} disabled={calculando}>Inicializar asignación</Button>
+        <TablaAnteproyectos title="Anteproyectos asignables" anteproyectos={anteproyectos}/>
+        <TablaProfesores profesores={profesores}/>
+      </div>
       <Modal
         title="Asignación Calculada"
         modalRef={modalRef}
@@ -136,23 +138,20 @@ const ElementoDatosAnteproyecto = ({ anteproyecto }) => (
  * Tabla para mostrar profesores y su cantidadEstudiantes.
  */
 const TablaProfesores = ({ profesores }) => (
-  <table className={tableStyles.table}>
-    <thead>
-      <tr className={tableStyles.title}>
-        <th colSpan={3}>Profesores</th>
-      </tr>
+  <table className="min-w-full border-collapse">
+    <thead className="bg-gray-100 border-b">
       <tr>
-        <th>Nombre</th>
-        <th>Sede</th>
-        <th>Cantidad de estudiantes</th>
+        <th className="p-2 text-left font-semibold">Nombre</th>
+        <th className="p-2 text-left font-semibold">Sede</th>
+        <th className="p-2 text-left font-semibold">Cantidad de Estudiantes</th>
       </tr>
     </thead>
     <tbody>
-      {profesores.map((p, index) => (
-        <tr key={`profesor-${index}`} className={tableStyles.tableSpace}>
-          <td>{p.nombre}</td>
-          <td>{p.sede}</td>
-          <td>{p.cantidadEstudiantes}</td>
+      {profesores.map((p, idx) => (
+        <tr key={idx} className="border-b">
+          <td className="p-2">{p.nombre}</td>
+          <td className="p-2">{p.sede}</td>
+          <td className="p-2">{p.cantidadEstudiantes}</td>
         </tr>
       ))}
     </tbody>
