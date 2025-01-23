@@ -5,6 +5,12 @@
 
 @import '@fortawesome/fontawesome-free/css/all.min.css';
 
+:root {
+  /* Your existing CSS variables */
+}
+
+/* Rest of your global styles */
+
 html, body {
   margin: 0;
   padding: 0;

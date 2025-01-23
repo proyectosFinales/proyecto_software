@@ -1,6 +1,7 @@
 /*SidebarCoordinador.js */
 import React from "react";
 import { Link } from "react-router-dom";
+import PropTypes from 'prop-types';
 import { 
   Home, 
   FileText, 
@@ -22,16 +23,16 @@ const SidebarCoordinador = ({ show, setShow }) => {
     { path: "/gestion-perfiles", text: "Gestionar perfiles", icon: UserCog },
   ];
 
+  if (!show) return null;
+
   return (
     <>
       {/* Overlay when sidebar is open */}
-      {show && (
-        <div 
-          className="fixed inset-0 bg-black/20 z-40"
-          onClick={() => setShow(false)}
-          aria-hidden="true"
-        />
-      )}
+      <div 
+        className="fixed inset-0 bg-black/20 z-40"
+        onClick={() => setShow(false)}
+        aria-hidden="true"
+      />
 
       {/* Sidebar */}
       <nav 
@@ -53,6 +54,7 @@ const SidebarCoordinador = ({ show, setShow }) => {
                 key={index}
                 to={item.path}
                 className="block no-underline group transition-all duration-200"
+                onClick={() => setShow(false)}
               >
                 <li className="
                   flex items-center gap-3
@@ -84,6 +86,11 @@ const SidebarCoordinador = ({ show, setShow }) => {
       </nav>
     </>
   );
+};
+
+SidebarCoordinador.propTypes = {
+  show: PropTypes.bool.isRequired,
+  setShow: PropTypes.func.isRequired
 };
 
 export default SidebarCoordinador;
