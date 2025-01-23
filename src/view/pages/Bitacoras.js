@@ -16,6 +16,7 @@ const Bitacoras = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [entradas, setEntradas] = useState([]);
   const [rol, setRol] = useState(0);
+  const [entradaBitacoraId, setEntradaBitacoraId] = useState(0);
 
   useEffect(() => {
     const fetchBitacoras = async () => {
@@ -129,7 +130,8 @@ const Bitacoras = () => {
       const { data, error } = await supabase
         .from('Entrada')
         .select(`
-          id, 
+          id,
+          bitacora_id,
           fecha, 
           contenido, 
           aprobada_prof,
@@ -146,6 +148,7 @@ const Bitacoras = () => {
 
   const handleVerDetallesBitacora = async (id) => {
     await fetchEntradas(id);
+    setEntradaBitacoraId(id);
     setModalIsOpen(true);
   };
 
@@ -197,6 +200,10 @@ const Bitacoras = () => {
     } catch (error) {
       console.error('Error al agregar la bitácora:', error);
     }
+  };
+
+  const handleAgregarEntrada = (id) => {
+    window.location.href = `/agregarEntrada?id=${entradaBitacoraId}`;
   };
   
   return (
@@ -257,52 +264,78 @@ const Bitacoras = () => {
 
       {/* Modal para ver los detalles de la bitácora */}
       <Modal
-        isOpen={modalIsOpen}
-        onRequestClose={handleCloseModal}
-        contentLabel="Detalles de la Bitácora"
-        className="modal-content-small"
-        overlayClassName="modal-overlay"
+      isOpen={modalIsOpen}
+      onRequestClose={handleCloseModal}
+      contentLabel="Detalles de la Bitácora"
+      className="modal-content-small"
+      overlayClassName="modal-overlay"
       >
+      {/* Contenedor para el título y el botón */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h2>Entradas de la Bitácora</h2>
-        {entradas.length > 0 ? (
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            <table className="w-100">
-              <thead>
-                <tr className="cita-row">
-                  <th>Fecha</th>
-                  <th>Estado</th>
-                  <th> </th>
-                </tr>
-              </thead>
-              <tbody>
-                {entradas.map((entrada) => (
-                  <tr key={entrada.id}>
-                    <td>{entrada.fecha}</td>
-                    <td>
-                      {(entrada.aprobada_prof===true) && (entrada.aprobada_est === true)
-                        ? 'Aprobada'
-                        : 'Pendiente'}
-                    </td>
-                    <td>
-                      <button
-                        className="cita-btn w-50 mx-auto"
-                        onClick={() => handleVerDetallesEntrada(entrada.id)}
-                      >
-                        Ver detalles
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <p style={{ textAlign: 'center' }}>No hay entradas para mostrar.</p>
-        )}
-        <button onClick={handleCloseModal} className="btn btn-secondary mt-3">
-          Cerrar
+        <button
+          className="btn btn-primary"
+          onClick={handleAgregarEntrada}
+        >
+          +
         </button>
-      </Modal>
+      </div>
+
+      {/* Entradas */}
+      {entradas.length > 0 ? (
+        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <table className="w-100">
+            <thead>
+              <tr className="cita-row">
+                <th>Fecha</th>
+                <th>Profesor</th>
+                <th>Estudiante</th>
+                <th>Estado</th>
+                <th> </th>
+              </tr>
+            </thead>
+            <tbody>
+              {entradas.map((entrada) => (
+                <tr key={entrada.id}>
+                  <td>{entrada.fecha}</td>
+                  <td>
+                    {(entrada.aprobada_prof === true)
+                      ? 'Aprobado'
+                      : 'Pendiente'}
+                  </td>
+                  <td>
+                    {(entrada.aprobada_est === true)
+                      ? 'Aprobado'
+                      : 'Pendiente'}
+                  </td>
+                  <td>
+                    {(entrada.aprobada_prof === true) && (entrada.aprobada_est === true)
+                      ? 'Aprobado'
+                      : 'Pendiente'}
+                  </td>
+                  <td>
+                    <button
+                      className="cita-btn w-auto mx-auto"
+                      onClick={() => handleVerDetallesEntrada(entrada.id)}
+                    >
+                      Ver detalles
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <p style={{ textAlign: 'center' }}>No hay entradas para mostrar.</p>
+      )}
+
+      {/* Botón para cerrar el modal */}
+      <button onClick={handleCloseModal} className="btn btn-secondary mt-3">
+        Cerrar
+      </button>
+    </Modal>
+
     </div>
   );
 };

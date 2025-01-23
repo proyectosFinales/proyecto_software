@@ -129,6 +129,7 @@ const AgregarBitacora = () => {
           const { data: proyectos, error } = await supabase
             .from('Proyecto')
             .select(`
+              id,
               estado,
               anteproyecto_id,
               Anteproyecto:anteproyecto_id (
@@ -203,50 +204,87 @@ const AgregarBitacora = () => {
   return (
     <div className="agregar-usuario-container">
       <Header />
-      <div className="form-container">
-        <button
-          className="btn-back-addUser"
-          onClick={() => navigate("/bitacoras")}
+      <div 
+        className="form-container" 
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '20px',
+          padding: '20px',
+        }}
+      >
+        {/* Botón Volver y Título */}
+        <div 
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            width: '100%',
+          }}
         >
-          Volver
-        </button>
-        <h2>Agregar Bitacora</h2>
+          <button
+            className="btn-back-addUser"
+            onClick={() => navigate("/bitacoras")}
+            style={{ marginLeft: '10px' }}
+          >
+            Volver
+          </button>
+          <h2 style={{ textAlign: 'center', margin: '0 auto', flex: 1 }}>
+            Agregar Bitacora
+          </h2>
+        </div>
 
-        <form className="form-addUser">
+        {/* Formulario */}
+        <form 
+          className="form-addUser" 
+          style={{ 
+            width: '100%', 
+            maxWidth: '600px', 
+            display: 'flex', 
+            flexDirection: 'column', 
+            gap: '15px' 
+          }}
+        >
+          {/* Estudiante */}
           <label>Estudiante:</label>
-          <div className="input-container-add">
+          <div className="input-container-add" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <FaUser className="icon-add" />
             {profesorId !== "0" ? (
-                // Mostrar el select si profesorId es diferente de "0"
-                <select
+              <select
                 name="estudiante"
                 className="input-field"
                 value={bitacora.estudiante || ''}
                 onChange={handleInputChange}
                 required
-                >
+                style={{ flex: 1 }}
+              >
                 <option value="">Seleccione un estudiante</option>
                 {estudiantes.map((estudiante) => (
-                    <option key={estudiante.estudiante_id} value={estudiante.Usuario.nombre} data-id={estudiante.estudiante_id}>
+                  <option 
+                    key={estudiante.estudiante_id} 
+                    value={estudiante.Usuario.nombre} 
+                    data-id={estudiante.estudiante_id}
+                  >
                     {estudiante.Usuario.nombre}
-                    </option>
+                  </option>
                 ))}
-                </select>
+              </select>
             ) : (
-                // Mostrar solo el nombre del estudiante si profesorId es "0"
-                <input
+              <input
                 type="text"
                 name="estudiante"
                 className="input-field"
                 value={bitacora.estudiante}
                 readOnly
-                />
+                style={{ flex: 1 }}
+              />
             )}
-        </div>
+          </div>
 
-
+          {/* Profesor */}
           <label>Profesor:</label>
-          <div className="input-container-add">
+          <div className="input-container-add" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <FaEnvelope className="icon-add" />
             <input
               type="email"
@@ -254,30 +292,36 @@ const AgregarBitacora = () => {
               className="input-field"
               value={bitacora.profesor}
               readOnly
+              style={{ flex: 1 }}
             />
           </div>
 
+          {/* Proyecto */}
           <label>Proyecto:</label>
-          <div className="input-container-add">
+          <div className="input-container-add" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <FaMapMarked className="icon-sede" />
             <select
-                name="proyecto"
-                className="sede-dropdown"
-                value={bitacora.proyecto}
-                onChange={handleInputChange}
-                required
+              name="proyecto"
+              className="sede-dropdown"
+              value={bitacora.proyecto}
+              onChange={handleInputChange}
+              required
+              style={{ flex: 1 }}
             >
-            <option value=''>Proyecto nulo</option>
-            {proyectos.map((proyecto, index) => (
-            <option key={index} value={proyecto}>
-                {proyecto.Anteproyecto.Empresa.nombre}
-            </option>
-            ))}
+              <option value="">Proyecto nulo</option>
+              {proyectos.map((proyecto, index) => (
+                <option key={proyecto.id} value={proyecto}>
+                  {proyecto.Anteproyecto.Empresa.nombre}
+                </option>
+              ))}
             </select>
-        </div>
+          </div>
 
-
-          <div className="buttons">
+          {/* Botones */}
+          <div 
+            className="buttons" 
+            style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}
+          >
             <button type="button" onClick={handleLimpiarEntradas}>
               Limpiar
             </button>
@@ -289,6 +333,7 @@ const AgregarBitacora = () => {
       </div>
       <Footer />
     </div>
+
   );
 };
 
