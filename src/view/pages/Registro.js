@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'react-icons/fa';
-import '../styles/Registro.css';
 import { signUpNewUser } from '../../controller/Signup';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,70 +37,71 @@ const Registro = () => {
   };
 
   return (
-    <div className="register-container">
-      <div className="register-box">
-        <h2>Registro de Usuario</h2>
+    <div className="flex flex-col min-h-screen bg-gray-100 justify-center items-center p-4">
+      <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-8 space-y-6">
 
-        <div className="input-container-registro">
-          <FaUser className="icon-registro" />
+        <h2 className="text-2xl font-bold mb-6 text-center">Registro</h2>
+
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaUser className="text-gray-500 mx-2" />
           <input
             type="text"
-            className="input-field"
-            placeholder="Nombre completo"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+            placeholder="Nombre Completo"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
           />
         </div>
 
-        <div className="input-container-registro">
-          <FaIdCard className="icon-registro" />
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaIdCard className="text-gray-500 mx-2" />
           <input
             type="number"
-            className="input-field"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
             placeholder="Carné de institución"
             value={carnet}
             onChange={(e) => setCarnet(e.target.value)}
           />
         </div>
 
-        <div className="input-container-registro">
-          <FaPhone className="icon-registro" />
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaPhone className="text-gray-500 mx-2" />
           <input
             type="tel"
-            className="input-field"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
             placeholder="Teléfono"
             value={number}
             onChange={(e) => setNumber(e.target.value)}
           />
         </div>
 
-        <div className="input-container-registro">
-          <FaEnvelope className="icon-registro" />
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaEnvelope className="text-gray-500 mx-2" />
           <input
             type="email"
-            className="input-field"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
             placeholder="Correo de la institución"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
 
-        <div className="input-container-registro">
-          <FaLock className="icon-registro" />
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaLock className="text-gray-500 mx-2" />
           <input
             type="password"
-            className="input-field"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
-        <div className="input-container-registro">
-          <FaMapMarked className="icon-sede" />
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaMapMarked className="text-gray-500 mx-2" />
           <select
             name="sede"
-            className="sede-dropdown"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
             value={sede}
             onChange={(e) => setSede(e.target.value)}
             required
@@ -115,18 +115,23 @@ const Registro = () => {
           </select>
         </div>
 
-        <button className="btn-register" onClick={handleSubmit}>
+        <button
+          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
+          onClick={handleSubmit}
+        >
           Registrarse
         </button>
 
-        <div className="footer-links">
+        <div className="flex items-center justify-between text-sm">
           <span>¿Ya tienes cuenta?</span>
-          <a href="/">Iniciar sesión</a>
+          <a href="/" className="text-blue-600 hover:underline">
+            Iniciar sesión
+          </a>
         </div>
-      </div>
 
-      <div className="register-footer">
-        Instituto Tecnológico de Costa Rica
+        <div className="mt-4 text-center text-xs text-gray-600">
+          Instituto Tecnológico de Costa Rica
+        </div>
       </div>
     </div>
   );

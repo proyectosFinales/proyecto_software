@@ -1,10 +1,9 @@
 import { React, useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import "../styles/Login.css";
-import { signIn } from '../../controller/Signin';
 import { FaUser, FaLock } from "react-icons/fa";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import Footer from '../components/Footer';
+import { signIn } from '../../controller/Signin';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -39,69 +38,74 @@ const Login = () => {
     navigate("/recuperar-contraseña");
   };
 
-  const toggleVistaContra = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div className="login-root">
-      <div className="title-container">
-        <h1>Trabajo final de graduación</h1>
-        <h2>Escuela de Producción Industrial</h2>
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <div className="w-full bg-white shadow-md py-6 px-4">
+        <h1 className="text-3xl font-bold text-black text-center font-[Montserrat]">
+          Sistema de Gestión de Trabajo Final de Graduación
+        </h1>
+        <h2 className="text-xl text-black text-center mt-2 font-[Montserrat]">
+          Escuela de Ingeniería en Producción Industrial
+        </h2>
       </div>
-      <div className="login-container">
-        <div className="login-box">
-          <h2>Iniciar sesión</h2>
-          <form className="login-form" onSubmit={handleSubmit}>
-            <div className="input-container">
-              <FaUser className="icon" />
-              <input
-                type="email"
-                className="input-field"
-                placeholder="Correo electrónico"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="input-container">
-            <FaLock className="icon" />
-              <input
-                type={showPassword ? "text" : "password"}
-                className="input-field password-input"
-                placeholder="Contraseña"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              <button
-                type="button"
-                className="toggle-password"
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
-              </button>
-            </div>
-
-            <button className="btn-login" type="submit">
-              Iniciar Sesión
-            </button>
-          </form>
-
-          <div className="forgot-password">
-            <a onClick={toRecovery}>Olvidé mi contraseña</a>
+      <div className="flex-grow flex flex-col justify-center items-center p-4">
+        <form
+          className="w-full max-w-sm bg-white shadow-md rounded px-8 pt-6 pb-8 space-y-6"
+          onSubmit={handleSubmit}
+        >
+          <div className="flex items-center border-b border-gray-300 py-2">
+            <FaUser className="text-gray-500 mx-2" />
+            <input
+              type="email"
+              className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+              placeholder="Correo electrónico"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
           </div>
 
-          <button className="btn-register" onClick={toRegister}>
+          <div className="flex items-center border-b border-gray-300 py-2">
+            <FaLock className="text-gray-500 mx-2" />
+            <input
+              type={showPassword ? "text" : "password"}
+              className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+              placeholder="Contraseña"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+            <button
+              type="button"
+              className="text-gray-500 mx-2"
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? <IoEyeOffOutline /> : <IoEyeOutline />}
+            </button>
+          </div>
+
+          <button
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+            type="submit"
+          >
+            Iniciar Sesión
+          </button>
+          <button
+            className="w-full bg-gray-100 text-blue-600 py-2 rounded border border-blue-400 hover:bg-gray-200"
+            onClick={toRegister}
+          >
             Registrarse
           </button>
-        </div>
-
-        <Footer />
+          <div
+            className="text-sm text-blue-600 hover:underline cursor-pointer text-right"
+            onClick={toRecovery}
+          >
+            Olvidé mi contraseña
+          </div>
+        </form>
       </div>
+      <Footer />
     </div>
-
   );
 };
 

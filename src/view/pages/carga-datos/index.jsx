@@ -4,7 +4,6 @@
  * y reiniciar (limpiar) datos de un semestre anterior.
  */
 import { Link } from "react-router-dom";
-import { AiOutlineCloudUpload } from "react-icons/ai";
 import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 import Modal from '../../components/Modal';
@@ -82,32 +81,34 @@ const InicioCargaDatos = () => {
 
   return (
     <>
-      <Header title="Menú de carga de datos" />
-      <div className="menu-grid" style={{ textAlign: "center" }}>
-        <Link
-          className="menu-item"
-          to="/carga-datos/cantidad-proyectos-profesor"
-          style={{ textDecoration: "none", color: "var(--azul)" }}
-        >
-          <i className="fa-solid fa-chalkboard-user" style={{ color: "var(--azul)" }}></i>
-          <p>Cantidad de proyectos por profesor</p>
-        </Link>
+      <Header title="Carga de Datos" />
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center py-6 px-4">
+        <div className="max-w-md w-full bg-white rounded shadow p-6 space-y-4">
+          <h1 className="text-xl font-bold text-center">Opciones de Carga</h1>
 
-        <Link
-          className="menu-item"
-          to="/cargarProfesores"
-          style={{ textDecoration: "none", color: "var(--azul)" }}
-        >
-          <AiOutlineCloudUpload style={{ color: "var(--azul)", fontSize: "80px" }} />
-          <p>Registrar profesores</p>
-        </Link>
+          <div className="flex flex-col space-y-4">
+            <Link
+              to="/carga-datos/profesores"
+              className="w-full bg-blue-600 text-white py-2 rounded text-center hover:bg-blue-700"
+            >
+              Registrar Profesores
+            </Link>
+            <Link
+              to="/carga-datos/cantidad-proyectos-profesor"
+              className="w-full bg-green-600 text-white py-2 rounded text-center hover:bg-green-700"
+            >
+              Cantidad Proyectos Profesor
+            </Link>
+          </div>
 
-        <div className="menu-item" onClick={() => setModal(true)}>
-          <i className="fas fa-clock"></i>
-          <p>Reiniciar base de datos</p>
+          <button
+            onClick={() => setModal(true)}
+            className="w-full mt-4 bg-red-600 text-white py-2 rounded hover:bg-red-700"
+          >
+            Reiniciar BD
+          </button>
         </div>
       </div>
-
       <Modal show={modal} onClose={() => setModal(false)}>
         <>
           <h2>LEA CUIDADOSAMENTE!</h2>
@@ -128,7 +129,6 @@ const InicioCargaDatos = () => {
           </div>
         </>
       </Modal>
-
       <Footer />
     </>
   );

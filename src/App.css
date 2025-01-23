@@ -6,6 +6,8 @@
   --gris_claro: #D9D9D9;
 }
 
+/* Remove superfluous classes if replaced by Tailwind, e.g.:
+
 .App {
   text-align: center;
   font-family: Arial, sans-serif;
@@ -13,11 +15,11 @@
 
 .App-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #000;
+  ...
 }
+
+If everything is replaced by Tailwind, you can safely delete all or most of these rules.
+*/
 
 .settings-icon {
   font-size: 24px;

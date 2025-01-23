@@ -4,7 +4,6 @@ import styles from "../styles/layout.module.css";
 import ToastContainer from "./toast";
 import SidebarCoordinador from "./SidebarCoordinador";
 import SidebarProfesor from "./SidebarProfesor";
-import SidebarEstudiante from "./SidebarEstudiante";
 import SettingsCoordinador from "./SettingsCoordinador";
 import AppFooter from "./Footer";
 import HeaderCoordinador from "./HeaderCoordinador";
@@ -19,7 +18,7 @@ const Layout = ({ title, children, Sidebar=SidebarCoordinador, Settings=Settings
             Sidebar === SidebarProfesor ? <HeaderProfesor title={title}/> :
             <HeaderEstudiante title={title}/>
         }
-        <main className={styles.layout}>
+        <main className="max-w-7xl mx-auto p-4">
             {children}
         </main>
         {/* <Footer/> */}
