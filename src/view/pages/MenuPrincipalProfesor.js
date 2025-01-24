@@ -10,7 +10,8 @@ const MenuProfesor = () => {
     { to: "/proyectos-profesor", icon: "fas fa-folder-open", text: "Proyectos" },
     { to: "/disponibilidad-profesor", icon: "fas fa-calendar-days", text: "Disponibilidad para defensas" },
     { to: "/citas-profesor", icon: "fas fa-clock", text: "Consultar citas" },
-    { to: "/bitacoras", icon: "fas fa-folder-open", text: "Bitácoras" }
+    { to: "/bitacoras", icon: "fas fa-folder-open", text: "Bitácoras" },
+    { to: "/ver-calificaciones", icon: "fas fa-star", text: "Ver Calificaciones" }
   ];
 
   return (

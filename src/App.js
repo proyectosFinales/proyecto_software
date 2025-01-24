@@ -48,6 +48,8 @@ import Bitacoras from './view/pages/Bitacoras.js';
 import AgregarBitacora from './view/pages/agregarBitacora.js';
 import Entrada from './view/pages/verEntrada.js';
 import AgregarEntrada from './view/pages/agregarEntrada.js';
+import DashboardMenu from './view/pages/DashboardMenu';
+import DashboardEstudiantes from './view/pages/DashboardEstudiantes.jsx';
 
 function App() {
   return (
@@ -218,7 +220,17 @@ function App() {
         <Route path='bitacoras' element={<RutaProtegida element={<Bitacoras />} requiredRoles={["2", "3"]} />} />
         <Route path="agregarBitacora" element={<RutaProtegida element={<AgregarBitacora />} requiredRoles={["2", "3"]} />}/>
         <Route path="entrada" element={<RutaProtegida element={<Entrada />} requiredRoles={["2", "3"]} />}/>
-        <Route path="agregarEntrada" element={<RutaProtegida element={<AgregarEntrada />} requiredRoles={["2", "3"]} />}/>       
+        <Route path="agregarEntrada" element={<RutaProtegida element={<AgregarEntrada />} requiredRoles={["2", "3"]} />}/>
+        <Route path="/dashboardMenu" element={<DashboardMenu />} />
+        <Route
+          path="/dashboard-estudiantes"
+          element={
+            <RutaProtegida 
+              element={<DashboardEstudiantes />} 
+              requiredRoles={["1"]} 
+            />
+          }
+        />
       </Routes>
     </Router>
   );

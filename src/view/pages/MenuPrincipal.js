@@ -13,7 +13,7 @@ const Menu = () => {
     { to: "/gestion-perfiles", icon: "fas fa-user-cog", text: "Gestionar perfiles" },
     { to: "/carga-datos", icon: "fas fa-database", text: "Base de datos" },
     { to: "/citasMenu", icon: "fas fa-clock", text: "Citas y Calendario" },
-    { to: "/dashboard-menu", icon: "fas fa-chart-bar", text: "Reportes y gráficos" }
+    { to: "/dashboardMenu", icon: "fas fa-chart-bar", text: "Reportes y gráficos" }
   ];
 
   return (
