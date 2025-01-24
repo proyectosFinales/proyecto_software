@@ -4,12 +4,10 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/AprobarProyecto.module.css';
 import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { AiOutlineArrowDown, AiOutlineArrowUp, AiOutlineInfoCircle } from 'react-icons/ai';
-import styles2 from '../styles/table.module.css';
 import { errorToast, successToast } from '../components/toast';
 
 const AprobarProyectos = () => {
@@ -120,100 +118,68 @@ const AprobarProyectos = () => {
   };
 
   return (
-    <div className={styles.anteproyectos_coordinador_contenedor}>
-      <Header title="Aprobar proyectos"/>
-      <div>
-        <main>
-          <div className={styles.lista_anteproyectos_coordinador}>
-            <table className={styles2.table}>
-              <thead>
-                <tr>
-                  <th>Estudiante</th>
-                  <th>Nombre de la empresa</th>
-                  <th>
-                    Estado del proyecto
-                    <AiOutlineInfoCircle
-                      className={styles.infoIcon}
-                      onClick={() => toggleInfo('estados')}
-                      title="Estado_info"
-                    />
-                    {infoVisible.estados && (
-                      <p className={styles.infoText}>
-                        (Finalizado: Curso aprobado, Perdido: Curso perdido).
-                      </p>
-                    )}
-                  </th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {anteproyectos.map((anteproyecto) => (
-                  <React.Fragment key={anteproyecto.id}>
-                    <tr>
-                      <td>
-                        {anteproyecto.Estudiante
-                          ? anteproyecto.Estudiante.nombre
-                          : 'Sin estudiante asignado'}
-                      </td>
-                      <td>{anteproyecto.nombreEmpresa}</td>
-                      <td>{anteproyecto.estado === 'Aprobado' ? 'Pendiente' : anteproyecto.estado}</td>
-                      <td>
-                        <div className={styles.contenedor_botones_anteproyectos_coordinador}>
-                          <button
-                            onClick={() => aprobar(anteproyecto.id)}
-                            className={`${styles.btn} ${styles.revisar}`}
-                          >
-                            Aprobar
-                          </button>
-                          <button
-                            onClick={() => reprobar(anteproyecto.id)}
-                            className={`${styles.btn} ${styles.descargar}`}
-                          >
-                            Reprobar
-                          </button>
-                          <button
-                            onClick={() => toggleExpandRow(anteproyecto.id)}
-                            className={`${styles.btn} ${styles.descargar}`}
-                          >
-                            {expandedRow === anteproyecto.id ? (
-                              <AiOutlineArrowUp className={styles.icono_arrow_down} />
-                            ) : (
-                              <AiOutlineArrowDown className={styles.icono_arrow_down} />
-                            )}
-                          </button>
+    <div className="flex flex-col min-h-screen bg-white">
+      <Header title="Aprobar Proyectos" />
+
+      <main className="flex-grow w-full max-w-6xl mx-auto px-4 py-6">
+        <div className="overflow-x-auto">
+          <table className="table-auto w-full border border-gray-300 text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 border-b border-gray-300">Proyecto</th>
+                <th className="px-4 py-2 border-b border-gray-300">Estado</th>
+                <th className="px-4 py-2 border-b border-gray-300">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {anteproyectos.map((anteproyecto, index) => (
+                <React.Fragment key={index}>
+                  <tr className="border-b">
+                    <td className="px-4 py-2">{anteproyecto.nombre}</td>
+                    <td className="px-4 py-2">{anteproyecto.estado}</td>
+                    <td className="px-4 py-2">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          onClick={() => aprobar(anteproyecto.id)}
+                        >
+                          Aprobar
+                        </button>
+                        <button
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                          onClick={() => reprobar(anteproyecto.id)}
+                        >
+                          Reprobar
+                        </button>
+                        <button
+                          className="px-3 py-1 bg-gray-300 text-black rounded hover:bg-gray-400"
+                          onClick={() => toggleExpandRow(anteproyecto.id)}
+                        >
+                          {expandedRow === index ? <AiOutlineArrowUp /> : <AiOutlineArrowDown />}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+
+                  {/* Extra row details if expanded */}
+                  {expandedRow === index && (
+                    <tr className="bg-gray-50">
+                      <td colSpan={3} className="px-4 py-2">
+                        <div className="flex flex-col space-y-2 text-sm">
+                          <p><strong>Contexto:</strong> {anteproyecto.contexto}</p>
+                          <p><strong>Justificación:</strong> {anteproyecto.justificacion}</p>
+                          {/* etc. ... */}
                         </div>
                       </td>
                     </tr>
-                    {expandedRow === anteproyecto.id && (
-                      <tr className={styles.expandedRow}>
-                        <td colSpan="4">
-                          <div className={styles.info_adicional}>
-                            <p>
-                              <strong>Asesor:</strong> {anteproyecto.nombreAsesor} ({anteproyecto.puestoAsesor})
-                            </p>
-                            <p>
-                              <strong>Teléfono:</strong> {anteproyecto.telefonoContacto}
-                            </p>
-                            <p>
-                              <strong>Correo:</strong> {anteproyecto.correoContacto}
-                            </p>
-                            <p>
-                              <strong>Contexto:</strong> {anteproyecto.contexto}
-                            </p>
-                            <p>
-                              <strong>Justificación:</strong> {anteproyecto.justificacion}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
-      </div>
+                  )}
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );

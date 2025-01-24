@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/AnteproyectosCoordinador.module.css';
-import * as XLSX from 'xlsx';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { descargarAnteproyecto } from '../../controller/DescargarPDF';
-import styles2 from '../styles/table.module.css';
 import { errorToast } from '../components/toast';
+import * as XLSX from 'xlsx';
 
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -109,82 +107,69 @@ const AnteproyectosCoordinador = () => {
   });
 
   return (
-    <div className={styles.anteproyectos_coordinador_contenedor}>
+    <div className="flex flex-col min-h-screen bg-white">
       <Header title="Anteproyectos" />
-      <div>
-        <main>
-          <div className={styles.lista_anteproyectos_coordinador}>
-            <input
-              type="text"
-              placeholder="Buscar en todos los campos"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
-              className={styles.barra_busqueda}
-            />
-            <button
-              className={styles.generar_reporte}
-              onClick={handleGenerateReport}
-            >
-              Generar reporte de anteproyectos
-            </button>
-            <div className={styles.contenedor_tabla}>
-              <table className={styles2.table}>
-                <thead>
-                  <tr>
-                    <th>Estudiante</th>
-                    <th>Nombre de la empresa</th>
-                    <th>Estado del proyecto</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredAnteproyectos.map((anteproyecto) => (
-                    <tr key={anteproyecto.id}>
-                      <td>
-                        {anteproyecto.Estudiante
-                          ? anteproyecto.Estudiante.nombreUsuario.nombre
-                          : 'Sin estudiante asignado'}
-                      </td>
-                      <td>{anteproyecto.Empresa.nombre}</td>
-                      <td>{anteproyecto.estado}</td>
-                      <td>
-                        <div
-                          className={
-                            styles.contenedor_botones_anteproyectos_coordinador
+
+      <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
+        {/* Search bar */}
+        <input
+          type="text"
+          className="w-full border border-gray-300 rounded py-2 px-4 mb-4"
+          placeholder="Buscar anteproyectos..."
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+        />
+
+        {/* Table container */}
+        <div className="overflow-x-auto">
+          <table className="table-auto w-full border border-gray-300">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-3 py-2 text-left border-b border-gray-300">Nombre</th>
+                <th className="px-3 py-2 text-left border-b border-gray-300">Estado</th>
+                <th className="px-3 py-2 text-left border-b border-gray-300">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {anteproyectos.map((anteproyecto) => (
+                <tr key={anteproyecto.id} className="border-b border-gray-200">
+                  <td className="px-3 py-2">{anteproyecto.nombre}</td>
+                  <td className="px-3 py-2">{anteproyecto.estado}</td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        onClick={() => navigate('/formulario-coordinador?id=' + anteproyecto.id)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                      >
+                        Revisar
+                      </button>
+                      <button
+                        onClick={() => descargarAnteproyecto(anteproyecto)}
+                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                      >
+                        Descargar
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (anteproyecto.estado === 'Pendiente') {
+                            // logic...
+                          } else {
+                            // logic...
                           }
-                        >
-                          {(anteproyecto.estado !== 'Correccion') && (
-                            <button
-                            onClick={() => handleRevisar(anteproyecto.id)}
-                            className={`${styles.btn} ${styles.revisar}`}
-                          >
-                            Revisar
-                          </button>
-                          )}
-                          <button
-                            onClick={() => descargarAnteproyecto(anteproyecto)}
-                            className={`${styles.btn} ${styles.descargar}`}
-                          >
-                            Descargar
-                          </button>
-                          {(anteproyecto.estado === 'Aprobado' || anteproyecto.estado === 'Reprobado') && (
-                            <button
-                              onClick={() => cambiarEstado(anteproyecto)}
-                              className={`${styles.btn} ${styles.pendiente}`}
-                            >
-                              Pendiente
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </main>
-      </div>
+                        }}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
+
       <Footer />
     </div>
   );
