@@ -2,7 +2,6 @@
 
 import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import "../styles/GestionPerfiles.css";
 import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaFileAlt, FaMapMarked, FaSearch } from 'react-icons/fa';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
@@ -172,242 +171,84 @@ const GestionPerfiles = () => {
   }, [users, filter, searchTerm]);
 
   return (
-    <div className="gestion-container">
-      <Header title={"Gestión de perfiles"} />
-      <div className="content">
-        <div className="top-bar">
-          <button onClick={handleNavigate} className="btn-volver-menu">
+    <div className="flex flex-col min-h-screen bg-white">
+      <Header title="Gestión de Perfiles" />
+
+      <div className="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
+        {/* Top bar */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
+          <button
+            onClick={handleNavigate}
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+          >
             Volver
           </button>
-          <div className="filter-buttons">
-            <select value={filter} onChange={handleFilterChange}>
+          {/* Filter & search */}
+          <div className="mt-4 md:mt-0 flex items-center space-x-2">
+            <select
+              value={filter}
+              onChange={handleFilterChange}
+              className="border border-gray-300 rounded px-3 py-1"
+            >
               <option value="">Todos</option>
-              <option value="profesores">Profesores</option>
-              <option value="estudiantes">Estudiantes</option>
+              <option value="profesor">Profesores</option>
+              <option value="estudiante">Estudiantes</option>
             </select>
-          </div>
-          <div className="search-bar">
-            <input
-              type="text"
-              placeholder="Buscar..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-            <i className="fas fa-search search-icon"></i>
+
+            <div className="relative">
+              <FaSearch className="absolute left-2 top-2 text-gray-400" />
+              <input
+                className="pl-8 pr-3 py-1 border border-gray-300 rounded"
+                type="text"
+                placeholder="Buscar por nombre..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+            </div>
           </div>
         </div>
-        <div className="gestion-perfiles">
-          {/* Lista de usuarios */}
-          <div className="users-list">
-            <ul>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user, index) => {
-                  return (
-                    <li
-                      key={user.id || index}
-                      className={index % 2 === 0 ? "even-row" : "odd-row"}
-                    >
-                      <span
-                        className="user-name"
+
+        {/* User list */}
+        <div className="overflow-x-auto border border-gray-300 rounded shadow-sm">
+          <table className="table-auto w-full text-left">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="px-4 py-2">ID</th>
+                <th className="px-4 py-2">Nombre</th>
+                <th className="px-4 py-2">Rol</th>
+                <th className="px-4 py-2">Correo</th>
+                <th className="px-4 py-2">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => (
+                <tr key={user.id} className="border-b last:border-none">
+                  <td className="px-4 py-2">{user.id}</td>
+                  <td className="px-4 py-2">{user.nombre}</td>
+                  <td className="px-4 py-2">{user.rol}</td>
+                  <td className="px-4 py-2">{user.correo}</td>
+                  <td className="px-4 py-2">
+                    <div className="flex flex-wrap gap-2">
+                      <button
                         onClick={() => handleUserClick(user.id)}
+                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                       >
-                        {user.nombre}
-                      </span>
-                      <input
-                        type="checkbox"
-                        className="user-checkbox"
-                        checked={checkedUsers.has(user.id)}
-                        onChange={() => handleCheckboxChange(user.id)}
-                      />
-                    </li>
-                  );
-                })
-              ) : (
-                <p>No hay usuarios disponibles.</p>
-              )}
-            </ul>
-          </div>
-
-          {/* Información del usuario editable */}
-          <div className="info-container">
-            <div className="user-info">
-              <h2>Información del usuario</h2>
-
-              {/* Profesor (rol = 2) */}
-              {editableUser.rol === '2' && (
-                <>
-                  <label>
-                    Nombre
-                    <div className="input-container-gestion">
-                      <FaUser className="icon-gestion" />
-                      <input
-                        type="text"
-                        name="nombre"
-                        className="input-field-gestion"
-                        value={editableUser.nombre || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
-                    Correo electrónico
-                    <div className="input-container-gestion">
-                      <FaEnvelope className="icon-gestion" />
-                      <input
-                        type="email"
-                        name="correo"
-                        className="input-field-gestion"
-                        value={editableUser.correo || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
-                    Sede
-                    <div className="input-container-gestion">
-                      <FaMapMarked className="icon-sede" />
-                      <select
-                        name="sede"
-                        className="sede-dropdown"
-                        value={editableUser.sede || ''}
-                        onChange={handleInputChange}
-                        required
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleCheckboxChange(user.id)}
+                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                       >
-                        <option value="">Seleccione una sede</option>
-                        <option value="Central Cartago">Central Cartago</option>
-                        <option value="Local San José">Local San José</option>
-                        <option value="Local San Carlos">Local San Carlos</option>
-                        <option value="Limón">Centro Académico de Limón</option>
-                        <option value="Alajuela">Centro Académico de Alajuela</option>
-                      </select>
+                        Eliminar
+                      </button>
                     </div>
-                  </label>
-                </>
-              )}
-
-              {/* Estudiante (rol = 3) */}
-              {editableUser.rol === '3' && (
-                <>
-                  <label>
-                    Nombre
-                    <div className="input-container-gestion">
-                      <FaUser className="icon-gestion" />
-                      <input
-                        type="text"
-                        name="nombre"
-                        className="input-field-gestion"
-                        value={editableUser.nombre || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
-                    Carnet
-                    <div className="input-container-gestion">
-                      <FaIdCard className="icon-gestion" />
-                      <input
-                        type="text"
-                        name="carnet"
-                        className="input-field-gestion"
-                        value={editableUser.carnet || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
-                    Correo electrónico
-                    <div className="input-container-gestion">
-                      <FaEnvelope className="icon-gestion" />
-                      <input
-                        type="email"
-                        name="correo"
-                        className="input-field-gestion"
-                        value={editableUser.correo || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
-                    Teléfono
-                    <div className="input-container-gestion">
-                      <FaPhone className="icon-gestion" />
-                      <input
-                        type="text"
-                        name="telefono"
-                        className="input-field-gestion"
-                        value={editableUser.telefono || ''}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </label>
-
-                  <label>
-                    Sede
-                    <div className="input-container-gestion">
-                      <FaMapMarked className="icon-sede" />
-                      <select
-                        name="sede"
-                        className="sede-dropdown"
-                        value={editableUser.sede || ''}
-                        onChange={handleInputChange}
-                        required
-                      >
-                        <option value="">Seleccione una sede</option>
-                        <option value="Central Cartago">Central Cartago</option>
-                        <option value="Local San José">Local San José</option>
-                        <option value="Local San Carlos">Local San Carlos</option>
-                        <option value="Limón">Centro Académico de Limón</option>
-                        <option value="Alajuela">Centro Académico de Alajuela</option>
-                      </select>
-                    </div>
-                  </label>
-
-                  <label>
-                    Estado
-                    <div className="input-container-gestion">
-                      <FaFileAlt className="icon-gestion" />
-                      <select
-                        name="estado"
-                        className="input-field-gestion"
-                        value={editableUser.estado || ''}
-                        onChange={handleInputChange}
-                      >
-                        <option value="">Seleccione un estado</option>
-                        <option value="aprobado">Aprobado</option>
-                        <option value="defensa">Defensa</option>
-                        <option value="en progreso">En progreso</option>
-                        <option value="reprobado">Reprobado</option>
-                        <option value="retirado">Retirado</option>
-                      </select>
-                    </div>
-                  </label>
-                </>
-              )}
-
-              {/* Rol 1 (Coordinador) no se muestra en este snippet, 
-                  pero si llegase un user con rol=1, 
-                  podrías mostrar datos básicos sin Estudiante/Profesor. */}
-            </div>
-            <div className="actions">
-              <button className="btn-delete" onClick={() => setModal(true)}>
-                Borrar usuario(s)
-              </button>
-              <button className="btn-edit" onClick={handleUserEdit}>
-                Editar usuario
-              </button>
-              <button className="btn-add-user" onClick={handleUserAdd}>
-                Agregar usuario
-              </button>
-            </div>
-          </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
-      <Footer />
 
       <Modal
         show={modal}
@@ -436,6 +277,8 @@ const GestionPerfiles = () => {
           </button>
         </div>
       </Modal>
+
+      <Footer />
     </div>
   );
 };
