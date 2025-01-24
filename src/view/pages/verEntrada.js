@@ -19,6 +19,9 @@ const Entrada = () => {
       contenido: '',
       aprobada_prof: false,
       aprobada_est: false,
+      puntosAnalizados: '',
+      asuntosPendientes: '',
+      observaciones: '',
     });
 
     const navigate = useNavigate();
@@ -47,13 +50,18 @@ const Entrada = () => {
                       aprobada_est`)
                       .eq('id', entradaId);
 
+                const cont = JSON.parse(data[0].contenido || "{}");
+
                 setEntrada((prev) => ({
                     ...prev,
                     bitacora_id: data[0].bitacora_id,
                     fecha: data[0].fecha,
                     contenido: data[0].contenido,
                     aprobada_prof: data[0].aprobada_prof,
-                    aprobada_est: data[0].aprobada_est
+                    aprobada_est: data[0].aprobada_est,
+                    puntosAnalizados: cont[0],
+                    asuntosPendientes: cont[1],
+                    observaciones: cont[2],
                 }))
 
                 if (error) {
@@ -76,17 +84,21 @@ const Entrada = () => {
     }));
   };
 
-  const handleLimpiarEntradas = () => {
-    console.log('Limpiar entradas');
-  };
-
   const handleGuardarBitacora = async () => {
     try {
+
+      // Convertimos las entradas en un array y luego en string
+      const cont = JSON.stringify([
+        entrada.puntosAnalizados,
+        entrada.asuntosPendientes,
+        entrada.observaciones,
+      ]);
+
       const { error } = await supabase
         .from('Entrada')
         .update({
           fecha: new Date().toISOString(),
-          contenido: entrada.contenido,
+          contenido: cont,
           aprobada_prof: false,
           aprobada_est: false,
         })
@@ -197,12 +209,56 @@ const Entrada = () => {
         </div>
 
         {/* Contenido */}
-        <label>Contenido:</label>
+        <label>Puntos Analizados:</label>
         <div className="input-container-add" style={{ width: '100%' }}>
           <textarea
-            name="contenido"
+            name="puntosAnalizados"
             className="input-field"
-            value={entrada.contenido}
+            value={entrada.puntosAnalizados}
+            onChange={handleInputChange}
+            rows="4"
+            style={{
+              resize: 'none',
+              width: '100%',
+              height: 'auto',
+              overflow: 'hidden',
+            }}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            readOnly={entrada.aprobada_prof === true && entrada.aprobada_est === true}
+          />
+        </div>
+
+        <label>Asuntos Pendientes:</label>
+        <div className="input-container-add" style={{ width: '100%' }}>
+          <textarea
+            name="asuntosPendientes"
+            className="input-field"
+            value={entrada.asuntosPendientes}
+            onChange={handleInputChange}
+            rows="4"
+            style={{
+              resize: 'none',
+              width: '100%',
+              height: 'auto',
+              overflow: 'hidden',
+            }}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = `${e.target.scrollHeight}px`;
+            }}
+            readOnly={entrada.aprobada_prof === true && entrada.aprobada_est === true}
+          />
+        </div>
+
+        <label>Observaciones:</label>
+        <div className="input-container-add" style={{ width: '100%' }}>
+          <textarea
+            name="observaciones"
+            className="input-field"
+            value={entrada.observaciones}
             onChange={handleInputChange}
             rows="4"
             style={{

@@ -312,7 +312,16 @@ const Bitacoras = () => {
                         Contenido
                       </th>
                       <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Profesor
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        Estudiante
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                         Estado
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
+                        
                       </th>
                     </tr>
                   </thead>
@@ -326,7 +335,22 @@ const Bitacoras = () => {
                           {entrada.fecha}
                         </td>
                         <td className="px-4 py-4 text-sm text-gray-900">
-                          {entrada.contenido.slice(0, 100)}...
+                          {JSON.parse(entrada.contenido.slice(0, 100))}...
+                        </td>
+                        <td>
+                          {(entrada.aprobada_prof===true)
+                            ? 'Aprobada'
+                            : 'Pendiente'}
+                        </td>
+                        <td>
+                          {(entrada.aprobada_est===true)
+                            ? 'Aprobada'
+                            : 'Pendiente'}
+                        </td>
+                        <td>
+                          {(entrada.aprobada_prof===true) && (entrada.aprobada_est===true)
+                            ? 'Aprobada'
+                            : 'Pendiente'}
                         </td>
                         <td className="px-4 py-4 text-right text-sm font-medium whitespace-nowrap">
                           <button
