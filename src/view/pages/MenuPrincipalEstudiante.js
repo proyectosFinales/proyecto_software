@@ -9,7 +9,8 @@ const MenuEstudiante = () => {
   const menuItems = [
     { to: "/anteproyectosEstudiante", icon: "fas fa-folder", text: "Anteproyectos" },
     { to: "/citas-estudiante", icon: "fas fa-clock", text: "Citas" },
-    { to: "/bitacoras", icon: "fas fa-folder-open", text: "Bitácoras" }
+    { to: "/bitacoras", icon: "fas fa-folder-open", text: "Bitácoras" },
+    { to: "/calificar-asesor", icon: "fas fa-star", text: "Calificar Profesor Asesor" }
   ];
 
   return (
