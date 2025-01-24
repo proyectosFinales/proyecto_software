@@ -12,6 +12,7 @@ const SidebarEstudiante = ({ show, setShow }) => {
     { path: "/MenuEstudiante", text: "Inicio", icon: Home },
     { path: "/anteproyectosEstudiante", text: "Anteproyecto", icon: FileText },
     { path: "/citas-estudiante", text: "Citas", icon: Calendar },
+    { path: "/bitacoras", text: "Bitácoras", icon: Calendar },
   ];
 
   return (

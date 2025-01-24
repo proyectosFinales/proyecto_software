@@ -7,7 +7,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaMapMarked } from 'react-icons/fa';
 import '../styles/AgregarUsuario.css';
-import Header from '../components/HeaderCoordinador';
+import HeaderProfesor from '../components/HeaderProfesor';
+import HeaderEstudiante from '../components/HeaderEstudiante';
 import Footer from '../components/Footer';
 import supabase from '../../model/supabase';
 
@@ -34,11 +35,25 @@ const Entrada = () => {
     const queryParams = getQueryParams(location.search);
     const entradaId = queryParams.id;
     const esProfesor = queryParams.esProfesor === 'true';
+    const usuarioId = sessionStorage.getItem('token');
+    const [rol, setRol] = useState(0);
 
     useEffect(() => {
 
         const fetchEntrada = async () => {
-            console.log(entradaId);
+             // Obtener el rol del usuario
+              const { data: rolUsuario, error: rolError } = await supabase
+              .from('Usuario')
+              .select('rol')
+              .eq('id', usuarioId)
+              .single();
+
+            if (rolError || !rolUsuario) {
+              throw new Error('Error al obtener el rol del usuario');
+            }
+
+            setRol(rolUsuario.rol);
+
             try {
                 const { data, error } = await supabase
                     .from('Entrada')
@@ -150,7 +165,8 @@ const Entrada = () => {
 
   return (
   <div className="agregar-usuario-container">
-    <Header />
+    {rol === 2 ? <HeaderProfesor/> :
+        <HeaderEstudiante/>}
     <div 
       className="form-container" 
       style={{

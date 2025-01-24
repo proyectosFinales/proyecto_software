@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles/AgregarUsuario.css';
-import Header from '../components/HeaderCoordinador';
+import HeaderProfesor from '../components/HeaderProfesor';
+import HeaderEstudiante from '../components/HeaderEstudiante';
 import Footer from '../components/Footer';
 import supabase from '../../model/supabase';
 
@@ -21,6 +22,31 @@ const AgregarEntrada = () => {
 
   const queryParams = getQueryParams(location.search);
   const bitacoraId = queryParams.id;
+  const usuarioId = sessionStorage.getItem('token');
+  const [rol, setRol] = useState(0);
+
+  useEffect(() => {
+    const fetchRol = async () => {
+      try {
+        // Obtener el rol del usuario
+        const { data: rolUsuario, error: rolError } = await supabase
+        .from('Usuario')
+        .select('rol')
+        .eq('id', usuarioId)
+        .single();
+
+      if (rolError || !rolUsuario) {
+        throw new Error('Error al obtener el rol del usuario');
+      }
+
+      setRol(rolUsuario.rol);
+      } catch (error) {
+        console.error('Error al obtener el rol del usuario:', error.message);
+      }
+    };
+
+    fetchRol();
+  }, [usuarioId]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -65,7 +91,8 @@ const AgregarEntrada = () => {
 
   return (
     <div className="agregar-usuario-container">
-      <Header />
+       {rol === 2 ? <HeaderProfesor/> :
+        <HeaderEstudiante/>}
       <div
         className="form-container"
         style={{

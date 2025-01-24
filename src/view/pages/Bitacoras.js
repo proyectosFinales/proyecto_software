@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import Footer from '../components/Footer';
-import Header from '../components/HeaderProfesor';
+import HeaderProfesor from '../components/HeaderProfesor';
+import HeaderEstudiante from '../components/HeaderEstudiante';
 import supabase from '../../model/supabase';
 import Modal from 'react-modal';
 import '../styles/Bitacoras.css';
@@ -208,7 +209,8 @@ const Bitacoras = () => {
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header title="Bitácoras" />
+      {rol === 2 ? <HeaderProfesor title="Bitácoras del Profesor" /> :
+        <HeaderEstudiante title="Bitácoras del Estudiante" />}
       <div className="flex-grow p-2 sm:p-4 container mx-auto">
         {/* Header con título y botón de agregar */}
         <div className="flex justify-between items-center mb-6 px-4">
