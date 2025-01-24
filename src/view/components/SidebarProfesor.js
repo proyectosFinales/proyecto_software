@@ -12,8 +12,9 @@ const SidebarProfesor = ({ show, setShow }) => {
   const menuItems = [
     { path: "/menuProfesor", text: "Inicio", icon: Home },
     { path: "/proyectos-profesor", text: "Proyectos", icon: FileText },
-    { path: "/disponibildad-profesor", text: "Disponibilidad para defensas", icon: Clock },
+    { path: "/disponibilidad-profesor", text: "Disponibilidad para defensas", icon: Clock },
     { path: "/citas-profesor", text: "Citas", icon: Calendar },
+    { path: "/bitacoras", text: "Bitácoras", icon: Calendar },
   ];
 
   return (
