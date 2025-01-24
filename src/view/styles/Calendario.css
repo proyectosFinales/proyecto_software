@@ -83,7 +83,7 @@
 .btn-add-event {
   padding: 10px 20px;
   background-color: var(--azul);
-  color: white;
+  color: grey;
   border: none;
   border-radius: 5px;
   cursor: pointer;
