@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import '../styles/AgregarUsuario.css';
 import HeaderProfesor from '../components/HeaderProfesor';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import Footer from '../components/Footer';
@@ -90,49 +89,20 @@ const AgregarEntrada = () => {
   };
 
   return (
-    <div className="agregar-usuario-container">
-       {rol === 2 ? <HeaderProfesor/> :
-        <HeaderEstudiante/>}
-      <div
-        className="form-container"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '20px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            width: '100%',
-            alignItems: 'center',
-          }}
-        >
-          <button
-            className="btn-back-addUser"
-            onClick={() => navigate('/bitacoras')}
-            style={{ marginLeft: '10px' }}
-          >
-            Volver
-          </button>
-          <h2 style={{ textAlign: 'center', margin: '0 auto', flex: 1 }}>
-            Entrada
-          </h2>
-        </div>
-
-        {/* Formulario */}
-        <form className="form-addUser" style={{ width: '75%' }}>
-          {/* Puntos Analizados */}
-          <label>Puntos Analizados:</label>
-          <div className="input-container-add">
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      {rol === 2 ? <HeaderProfesor title="Agregar Entrada" /> :
+        <HeaderEstudiante title="Agregar Entrada" />}
+      <div className="flex-grow flex flex-col items-center p-6">
+        <form className="w-full max-w-lg bg-white p-6 rounded shadow space-y-4">
+          <h2 className="text-xl font-semibold mb-2">Nueva Entrada</h2>
+          <div className="flex flex-col">
+            <label className="mb-1">Puntos Analizados</label>
             <textarea
               name="puntosAnalizados"
-              className="input-field"
+              className="border border-gray-300 rounded px-3 py-2"
               value={entrada.puntosAnalizados}
               onChange={handleInputChange}
-              rows="3"
+              rows="4"
               style={{
                 resize: 'none',
                 width: '100%',
@@ -145,16 +115,14 @@ const AgregarEntrada = () => {
               }}
             />
           </div>
-
-          {/* Asuntos Pendientes */}
-          <label>Asuntos Pendientes:</label>
-          <div className="input-container-add">
+          <div className="flex flex-col">
+            <label className="mb-1">Asuntos Pendientes</label>
             <textarea
               name="asuntosPendientes"
-              className="input-field"
+              className="border border-gray-300 rounded px-3 py-2"
               value={entrada.asuntosPendientes}
               onChange={handleInputChange}
-              rows="3"
+              rows="4"
               style={{
                 resize: 'none',
                 width: '100%',
@@ -167,16 +135,14 @@ const AgregarEntrada = () => {
               }}
             />
           </div>
-
-          {/* Observaciones */}
-          <label>Observaciones:</label>
-          <div className="input-container-add">
+          <div className="flex flex-col">
+            <label className="mb-1">Observaciones</label>
             <textarea
               name="observaciones"
-              className="input-field"
+              className="border border-gray-300 rounded px-3 py-2"
               value={entrada.observaciones}
               onChange={handleInputChange}
-              rows="3"
+              rows="4"
               style={{
                 resize: 'none',
                 width: '100%',
@@ -189,13 +155,12 @@ const AgregarEntrada = () => {
               }}
             />
           </div>
-
-          {/* Botón Guardar */}
-          <div
-            className="buttons"
-            style={{ marginTop: '20px', textAlign: 'center' }}
-          >
-            <button type="button" onClick={handleGuardarEntrada}>
+          <div className="flex justify-center mt-4">
+            <button
+              type="button"
+              onClick={handleGuardarEntrada}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
               Guardar
             </button>
           </div>
