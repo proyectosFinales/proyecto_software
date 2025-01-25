@@ -6,7 +6,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'react-icons/fa';
-import '../styles/AgregarUsuario.css';
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import { signUpNewUser, registroProfesor, generarContraseña, sendMailToNewUser } from '../../controller/Signup';
@@ -82,39 +81,20 @@ const AgregarUsuario = () => {
   };
 
   return (
-    <div className="agregar-usuario-container">
-      <Header />
-      <div className="form-container">
-        <button
-          className="btn-back-addUser"
-          onClick={() => navigate("/gestion-perfiles")}
-        >
-          Volver
-        </button>
-        <h2>Agregar Usuario</h2>
-        <div className="tabs">
-          <button
-            onClick={() => handleTipoUsuarioChange('estudiante')}
-            className={tipoUsuario === 'estudiante' ? 'active' : ''}
-          >
-            Estudiante
-          </button>
-          <button
-            onClick={() => handleTipoUsuarioChange('profesor')}
-            className={tipoUsuario === 'profesor' ? 'active' : ''}
-          >
-            Profesor
-          </button>
-        </div>
-
-        <form className="form-addUser">
-          <label>Nombre:</label>
-          <div className="input-container-add">
-            <FaUser className="icon-add" />
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      <Header title="Agregar Usuario" />
+      <div className="flex-grow flex flex-col items-center p-6">
+        <form className="w-full max-w-md bg-white p-6 rounded shadow space-y-4 relative">
+          <h2 className="text-xl font-bold">Datos de {tipoUsuario}</h2>
+          <div className="flex flex-col mb-3">
+            <label className="mb-1 flex items-center">
+              <FaUser className="mr-2" />
+              Nombre completo
+            </label>
             <input
+              className="border border-gray-300 rounded px-3 py-2"
               type="text"
               name="nombre"
-              className="input-field"
               value={usuario.nombre}
               onChange={handleInputChange}
               required
@@ -123,26 +103,30 @@ const AgregarUsuario = () => {
 
           {tipoUsuario === 'estudiante' && (
             <>
-              <label>Carnet:</label>
-              <div className="input-container-add">
-                <FaIdCard className="icon-add" />
+              <div className="flex flex-col mb-3">
+                <label className="mb-1 flex items-center">
+                  <FaIdCard className="mr-2" />
+                  Carnet
+                </label>
                 <input
+                  className="border border-gray-300 rounded px-3 py-2"
                   type="text"
                   name="carnet"
-                  className="input-field"
                   value={usuario.carnet}
                   onChange={handleInputChange}
                   required
                 />
               </div>
 
-              <label>Número (teléfono):</label>
-              <div className="input-container-add">
-                <FaPhone className="icon-add" />
+              <div className="flex flex-col mb-3">
+                <label className="mb-1 flex items-center">
+                  <FaPhone className="mr-2" />
+                  Número (teléfono)
+                </label>
                 <input
+                  className="border border-gray-300 rounded px-3 py-2"
                   type="text"
                   name="numero"
-                  className="input-field"
                   value={usuario.numero}
                   onChange={handleInputChange}
                   required
@@ -153,13 +137,15 @@ const AgregarUsuario = () => {
 
           {tipoUsuario === 'profesor' && (
             <>
-              <label>Número (teléfono):</label>
-              <div className="input-container-add">
-                <FaPhone className="icon-add" />
+              <div className="flex flex-col mb-3">
+                <label className="mb-1 flex items-center">
+                  <FaPhone className="mr-2" />
+                  Número (teléfono)
+                </label>
                 <input
+                  className="border border-gray-300 rounded px-3 py-2"
                   type="text"
                   name="numero"
-                  className="input-field"
                   value={usuario.numero}
                   onChange={handleInputChange}
                 />
@@ -167,25 +153,29 @@ const AgregarUsuario = () => {
             </>
           )}
 
-          <label>Correo:</label>
-          <div className="input-container-add">
-            <FaEnvelope className="icon-add" />
+          <div className="flex flex-col mb-3">
+            <label className="mb-1 flex items-center">
+              <FaEnvelope className="mr-2" />
+              Correo
+            </label>
             <input
+              className="border border-gray-300 rounded px-3 py-2"
               type="email"
               name="correo"
-              className="input-field"
               value={usuario.correo}
               onChange={handleInputChange}
               required
             />
           </div>
 
-          <label>Seleccione una sede:</label>
-          <div className="input-container-add">
-            <FaMapMarked className="icon-sede" />
+          <div className="flex flex-col mb-3">
+            <label className="mb-1 flex items-center">
+              <FaMapMarked className="mr-2" />
+              Seleccione una sede:
+            </label>
             <select
+              className="border border-gray-300 rounded px-3 py-2"
               name="sede"
-              className="sede-dropdown"
               value={usuario.sede}
               onChange={handleInputChange}
               required
@@ -199,11 +189,19 @@ const AgregarUsuario = () => {
             </select>
           </div>
 
-          <div className="buttons">
-            <button type="button" onClick={handleLimpiarEntradas}>
+          <div className="flex justify-between mt-6">
+            <button
+              type="button"
+              onClick={handleLimpiarEntradas}
+              className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+            >
               Limpiar
             </button>
-            <button type="button" onClick={handleAgregarUsuario}>
+            <button
+              type="button"
+              onClick={handleAgregarUsuario}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
               Agregar Usuario
             </button>
           </div>

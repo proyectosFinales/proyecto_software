@@ -6,7 +6,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaMapMarked } from 'react-icons/fa';
-import '../styles/AgregarUsuario.css';
 import HeaderProfesor from '../components/HeaderProfesor';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import Footer from '../components/Footer';
@@ -218,112 +217,39 @@ const AgregarBitacora = () => {
   };
 
   return (
-    <div className="agregar-usuario-container">
-      {rol === 2 ? <HeaderProfesor/> :
-        <HeaderEstudiante/>}
-      <div 
-        className="form-container" 
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: '20px',
-          padding: '20px',
-        }}
-      >
-        {/* Botón Volver y Título */}
-        <div 
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            width: '100%',
-          }}
-        >
-          <button
-            className="btn-back-addUser"
-            onClick={() => navigate("/bitacoras")}
-            style={{ marginLeft: '10px' }}
-          >
-            Volver
-          </button>
-          <h2 style={{ textAlign: 'center', margin: '0 auto', flex: 1 }}>
-            Agregar Bitacora
-          </h2>
-        </div>
-
-        {/* Formulario */}
-        <form 
-          className="form-addUser" 
-          style={{ 
-            width: '100%', 
-            maxWidth: '600px', 
-            display: 'flex', 
-            flexDirection: 'column', 
-            gap: '15px' 
-          }}
-        >
-          {/* Estudiante */}
-          <label>Estudiante:</label>
-          <div className="input-container-add" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FaUser className="icon-add" />
-            {profesorId !== "0" ? (
-              <select
-                name="estudiante"
-                className="input-field"
-                value={bitacora.estudiante || ''}
-                onChange={handleInputChange}
-                required
-                style={{ flex: 1 }}
-              >
-                <option value="">Seleccione un estudiante</option>
-                {estudiantes.map((estudiante) => (
-                  <option 
-                    key={estudiante.estudiante_id} 
-                    value={estudiante.Usuario.nombre} 
-                    data-id={estudiante.estudiante_id}
-                  >
-                    {estudiante.Usuario.nombre}
-                  </option>
-                ))}
-              </select>
-            ) : (
-              <input
-                type="text"
-                name="estudiante"
-                className="input-field"
-                value={bitacora.estudiante}
-                readOnly
-                style={{ flex: 1 }}
-              />
-            )}
-          </div>
-
-          {/* Profesor */}
-          <label>Profesor:</label>
-          <div className="input-container-add" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FaEnvelope className="icon-add" />
+    <div className="flex flex-col min-h-screen bg-gray-100">
+      {rol === 2 ? <HeaderProfesor title="Agregar Bitácora" /> :
+        <HeaderEstudiante title="Agregar Bitácora" />}
+      <div className="flex-grow flex flex-col items-center p-6">
+        <form className="w-full max-w-sm bg-white p-6 rounded shadow space-y-4">
+          <h2 className="text-xl font-semibold mb-2">Nueva Bitácora</h2>
+          <div className="flex flex-col">
+            <label className="mb-1">Nombre del estudiante</label>
             <input
-              type="email"
-              name="correo"
-              className="input-field"
-              value={bitacora.profesor}
-              readOnly
-              style={{ flex: 1 }}
+              type="text"
+              className="border border-gray-300 rounded px-3 py-2"
+              name="estudiante"
+              value={bitacora.estudiante}
+              onChange={handleInputChange}
             />
           </div>
-
-          {/* Proyecto */}
-          <label>Proyecto:</label>
-          <div className="input-container-add" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <FaMapMarked className="icon-sede" />
+          <div className="flex flex-col">
+            <label className="mb-1">Profesor</label>
+            <input
+              type="email"
+              className="border border-gray-300 rounded px-3 py-2"
+              name="correo"
+              value={bitacora.profesor}
+              readOnly
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="mb-1">Proyecto</label>
             <select
+              className="border border-gray-300 rounded px-3 py-2"
               name="proyecto"
-              className="sede-dropdown"
               value={bitacora.proyecto}
               onChange={handleInputChange}
-              required
-              style={{ flex: 1 }}
             >
               <option value="">Proyecto nulo</option>
               {proyectos.map((proyecto, index) => (
@@ -333,16 +259,19 @@ const AgregarBitacora = () => {
               ))}
             </select>
           </div>
-
-          {/* Botones */}
-          <div 
-            className="buttons" 
-            style={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}
-          >
-            <button type="button" onClick={handleLimpiarEntradas}>
+          <div className="flex justify-between mt-4">
+            <button
+              type="button"
+              onClick={handleLimpiarEntradas}
+              className="bg-gray-300 hover:bg-gray-400 px-4 py-2 rounded"
+            >
               Limpiar
             </button>
-            <button type="button" onClick={handleAgregarBitacora}>
+            <button
+              type="button"
+              onClick={handleAgregarBitacora}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+            >
               Agregar Bitacora
             </button>
           </div>
@@ -350,7 +279,6 @@ const AgregarBitacora = () => {
       </div>
       <Footer />
     </div>
-
   );
 };
 

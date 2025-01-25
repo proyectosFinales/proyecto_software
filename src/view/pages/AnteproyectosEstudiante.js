@@ -4,12 +4,10 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/AnteproyectosEstudiante.module.css';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import { descargarAnteproyecto } from '../../controller/DescargarPDF';
-import styles2 from '../styles/table.module.css';
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -162,61 +160,58 @@ const AnteproyectosEstudiante = () => {
   }
 
   return (
-    <div className={styles.contenedor_anteproyectos_estudiante}>
-      <HeaderEstudiante title="Anteproyectos" />
-      <div>
-        <main className={styles.lista_anteproyectos_estudiante}>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <HeaderEstudiante title="Mis Anteproyectos" />
+      <main className="flex-grow p-6">
+        <div className="max-w-7xl mx-auto bg-white p-4 rounded shadow">
           <button
-            className={styles.crear_anteproyecto}
-            onClick={() => crearAnteproyecto()}
+            onClick={() => navigate('/formularioEstudiantes')}
+            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mb-4"
           >
-            Crear anteproyecto
+            Crear Anteproyecto
           </button>
-          <div className={styles.contenedor_tabla}>
-            <table className={styles2.table}>
-              <thead>
-                <tr>
-                  <th>Empresa</th>
-                  <th>Estado</th>
-                  <th></th>
+
+          <table className="w-full border-collapse border">
+            <thead>
+              <tr className="bg-gray-200 border-b">
+                <th className="p-3 border-r text-left">Nombre del proyecto</th>
+                <th className="p-3 border-r text-left">Estado</th>
+                <th className="p-3 text-left">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {anteproyectos.map((anteproyecto) => (
+                <tr key={anteproyecto.id} className="border-b hover:bg-gray-50">
+                  <td className="p-3 border-r">{anteproyecto.Empresa.nombre}</td>
+                  <td className="p-3 border-r">{anteproyecto.estado}</td>
+                  <td className="p-3 flex space-x-2">
+                    <button
+                      onClick={() => editarAnteproyecto(anteproyecto.id)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => descargarAnteproyecto(anteproyecto)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                    >
+                      Descargar
+                    </button>
+                    <button
+                      onClick={() =>
+                        eliminarAnteproyecto(anteproyecto.id, anteproyecto.estado)
+                      }
+                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                    >
+                      Eliminar
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {anteproyectos.map((anteproyecto) => (
-                  <tr key={anteproyecto.id}>
-                    <td>{anteproyecto.Empresa.nombre}</td>
-                    <td>{anteproyecto.estado}</td>
-                    <td>
-                      <div className={styles.contenedor_botones_anteproyectos_estudiante}>
-                        <button
-                          onClick={() => editarAnteproyecto(anteproyecto.id)}
-                          className={`${styles.btn} ${styles.editar}`}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => descargarAnteproyecto(anteproyecto)}
-                          className={`${styles.btn} ${styles.descargar}`}
-                        >
-                          Descargar
-                        </button>
-                        <button
-                          onClick={() =>
-                            eliminarAnteproyecto(anteproyecto.id, anteproyecto.estado)
-                          }
-                          className={`${styles.btn} ${styles.eliminar}`}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
       <Footer />
     </div>
   );
