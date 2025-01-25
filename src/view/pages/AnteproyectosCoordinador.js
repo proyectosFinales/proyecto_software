@@ -131,7 +131,7 @@ const AnteproyectosCoordinador = () => {
               </tr>
             </thead>
             <tbody>
-              {anteproyectos.map((anteproyecto) => (
+              {filteredAnteproyectos.map((anteproyecto) => (
                 <tr key={anteproyecto.id} className="border-b border-gray-200">
                   <td className="px-3 py-2">{anteproyecto.nombre}</td>
                   <td className="px-3 py-2">{anteproyecto.estado}</td>
@@ -161,6 +161,14 @@ const AnteproyectosCoordinador = () => {
                       >
                         Eliminar
                       </button>
+                      {anteproyecto.estado === 'Aprobado' && (
+                        <button
+                          onClick={() => cambiarEstado(anteproyecto)}
+                          className={"px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"}
+                        >
+                          Pendiente
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
