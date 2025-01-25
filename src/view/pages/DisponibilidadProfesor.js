@@ -49,7 +49,7 @@ const DisponibilidadProfesor = () => {
   const handleAgregarDisponibilidad = async () => {
     try {
       console.log(disponibilidadProfesor);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('disponibilidad')
         .insert([
             {
@@ -73,6 +73,15 @@ const DisponibilidadProfesor = () => {
     }
   };
 
+  const handleEliminarDisponibilidad = async (id) => {
+    try {
+      await supabase.from('disponibilidad').delete().eq('id', id);
+      setDisponibilidad(disponibilidad.filter(event => event.id !== id));
+    } catch (error) {
+      alert(`Error al eliminar evento: ${error.message}`);
+    }
+  };
+
   return (
     <div>
       <Header title="Disponibilidad" />
@@ -84,6 +93,7 @@ const DisponibilidadProfesor = () => {
                 <th>Día</th>
                 <th>Hora Inicio</th>
                 <th>Hora Fin</th>
+                <th>¿Eliminar?</th>
               </tr>
             </thead>
             <tbody>
@@ -92,6 +102,13 @@ const DisponibilidadProfesor = () => {
                   <td>{disp.dia}</td>
                   <td>{disp.hora_inicio}</td>
                   <td>{disp.hora_fin}</td>
+                  <td>
+                    <button
+                      className="btn-delete-event" 
+                      onClick={() => handleEliminarDisponibilidad(disp.id)}>
+                      Eliminar
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
