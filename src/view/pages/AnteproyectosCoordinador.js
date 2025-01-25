@@ -125,55 +125,56 @@ const AnteproyectosCoordinador = () => {
   });
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Header title="Anteproyectos" />
+      <main className="flex-grow p-6">
+        <div className="max-w-7xl mx-auto bg-white p-4 rounded shadow">
+          {/* Search bar */}
+          <input
+            type="text"
+            placeholder="Buscar anteproyecto..."
+            className="border border-gray-300 rounded px-3 py-2 mb-4 w-full"
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
 
-      <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
-        {/* Search bar */}
-        <input
-          type="text"
-          className="w-full border border-gray-300 rounded py-2 px-4 mb-4"
-          placeholder="Buscar anteproyectos..."
-          value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
-        />
-
-        {/* Table container */}
-        <div className="overflow-x-auto">
-          <table className="table-auto w-full border border-gray-300">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-3 py-2 text-left border-b border-gray-300">Nombre</th>
-                <th className="px-3 py-2 text-left border-b border-gray-300">Estado</th>
-                <th className="px-3 py-2 text-left border-b border-gray-300">Acciones</th>
+          {/* Table replaced old .lista_anteproyectos_coordinador styling */}
+          <table className="w-full border-collapse border">
+            <thead>
+              <tr className="bg-gray-200 border-b">
+                <th className="p-2 border-r text-left">Nombre</th>
+                <th className="p-2 border-r text-left">Empresa</th>
+                <th className="p-2 border-r text-left">Estado</th>
+                <th className="p-2 text-left">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {filteredAnteproyectos.map((anteproyecto) => (
-                <tr key={anteproyecto.id} className="border-b border-gray-200">
-                  <td className="px-3 py-2">{anteproyecto.Estudiante.Usuario.nombre}</td>
-                  <td className="px-3 py-2">{anteproyecto.estado}</td>
-                  <td className="px-3 py-2">
+                <tr key={anteproyecto.id} className="border-b hover:bg-gray-50">
+                  <td className="p-2 border-r">{anteproyecto.Estudiante.Usuario.nombre}</td>
+                  <td className="p-2 border-r">{anteproyecto.Empresa.nombre}</td>
+                  <td className="p-2 border-r">{anteproyecto.estado}</td>
+                  <td className="p-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <button
-                        onClick={() => navigate('/formulario-coordinador?id=' + anteproyecto.id)}
-                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
+                        onClick={() => handleRevisar(anteproyecto.id)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
                       >
                         Revisar
                       </button>
                       <button
                         onClick={() => descargarAnteproyecto(anteproyecto)}
-                        className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
                       >
                         Descargar
                       </button>
                       {(anteproyecto.estado !== "Pendiente" && anteproyecto.estado !== "Correccion") && (
-                      <button
-                        onClick={() => {cambiarEstado(anteproyecto)}}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                      >
-                        Pendiente
-                      </button>
+                        <button
+                          onClick={() => cambiarEstado(anteproyecto)}
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                        >
+                          Pendiente
+                        </button>
                       )}
                     </div>
                   </td>
@@ -183,7 +184,6 @@ const AnteproyectosCoordinador = () => {
           </table>
         </div>
       </main>
-
       <Footer />
     </div>
   );
