@@ -185,7 +185,16 @@ const AgregarBitacora = () => {
 
   const handleAgregarBitacora = async () => {
       try{
-        const { data, error } = await supabase
+
+        console.log(estudiante);
+        console.log(profesor);
+        console.log(bitacora.proyecto.id);
+        console.log(bitacora);
+
+        if (estudiante === '' || profesor === '' || bitacora.proyecto === null) {
+            throw new Error('Todos los campos son obligatorios');
+        }
+        const { error } = await supabase
         .from('Bitacora')
         .insert([
             {
@@ -225,13 +234,32 @@ const AgregarBitacora = () => {
           <h2 className="text-xl font-semibold mb-2">Nueva Bitácora</h2>
           <div className="flex flex-col">
             <label className="mb-1">Nombre del estudiante</label>
-            <input
-              type="text"
-              className="border border-gray-300 rounded px-3 py-2"
-              name="estudiante"
-              value={bitacora.estudiante}
-              onChange={handleInputChange}
-            />
+            {profesorId !== "0" ? (
+                // Mostrar el select si profesorId es diferente de "0"
+                <select
+                name="estudiante"
+                className="input-field border border-gray-300 rounded px-3 py-2"
+                value={bitacora.estudiante || ''}
+                onChange={handleInputChange}
+                required
+                >
+                <option value="">Seleccione un estudiante</option>
+                {estudiantes.map((estudiante) => (
+                    <option key={estudiante.estudiante_id} value={estudiante.Usuario.nombre} data-id={estudiante.estudiante_id}>
+                    {estudiante.Usuario.nombre}
+                    </option>
+                ))}
+                </select>
+            ) : (
+                // Mostrar solo el nombre del estudiante si profesorId es "0"
+                <input
+                type="text"
+                name="estudiante"
+                className="input-field border border-gray-300 rounded px-3 py-2"
+                value={bitacora.estudiante}
+                readOnly
+                />
+            )}
           </div>
           <div className="flex flex-col">
             <label className="mb-1">Profesor</label>
@@ -251,9 +279,9 @@ const AgregarBitacora = () => {
               value={bitacora.proyecto}
               onChange={handleInputChange}
             >
-              <option value="">Proyecto nulo</option>
+              <option value="">Seleccione un proyecto</option>
               {proyectos.map((proyecto, index) => (
-                <option key={proyecto.id} value={proyecto}>
+                <option key={proyecto.id} value={proyecto.id}>
                   {proyecto.Anteproyecto.Empresa.nombre}
                 </option>
               ))}
