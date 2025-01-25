@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/AnteproyectosCoordinador.module.css';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import styles2 from '../styles/table.module.css';

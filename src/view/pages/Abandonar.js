@@ -5,7 +5,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/Abandonar.module.css';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderEstudiante';
 
