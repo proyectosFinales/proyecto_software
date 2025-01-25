@@ -83,8 +83,8 @@ const AgregarUsuario = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <Header title="Agregar Usuario" />
-      <div className="flex-grow flex flex-col items-center p-6">
-        <form className="w-full max-w-md bg-white p-6 rounded shadow space-y-4 relative">
+      <main className="flex-grow flex items-center justify-center p-6">
+        <form className="w-full max-w-md bg-white p-6 rounded shadow space-y-4">
           <h2 className="text-xl font-bold">Datos de {tipoUsuario}</h2>
           <div className="flex flex-col mb-3">
             <label className="mb-1 flex items-center">
@@ -206,7 +206,7 @@ const AgregarUsuario = () => {
             </button>
           </div>
         </form>
-      </div>
+      </main>
       <Footer />
     </div>
   );
