@@ -23,18 +23,49 @@ const AnteproyectosCoordinador = () => {
         .select(`
           id,
           empresa_id,
+          contexto,
+          justificacion,
+          sintomas,
           estado,
+          impacto,
+          tipo,
+          comentario,
           estudiante_id,
-          Empresa:Empresa!anteproyecto_empresa_id_fkey (
-            nombre         
-          ),
+          actividad,
+          departamento,
+          comentario,
           Estudiante:estudiante_id (
-            nombre
+            carnet,
+            id_usuario,
             Usuario:id_usuario (
-              nombre
+              nombre,
+              correo,
+              telefono,
+              sede
+            )
+          ),
+          Empresa:empresa_id (
+            nombre,
+            tipo,
+            provincia,
+            canton,
+            distrito
+          ),
+          AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
+            ContactoEmpresa:contacto_id(
+              nombre,
+              correo,
+              departamento,
+              telefono
+            ),
+            RRHH:rrhh_id(
+              nombre,
+              correo,
+              telefono
             )
           )
         `);
+      console.log(data);
       if (error) {
         alert('No se pudieron obtener los anteproyectos. ' + error.message);
         return;
@@ -133,7 +164,7 @@ const AnteproyectosCoordinador = () => {
             <tbody>
               {filteredAnteproyectos.map((anteproyecto) => (
                 <tr key={anteproyecto.id} className="border-b border-gray-200">
-                  <td className="px-3 py-2">{anteproyecto.nombre}</td>
+                  <td className="px-3 py-2">{anteproyecto.Estudiante.Usuario.nombre}</td>
                   <td className="px-3 py-2">{anteproyecto.estado}</td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center gap-2">
@@ -149,25 +180,13 @@ const AnteproyectosCoordinador = () => {
                       >
                         Descargar
                       </button>
+                      {(anteproyecto.estado !== "Pendiente" && anteproyecto.estado !== "Correccion") && (
                       <button
-                        onClick={() => {
-                          if (anteproyecto.estado === 'Pendiente') {
-                            // logic...
-                          } else {
-                            // logic...
-                          }
-                        }}
+                        onClick={() => {cambiarEstado(anteproyecto)}}
                         className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                       >
-                        Eliminar
+                        Pendiente
                       </button>
-                      {anteproyecto.estado === 'Aprobado' && (
-                        <button
-                          onClick={() => cambiarEstado(anteproyecto)}
-                          className={"px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"}
-                        >
-                          Pendiente
-                        </button>
                       )}
                     </div>
                   </td>
