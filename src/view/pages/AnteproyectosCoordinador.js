@@ -142,16 +142,22 @@ const AnteproyectosCoordinador = () => {
   };
 
   const filteredAnteproyectos = anteproyectos.filter((anteproyecto) => {
+    // Convertimos el texto de búsqueda a minúsculas para hacer una comparación case-insensitive
     const lowerSearchText = searchText.toLowerCase();
-    return Object.values(anteproyecto).some((value) => {
-      if (typeof value === 'object' && value !== null) {
-        return Object.values(value).some((subValue) =>
-          String(subValue).toLowerCase().includes(lowerSearchText)
-        );
-      }
-      return String(value).toLowerCase().includes(lowerSearchText);
-    });
+  
+    // Obtenemos los valores relevantes del anteproyecto
+    const estudianteNombre = anteproyecto.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
+    const estado = anteproyecto.estado?.toLowerCase() || '';
+    const empresaNombre = anteproyecto.Empresa?.nombre?.toLowerCase() || '';
+  
+    // Comprobamos si alguno de estos valores incluye el texto de búsqueda
+    return (
+      estudianteNombre.includes(lowerSearchText) ||
+      estado.includes(lowerSearchText) ||
+      empresaNombre.includes(lowerSearchText)
+    );
   });
+  
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -182,6 +188,7 @@ const AnteproyectosCoordinador = () => {
               <tr>
                 <th className="px-3 py-2 text-left border-b border-gray-300">Nombre</th>
                 <th className="px-3 py-2 text-left border-b border-gray-300">Estado</th>
+                <th className="px-3 py-2 text-left border-b border-gray-300">Empresa</th>
                 <th className="px-3 py-2 text-left border-b border-gray-300">Acciones</th>
               </tr>
             </thead>
@@ -193,6 +200,9 @@ const AnteproyectosCoordinador = () => {
                   </td>
                   <td className="px-3 py-2">
                     {anteproyecto.estado}
+                  </td>
+                  <td className="px-3 py-2">
+                    {anteproyecto.Empresa?.nombre || "Sin empresa"}
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center gap-2">
