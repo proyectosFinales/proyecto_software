@@ -14,8 +14,10 @@ import MenuEstudiante from './view/pages/MenuPrincipalEstudiante.js';
 import GestionPerfiles from './view/pages/GestionPerfiles.jsx';
 import AgregarUsuario from './view/pages/AgregarUsuario.js';
 import FormularioEstudiantes from './view/pages/FormularioEstudiante.js';
+import FormularioCarta from './view/pages/FormularioCarta.js';
 import FormularioCoordinador from './view/pages/FormularioCoordinador.js';
 import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante.js';
+import CartasEstudiante from './view/pages/CartasEstudiante.js';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador.js';
 import CargarProfesores from './view/pages/CargarProfesores.js';
 import EditarFormulario from './view/pages/EditarFormulario.js';
@@ -77,6 +79,10 @@ function App() {
           element={<RutaProtegida element={<AnteproyectosEstudiante />} requiredRoles={["3"]} />}
         />
         <Route
+          path="/cartasEstudiante"
+          element={<RutaProtegida element={<CartasEstudiante />} requiredRoles={["3"]} />}
+        />
+        <Route
           path="/anteproyectosCoordinador"
           element={<RutaProtegida element={<AnteproyectosCoordinador />} requiredRoles={["1"]} />}
         />
@@ -103,6 +109,10 @@ function App() {
         <Route
           path="/formulario-estudiantes"
           element={<RutaProtegida element={<FormularioEstudiantes />} requiredRoles={["3"]} />}
+        />
+        <Route
+          path="/formularioCarta"
+          element={<RutaProtegida element={<FormularioCarta />} requiredRoles={["3"]} />}
         />
         <Route
           path="/formulario-coordinador"

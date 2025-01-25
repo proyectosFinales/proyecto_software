@@ -12,8 +12,9 @@ const Menu = () => {
     { to: "/aprobarProyectos", icon: "fas fa-check-square", text: "Proyectos" },
     { to: "/gestion-perfiles", icon: "fas fa-user-cog", text: "Gestionar perfiles" },
     { to: "/carga-datos", icon: "fas fa-database", text: "Base de datos" },
-    { to: "/citasMenu", icon: "fas fa-clock", text: "Citas y Calendario" },
-    { to: "/dashboardMenu", icon: "fas fa-chart-bar", text: "Reportes y gráficos" }
+    { to: "/citasMenu", icon: "fas fa-clock", text: "Citas y calendario" },
+    { to: "/dashboardMenu", icon: "fas fa-chart-bar", text: "Reportes y gráficos" },
+    { to: "/empresas", icon: "fa-solid fa-address-book", text: "Empresas y contactos" }
   ];
 
   return (
