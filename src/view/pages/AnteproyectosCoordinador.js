@@ -33,36 +33,23 @@ const AnteproyectosCoordinador = () => {
           estudiante_id,
           actividad,
           departamento,
-          comentario,
-          Estudiante:estudiante_id (
+          Estudiante!anteproyecto_estudiante_id_fkey (
+            estudiante_id,
             carnet,
             id_usuario,
-            Usuario:id_usuario (
+            Usuario!Estudiante_id_usuario_fkey (
               nombre,
               correo,
               telefono,
               sede
             )
           ),
-          Empresa:empresa_id (
+          Empresa!anteproyecto_empresa_id_fkey (
             nombre,
             tipo,
             provincia,
             canton,
             distrito
-          ),
-          AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
-            ContactoEmpresa:contacto_id(
-              nombre,
-              correo,
-              departamento,
-              telefono
-            ),
-            RRHH:rrhh_id(
-              nombre,
-              correo,
-              telefono
-            )
           )
         `);
       console.log(data);

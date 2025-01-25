@@ -7,6 +7,7 @@ import SettingsCoordinador from '../components/SettingsCoordinador';
 import Profesor from '../../controller/profesor';
 import Estudiante from '../../controller/estudiante';
 import '../styles/DashboardEstudiantes.css';
+import supabase from '../../model/supabase';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 

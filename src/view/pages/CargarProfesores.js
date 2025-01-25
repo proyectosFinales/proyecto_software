@@ -4,7 +4,7 @@
  */
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 import styles from '../styles/CargarProfesores.module.css';
 import Header from '../components/HeaderCoordinador';
 import sendMail from '../../controller/Email';

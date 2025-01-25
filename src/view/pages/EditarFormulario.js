@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/EditarFormulario.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import { errorToast, successToast } from '../components/toast';
 
