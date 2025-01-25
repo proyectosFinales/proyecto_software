@@ -6,11 +6,8 @@
  */
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styles from '../styles/MenuPrincipal.module.css';
-import Header from '../components/HeaderCoordinador';
-import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 
 const CitasMenu = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -136,24 +133,37 @@ const CitasMenu = () => {
   };
 
   return (
-    <div>
-      <Header title="Citas y Calendario" />
-      <SettingsCoordinador show={isMenuOpen} />
-      <div className={styles.menuGrid}>
-        <Link to="/citas" className={styles.menuItem}>
-          <i className="fas fa-folder"></i>
-          <p>Administrar Citas</p>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-black py-4 px-6 text-xl font-bold">
+        Citas y Calendario
+      </header>
+      <SettingsCoordinador show={isMenuOpen} setShow={setIsMenuOpen} />
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 p-6 flex-1">
+        <Link
+          to="/citas"
+          className="flex flex-col items-center justify-center p-4 bg-white rounded shadow hover:shadow-lg hover:scale-105 transition-transform"
+        >
+          <i className="fas fa-folder text-5xl mb-2 text-azul"></i>
+          <p className="font-semibold text-gray-700">Administrar Citas</p>
         </Link>
-        <div className={styles.menuItem} onClick={assignLecturersToAppointments}>
-          <i className="fas fa-users"></i>
-          <p>Asignación Automática</p>
+
+        <div
+          className="flex flex-col items-center justify-center p-4 bg-white rounded shadow hover:shadow-lg hover:scale-105 transition-transform cursor-pointer"
+          onClick={assignLecturersToAppointments}
+        >
+          <i className="fas fa-users text-5xl mb-2 text-azul"></i>
+          <p className="font-semibold text-gray-700">Asignación Automática</p>
         </div>
-        <Link to="/calendario" className={styles.menuItem}>
-          <i className="fas fa-calendar-alt"></i>
-          <p>Calendario</p>
+
+        <Link
+          to="/calendario"
+          className="flex flex-col items-center justify-center p-4 bg-white rounded shadow hover:shadow-lg hover:scale-105 transition-transform"
+        >
+          <i className="fas fa-calendar-alt text-5xl mb-2 text-azul"></i>
+          <p className="font-semibold text-gray-700">Calendario</p>
         </Link>
       </div>
-      <Footer />
     </div>
   );
 };

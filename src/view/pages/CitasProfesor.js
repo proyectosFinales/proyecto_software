@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderProfesor';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 
 const CitasProfesor = () => {
   const profesorID = sessionStorage.getItem('token');

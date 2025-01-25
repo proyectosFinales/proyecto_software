@@ -4,11 +4,9 @@
  */
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import styles from '../styles/AnteproyectosCoordinador.module.css';
-import { supabase } from '../../model/Cliente';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
-import styles2 from '../styles/table.module.css';
+import supabase from '../../model/supabase';
 
 const Empresas = () => {
   const [empresas, setEmpresas] = useState([]);
@@ -55,99 +53,101 @@ const Empresas = () => {
     navigate(`/contactos?id=${id}`);
   }
 
-  async function eliminarEmpresa(id,count) {
-      const confirmarEnvio = window.confirm(
-        "¿Está seguro que desea eliminar esta empresa?"
-      );
-      if (!confirmarEnvio) return;
-  
-      if (count !== 0) {
-        alert("No se puede eliminar una empresa con contactos existentes.");
-        return;
-      }
-  
-      try {
-        const { error } = await supabase
-          .from('Empresa')
-          .delete()
-          .eq('id', id);
-        if (error) {
-          alert('Error al eliminar anteproyecto: ' + error.message);
-          return;
-        }
-  
-        setEmpresas((prev) => prev.filter((ap) => ap.id !== id));
-        alert(`La empresa fue borrada exitosamente.`);
-      } catch (error) {
-        alert('Error al eliminar empresa:' + error);
-      }
+  async function eliminarEmpresa(id, count) {
+    const confirmarEnvio = window.confirm(
+      "¿Está seguro que desea eliminar esta empresa?"
+    );
+    if (!confirmarEnvio) return;
+
+    if (count !== 0) {
+      alert("No se puede eliminar una empresa con contactos existentes.");
+      return;
     }
 
+    try {
+      const { error } = await supabase
+        .from('Empresa')
+        .delete()
+        .eq('id', id);
+      if (error) {
+        alert('Error al eliminar anteproyecto: ' + error.message);
+        return;
+      }
+
+      setEmpresas((prev) => prev.filter((ap) => ap.id !== id));
+      alert(`La empresa fue borrada exitosamente.`);
+      consultarEmpresas();
+    } catch (error) {
+      alert('Error al eliminar empresa:' + error);
+    }
+  }
+
   return (
-    <div className={styles.anteproyectos_coordinador_contenedor}>
-      <Header title="Empresas" />
-      <div>
-        <main className={styles.lista_anteproyectos_coordinador}>
-          <button
-            className={styles.generar_reporte}
-            onClick={() => crearEmpresa()}
-          >
-            Crear empresa
-          </button>
-          <div className={styles.contenedor_tabla}>
-            <table className={styles2.table}>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Tipo</th>
-                  <th>Provincia</th>
-                  <th>Cantón</th>
-                  <th>Distrito</th>
-                  <th>Cantidad de contactos</th>
-                  <th></th>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <header className="p-4 bg-white border-b border-gray-300">
+        <h2 className="text-xl font-bold">Empresas</h2>
+      </header>
+
+      <main className="flex-grow p-4 md:p-8">
+        <button
+          onClick={crearEmpresa}
+          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+        >
+          Crear Empresa
+        </button>
+
+        <div className="overflow-x-auto bg-white shadow rounded">
+          <table className="min-w-full text-left border">
+            <thead className="border-b bg-gray-100">
+              <tr>
+                <th className="px-4 py-2 font-medium">Nombre</th>
+                <th className="px-4 py-2 font-medium">Tipo</th>
+                <th className="px-4 py-2 font-medium">Provincia</th>
+                <th className="px-4 py-2 font-medium">Cantón</th>
+                <th className="px-4 py-2 font-medium">Distrito</th>
+                <th className="px-4 py-2 font-medium">Cantidad de contactos</th>
+                <th className="px-4 py-2 font-medium"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {empresas.map((empresa) => (
+                <tr key={empresa.id} className="border-b hover:bg-gray-50">
+                  <td className="px-4 py-2">{empresa.nombre}</td>
+                  <td className="px-4 py-2">{empresa.tipo}</td>
+                  <td className="px-4 py-2">{empresa.provincia}</td>
+                  <td className="px-4 py-2">{empresa.canton}</td>
+                  <td className="px-4 py-2">{empresa.distrito}</td>
+                  <td className="px-4 py-2">{empresa.ContactoEmpresa.length}</td>
+                  <td className="px-4 py-2">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => verContactos(empresa.id)}
+                        className="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+                      >
+                        Contactos
+                      </button>
+                      <button
+                        onClick={() => editarEmpresa(empresa.id)}
+                        className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() =>
+                          eliminarEmpresa(empresa.id, empresa.ContactoEmpresa.length)
+                        }
+                        className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {empresas.map((empresa) => (
-                  <tr key={empresa.id}>
-                    <td>{empresa.nombre}</td>
-                    <td>{empresa.tipo}</td>
-                    <td>{empresa.provincia}</td>
-                    <td>{empresa.canton}</td>
-                    <td>{empresa.distrito}</td>
-                    <td>{empresa.ContactoEmpresa.length}</td>
-                    <td>
-                      <div className={styles.contenedor_botones_anteproyectos_coordinador}>
-                        <button
-                          onClick={() => verContactos(empresa.id)}
-                          className={`${styles.btn} ${styles.revisar}`}
-                        >
-                          Contactos
-                        </button>
-                        <button
-                          onClick={() => editarEmpresa(empresa.id)}
-                          className={`${styles.btn} ${styles.revisar}`}
-                        >
-                          Editar
-                        </button>
-                        
-                        <button
-                          onClick={() =>
-                            eliminarEmpresa(empresa.id,empresa.ContactoEmpresa.length)
-                          }
-                          className={`${styles.btn} ${styles.eliminar}`}
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </main>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </main>
       <Footer />
     </div>
   );

@@ -34,26 +34,27 @@ const CantidadProyectosProfesor = () => {
   }, [profesores]);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 flex flex-col">
-      <h1 className="text-2xl font-bold text-center mb-6">Cantidad de Proyectos por Profesor</h1>
-      <div className="overflow-x-auto max-w-2xl mx-auto bg-white rounded shadow p-4">
-        <table className="min-w-full table-auto">
-          <thead className="border-b">
+    <div className="min-h-screen flex flex-col p-6 bg-gray-50">
+      <h2 className="text-2xl font-bold mb-6">Cantidad de Proyectos por Profesor</h2>
+
+      <div className="overflow-x-auto bg-white rounded-lg shadow-md p-4">
+        <table className="min-w-full text-left border">
+          <thead className="border-b bg-gray-100">
             <tr>
-              <th className="px-4 py-2 text-left">Profesor</th>
-              <th className="px-4 py-2 text-left">Cantidad Estudiantes</th>
+              <th className="px-4 py-2 font-medium">Profesor</th>
+              <th className="px-4 py-2 font-medium">Cantidad Estudiantes</th>
             </tr>
           </thead>
           <tbody>
             {profesores.map((profesor, i) => (
-              <tr key={profesor.profesor_id} className="border-b">
+              <tr key={profesor.profesor_id} className="border-b hover:bg-gray-50">
                 <td className="px-4 py-2">{profesor.nombre}</td>
                 <td className="px-4 py-2">
                   <input
                     type="number"
+                    className="w-20 border rounded p-1 focus:outline-none"
                     value={profesor.cantidadEstudiantes}
-                    className="border border-gray-300 rounded px-2 py-1 w-20"
-                    onChange={(event) => actualizarCantidad(i, event)}
+                    onChange={(e) => actualizarCantidad(i, e)}
                   />
                 </td>
               </tr>
@@ -61,10 +62,11 @@ const CantidadProyectosProfesor = () => {
           </tbody>
         </table>
       </div>
-      <div className="max-w-2xl mx-auto p-4">
+
+      <div className="mt-6">
         <button
           onClick={guardarCambios}
-          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow"
         >
           Guardar Cambios
         </button>

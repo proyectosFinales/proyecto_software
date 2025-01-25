@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Citas.css';
 import Modal from '../components/Modal';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 

@@ -81,58 +81,55 @@ const InicioCargaDatos = () => {
 
   return (
     <>
-      <Header title="Base de datos" />
-      <div className="menu-grid" style={{textAlign: "center"}}>
-        <Link 
-          className="menu-item" 
-          to="/carga-datos/profesores"
-          style={{textDecoration: "none", color: "var(--azul)"}}
-        >
-          <i className="fa-solid fa-users" style={{color: "var(--azul)"}}></i>
-          <p>Cargar profesores</p>
-        </Link>
-        <Link 
-          className="menu-item" 
-          to="/carga-datos/cantidad-proyectos"
-          style={{textDecoration: "none", color: "var(--azul)"}}
-        >
-          <i className="fa-solid fa-list-ol" style={{color: "var(--azul)"}}></i>
-          <p>Cantidad de proyectos</p>
-        </Link>
-        <div 
-          className="menu-item"
-          onClick={() => setModal(true)}
-          style={{cursor: "pointer", color: "var(--azul)"}}
-        >
-          <i className="fa-solid fa-trash" style={{color: "var(--azul)"}}></i>
-          <p>Reiniciar Base de Datos</p>
+      <Header title="Carga de Datos" />
+      <div className="flex flex-col min-h-screen bg-gray-50 p-6">
+        <div className="flex-1 flex flex-col items-center justify-center gap-4">
+          <h2 className="text-xl font-bold mb-4">Menú de Carga de Datos</h2>
+          <button
+            onClick={() => setModal(true)}
+            className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded shadow"
+          >
+            Reiniciar Base de Datos
+          </button>
+          <Link 
+            className="menu-item" 
+            to="/carga-datos/profesores"
+            style={{textDecoration: "none", color: "var(--azul)"}}
+          >
+            <i className="fa-solid fa-users" style={{color: "var(--azul)"}}></i>
+            <p>Cargar profesores</p>
+          </Link>
+          <Link 
+            className="menu-item" 
+            to="/carga-datos/cantidad-proyectos"
+            style={{textDecoration: "none", color: "var(--azul)"}}
+          >
+            <i className="fa-solid fa-list-ol" style={{color: "var(--azul)"}}></i>
+            <p>Cantidad de proyectos</p>
+          </Link>
         </div>
-      </div>
 
-      <Modal show={modal} onClose={() => setModal(false)}>
-        <>
-          <h2>¿Está seguro?</h2>
-          <p>
-            Esta acción eliminará todos los datos del semestre actual. 
-            Asegúrese de que ya no quiera realizar ninguna otra acción en el sistema 
-            este semestre antes de borrar la base de datos.
-          </p>
-          <div className="modal-actions">
-            <button 
-              className="cita-btn cita-btn-error w-50" 
-              onClick={ReiniciarBaseDatos}
-            >
-              Eliminar
-            </button>
-            <button 
-              className="cita-btn w-50" 
-              onClick={() => setModal(false)}
-            >
-              Cancelar
-            </button>
+        <Modal show={modal} onClose={() => setModal(false)}>
+          <div className="p-4">
+            <h2 className="text-lg font-bold mb-2">¿Está seguro?</h2>
+            <p>Esta acción eliminará datos del semestre actual.</p>
+            <div className="mt-4 flex gap-4 justify-end">
+              <button
+                onClick={ReiniciarBaseDatos}
+                className="bg-red-600 text-white px-4 py-2 rounded"
+              >
+                Eliminar
+              </button>
+              <button
+                onClick={() => setModal(false)}
+                className="bg-gray-300 px-4 py-2 rounded"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
-        </>
-      </Modal>
+        </Modal>
+      </div>
       <Footer />
     </>
   );

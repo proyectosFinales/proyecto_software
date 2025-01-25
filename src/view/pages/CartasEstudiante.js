@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/AnteproyectosEstudiante.module.css';
-import { supabase } from '../../model/Cliente';
+import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import { descargarAnteproyecto } from '../../controller/DescargarPDF';
