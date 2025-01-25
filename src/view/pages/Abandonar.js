@@ -16,14 +16,15 @@ const DarseDeBaja = () => {
     const confirmReprobar = window.confirm(
       "¿Está seguro/a que quiere DARSE DE BAJA del anteproyecto/proyecto?"
     );
-    if(!confirmReprobar) return;
+    if (!confirmReprobar) return;
 
     try {
       const { error } = await supabase
-        .from('Anteproyecto')               // Cambia 'anteproyectos' -> 'Anteproyecto'
-        .update({ estado: "Retirado" })     // Asegúrate de que "Retirado" existe en tu enum
-        .eq('estudiante_id', sessionStorage.getItem('token')) // Cambia 'idEstudiante' -> 'estudiante_id'
-        .eq('semestre_id', 1);             // si usas 'semestre_id'; ajusta si no usas semestre
+        .from('Anteproyecto')
+        .update({ estado: "Retirado" })
+        .eq('estudiante_id', sessionStorage.getItem('token'))
+        .eq('semestre_id', 1);
+
       if (error) {
         alert('Error al retirar anteproyecto/proyecto: ' + error.message);
         return;
@@ -37,27 +38,33 @@ const DarseDeBaja = () => {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <Header />
-      <main className="flex flex-col items-center justify-center flex-grow p-6">
-        <div className="bg-gray-200 p-6 rounded-md max-w-2xl text-justify mb-6 shadow">
-          <h3 className="text-2xl font-bold mb-2 text-center">¿Estás seguro?</h3>
-          <p className="mb-4">
-            Esta acción dará de baja tu anteproyecto/proyecto. 
-            Asegúrate de leer y comprender todas las implicaciones.
+    <div className="flex flex-col min-h-screen bg-white">
+      <Header title="Darse de baja" />
+      <main className="flex-grow w-full max-w-3xl mx-auto p-4 space-y-6">
+        <div className="bg-red-50 p-4 rounded shadow">
+          <h3 className="text-xl font-bold mb-2">Advertencia</h3>
+          <p className="mb-3">
+            Al presionar el botón "Darse de baja" usted estará abandonando el proyecto de graduación
+            de la escuela de producción industrial para el semestre actual. Esta acción no se puede
+            deshacer y debe ser tomada con precaución. Al darse de baja su perfil NO será eliminado 
+            y su anteproyecto/proyecto se conservarán en el sistema con el estado "Retirado". 
+            La próxima vez que desee cursar el proyecto deberá crear uno nuevo.
+          </p>
+          <p>
+            Si no está seguro de lo que está haciendo, no haga clic en el botón "Darse de baja" y abandone
+            esta sección con el botón "Volver" o el menú lateral.
           </p>
         </div>
-
-        <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex justify-around">
           <button
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
             onClick={abandonarProyecto}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow"
           >
             Darse de baja
           </button>
           <button
+            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
             onClick={() => navigate('/menuEstudiante')}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"
           >
             Volver
           </button>

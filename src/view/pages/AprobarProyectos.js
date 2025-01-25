@@ -25,96 +25,128 @@ const AprobarProyectos = () => {
   };
 
   const fetchAnteproyectos = async () => {
-    const { data, error } = await supabase
-      .from('Anteproyecto')  // Cambia 'anteproyectos'
-      .select(`
-        id,
-        sede,
-        tipoEmpresa,
-        nombreEmpresa,
-        actividadEmpresa,
-        distritoEmpresa,
-        cantonEmpresa,
-        provinciaEmpresa,
-        nombreAsesor,
-        puestoAsesor,
-        telefonoContacto,
-        correoContacto,
-        nombreHR,
-        telefonoHR,
-        correoHR,
-        contexto,
-        justificacion,
-        sintomas,
-        impacto,
-        nombreDepartamento,
-        tipoProyecto,
-        observaciones,
-        estado,
-        estudiante_id,
-        Estudiante:estudiante_id (
+    try {
+      const { data, error } = await supabase
+        .from('Anteproyecto')
+        .select(`
+          id,
+          nombreEmpresa,
+          contexto,
+          justificacion,
+          estado,
           estudiante_id,
-          nombre,
-          carnet,
-          telefono,
-          correo
-        )
-      `)
-      .eq('semestre_id', 1) // ajusta si usas semestres
-      .or('estado.eq.Aprobado,estado.eq.Perdido,estado.eq.Finalizado'); // ajusta a tu enum
-    if (error) {
-      errorToast('No se pudieron obtener los anteproyectos: ' + error.message);
-    } else {
+          Estudiante:estudiante_id (
+            estudiante_id,
+            nombre,
+            carnet,
+            telefono,
+            correo
+          )
+        `)
+        .in('estado', ['Aprobado', 'Reprobado']);
+
+      if (error) {
+        errorToast('No se pudieron obtener los anteproyectos: ' + error.message);
+        return;
+      }
+      
       setAnteproyectos(data || []);
+    } catch (err) {
+      errorToast('Error al cargar anteproyectos: ' + err.message);
     }
   };
 
-  async function aprobar(id) {
-    const confirmAprobar = window.confirm("¿Está seguro de APROBAR el proyecto?");
-    if(!confirmAprobar) return;
+  const createOrUpdateProyecto = async (anteproyectoID, estudianteId, newState) => {
+    try {
+      const { data: existing, error: existError } = await supabase
+        .from('Proyecto')
+        .select('id, estado')
+        .eq('anteproyecto_id', anteproyectoID)
+        .single();
+
+      if (existError && existError.code !== 'PGRST116') {
+        console.error('Error revisando proyecto existente:', existError);
+      }
+
+      if (!existing) {
+        const { error: insertError } = await supabase
+          .from('Proyecto')
+          .insert([{
+            anteproyecto_id: anteproyectoID,
+            estudiante_id: estudianteId,
+            estado: newState,
+            fecha_inicio: new Date().toISOString().slice(0, 10),
+          }]);
+        if (insertError) {
+          console.error('Error insertando en Proyecto:', insertError);
+        }
+      } else {
+        const { error: updateError } = await supabase
+          .from('Proyecto')
+          .update({ estado: newState })
+          .eq('id', existing.id);
+
+        if (updateError) {
+          console.error('Error actualizando Proyecto:', updateError);
+        }
+      }
+    } catch (err) {
+      console.error('Excepción en createOrUpdateProyecto:', err);
+    }
+  };
+
+  async function aprobar(anteproyectoId) {
+    const confirmAprobar = window.confirm("¿Está seguro de APROBAR este proyecto?");
+    if (!confirmAprobar) return;
 
     try {
       const { error } = await supabase
         .from('Anteproyecto')
-        .update({ estado: "Finalizado" }) // Ajusta si tu enum final es "Finalizado"
-        .eq('id', id);
+        .update({ estado: "Aprobado" })  
+        .eq('id', anteproyectoId);
+
       if (error) {
         console.error('Error al actualizar proyecto:', error);
         errorToast(error.message);
         return;
       }
 
+      await createOrUpdateProyecto(anteproyectoId, anteproyectoId, "Aprobado");
+
       successToast('Proyecto actualizado exitosamente');
       fetchAnteproyectos();
-    } catch (error) {
-      errorToast('Error al actualizar proyecto: ' + error);
+    } catch (err) {
+      errorToast('Error al actualizar proyecto: ' + err);
     }
   }
 
-  async function reprobar(id) {
-    const confirmReprobar = window.confirm("¿Está seguro de REPROBAR el proyecto?");
-    if(!confirmReprobar) return;
+  async function reprobar(anteproyectoId) {
+    const confirmReprobar = window.confirm("¿Está seguro de REPROBAR este proyecto?");
+    if (!confirmReprobar) return;
 
     try {
       const { error } = await supabase
         .from('Anteproyecto')
-        .update({ estado: "Perdido" })
-        .eq('id', id);
+        .update({ estado: "Reprobado" })
+        .eq('id', anteproyectoId);
+
       if (error) {
         console.error('Error al actualizar proyecto:', error);
         errorToast(error.message);
         return;
       }
 
+      await createOrUpdateProyecto(anteproyectoId, anteproyectoId, "Reprobado");
+
       successToast('Proyecto actualizado exitosamente');
       fetchAnteproyectos();
-    } catch (error) {
-      errorToast('Error al actualizar proyecto: ' + error);
+    } catch (err) {
+      errorToast('Error al actualizar proyecto: ' + err);
     }
   }
 
-  const toggleExpandRow = (id) => {
-    setExpandedRow(expandedRow === id ? null : id);
+  const toggleExpandRow = (idx) => {
+    setExpandedRow(expandedRow === idx ? null : idx);
   };
 
   return (
@@ -133,10 +165,14 @@ const AprobarProyectos = () => {
             </thead>
             <tbody>
               {anteproyectos.map((anteproyecto, index) => (
-                <React.Fragment key={index}>
+                <React.Fragment key={anteproyecto.id}>
                   <tr className="border-b">
-                    <td className="px-4 py-2">{anteproyecto.nombre}</td>
-                    <td className="px-4 py-2">{anteproyecto.estado}</td>
+                    <td className="px-4 py-2">
+                      {anteproyecto.nombreEmpresa || 'Sin Nombre'}
+                    </td>
+                    <td className="px-4 py-2">
+                      {anteproyecto.estado}
+                    </td>
                     <td className="px-4 py-2">
                       <div className="flex flex-wrap gap-2">
                         <button
@@ -153,22 +189,24 @@ const AprobarProyectos = () => {
                         </button>
                         <button
                           className="px-3 py-1 bg-gray-300 text-black rounded hover:bg-gray-400"
-                          onClick={() => toggleExpandRow(anteproyecto.id)}
+                          onClick={() => toggleExpandRow(index)}
                         >
                           {expandedRow === index ? <AiOutlineArrowUp /> : <AiOutlineArrowDown />}
                         </button>
                       </div>
                     </td>
                   </tr>
-
-                  {/* Extra row details if expanded */}
                   {expandedRow === index && (
                     <tr className="bg-gray-50">
                       <td colSpan={3} className="px-4 py-2">
                         <div className="flex flex-col space-y-2 text-sm">
-                          <p><strong>Contexto:</strong> {anteproyecto.contexto}</p>
-                          <p><strong>Justificación:</strong> {anteproyecto.justificacion}</p>
-                          {/* etc. ... */}
+                          <p>
+                            <strong>Contexto:</strong> {anteproyecto.contexto}
+                          </p>
+                          <p>
+                            <strong>Justificación:</strong> {anteproyecto.justificacion}
+                          </p>
+                          {/* Agrega más campos si deseas verlos en detalle */}
                         </div>
                       </td>
                     </tr>
