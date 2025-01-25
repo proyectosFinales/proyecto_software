@@ -51,7 +51,7 @@ export function descargarAnteproyecto(anteproyecto) {
 
   // Fecha en la esquina superior derecha
   doc.setFontSize(10);
-  doc.text(`${fechaFormateada}`, textWidth, 20);
+  doc.text(`${fechaFormateada}`, textWidth, 10);
 
   /**
    * Añade texto dinámicamente, con salto de página si se supera el límite.
@@ -86,42 +86,41 @@ export function descargarAnteproyecto(anteproyecto) {
 
   // Sección de datos del estudiante (si existe)
   doc.setFontSize(12);
-  if (anteproyecto.estudiante) {
-    addText("Nombre del estudiante:", anteproyecto.estudiante.nombre);
-    addText("Carnet:", anteproyecto.estudiante.carnet);
-    addText("Teléfono:", anteproyecto.estudiante.telefono);
-    addText("Correo:", anteproyecto.estudiante.correo);
-    addText("Sede:", anteproyecto.estudiante.sede);
-  }
+  addText("Nombre del estudiante:", anteproyecto.Estudiante.Usuario.nombre);
+  addText("Carnet:", anteproyecto.Estudiante.carnet);
+  addText("Teléfono:", anteproyecto.Estudiante.Usuario.telefono);
+  addText("Correo:", anteproyecto.Estudiante.Usuario.correo);
+  addText("Sede:", anteproyecto.Estudiante.Usuario.sede);
 
   // Sección de datos de la empresa
-  addText("Nombre de la Empresa:", anteproyecto.nombreEmpresa);
-  addText("Tipo de Empresa:", anteproyecto.tipoEmpresa);
-  addText("Actividad de la empresa:", anteproyecto.actividadEmpresa);
-  addText("Ubicación de la empresa (distrito):", anteproyecto.distritoEmpresa);
-  addText("Ubicación de la empresa (cantón):", anteproyecto.cantonEmpresa);
-  addText("Ubicación de la empresa (provincia):", anteproyecto.provinciaEmpresa);
+  addText("Nombre de la Empresa:", anteproyecto.Empresa.nombre);
+  addText("Tipo de Empresa:", anteproyecto.Empresa.tipo);
+  addText("Actividad de la empresa:", anteproyecto.actividad);
+  addText("Ubicación de la empresa (distrito):", anteproyecto.Empresa.distrito);
+  addText("Ubicación de la empresa (cantón):", anteproyecto.Empresa.canton);
+  addText("Ubicación de la empresa (provincia):", anteproyecto.Empresa.provincia);
 
   // Datos de contactos
-  addText("Nombre del asesor industrial:", anteproyecto.nombreAsesor);
-  addText("Puesto que desempeña el asesor industrial:", anteproyecto.puestoAsesor);
-  addText("Teléfono del contacto:", anteproyecto.telefonoContacto);
-  addText("Correo del contacto:", anteproyecto.correoContacto);
-  addText("Nombre del contacto de recursos humanos:", anteproyecto.nombreHR);
-  addText("Teléfono del contacto de recursos humanos:", anteproyecto.telefonoHR);
-  addText("Correo del contacto de recursos humanos:", anteproyecto.correoHR);
+  addText("Nombre del asesor industrial:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.nombre);
+  addText("Puesto que desempeña el asesor industrial:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.departamento);
+  addText("Teléfono del contacto:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.telefono);
+  addText("Correo del contacto:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.correo);
+  addText("Nombre del contacto de recursos humanos:", anteproyecto.AnteproyectoContacto[0].RRHH.nombre);
+  addText("Teléfono del contacto de recursos humanos:", anteproyecto.AnteproyectoContacto[0].RRHH.telefono);
+  addText("Correo del contacto de recursos humanos:", anteproyecto.AnteproyectoContacto[0].RRHH.correo);
 
   // Datos de contenido del anteproyecto
   addText("Contexto:", anteproyecto.contexto);
   addText("Justificación del trabajo:", anteproyecto.justificacion);
   addText("Síntomas principales:", anteproyecto.sintomas);
   addText("Efectos o impactos para la empresa:", anteproyecto.impacto);
-  addText("Departamento para realizar el proyecto:", anteproyecto.nombreDepartamento);
-  addText("Tipo de proyecto:", anteproyecto.tipoProyecto);
+  addText("Departamento para realizar el proyecto:", anteproyecto.departamento);
+  addText("Tipo de proyecto:", anteproyecto.tipo);
   addText("Estado del proyecto:", anteproyecto.estado);
+  addText("Observaciones por el coordinador:", anteproyecto.comentario);
 
   // Descargar PDF (Nombre sugerido)
-  doc.save(`Anteproyecto_${anteproyecto.nombreEmpresa || 'SinNombre'}.pdf`);
+  doc.save(`Anteproyecto_${anteproyecto.Estudiante.Usuario.nombre || 'SinNombre'}.pdf`);
 }
 
 /**

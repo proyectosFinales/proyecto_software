@@ -11,8 +11,8 @@ import HeaderEstudiante from '../components/HeaderEstudiante';
 import { descargarAnteproyecto } from '../../controller/DescargarPDF';
 import styles2 from '../styles/table.module.css';
 
-const AnteproyectosEstudiante = () => {
-  const [anteproyectos, setAnteproyectos] = useState([]);
+const CartasEstudiante = () => {
+  const [cartas, setCartas] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,27 +42,27 @@ const AnteproyectosEstudiante = () => {
     }
   }
 
-  async function crearAnteproyecto() {
+  async function crearCarta() {
     try {
       const studentID = await consultarInfoEstudiante();
       const { data, error } = await supabase
-        .from('Anteproyecto')
+        .from('SolicitudCarta')
         .select(`
-          id
+          id_solicitud
         `)
-        .eq('estudiante_id', studentID);
+        .eq('id_estudiante', studentID);
       if (error) {
-        alert('No se pudieron obtener los anteproyectos. ' + error.message);
+        alert('No se pudieron obtener las cartas. ' + error.message);
         return;
       }
       if(data.length != 0){
-        alert("Ya tiene un anteproyecto activo");
+        alert("Ya tiene una carta solicitada");
       }
       else{
-        navigate('/formulario-estudiantes');
+        navigate('/formularioCarta');
       }
     } catch (error) {
-      alert('Error al consultar anteproyectos: ' + error);
+      alert('Error al consultar cartas: ' + error);
     }
   }
 
@@ -70,58 +70,25 @@ const AnteproyectosEstudiante = () => {
     try {
       const studentID = await consultarInfoEstudiante();
       const { data, error } = await supabase
-        .from('Anteproyecto')
+        .from('SolicitudCarta')
         .select(`
-          id,
-          empresa_id,
-          contexto,
-          justificacion,
-          sintomas,
-          estado,
-          impacto,
-          tipo,
-          comentario,
-          estudiante_id,
-          actividad,
-          departamento,
-          comentario,
-          Estudiante:estudiante_id (
-            carnet,
-            id_usuario,
-            Usuario:id_usuario (
-              nombre,
-              correo,
-              telefono,
-              sede
-            )
-          ),
-          Empresa:empresa_id (
-            nombre,
-            tipo,
-            provincia,
-            canton,
-            distrito
-          ),
-          AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
-            ContactoEmpresa:contacto_id(
-              nombre,
-              correo,
-              departamento,
-              telefono
-            ),
-            RRHH:rrhh_id(
-              nombre,
-              correo,
-              telefono
-            )
-          )
+          id_solicitud,
+          id_estudiante,
+          nombre_receptor,
+          puesto_receptor,
+          empresa,
+          genero_emisor,
+          genero_receptor,
+          apellidos_receptor,
+          cedula,
+          idioma
         `)
-        .eq('estudiante_id', studentID);
+        .eq('id_estudiante', studentID);
       if (error) {
-        alert('No se pudieron obtener los anteproyectos. ' + error.message);
+        alert('No se pudieron obtener las cartas. ' + error.message);
         return;
       }
-      setAnteproyectos(data || []);
+      setCartas(data || []);
     } catch (error) {
       alert('Error al consultar anteproyectos: ' + error);
     }
@@ -132,77 +99,65 @@ const AnteproyectosEstudiante = () => {
   }
 
   // Función para eliminar anteproyectos (solo si Pendiente o Reprobado)
-  async function eliminarAnteproyecto(id, estado) {
+  async function eliminarCarta(id) {
     const confirmarEnvio = window.confirm(
-      "¿Está seguro que desea eliminar este anteproyecto?"
+      "¿Está seguro que desea eliminar esta carta?"
     );
     if (!confirmarEnvio) return;
 
-    if (estado === 'Aprobado') {
-      alert("No se puede eliminar un anteproyecto aprobado.");
-      return;
-    }
-
     try {
       const { error } = await supabase
-        .from('Anteproyecto')
+        .from('SolicitudCarta')
         .delete()
-        .eq('id', id)
-        .in('estado', ['Reprobado', 'Pendiente']); // filtra para no borrar uno aprobado
+        .eq('id_solicitud', id);
       if (error) {
-        alert('Error al eliminar anteproyecto: ' + error.message);
+        alert('Error al eliminar carta: ' + error.message);
         return;
       }
 
-      setAnteproyectos((prev) => prev.filter((ap) => ap.id !== id));
-      console.log(`Anteproyecto con ID ${id} eliminado exitosamente.`);
+      setCartas((prev) => prev.filter((ap) => ap.id !== id));
+      console.log(`La carta fue eliminada exitosamente.`);
     } catch (error) {
-      alert('Error al eliminar anteproyecto:' + error);
+      alert('Error al eliminar carta:' + error);
     }
   }
 
   return (
     <div className={styles.contenedor_anteproyectos_estudiante}>
-      <HeaderEstudiante title="Anteproyectos" />
+      <HeaderEstudiante title="Solicitud de cartas para empresa" />
       <div>
         <main className={styles.lista_anteproyectos_estudiante}>
           <button
             className={styles.crear_anteproyecto}
-            onClick={() => crearAnteproyecto()}
+            onClick={() => crearCarta()}
           >
-            Crear anteproyecto
+            Solicitar Carta
           </button>
           <div className={styles.contenedor_tabla}>
             <table className={styles2.table}>
               <thead>
                 <tr>
                   <th>Empresa</th>
-                  <th>Estado</th>
+                  <th>Receptor</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
-                {anteproyectos.map((anteproyecto) => (
-                  <tr key={anteproyecto.id}>
-                    <td>{anteproyecto.Empresa.nombre}</td>
-                    <td>{anteproyecto.estado}</td>
+                {cartas.map((carta) => (
+                  <tr key={carta.id_solicitud}>
+                    <td>{carta.empresa}</td>
+                    <td>{carta.nombre_receptor} {carta.apellidos_receptor}</td>
                     <td>
-                      <div className={styles.contenedor_botones_anteproyectos_estudiante}>
+                      <div className={styles.carta}>
                         <button
-                          onClick={() => editarAnteproyecto(anteproyecto.id)}
-                          className={`${styles.btn} ${styles.editar}`}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => descargarAnteproyecto(anteproyecto)}
+                          onClick={() => descargarAnteproyecto(carta)}
                           className={`${styles.btn} ${styles.descargar}`}
                         >
                           Descargar
                         </button>
                         <button
                           onClick={() =>
-                            eliminarAnteproyecto(anteproyecto.id, anteproyecto.estado)
+                            eliminarCarta(carta.id_solicitud)
                           }
                           className={`${styles.btn} ${styles.eliminar}`}
                         >
@@ -222,4 +177,4 @@ const AnteproyectosEstudiante = () => {
   );
 };
 
-export default AnteproyectosEstudiante;
+export default CartasEstudiante;
