@@ -51,7 +51,7 @@ export function validateInfo(carnet, tel, email, password, checkPass = true) {
 }
 
 /**
- * Hace una validación “paso a paso” en vez de un único Regex,
+ * Hace una validación "paso a paso" en vez de un único Regex,
  * y retorna un string con el mensaje de error (o "" si todo bien).
  */
 export function validarContraseñaDetallada(contraseña) {
@@ -122,6 +122,18 @@ export async function validarCorreoExistente(correo, id) {
 
   // Si data.id === id, es el mismo usuario → no es duplicado
   return true;
+}
+
+/**
+ * Valida el formato de teléfono permitiendo 8 dígitos o +506 seguido de 8 dígitos.
+ */
+export function validarTelefono(phone) {
+  if (!phone) return false;
+  phone = phone.trim();
+  // ^(\+506\d{8}|\d{8})$
+  // Esto permite +506 y 8 dígitos continuos, o sólo 8 dígitos
+  const regex = /^(\+506\d{8}|\d{8})$/;
+  return regex.test(phone);
 }
 
 // Exportamos la función principal por defecto
