@@ -19,7 +19,7 @@ import FormularioCoordinador from './view/pages/FormularioCoordinador.js';
 import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante.js';
 import CartasEstudiante from './view/pages/CartasEstudiante.js';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador.js';
-import CargarProfesores from './view/pages/CargarProfesores.js';
+import CargarProfesores from './view/pages/CargarProfesores';
 import EditarFormulario from './view/pages/EditarFormulario.js';
 import Empresas from './view/pages/Empresas.js';
 import EditarEmpresa from './view/pages/EditarEmpresa.js';
@@ -147,8 +147,22 @@ function App() {
           element={<RutaProtegida element={<FormularioEmpresa />} requiredRoles={["1"]} />}
         />
         <Route
-          path="/cargarProfesores"
-          element={<RutaProtegida element={<CargarProfesores />} requiredRoles={["1"]} />}
+          path="/carga-datos"
+          element={
+            <RutaProtegida 
+              element={<InicioCargaDatos />} 
+              requiredRoles={["1"]} 
+            />
+          }
+        />
+        <Route
+          path="/carga-datos/profesores"
+          element={
+            <RutaProtegida 
+              element={<CargarProfesores />} 
+              requiredRoles={["1"]} 
+            />
+          }
         />
         <Route
           path="/citas"
@@ -179,12 +193,13 @@ function App() {
           element={<RutaProtegida element={<EditarPerfil />} requiredRoles={["1", "2", "3"]} />}
         />
         <Route
-          path="/carga-datos"
-          element={<RutaProtegida element={<InicioCargaDatos />} requiredRoles={["1"]} />}
-        />
-        <Route
-          path="/carga-datos/cantidad-proyectos-profesor"
-          element={<RutaProtegida element={<CantidadProyectosProfesor />} requiredRoles={["1"]} />}
+          path="/carga-datos/cantidad-proyectos"
+          element={
+            <RutaProtegida 
+              element={<CantidadProyectosProfesor />} 
+              requiredRoles={["1"]} 
+            />
+          }
         />
         <Route
           path="/asignaciones/automatica"
