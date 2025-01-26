@@ -137,6 +137,10 @@ class Profesor extends Usuario {
     return data.map(p => Profesor.from(p));
   }
 
+  static async obtenerEncargados() {
+    return await Profesor.obtenerTodos();
+  }
+
   /**
    * Actualiza "cantidad_estudiantes" en la BD
    * si ha cambiado respecto a la original.

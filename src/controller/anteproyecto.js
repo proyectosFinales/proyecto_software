@@ -267,6 +267,14 @@ class Anteproyecto {
       }
     });
   }
+
+  static async cambiarEstado(anteproyecto, newEstado) {
+    const oldEstado = anteproyecto.estado;
+    // the same logic from handleEstadoChange, but placed here
+    // 1) update Anteproyecto
+    // 2) if (old != 'Aprobado' && new == 'Aprobado') => insert Proyecto
+    // 3) if (old == 'Aprobado' && new != 'Aprobado') => remove Proyecto + bitácoras + entradas
+  }
 }
 
 export default Anteproyecto;

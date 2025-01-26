@@ -8,13 +8,16 @@ import Profesor from "./profesor";
  * @param {Profesor[]} profesores 
  */
 export const asignarAnteproyectosAProfesores = (anteproyectos, profesores) => {
+  // Filter out any anteproyectos that are not "Aprobado"
+  const anteproyectosAprobados = anteproyectos.filter(ap => ap.estado === 'Aprobado');
+
   return new Promise(resolve => {
     const asignados = [];
     const noasignados = [];
     let indiceProfesor = 0;
     
     // Iteramos anteproyectos uno a uno con profesores para lograr una asignación nivelada
-    anteproyectos.forEach(anteproyecto => {
+    anteproyectosAprobados.forEach(anteproyecto => {
       let asignado = false;
       const totalProfesores = profesores.length;
 
