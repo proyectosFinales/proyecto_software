@@ -52,6 +52,9 @@ import Entrada from './view/pages/verEntrada.js';
 import AgregarEntrada from './view/pages/agregarEntrada.js';
 import DashboardMenu from './view/pages/DashboardMenu';
 import DashboardEstudiantes from './view/pages/DashboardEstudiantes.jsx';
+import ProfessorEvaluationForm from './view/pages/calificaciones/calificacionAsesor.js';
+import ProfessorDashboard from './view/pages/calificaciones/calificacionAsesorDashboard.js';
+import PermisosVerCalificaciones from './view/pages/calificaciones/permisosVerCalificaciones.js';
 
 function App() {
   return (
@@ -252,6 +255,33 @@ function App() {
           element={
             <RutaProtegida 
               element={<DashboardEstudiantes />} 
+              requiredRoles={["1"]} 
+            />
+          }
+        />
+        <Route
+          path="calificar-asesor"
+          element={
+            <RutaProtegida
+              element={<ProfessorEvaluationForm />}
+              requiredRoles={["3"]}
+            />
+          }
+        />
+        <Route
+          path="/dashboard-calificaciones"
+          element={
+            <RutaProtegida 
+              element={<ProfessorDashboard />} 
+              requiredRoles={["1"]} 
+            />
+          }
+        />
+        <Route
+          path="/permisos-calificaciones"
+          element={
+            <RutaProtegida 
+              element={<PermisosVerCalificaciones />} 
               requiredRoles={["1"]} 
             />
           }
