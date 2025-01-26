@@ -15,40 +15,32 @@ import Modal from "../components/Modal";
  */
 const GestionPerfiles = () => {
   const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [editableUser, setEditableUser] = useState({});
   const [checkedUsers, setCheckedUsers] = useState(new Set());
   const [modal, setModal] = useState(false);
   const [filter, setFilter] = useState('');
-  const [filteredUsers, setFilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
   const navigate = useNavigate();
 
-  const handleFilterChange = (event) => {
-    setFilter(event.target.value);
-  };
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-  };
-
   /**
    * Al dar clic en un usuario de la lista, se carga su info detallada
-   * usando la función gestionUserInfo(id).
    */
   const handleUserClick = async (id) => {
     try {
-      const data = await gestionUserInfo(id); 
-      // data: { id, correo, contrasena, rol, sede, profesor:{...}, estudiante:{...} }
+      const data = await gestionUserInfo(id);
+      // data: { id, correo, contrasena, rol, sede, nombre, telefono, estudiante: [...] }
 
       setEditableUser({
-        id: id,
+        id: data.id,
         correo: data.correo,
-        rol: data.rol.toString(),  // Aseguramos string
+        rol: data.rol.toString(),
         sede: data.sede,
         nombre: data.nombre,
         telefono: data.telefono,
-        ...(data.rol == 3 && {
+        // Sólo si es estudiante (rol=3) y viene data.estudiante[] con algo
+        ...(data.rol === 3 && data.estudiante && data.estudiante.length > 0 && {
           carnet: data.estudiante[0].carnet,
           estado: data.estudiante[0].estado
         })
@@ -66,18 +58,15 @@ const GestionPerfiles = () => {
    */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setEditableUser((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setEditableUser((prev) => ({ ...prev, [name]: value }));
   };
 
   /**
    * Marcar/desmarcar un usuario en la lista para su eliminación
    */
   const handleCheckboxChange = (userId) => {
-    setCheckedUsers((prevState) => {
-      const updated = new Set(prevState);
+    setCheckedUsers((prev) => {
+      const updated = new Set(prev);
       if (updated.has(userId)) {
         updated.delete(userId);
       } else {
@@ -88,26 +77,21 @@ const GestionPerfiles = () => {
   };
 
   /**
-   * Eliminar usuarios seleccionados en la lista y/o el usuario en edición
+   * Eliminar usuarios seleccionados y/o el usuario en edición
    */
   const handleDeleteUsers = async () => {
     try {
       const usersToDelete = new Set(checkedUsers);
-
-      // Si tenemos un usuario cargado en edición, también lo incluimos
+      // Incluimos también el usuario editable actual
       if (editableUser.id) {
         usersToDelete.add(editableUser.id);
       }
-
-      // Eliminar cada uno
       for (const userId of usersToDelete) {
-        console.log('Eliminando usuario:', userId);
         await delUser(userId);
       }
-
-      // Actualizar la lista local
       const updatedUsers = users.filter((u) => !usersToDelete.has(u.id));
       setUsers(updatedUsers);
+      setFilteredUsers(updatedUsers);
       setCheckedUsers(new Set());
       setEditableUser({});
     } catch (error) {
@@ -117,7 +101,7 @@ const GestionPerfiles = () => {
   };
 
   /**
-   * Editar (guardar) los cambios hechos a 'editableUser'
+   * Editar (guardar) cambios en 'editableUser'
    */
   const handleUserEdit = async () => {
     try {
@@ -143,13 +127,30 @@ const GestionPerfiles = () => {
   };
 
   /**
+   * Manejador de filtros
+   */
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
+  };
+
+  /**
+   * Manejador de búsqueda
+   */
+  const handleSearchChange = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  /**
    * Al montar, obtener la lista de usuarios
    */
   useEffect(() => {
     const getAllUsersInfo = async () => {
       try {
-        const data = await getAllUsers();
-        if (data) setUsers(data);
+        const response = await getAllUsers();
+        if (response) {
+          setUsers(response);
+          setFilteredUsers(response);
+        }
       } catch (error) {
         console.error('Error al obtener usuarios:', error.message);
       }
@@ -157,159 +158,291 @@ const GestionPerfiles = () => {
     getAllUsersInfo();
   }, []);
 
+  /**
+   * Filtrar + búsqueda
+   */
   useEffect(() => {
-    setFilteredUsers(users.filter(user => {
-      if (filter === 'profesores') return user.rol === 2;
-      if (filter === 'estudiantes') return user.rol === 3;
-      return true;
-    }).filter(user => 
-      user.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.correo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (user.estudiante?.[0].carnet && user.estudiante?.[0].carnet.toLowerCase().includes(searchTerm.toLowerCase()))
-    ));
+    let temp = [...users];
 
-  }, [users, filter, searchTerm]);
+    // Filtro por rol (profesores=2, estudiantes=3)
+    if (filter === 'profesores') {
+      temp = temp.filter((u) => u.rol === 2);
+    } else if (filter === 'estudiantes') {
+      temp = temp.filter((u) => u.rol === 3);
+    }
+
+    // Búsqueda por nombre, correo o carnet
+    if (searchTerm.trim() !== '') {
+      const lowerSearch = searchTerm.toLowerCase();
+      temp = temp.filter((u) => {
+        const matchesName = u.nombre.toLowerCase().includes(lowerSearch);
+        const matchesEmail = u.correo.toLowerCase().includes(lowerSearch);
+        const hasCarnet = u.estudiante?.[0]?.carnet?.toLowerCase()?.includes(lowerSearch);
+        return matchesName || matchesEmail || hasCarnet;
+      });
+    }
+
+    setFilteredUsers(temp);
+  }, [filter, searchTerm, users]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <Header title="Gestión de perfiles" />
-      
+      <Header title="Gestión de Perfiles" />
+
       <main className="flex-grow p-4">
-        {/* Top Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
-          <button 
+        {/* Top Controls: Volver, Filtro, Búsqueda */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+          <button
             onClick={handleNavigate}
-            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition-colors w-full md:w-auto"
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded text-gray-800 w-full md:w-auto"
           >
             Volver
           </button>
 
-          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-            <select 
-              value={filter} 
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
+            <select
+              value={filter}
               onChange={handleFilterChange}
-              className="px-4 py-2 border rounded bg-white"
+              className="px-4 py-2 border rounded bg-white w-full sm:w-auto"
             >
               <option value="">Todos</option>
               <option value="profesores">Profesores</option>
               <option value="estudiantes">Estudiantes</option>
             </select>
 
-            <div className="relative flex-grow">
+            <div className="relative w-full sm:w-auto">
               <input
                 type="text"
                 placeholder="Buscar..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                className="w-full px-4 py-2 border rounded pr-10"
+                className="border rounded pl-10 pr-3 py-2 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
-              <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <FaSearch className="absolute left-3 top-2.5 text-gray-400" />
             </div>
           </div>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Users List */}
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-lg font-semibold mb-4">Lista de Usuarios</h2>
-            <div className="max-h-[600px] overflow-y-auto">
-              {filteredUsers.length > 0 ? (
-                <ul className="divide-y">
-                  {filteredUsers.map((user, index) => (
-                    <li 
-                      key={user.id || index}
-                      className="flex items-center justify-between py-2 hover:bg-gray-50"
-                    >
-                      <button
-                        className="flex-grow text-left px-2 py-1 hover:text-blue-600"
-                        onClick={() => handleUserClick(user.id)}
-                      >
-                        {user.nombre}
-                      </button>
-                      <input
-                        type="checkbox"
-                        className="h-5 w-5 text-blue-600 rounded border-gray-300"
-                        checked={checkedUsers.has(user.id)}
-                        onChange={() => handleCheckboxChange(user.id)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-center text-gray-500">No hay usuarios disponibles.</p>
-              )}
-            </div>
+        {/* Main content: user list & user details */}
+        <div className="flex flex-col md:flex-row gap-8">
+          {/* Lista de usuarios */}
+          <div className="md:w-1/3 bg-white p-4 rounded shadow-md">
+            <h3 className="text-lg font-bold mb-4">Lista de Usuarios</h3>
+            {filteredUsers.length > 0 ? (
+              <ul className="space-y-2">
+                {filteredUsers.map((user, index) => (
+                  <li
+                    key={user.id || index}
+                    onClick={() => handleUserClick(user.id)}
+                    className="flex items-center justify-between px-3 py-2 border border-gray-200 rounded hover:bg-gray-100 cursor-pointer"
+                  >
+                    <span>{user.nombre}</span>
+                    <input
+                      type="checkbox"
+                      checked={checkedUsers.has(user.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleCheckboxChange(user.id);
+                      }}
+                      className="h-4 w-4"
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-500">No hay usuarios disponibles.</p>
+            )}
           </div>
 
-          {/* User Info Form */}
-          <div className="bg-white p-4 rounded shadow">
-            <h2 className="text-lg font-semibold mb-4">Información del Usuario</h2>
-            
-            <div className="space-y-4">
-              {/* Render form fields based on role */}
-              {editableUser.rol === '2' && (
-                // Professor fields
-                <>
-                  <FormField
-                    label="Nombre"
-                    icon={<FaUser className="text-gray-400" />}
-                    name="nombre"
-                    value={editableUser.nombre || ''}
-                    onChange={handleInputChange}
-                  />
-                  <FormField
-                    label="Correo electrónico"
-                    icon={<FaEnvelope className="text-gray-400" />}
-                    name="correo"
-                    type="email"
-                    value={editableUser.correo || ''}
-                    onChange={handleInputChange}
-                  />
-                  <FormField
-                    label="Sede"
-                    icon={<FaMapMarked className="text-gray-400" />}
-                    name="sede"
-                    type="select"
-                    value={editableUser.sede || ''}
-                    onChange={handleInputChange}
-                    options={[
-                      { value: "", label: "Seleccione una sede" },
-                      { value: "Central Cartago", label: "Central Cartago" },
-                      { value: "Local San José", label: "Local San José" },
-                      { value: "Local San Carlos", label: "Local San Carlos" },
-                      { value: "Limón", label: "Centro Académico de Limón" },
-                      { value: "Alajuela", label: "Centro Académico de Alajuela" }
-                    ]}
-                  />
-                </>
-              )}
+          {/* Información del usuario editable */}
+          <div className="md:w-2/3 bg-white p-4 rounded shadow-md">
+            <h3 className="text-lg font-bold mb-4">Información del usuario</h3>
 
-              {editableUser.rol === '3' && (
-                // Student fields
-                <>
-                  {/* ... Similar FormField components for student fields ... */}
-                </>
-              )}
-            </div>
+            {/* Profesor (rol=2) */}
+            {editableUser.rol === '2' && (
+              <div className="grid grid-cols-1 gap-4">
+                <label className="block">
+                  Nombre:
+                  <div className="relative mt-1">
+                    <FaUser className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="nombre"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.nombre || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+                <label className="block">
+                  Correo electrónico:
+                  <div className="relative mt-1">
+                    <FaEnvelope className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="email"
+                      name="correo"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.correo || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Teléfono:
+                  <div className="relative mt-1">
+                    <FaPhone className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="telefono"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.telefono || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Sede:
+                  <div className="relative mt-1">
+                    <FaMapMarked className="absolute top-2.5 left-2 text-gray-400" />
+                    <select
+                      name="sede"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.sede || ''}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Seleccione una sede</option>
+                      <option value="Central Cartago">Central Cartago</option>
+                      <option value="Local San José">Local San José</option>
+                      <option value="Local San Carlos">Local San Carlos</option>
+                      <option value="Limón">Centro Académico de Limón</option>
+                      <option value="Alajuela">Centro Académico de Alajuela</option>
+                    </select>
+                  </div>
+                </label>
+              </div>
+            )}
+
+            {/* Estudiante (rol=3) */}
+            {editableUser.rol === '3' && (
+              <div className="grid grid-cols-1 gap-4">
+                <label className="block">
+                  Nombre:
+                  <div className="relative mt-1">
+                    <FaUser className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="nombre"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.nombre || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Carnet:
+                  <div className="relative mt-1">
+                    <FaIdCard className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="carnet"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.carnet || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Correo electrónico:
+                  <div className="relative mt-1">
+                    <FaEnvelope className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="email"
+                      name="correo"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.correo || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Teléfono:
+                  <div className="relative mt-1">
+                    <FaPhone className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="telefono"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.telefono || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Sede:
+                  <div className="relative mt-1">
+                    <FaMapMarked className="absolute top-2.5 left-2 text-gray-400" />
+                    <select
+                      name="sede"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.sede || ''}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Seleccione una sede</option>
+                      <option value="Central Cartago">Central Cartago</option>
+                      <option value="Local San José">Local San José</option>
+                      <option value="Local San Carlos">Local San Carlos</option>
+                      <option value="Limón">Centro Académico de Limón</option>
+                      <option value="Alajuela">Centro Académico de Alajuela</option>
+                    </select>
+                  </div>
+                </label>
+
+                <label className="block">
+                  Estado:
+                  <div className="relative mt-1">
+                    <FaFileAlt className="absolute top-2.5 left-2 text-gray-400" />
+                    <select
+                      name="estado"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.estado || ''}
+                      onChange={handleInputChange}
+                    >
+                      <option value="">Seleccione un estado</option>
+                      <option value="aprobado">Aprobado</option>
+                      <option value="defensa">Defensa</option>
+                      <option value="en progreso">En progreso</option>
+                      <option value="reprobado">Reprobado</option>
+                      <option value="retirado">Retirado</option>
+                    </select>
+                  </div>
+                </label>
+              </div>
+            )}
+
+            {/* Botones de acción */}
+            <div className="mt-6 flex flex-wrap gap-2">
               <button
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
                 onClick={() => setModal(true)}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
               >
                 Borrar usuario(s)
               </button>
               <button
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
                 onClick={handleUserEdit}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
               >
                 Editar usuario
               </button>
               <button
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                 onClick={handleUserAdd}
-                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
               >
                 Agregar usuario
               </button>
@@ -320,15 +453,24 @@ const GestionPerfiles = () => {
 
       <Footer />
 
-      {/* Delete Confirmation Modal */}
-      <Modal show={modal} onClose={() => setModal(false)}>
-        <div className="p-6">
-          <h2 className="text-xl font-bold mb-4">Confirmar eliminación</h2>
-          <p className="mb-4">
-            Al confirmar, se borrarán tanto el usuario mostrado como los usuarios
-            seleccionados. Esta acción es irreversible.
+      {/* Modal para confirmación de eliminación */}
+      <Modal
+        show={modal}
+        onClose={() => setModal(false)}
+      >
+        <div className="p-4">
+          <h2 className="text-lg font-bold mb-2">
+            ¿Deseas eliminar todos los usuarios seleccionados?
+          </h2>
+          <p className="mb-4 text-sm">
+            Al confirmar, se borrarán tanto el usuario mostrado 
+            como los usuarios seleccionados. Esta acción es irreversible.
           </p>
-          <div className="flex justify-end gap-4">
+          <p className="mb-6 text-sm">
+            ¿Desea proceder con la eliminación de los usuarios seleccionados?
+          </p>
+
+          <div className="flex justify-end gap-2">
             <button
               className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
               onClick={() => setModal(false)}
@@ -348,42 +490,6 @@ const GestionPerfiles = () => {
         </div>
       </Modal>
     </div>
-  );
-};
-
-// Helper component for form fields
-const FormField = ({ label, icon, name, type = "text", value, onChange, options }) => {
-  return (
-    <label className="block">
-      <span className="text-gray-700">{label}</span>
-      <div className="mt-1 relative rounded-md shadow-sm">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          {icon}
-        </div>
-        {type === "select" ? (
-          <select
-            name={name}
-            value={value}
-            onChange={onChange}
-            className="block w-full pl-10 pr-3 py-2 border rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          >
-            {options.map(option => (
-              <option key={option.value} value={option.value}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type={type}
-            name={name}
-            value={value}
-            onChange={onChange}
-            className="block w-full pl-10 pr-3 py-2 border rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-          />
-        )}
-      </div>
-    </label>
   );
 };
 
