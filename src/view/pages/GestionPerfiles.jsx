@@ -189,7 +189,7 @@ const GestionPerfiles = () => {
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header title="Gestión de Perfiles" />
 
-      <main className="flex-grow p-4">
+      <main className="flex-grow p-6 pb-28">
         {/* Top Controls: Volver, Filtro, Búsqueda */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <button
