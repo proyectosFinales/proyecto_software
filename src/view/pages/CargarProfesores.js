@@ -21,6 +21,7 @@ const CargarProfesores = () => {
   const [excelData, setExcelData] = useState([]);
   const [infoVisible, setInfoVisible] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     console.log('CargarProfesores: useEffect running');
@@ -29,6 +30,7 @@ const CargarProfesores = () => {
       setIsLoading(false);
     } catch (error) {
       console.error('CargarProfesores: Error in useEffect:', error);
+      setError(error.message);
       setIsLoading(false);
     }
     return () => {
@@ -37,7 +39,25 @@ const CargarProfesores = () => {
   }, []);
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4">
+        <div className="text-base sm:text-lg font-semibold text-gray-600 animate-pulse">
+          Cargando...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen bg-gray-50 px-4">
+        <div className="max-w-md text-center">
+          <div className="text-base sm:text-lg font-semibold text-red-600">
+            Error: {error}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const toggleInfo = (field) => {
@@ -99,25 +119,25 @@ const CargarProfesores = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
       {console.log('CargarProfesores: Rendering JSX')}
       <Header title="Cargar Profesores" />
       
-      <div className="flex-1 container mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          {/* Info Section */}
-          <div className="mb-8">
-            <div className="flex items-center mb-2">
-              <h2 className="text-xl font-bold mr-2">Formato del Excel</h2>
+      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8">
+          {/* Enhanced Info Section */}
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center mb-2 sm:mb-4">
+              <h2 className="text-lg sm:text-xl font-bold mr-2">Formato del Excel</h2>
               <AiOutlineInfoCircle 
-                className="text-blue-500 cursor-pointer"
+                className="text-blue-500 cursor-pointer text-xl sm:text-2xl hover:text-blue-600 transition-colors"
                 onClick={() => toggleInfo('format')}
               />
             </div>
             {infoVisible.format && (
-              <div className="text-gray-600 bg-blue-50 p-4 rounded-lg">
-                <p>El archivo Excel debe contener las siguientes columnas:</p>
-                <ul className="list-disc ml-5 mt-2">
+              <div className="text-sm sm:text-base text-gray-600 bg-blue-50 p-4 rounded-lg shadow-sm">
+                <p className="font-medium mb-2">El archivo Excel debe contener las siguientes columnas:</p>
+                <ul className="list-disc ml-4 sm:ml-6 space-y-1">
                   <li>Nombre (nombre completo del profesor)</li>
                   <li>Email (correo electrónico institucional)</li>
                   <li>Telefono (número de teléfono)</li>
@@ -127,54 +147,69 @@ const CargarProfesores = () => {
             )}
           </div>
 
-          {/* Upload Section */}
-          <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
-            <input
-              type="file"
-              accept=".xlsx, .xls, .csv"
-              onChange={handleFile}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
-                       file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
-                       hover:file:bg-blue-100 text-gray-600"
-            />
+          {/* Enhanced Upload Section */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-6 sm:mb-8">
+            <div className="flex-1">
+              <input
+                type="file"
+                accept=".xlsx, .xls, .csv"
+                onChange={handleFile}
+                className="w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                         file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700
+                         hover:file:bg-blue-100 text-gray-600 cursor-pointer
+                         focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+              />
+            </div>
             <button
               onClick={handleUpload}
               className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg
-                       hover:bg-blue-700 transition-colors duration-200"
+                       hover:bg-blue-700 transition-colors duration-200
+                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                       disabled:opacity-50 disabled:cursor-not-allowed
+                       text-sm sm:text-base font-medium"
+              disabled={!excelData.length}
             >
               Cargar Profesores
             </button>
           </div>
 
-          {/* Table Section */}
-          <div className="overflow-x-auto">
+          {/* Enhanced Table Section */}
+          <div className="overflow-x-auto -mx-4 sm:mx-0">
             {excelData.length > 0 && (
-              <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    {Object.keys(excelData[0]).map((key) => (
-                      <th key={key} className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        {key}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {excelData.map((row, index) => (
-                    <tr key={index}>
-                      {Object.values(row).map((cell, i) => (
-                        <td key={i} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                          {cell}
-                        </td>
+              <div className="inline-block min-w-full align-middle">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      {Object.keys(excelData[0]).map((key) => (
+                        <th key={key} 
+                            className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium 
+                                     text-gray-500 uppercase tracking-wider"
+                        >
+                          {key}
+                        </th>
                       ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {excelData.map((row, index) => (
+                      <tr key={index} className="hover:bg-gray-50 transition-colors">
+                        {Object.values(row).map((cell, i) => (
+                          <td key={i} 
+                              className="px-3 sm:px-6 py-2 sm:py-4 whitespace-nowrap 
+                                       text-xs sm:text-sm text-gray-900"
+                          >
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
-      </div>
+      </main>
       
       <Footer />
     </div>
