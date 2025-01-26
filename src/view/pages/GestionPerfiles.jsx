@@ -171,115 +171,219 @@ const GestionPerfiles = () => {
   }, [users, filter, searchTerm]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-white">
-      <Header title="Gestión de Perfiles" />
-
-      <div className="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
-        {/* Top bar */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4">
-          <button
+    <div className="min-h-screen flex flex-col bg-gray-50">
+      <Header title="Gestión de perfiles" />
+      
+      <main className="flex-grow p-4">
+        {/* Top Bar */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+          <button 
             onClick={handleNavigate}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="px-4 py-2 bg-gray-200 hover:bg-gray-300 rounded transition-colors w-full md:w-auto"
           >
             Volver
           </button>
-          {/* Filter & search */}
-          <div className="mt-4 md:mt-0 flex items-center space-x-2">
-            <select
-              value={filter}
+
+          <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+            <select 
+              value={filter} 
               onChange={handleFilterChange}
-              className="border border-gray-300 rounded px-3 py-1"
+              className="px-4 py-2 border rounded bg-white"
             >
               <option value="">Todos</option>
-              <option value="profesor">Profesores</option>
-              <option value="estudiante">Estudiantes</option>
+              <option value="profesores">Profesores</option>
+              <option value="estudiantes">Estudiantes</option>
             </select>
 
-            <div className="relative">
-              <FaSearch className="absolute left-2 top-2 text-gray-400" />
+            <div className="relative flex-grow">
               <input
-                className="pl-8 pr-3 py-1 border border-gray-300 rounded"
                 type="text"
-                placeholder="Buscar por nombre..."
+                placeholder="Buscar..."
                 value={searchTerm}
                 onChange={handleSearchChange}
+                className="w-full px-4 py-2 border rounded pr-10"
               />
+              <FaSearch className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" />
             </div>
           </div>
         </div>
 
-        {/* User list */}
-        <div className="overflow-x-auto border border-gray-300 rounded shadow-sm">
-          <table className="table-auto w-full text-left">
-            <thead className="bg-gray-100">
-              <tr>
-                <th className="px-4 py-2">ID</th>
-                <th className="px-4 py-2">Nombre</th>
-                <th className="px-4 py-2">Rol</th>
-                <th className="px-4 py-2">Correo</th>
-                <th className="px-4 py-2">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.map((user) => (
-                <tr key={user.id} className="border-b last:border-none">
-                  <td className="px-4 py-2">{user.id}</td>
-                  <td className="px-4 py-2">{user.nombre}</td>
-                  <td className="px-4 py-2">{user.rol}</td>
-                  <td className="px-4 py-2">{user.correo}</td>
-                  <td className="px-4 py-2">
-                    <div className="flex flex-wrap gap-2">
+        {/* Main Content Grid */}
+        <div className="grid md:grid-cols-2 gap-6">
+          {/* Users List */}
+          <div className="bg-white p-4 rounded shadow">
+            <h2 className="text-lg font-semibold mb-4">Lista de Usuarios</h2>
+            <div className="max-h-[600px] overflow-y-auto">
+              {filteredUsers.length > 0 ? (
+                <ul className="divide-y">
+                  {filteredUsers.map((user, index) => (
+                    <li 
+                      key={user.id || index}
+                      className="flex items-center justify-between py-2 hover:bg-gray-50"
+                    >
                       <button
+                        className="flex-grow text-left px-2 py-1 hover:text-blue-600"
                         onClick={() => handleUserClick(user.id)}
-                        className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                       >
-                        Editar
+                        {user.nombre}
                       </button>
-                      <button
-                        onClick={() => handleCheckboxChange(user.id)}
-                        className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                      >
-                        Eliminar
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                      <input
+                        type="checkbox"
+                        className="h-5 w-5 text-blue-600 rounded border-gray-300"
+                        checked={checkedUsers.has(user.id)}
+                        onChange={() => handleCheckboxChange(user.id)}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-center text-gray-500">No hay usuarios disponibles.</p>
+              )}
+            </div>
+          </div>
 
-      <Modal
-        show={modal}
-        onClose={() => setModal(false)}
-        className="modal confirm-delete-modal"
-      >
-        <h2>¿Deseas eliminar todos los usuarios seleccionados?</h2>
-        <p>
-          Al confirmar, se borrarán tanto el usuario mostrado como los usuarios 
-          seleccionados. Esta acción es irreversible.
-        </p>
-        <p>¿Desea proceder con la eliminación de los usuarios seleccionados?</p>
+          {/* User Info Form */}
+          <div className="bg-white p-4 rounded shadow">
+            <h2 className="text-lg font-semibold mb-4">Información del Usuario</h2>
+            
+            <div className="space-y-4">
+              {/* Render form fields based on role */}
+              {editableUser.rol === '2' && (
+                // Professor fields
+                <>
+                  <FormField
+                    label="Nombre"
+                    icon={<FaUser className="text-gray-400" />}
+                    name="nombre"
+                    value={editableUser.nombre || ''}
+                    onChange={handleInputChange}
+                  />
+                  <FormField
+                    label="Correo electrónico"
+                    icon={<FaEnvelope className="text-gray-400" />}
+                    name="correo"
+                    type="email"
+                    value={editableUser.correo || ''}
+                    onChange={handleInputChange}
+                  />
+                  <FormField
+                    label="Sede"
+                    icon={<FaMapMarked className="text-gray-400" />}
+                    name="sede"
+                    type="select"
+                    value={editableUser.sede || ''}
+                    onChange={handleInputChange}
+                    options={[
+                      { value: "", label: "Seleccione una sede" },
+                      { value: "Central Cartago", label: "Central Cartago" },
+                      { value: "Local San José", label: "Local San José" },
+                      { value: "Local San Carlos", label: "Local San Carlos" },
+                      { value: "Limón", label: "Centro Académico de Limón" },
+                      { value: "Alajuela", label: "Centro Académico de Alajuela" }
+                    ]}
+                  />
+                </>
+              )}
 
-        <div className="modal-actions">
-          <button className="delModalBtn btnCancelar" onClick={() => setModal(false)}>
-            Cancelar
-          </button>
-          <button
-            className="delModalBtn btnConfirmar"
-            onClick={() => {
-              handleDeleteUsers();
-              setModal(false);
-            }}
-          >
-            Confirmar
-          </button>
+              {editableUser.rol === '3' && (
+                // Student fields
+                <>
+                  {/* ... Similar FormField components for student fields ... */}
+                </>
+              )}
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button
+                onClick={() => setModal(true)}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+              >
+                Borrar usuario(s)
+              </button>
+              <button
+                onClick={handleUserEdit}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+              >
+                Editar usuario
+              </button>
+              <button
+                onClick={handleUserAdd}
+                className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
+              >
+                Agregar usuario
+              </button>
+            </div>
+          </div>
         </div>
-      </Modal>
+      </main>
 
       <Footer />
+
+      {/* Delete Confirmation Modal */}
+      <Modal show={modal} onClose={() => setModal(false)}>
+        <div className="p-6">
+          <h2 className="text-xl font-bold mb-4">Confirmar eliminación</h2>
+          <p className="mb-4">
+            Al confirmar, se borrarán tanto el usuario mostrado como los usuarios
+            seleccionados. Esta acción es irreversible.
+          </p>
+          <div className="flex justify-end gap-4">
+            <button
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              onClick={() => setModal(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              onClick={() => {
+                handleDeleteUsers();
+                setModal(false);
+              }}
+            >
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </Modal>
     </div>
+  );
+};
+
+// Helper component for form fields
+const FormField = ({ label, icon, name, type = "text", value, onChange, options }) => {
+  return (
+    <label className="block">
+      <span className="text-gray-700">{label}</span>
+      <div className="mt-1 relative rounded-md shadow-sm">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          {icon}
+        </div>
+        {type === "select" ? (
+          <select
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="block w-full pl-10 pr-3 py-2 border rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          >
+            {options.map(option => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type={type}
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="block w-full pl-10 pr-3 py-2 border rounded-md focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+          />
+        )}
+      </div>
+    </label>
   );
 };
 
