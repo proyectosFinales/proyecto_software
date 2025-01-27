@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
 import Profesor from '../../controller/profesor';
 import Estudiante from '../../controller/estudiante';
-import supabase from '../../model/supabase';
+import '../styles/DashboardEstudiantes.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -96,7 +96,7 @@ const DashboardEstudiantes = () => {
       <Header title="Estado de estudiantes" />
       <SettingsCoordinador show={isMenuOpen} />
       <div className="content-container">
-        <div className="filters-container">
+        <div className="filters-container flex justify-between"> 
           <div className="filter-item">
             <label htmlFor="profesor">Profesor:</label>
             <select id="profesor" value={selectedProfesor} onChange={handleProfesorChange}>
@@ -107,6 +107,7 @@ const DashboardEstudiantes = () => {
               ))}
             </select>
           </div>
+          <button className="btn btn-primary self-center">Descargar Reporte</button>
         </div>
         <div className="charts-container">
           <div className="chart-item">
