@@ -2,6 +2,7 @@
  * ProyectosAsignadosProfesor.jsx
  * Muestra los anteproyectos asignados a un profesor (según token).
  */
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import { descargarAnteproyecto } from "../../../controller/DescargarPDF";
 import Profesor from "../../../controller/profesor";
@@ -11,6 +12,7 @@ import SettingsProfesor from "../../components/SettingsProfesor";
 import supabase from "../../../model/supabase";
 
 const ProyectosAsignadosProfesor = () => {
+  const navigate = useNavigate();
   const [proyectos, setProyectos] = useState([]);
   const userId = sessionStorage.getItem("token"); // Or however you get the professor
 
@@ -84,7 +86,8 @@ const ProyectosAsignadosProfesor = () => {
               >
                 Descargar
               </button>
-              <button className="btn btn-primary">Avances</button>
+              <button className="btn btn-primary" 
+                onClick={() => navigate(`/avances/${proyecto.id}`)}>Avances</button>
             </div>
           </li>
         ))}
