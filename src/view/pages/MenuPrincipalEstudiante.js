@@ -14,101 +14,48 @@ const MenuEstudiante = () => {
   useEffect(() => {
     const checkUserState = async () => {
       try {
-        console.log("[MenuEstudiante] Verificando estado para usuario:", usuarioId);
-        
-        // Enhanced query to get more details
-        const { data: estData, error: estError } = await supabase
+        console.log("[MenuEstudiante] 1) Buscar Estudiante por userId:", usuarioId);
+        const { data: estudianteRow, error: estError } = await supabase
           .from('Estudiante')
-          .select(`
-            id_usuario,
-            estado,
-            carnet,
-            Usuario:Usuario!Estudiante_id_usuario_fkey (
-              nombre,
-              correo,
-              telefono,
-              sede
-            ),
-            Anteproyecto:Anteproyecto!Anteproyecto_estudiante_id_fkey (
-              id,
-              estado,
-              titulo,
-              fecha_creacion,
-              empresa,
-              profesor:Profesor (
-                id,
-                Usuario:Usuario (
-                  nombre,
-                  correo
-                ),
-                cantidad_estudiantes
-              )
-            )
-          `)
+          .select('estudiante_id, estado')
           .eq('id_usuario', usuarioId)
           .single();
 
-        if (estError) {
-          console.error("[MenuEstudiante] Error DB:", estError);
-          throw estError;
-        }
-        
-        // Enhanced logging with more details
-        console.log("[MenuEstudiante] 📋 Datos completos:", {
-          estudiante: {
-            id: estData?.id_usuario,
-            carnet: estData?.carnet,
-            estado: estData?.estado,
-            nombre: estData?.Usuario?.nombre,
-            correo: estData?.Usuario?.correo,
-            telefono: estData?.Usuario?.telefono,
-            sede: estData?.Usuario?.sede
-          },
-          anteproyecto: estData?.Anteproyecto ? {
-            id: estData?.Anteproyecto?.id,
-            titulo: estData?.Anteproyecto?.titulo,
-            estado: estData?.Anteproyecto?.estado,
-            fecha_creacion: estData?.Anteproyecto?.fecha_creacion,
-            empresa: estData?.Anteproyecto?.empresa,
-            profesor: estData?.Anteproyecto?.profesor ? {
-              id: estData?.Anteproyecto?.profesor?.id,
-              nombre: estData?.Anteproyecto?.profesor?.Usuario?.nombre,
-              correo: estData?.Anteproyecto?.profesor?.Usuario?.correo,
-              cantidad_estudiantes: estData?.Anteproyecto?.profesor?.cantidad_estudiantes
-            } : "Sin profesor asignado"
-          } : "Sin anteproyecto"
-        });
-
-        if (!estData) {
-          console.log("[MenuEstudiante] ⚠️ No se encontró info de Estudiante.");
+        if (estError) throw estError;
+        if (!estudianteRow) {
+          console.log("[MenuEstudiante] No se encontró Estudiante para este usuario");
           setIsAllowedToRate(false);
           return;
         }
 
-        const estadoEst = estData.estado?.toLowerCase();
-        const estadoProyecto = estData.Anteproyecto?.estado?.toLowerCase();
-        
-        console.log("[MenuEstudiante] 📊 Estados actuales:", {
-          estudiante: estadoEst,
-          proyecto: estadoProyecto
+        const estudianteID = estudianteRow.estudiante_id;
+        const estadoEst = (estudianteRow.estado || "").toLowerCase();
+        console.log("[MenuEstudiante] Estudiante:", estudianteID, "estado:", estadoEst);
+
+        // 2) Buscar Proyectos que tengan este estudiante_id
+        console.log("[MenuEstudiante] 2) Buscar Proyectos para estudiante:", estudianteID);
+        const { data: proyectos, error: prError } = await supabase
+          .from('Proyecto')
+          .select('id, estado')
+          .eq('estudiante_id', estudianteID);
+
+        if (prError) throw prError;
+        console.log("[MenuEstudiante] Proyectos del estudiante:", proyectos);
+
+        // Revisa si alguno de esos proyectos está "aprobado" o "reprobado"
+        const anyProyectoOk = proyectos.some(proy => {
+          const state = (proy.estado || "").toLowerCase();
+          return (state === "aprobado" || state === "reprobado");
         });
 
         const isEstudianteOk = (estadoEst === 'aprobado' || estadoEst === 'reprobado');
-        const isProyectoOk = (estadoProyecto === 'aprobado' || estadoProyecto === 'reprobado');
+        console.log("[MenuEstudiante] isEstudianteOk?", isEstudianteOk, "anyProyectoOk?", anyProyectoOk);
 
-        console.log("[MenuEstudiante] ✓ Verificación de estados:", {
-          estudianteAptoParaCalificar: isEstudianteOk,
-          proyectoAptoParaCalificar: isProyectoOk,
-          razon: !isEstudianteOk ? "Estado estudiante no es aprobado/reprobado" :
-                !isProyectoOk ? "Estado proyecto no es aprobado/reprobado" :
-                "Ambos estados son correctos"
-        });
-
-        if (isEstudianteOk && isProyectoOk) {
-          console.log("[MenuEstudiante] El estudiante y su proyecto están 'aprobado' o 'reprobado'. Revisa la calificación...");
+        if (isEstudianteOk && anyProyectoOk) {
+          console.log("[MenuEstudiante] Estudiante y al menos un Proyecto apto => Allowed to Rate");
           setIsAllowedToRate(true);
         } else {
-          console.log("[MenuEstudiante] Ineligible para calificar. (Pero mostramos el botón igual).");
+          console.log("[MenuEstudiante] Estudiante/Proyecto no apto => setIsAllowedToRate(false)");
           setIsAllowedToRate(false);
         }
       } catch (err) {
