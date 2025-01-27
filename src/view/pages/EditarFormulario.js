@@ -66,6 +66,7 @@ const CoordinadorForm = () => {
   const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [estado, setEstado] = useState('');
+  const [proyecto, setProyecto] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -141,12 +142,16 @@ const CoordinadorForm = () => {
           Correcciones:correcciones_anteproyecto_id_fkey (
             seccion,
             contenido
+          ),
+          Proyecto:proyecto_anteproyecto_id_fkey (
+            id
           )
 
 
         `)
         .eq('id', id)
         .single();
+        console.log(data);
       if (error) throw error;
       // Llenar estados
       setIdAnteproyecto(data.id);
@@ -195,7 +200,12 @@ const CoordinadorForm = () => {
       setNombreDepartamento(data.departamento || '');
       setTipoProyecto(data.tipo || '');
       setObservaciones(data.comentario || '');
-
+      if(data.Proyecto.length == 0){
+        setProyecto("empty")
+      }
+      else{
+        setProyecto("assigned");
+      }
       // Datos del Estudiante
       if (data.Estudiante) {
         setEstudianteId(data.estudiante_id);
@@ -248,6 +258,142 @@ const CoordinadorForm = () => {
     }
   }
 
+  async function consultarHR(nombreContact){
+    try{
+      const { data, error } = await supabase
+        .from('ContactoEmpresa')
+        .select(`
+          id,
+          nombre,
+          AnteproyectoContact:AnteproyectoContacto_rrhh_id_fkey (
+            contacto_id         
+          )
+        `)
+        .eq('nombre', nombreContact)
+        .single();
+      if(data.AnteproyectoContact.length==1){
+        return true;
+      }
+      else{
+        return false;
+      }
+    } catch(err){
+      console.error('Error al buscar contacto', err);
+      alert('Error al buscar contacto' + err.message);
+    }
+  }
+
+  async function eliminarCorrecciones(){
+    try{
+      const { error } = await supabase
+        .from('Correcciones')
+        .delete()
+        .eq('anteproyecto_id', idAnteproyecto);
+        if (error) {
+        alert('Error al eliminar correcciones: ' + error.message);
+        return;
+      }
+    }catch(error){
+      alert('Error al eliminar correcciones:' + error);
+    }
+  }
+
+  async function borrarAnteproyecto(){
+    try{
+      const { error } = await supabase
+        .from('Anteproyecto')
+        .delete()
+        .eq('id', idAnteproyecto);
+        if (error) {
+        alert('Error al eliminar anteproyecto: ' + error.message);
+        return;
+      }
+    }catch(error){
+      alert('Error al eliminar anteproyecto:' + error);
+    }
+  }
+
+  async function consultarEmpresas(){
+    try{
+      const { data, error } = await supabase
+        .from('Empresa')
+        .select(`
+          id,
+          nombre,
+          ContactoEmpresa:contactoempresa_empresa_id_fkey(
+            nombre
+          )
+        `)
+        .eq('nombre', nombreEmpresa)
+        .single();
+      if(data.ContactoEmpresa.length == 0){
+        return true;
+      }
+      else{
+        return false;
+      }
+    } catch(err){
+      console.error('Error al buscar empresas', err);
+      alert('Error al buscar empresas' + err.message);
+    }
+  }
+
+  async function eliminarContacto(name){
+    try{
+      const { error } = await supabase
+        .from('ContactoEmpresa')
+        .delete()
+        .eq('nombre', name);
+        if (error) {
+        alert('Error al eliminar contacto: ' + error.message);
+        return;
+      }
+    }catch(error){
+      alert('Error al eliminar contacto:' + error);
+    }
+  }
+
+  async function eliminarAnteContact(){
+    try{
+      const { error } = await supabase
+        .from('AnteproyectoContacto')
+        .delete()
+        .eq('anteproyecto_id', idAnteproyecto);
+        if (error) {
+        alert('Error al eliminar contacto: ' + error.message);
+        return;
+      }
+    }catch(error){
+      alert('Error al eliminar contacto:' + error);
+    }
+  }
+
+  async function consultarContactos(nombreContact){
+    try{
+      const { data, error } = await supabase
+        .from('ContactoEmpresa')
+        .select(`
+          id,
+          nombre,
+          AnteproyectoContact:anteproyectocontacto_contacto_id_fkey (
+            contacto_id         
+          )
+        `)
+        .eq('nombre', nombreContact)
+        .single();
+      if(error) throw error;
+      if(data.AnteproyectoContact.length==1){
+        return true;
+      }
+      else{
+        return false;
+      }
+    } catch(err){
+      console.error('Error al buscar contacto', err);
+      alert('Error al buscar contacto' + err.message);
+    }
+  }
+
   async function editarAnteproyecto(e) {
     e.preventDefault();
     const confirmUpdate = window.confirm("¿Está seguro de ACTUALIZAR el anteproyecto?");
@@ -281,6 +427,43 @@ const CoordinadorForm = () => {
       navigate('/anteproyectosEstudiante');
     } catch (error) {
       errorToast('Error al actualizar anteproyecto: ' + error.message);
+    }
+  }
+
+  async function eliminarAnteproyecto(e) {
+    e.preventDefault();
+    const confirmReprobar = window.confirm("¿Está seguro de que quiere borrar el anteproyecto?");
+    if (!confirmReprobar) return;
+    if(proyecto == "empty"){
+      try {
+        const contactoCount = await consultarContactos(nombreAsesor);
+        const rhCount = await consultarHR(nombreHR);
+        await eliminarCorrecciones();
+        await eliminarAnteContact();
+        await borrarAnteproyecto();
+        if(contactoCount==true){
+          await eliminarContacto(nombreAsesor);
+        }
+        if(rhCount==true){
+          await eliminarContacto(nombreHR);
+        }
+        const empresaCount = await consultarEmpresas();
+        if(empresaCount == true){
+          const { error } = await supabase
+          .from('Empresa')
+          .delete()
+          .eq('nombre', nombreEmpresa);
+          if (error) throw error;
+        }
+
+        alert('Anteproyecto actualizado exitosamente.');
+        navigate('/anteproyectosEstudiante');
+      } catch (error) {
+        alert('Error al actualizar anteproyecto: ' + error.message);
+      }
+    }
+    else{
+      alert("No se puede reprobar el anteproyecto, ya se encuentra asignado a un profesor");
     }
   }
 
@@ -471,6 +654,7 @@ const CoordinadorForm = () => {
           <textarea
             value={contexto}
             onChange={(e) => setContexto(e.target.value)}
+            required
           />
           {infoVisible.contexto && <p className="info-text">Explicación sobre el contexto...</p>}
           <p className={styles.correctionText}>
@@ -489,6 +673,7 @@ const CoordinadorForm = () => {
           <textarea
             value={justificacion}
             onChange={(e) => setJustificacion(e.target.value)}
+            required
           />
           {infoVisible.justificacion && <p className="info-text">Información sobre la justificación...</p>}
           <p className={styles.correctionText}>
@@ -502,11 +687,13 @@ const CoordinadorForm = () => {
             <AiOutlineInfoCircle
               className={styles.infoIcon}
               onClick={() => toggleInfo('sintomas')}
+              
             />
           </label>
           <textarea
             value={sintomas}
             onChange={(e) => setSintomas(e.target.value)}
+            required
           />
           {infoVisible.sintomas && <p className="info-text">Descripción de los síntomas...</p>}
           <p className={styles.correctionText}>
@@ -525,6 +712,7 @@ const CoordinadorForm = () => {
           <textarea
             value={impacto}
             onChange={(e) => setImpacto(e.target.value)}
+            required
           />
           {infoVisible.impacto && <p className="info-text">Descripción del impacto...</p>}
           <p className={styles.correctionText}>
@@ -565,6 +753,13 @@ const CoordinadorForm = () => {
             className={`${styles.button} ${styles.aprobar}`}
           >
             Editar
+          </button>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.cancelar}`}
+            onClick={eliminarAnteproyecto}
+          >
+            Eliminar
           </button>
           <button
             type="button"

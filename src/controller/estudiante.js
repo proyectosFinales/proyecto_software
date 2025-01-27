@@ -87,6 +87,7 @@ class Estudiante extends Usuario {
         estudiante_id,
         estado,
         carnet,
+        asesor,
         Usuario:id_usuario (
           id,
           nombre,

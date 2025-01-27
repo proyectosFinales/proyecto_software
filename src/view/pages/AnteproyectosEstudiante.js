@@ -129,36 +129,6 @@ const AnteproyectosEstudiante = () => {
     navigate(`/editarFormulario?id=${id}`);
   }
 
-  // Función para eliminar anteproyectos (solo si Pendiente o Reprobado)
-  async function eliminarAnteproyecto(id, estado) {
-    const confirmarEnvio = window.confirm(
-      "¿Está seguro que desea eliminar este anteproyecto?"
-    );
-    if (!confirmarEnvio) return;
-
-    if (estado === 'Aprobado') {
-      alert("No se puede eliminar un anteproyecto aprobado.");
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('Anteproyecto')
-        .delete()
-        .eq('id', id)
-        .in('estado', ['Reprobado', 'Pendiente']); // filtra para no borrar uno aprobado
-      if (error) {
-        alert('Error al eliminar anteproyecto: ' + error.message);
-        return;
-      }
-
-      setAnteproyectos((prev) => prev.filter((ap) => ap.id !== id));
-      console.log(`Anteproyecto con ID ${id} eliminado exitosamente.`);
-    } catch (error) {
-      alert('Error al eliminar anteproyecto:' + error);
-    }
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <HeaderEstudiante title="Mis Anteproyectos" />
@@ -196,14 +166,6 @@ const AnteproyectosEstudiante = () => {
                       className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
                     >
                       Descargar
-                    </button>
-                    <button
-                      onClick={() =>
-                        eliminarAnteproyecto(anteproyecto.id, anteproyecto.estado)
-                      }
-                      className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                    >
-                      Eliminar
                     </button>
                   </td>
                 </tr>

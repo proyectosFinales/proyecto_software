@@ -54,6 +54,7 @@ const FormularioCoordinador = () => {
   const [correccionJ, setCorrecionJ] = useState('');
   const [correccionS, setCorrecionS] = useState('');
   const [correccionE, setCorrecionE] = useState('');
+  const [proyecto, setProyecto] = useState('');
 
   // ID del anteproyecto actual
   const [idAnteproyecto, setIdAnteproyecto] = useState(null);
@@ -128,6 +129,9 @@ const FormularioCoordinador = () => {
                     correo,
                     telefono
                   )
+                ),
+                Proyecto:proyecto_anteproyecto_id_fkey (
+                  id
                 )
       
               `)
@@ -156,7 +160,12 @@ const FormularioCoordinador = () => {
       setNombreDepartamento(data.departamento || '');
       setTipoProyecto(data.tipo || '');
       setObservaciones(data.comentario || '');
-
+      if(data.Proyecto.length == 0){
+        setProyecto("empty");
+      }
+      else{
+        setProyecto("assigned");
+      }
       // Rellenar campos de estudiante (read-only)
       if (data.Estudiante?.Usuario) {
         setCarnet(data.Estudiante.carnet || '');
@@ -413,31 +422,35 @@ const FormularioCoordinador = () => {
     e.preventDefault();
     const confirmReprobar = window.confirm("¿Está seguro de REPROBAR el anteproyecto? Asegúrese de incluir la razón en las observaciones");
     if (!confirmReprobar) return;
+    if(proyecto == "empty"){
+      try {
+        const contactoCount = await consultarContactos(nombreAsesor);
+        const rhCount = await consultarHR(nombreHR);
+        await eliminarAnteContact();
+        await eliminarAnteproyecto();
+        if(contactoCount==true){
+          await eliminarContacto(nombreAsesor);
+        }
+        if(rhCount==true){
+          await eliminarContacto(nombreHR);
+        }
+        const empresaCount = await consultarEmpresas();
+        if(empresaCount == true){
+          const { error } = await supabase
+          .from('Empresa')
+          .delete()
+          .eq('nombre', nombreEmpresa);
+          if (error) throw error;
+        }
 
-    try {
-      const contactoCount = await consultarContactos(nombreAsesor);
-      const rhCount = await consultarHR(nombreHR);
-      await eliminarAnteContact();
-      await eliminarAnteproyecto();
-      if(contactoCount==true){
-        await eliminarContacto(nombreAsesor);
+        alert('Anteproyecto actualizado exitosamente (Reprobado).');
+        navigate('/anteproyectosCoordinador');
+      } catch (error) {
+        alert('Error al actualizar anteproyecto: ' + error.message);
       }
-      if(rhCount==true){
-        await eliminarContacto(nombreHR);
-      }
-      const empresaCount = await consultarEmpresas();
-      if(empresaCount == true){
-        const { error } = await supabase
-        .from('Empresa')
-        .delete()
-        .eq('nombre', nombreEmpresa);
-        if (error) throw error;
-      }
-
-      alert('Anteproyecto actualizado exitosamente (Reprobado).');
-      navigate('/anteproyectosCoordinador');
-    } catch (error) {
-      alert('Error al actualizar anteproyecto: ' + error.message);
+    }
+    else{
+      alert("No se puede reprobar el anteproyecto, ya se encuentra asignado a un profesor");
     }
   }
 
