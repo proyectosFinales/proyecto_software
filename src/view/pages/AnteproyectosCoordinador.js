@@ -119,28 +119,6 @@ const AnteproyectosCoordinador = () => {
     }
   };
 
-  const eliminarAnteproyecto = async (id) => {
-    const confirmacion = window.confirm("¿Está seguro de eliminar este anteproyecto?");
-    if (!confirmacion) return;
-
-    try {
-      const { error } = await supabase
-        .from('Anteproyecto')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        alert('No se pudo eliminar el anteproyecto. ' + error.message);
-        return;
-      }
-      setAnteproyectos((prev) => prev.filter((item) => item.id !== id));
-      alert('Anteproyecto eliminado exitosamente.');
-    } catch (err) {
-      console.error('Error eliminando anteproyecto:', err);
-      alert('Ocurrió un error al intentar eliminar el anteproyecto.');
-    }
-  };
-
   const filteredAnteproyectos = anteproyectos.filter((anteproyecto) => {
     // Convertimos el texto de búsqueda a minúsculas para hacer una comparación case-insensitive
     const lowerSearchText = searchText.toLowerCase();
@@ -226,12 +204,6 @@ const AnteproyectosCoordinador = () => {
                           Pendiente
                         </button>
                       )}
-                      <button
-                        onClick={() => eliminarAnteproyecto(anteproyecto.id)}
-                        className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-                      >
-                        Eliminar
-                      </button>
                     </div>
                   </td>
                 </tr>
