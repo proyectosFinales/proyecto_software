@@ -56,7 +56,8 @@
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   width: 90%;
   margin: 20px auto;
-  align-items: start;
+  align-items: start !important;
+  gap: 20px;
 }
 
 .input-row {
@@ -82,8 +83,8 @@
 
 .btn-add-event {
   padding: 10px 20px;
-  background-color: var(--azul);
-  color: grey;
+  background-color: #1E3A8A;
+  color: white;
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -95,7 +96,7 @@
 }
 
 .btn-edit-event {
-  background-color: var(--azul);
+  background-color: #1E3A8A;
   color: white;
   border: none;
   border-radius: 5px;
