@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import Header from '../components/HeaderCoordinador';
+import Header from '../components/HeaderProfesor';
 import Footer from '../components/Footer';
 import '../styles/Calendario.css';
 
