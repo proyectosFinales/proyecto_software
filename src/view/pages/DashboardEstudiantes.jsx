@@ -7,6 +7,10 @@ import SettingsCoordinador from '../components/SettingsCoordinador';
 import Profesor from '../../controller/profesor';
 import Estudiante from '../../controller/estudiante';
 import '../styles/DashboardEstudiantes.css';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
+import Modal from '../components/Modal';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
@@ -16,6 +20,8 @@ const DashboardEstudiantes = () => {
   const [profesores, setProfesores] = useState([]);
   const [chartData, setChartData] = useState({});
   const [estudiantes, setEstudiantes] = useState([]);
+  const [modal, setModal] = useState(false);
+  const [filteredEstudiantes, setFilteredEstudiantes] = useState([]);
 
   useEffect(() => {
     const fetchProfesores = async () => {
@@ -85,10 +91,47 @@ const DashboardEstudiantes = () => {
         },
       ],
     });
+    setFilteredEstudiantes(data);
   }, [selectedProfesor, estudiantes]);
 
   const handleProfesorChange = (e) => {
     setSelectedProfesor(e.target.value);
+  };
+
+  const handleDownloadClick = () => {
+    console.log('Download clicked');
+    setModal(true);
+  };
+
+  const handleDownload = (format) => {
+    if (format === 'pdf') {
+      const doc = new jsPDF();
+      autoTable(doc, {
+        head: [['Nombre', 'Correo', 'Carnet', 'Profesor Asesor', 'Estado']],
+        body: filteredEstudiantes.map(est => [
+          est.Usuario.nombre,
+          est.Usuario.correo,
+          est.carnet,
+          profesores.find(prof => prof.value === est.asesor)?.label || '',
+          est.estado,
+        ]),
+      });
+      doc.save('reporte_estudiantes.pdf');
+    } else if (format === 'excel') {
+      const worksheet = XLSX.utils.json_to_sheet(
+        filteredEstudiantes.map(est => ({
+          Nombre: est.Usuario.nombre,
+          Correo: est.Usuario.correo,
+          Carnet: est.carnet,
+          'Profesor Asesor': profesores.find(prof => prof.value === est.asesor)?.label || '',
+          Estado: est.estado,
+        }))
+      );
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Estudiantes');
+      XLSX.writeFile(workbook, 'reporte_estudiantes.xlsx');
+    }
+    setModal(false);
   };
 
   return (
@@ -107,7 +150,7 @@ const DashboardEstudiantes = () => {
               ))}
             </select>
           </div>
-          <button className="btn btn-primary self-center">Descargar Reporte</button>
+          <button className="btn btn-primary self-center" onClick={handleDownloadClick}>Descargar Reporte</button>
         </div>
         <div className="charts-container">
           <div className="chart-item">
@@ -123,6 +166,22 @@ const DashboardEstudiantes = () => {
         </div>
       </div>     
       <Footer />
+
+      <Modal
+        show={modal}
+        onClose={() => setModal(false)}
+      >
+        <div>
+          <p className="mb-6 text-sm">
+            Elija el formato en el que desea descargar el reporte de estudiantes.
+          </p>
+          <div className="flex justify-end gap-2">
+            <button className="btn btn-primary mr-2" onClick={() => handleDownload('pdf')}>PDF</button>
+            <button className="btn btn-primary mr-2" onClick={() => handleDownload('excel')}>Excel</button>
+            <button className="btn btn-secondary" onClick={() => setModal(false)}>Cancelar</button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 };
