@@ -1,0 +1,195 @@
+import React, { useState, useEffect } from 'react';
+import { Page, Text, Image, Document, StyleSheet, View } from "@react-pdf/renderer";
+import {Font} from '@react-pdf/renderer';
+import Logo from "./logoTec.jpg"
+import Cambria from './Font/Cambria-Font-For-Windows.ttf';
+
+Font.register({
+    family: 'Cambria',
+    src: Cambria
+  })
+
+const styles = StyleSheet.create({
+  body: {
+    paddingTop: 35,
+    paddingBottom: 65,
+    paddingHorizontal: 34,
+  },
+  title: {
+    fontSize: 24,
+    textAlign: "center",
+  },
+  text: {
+    margin: 8,
+    fontSize: 11,
+    textAlign: "justify",
+    fontFamily: "Cambria",
+  },
+  date: {
+    margin: 12,
+    fontSize: 11,
+    textAlign: "right",
+    fontFamily: "Cambria",
+  },
+  header: {
+    fontSize: 12,
+    marginBottom: 20,
+    textAlign: "center",
+    fontFamily: "Cambria",
+  },
+  footer: {
+    fontSize: 11,
+    marginTop: 60,
+    textAlign: "center",
+  },
+  signingRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 40,
+  },
+  signingSpace: {
+    width: "40%",
+  },
+  line: {
+    borderBottomWidth: 1,
+    borderBottomColor: "black",
+    width: "100%",
+    marginBottom: 0,
+  },
+  name: {
+    fontSize: 11,
+    textAlign: "left",
+    fontFamily: "Cambria",
+  },
+  option: {
+    fontSize: 11,
+    textAlign: "center",
+    fontFamily: "Cambria",
+  },
+});
+
+const ConstanciaPDF = (solicitud) => {
+
+    const [day, setDay] = useState('');
+    const [month, setMonth] = useState('');
+    const [year, setYear] = useState('');
+    const [estudiante, setEstudiante] = useState('');
+    const [profesor, setProfesor] = useState('');
+    const [titulo, setTitulo] = useState('');
+    const [persona1, setPersona1] = useState('');
+    const [persona2, setPersona2] = useState('');
+    const [sede, setSede] = useState('');
+    const [empresa, setEmpresa] = useState('');
+    const [semestre, setSemestre] = useState('');
+    const [publico, setPublico] = useState('');
+    const [confidencial, setConfidencial] = useState('');
+
+    useEffect(() => {
+        setData();
+    }, []);
+
+    function setData(){
+        console.log(solicitud);
+        const today = new Date();
+        setDay(today.getDate());
+        setMonth(today.toLocaleString('es-ES', { month: 'long' }));
+        setYear(today.getFullYear());
+        setEstudiante(solicitud.solicitud.Estudiante.Usuario.nombre);
+        setProfesor(solicitud.solicitud.Profesor.Usuario.nombre);
+        setTitulo(solicitud.solicitud.titulo);
+        setPersona1(solicitud.solicitud.datos.persona1);
+        setPersona2(solicitud.solicitud.datos.persona2);
+        setSede(solicitud.solicitud.Profesor.Usuario.sede);
+        setSemestre(solicitud.solicitud.semestre);
+        setEmpresa(solicitud.solicitud.Estudiante.Anteproyecto[0].Empresa.nombre);
+        if(solicitud.solicitud.datos.aprobacion == "Públicos"){
+          setPublico("x");
+          setConfidencial(" ");
+        }
+        else{
+          setPublico(" ");
+          setConfidencial("x");
+        }
+    }
+
+    return(
+    <Document>
+        <Page style={styles.body}>
+        <Image src={Logo} style={{ width: '40%', height: 'auto' , textAlign: "center", display: 'block', margin: '0 auto',}} />
+        <Text style={styles.header}>
+          CONSTANCIA DE DEFENSA PÚBLICA DEL{`\n`}
+          PROYECTO DE GRADUACIÓN{`\n`}
+        </Text>
+        <Text style={styles.text}>
+        El presente Proyecto de Graduación titulado “{titulo}” y realizado en la 
+        empresa “{empresa}”, durante el {semestre} Semestre de {year}, ha sido defendido, ante 
+        el Tribunal Examinador integrado por los profesores Ing. {persona1} e Ing. {persona2}; como 
+        requisito para optar al grado de Licenciatura en Ingeniería en 
+        Ingeniería en Producción Industrial, del Instituto Tecnológico de Costa Rica.  
+        </Text>
+        <Text style={styles.text}>
+          La orientación y supervisión del proyecto desarrollado por el estudiante, estuvo a cargo del 
+          profesor(a) asesor (a) Ing. {profesor}.  
+        </Text>
+        <Text style={styles.text}>
+          Este documento y su defensa ante el Tribunal Examinador han sido declarados:  
+        </Text>
+        <View style={styles.signingRow}>
+          <View style={styles.signingSpace}>
+            <Text style={styles.option}>
+              Públicos ({publico})
+            </Text>
+            
+          </View>
+          <View style={styles.signingSpace}>
+            <Text style={styles.option}>
+              Confidenciales ({confidencial})
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.text}>
+          {`\n\n\n\n`}
+        </Text>
+        <View style={styles.signingRow}>
+          <View style={styles.signingSpace}>
+            <View style={styles.line} />
+            <Text style={styles.name}>
+              Ing. {persona1}{`\n`}
+              Profesor(a) Evaluador(a)
+            </Text>
+            
+          </View>
+          <View style={styles.signingSpace}>
+            <View style={styles.line} />
+            <Text style={styles.name}>
+              Ing. {persona2}{`\n`}
+              Profesor(a) Evaluador(a)
+            </Text>
+          </View>
+        </View>
+        <View style={styles.signingRow}>
+          <View style={styles.signingSpace}>
+            <View style={styles.line} />
+            <Text style={styles.name}>
+              Ing. {profesor}{`\n`}
+              Profesor(a) Asesor(a)  
+            </Text>
+            
+          </View>
+          <View style={styles.signingSpace}>
+            <View style={styles.line} />
+            <Text style={styles.name}>
+              {estudiante}{`\n`}
+              Estudiante
+            </Text>
+          </View>
+        </View>
+        <Text style={styles.footer}>
+          Sede {sede}, {day} de {month} del {year}
+        </Text>
+        </Page>
+    </Document>
+    )
+};
+
+export default ConstanciaPDF;

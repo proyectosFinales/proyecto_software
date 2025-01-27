@@ -84,9 +84,7 @@ const Empresas = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <header className="p-4 bg-white border-b border-gray-300">
-        <h2 className="text-xl font-bold">Empresas</h2>
-      </header>
+      <Header title="Empresas" />
 
       <main className="flex-grow p-4 md:p-8">
         <button

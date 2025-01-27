@@ -16,6 +16,7 @@ const EstudianteForm = () => {
   const [generoR, setGeneroR] = useState('');
   const [puestoR, setPuestoR] = useState('');
   const [nombreR, setNombreR] = useState('');
+  const [semestre, setSemestre] = useState('');
   const [apellidosR, setApellidosR] = useState('');
   const [idioma, setIdioma] = useState('');
 
@@ -67,7 +68,7 @@ const EstudianteForm = () => {
   async function solicitarCarta(e) {
     e.preventDefault();
     const confirmarEnvio = window.confirm(
-      "¿Está seguro que desea la carta con la información actual?"
+      "¿Está seguro que desea la carta con la información actual (Recuerde ingresar la información en el idioma solicitado)?"
     );
     if (!confirmarEnvio) {
       return;
@@ -89,7 +90,8 @@ const EstudianteForm = () => {
           genero_receptor: generoR,
           apellidos_receptor: apellidosR,
           cedula: cedula,
-          idioma: idioma
+          idioma: idioma,
+          semestre: semestre
         })
         .select();
 
@@ -185,7 +187,35 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>4. Sede:</label>
+          <label>4. Semestre:</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="semestre"
+                value="I"
+                onChange={(e) => setSemestre(e.target.value)}
+                required
+              />
+              I
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="semestre"
+                value="II"
+                onChange={(e) => setSemestre(e.target.value)}
+                required
+              />
+              II
+            </label>
+          </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>5. Sede:</label>
           <input
             type="text"
             value={sede}
@@ -195,7 +225,7 @@ const EstudianteForm = () => {
 
         <h2>Datos del receptor</h2>
         <div className={styles.formGroup}>
-          <label>5. Nombre:</label>
+          <label>6. Nombre:</label>
           <input
             type="text"
             value={nombreR}
@@ -204,7 +234,7 @@ const EstudianteForm = () => {
           />
         </div>
         <div className={styles.formGroup}>
-          <label>6. Apellidos:</label>
+          <label>7. Apellidos:</label>
           <input
             type="text"
             value={apellidosR}
@@ -240,7 +270,7 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>7. Nombre de la empresa:</label>
+          <label>8. Nombre de la empresa:</label>
           <input
             type="text"
             value={nombreEmpresa}
@@ -250,7 +280,7 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>8. Puesto:</label>
+          <label>9. Puesto:</label>
           <input
             type="text"
             value={puestoR}
@@ -260,7 +290,7 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>9. Idioma:</label>
+          <label>10. Idioma:</label>
           <div>
             <label>
               <input
@@ -278,7 +308,7 @@ const EstudianteForm = () => {
               <input
                 type="radio"
                 name="idioma"
-                value="Inglés"
+                value="Ingles"
                 onChange={(e) => setIdioma(e.target.value)}
                 required
               />

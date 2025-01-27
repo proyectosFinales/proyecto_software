@@ -42,11 +42,15 @@ import AsignacionAutomatica from "./view/pages/asignacion-proyectos/asignacion-a
 import EdicionAsignacionProyectos from './view/pages/asignacion-proyectos/edicion.jsx';
 import RecuperarContraseña from './view/pages/RecuperarContraseña.js';
 import Abandonar from './view/pages/Abandonar.js';
+import ActaDefensa from './view/pages/actas/ActaDefensa.js';
+import ActaEntrega from './view/pages/actas/ActaEntrega.js';
+import ConstanciaDefensa from './view/pages/actas/Constancia.js';
 import InicioAsignaciones from './view/pages/asignacion-proyectos/index.jsx';
 import CambioContraseña from './view/pages/CambioContraseña.js';
 import AprobarProyectos from './view/pages/AprobarProyectos.js';
 import ProyectosAsignadosProfesor from './view/pages/asignacion-proyectos/proyectos-profesor.jsx';
 import Bitacoras from './view/pages/Bitacoras.js';
+import Actas from './view/pages/Actas.js';
 import AgregarBitacora from './view/pages/agregarBitacora.js';
 import Entrada from './view/pages/verEntrada.js';
 import AgregarEntrada from './view/pages/agregarEntrada.js';
@@ -55,6 +59,7 @@ import DashboardEstudiantes from './view/pages/DashboardEstudiantes.jsx';
 import ProfessorEvaluationForm from './view/pages/calificaciones/calificacionAsesor.js';
 import ProfessorDashboard from './view/pages/calificaciones/calificacionAsesorDashboard.js';
 import PermisosVerCalificaciones from './view/pages/calificaciones/permisosVerCalificaciones.js';
+import Machotes from './view/pages/Machotes.js';
 
 function App() {
   return (
@@ -110,12 +115,32 @@ function App() {
           element={<RutaProtegida element={<AgregarUsuario />} requiredRoles={["1"]} />}
         />
         <Route
-          path="/formulario-estudiantes"
+          path="/formularioEstudiantes"
           element={<RutaProtegida element={<FormularioEstudiantes />} requiredRoles={["3"]} />}
         />
         <Route
           path="/formularioCarta"
           element={<RutaProtegida element={<FormularioCarta />} requiredRoles={["3"]} />}
+        />
+        <Route
+          path="/actas"
+          element={<RutaProtegida element={<Actas />} requiredRoles={["2"]} />}
+        />
+        <Route
+          path="/actaDefensa"
+          element={<RutaProtegida element={<ActaDefensa />} requiredRoles={["2"]} />}
+        />
+        <Route
+          path="/actaEntrega"
+          element={<RutaProtegida element={<ActaEntrega />} requiredRoles={["2"]} />}
+        />
+        <Route
+          path="/constancia"
+          element={<RutaProtegida element={<ConstanciaDefensa />} requiredRoles={["2"]} />}
+        />
+        <Route
+          path="/machotes"
+          element={<RutaProtegida element={<Machotes />} requiredRoles={["2"]} />}
         />
         <Route
           path="/formulario-coordinador"

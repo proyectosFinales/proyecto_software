@@ -5,7 +5,9 @@ import {
   Home,
   FileText,
   Clock,
-  Calendar
+  Calendar,
+  File,
+  Building
 } from "lucide-react";
 
 const SidebarProfesor = ({ show, setShow }) => {
@@ -15,6 +17,7 @@ const SidebarProfesor = ({ show, setShow }) => {
     { path: "/disponibilidad-profesor", text: "Disponibilidad para defensas", icon: Clock },
     { path: "/citas-profesor", text: "Citas", icon: Calendar },
     { path: "/bitacoras", text: "Bitácoras", icon: Calendar },
+    { path: "/actas", text: "Solicitar Acta de defensa", icon: File },
   ];
 
   return (

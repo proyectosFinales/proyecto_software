@@ -178,12 +178,11 @@ const EstudianteForm = () => {
           nombre
         `)
         .eq('nombre', nombreEmpresa)
-        .single();
-      if(!data){
+      if(data.length == 0){
         return "empty";
       }
       else{
-        return data.id;
+        return data[0].id;
       }
     } catch(err){
       console.error('Error al buscar empresas', err);
@@ -200,12 +199,11 @@ const EstudianteForm = () => {
           nombre
         `)
         .eq('nombre', nombreContact)
-        .single();
-      if(!data){
+      if(data.length == 0){
         return "empty";
       }
       else{
-        return data.id;
+        return data[0].id;
       }
     } catch(err){
       console.error('Error al buscar contacto', err);
