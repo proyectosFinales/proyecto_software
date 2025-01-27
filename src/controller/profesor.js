@@ -37,12 +37,13 @@ class Profesor extends Usuario {
    * @param {number} cantidadEstudiantes - Valor de la columna "cantidad_estudiantes" en la tabla Profesor
    * @param {Anteproyecto[]} anteproyectos - Lista de anteproyectos asociados (opcional)
    */
-  constructor(profesor_id, id_usuario, nombre, sede, cantidadEstudiantes, anteproyectos = []) {
+  constructor(profesor_id, id_usuario, nombre, sede, cantidadEstudiantes, estudiantesLibres, anteproyectos = []) {
     super(id_usuario, nombre, sede); // Constructor base de Usuario
     this.profesor_id = profesor_id;
     this.cantidadEstudiantes = cantidadEstudiantes ?? 0;
     this.anteproyectos = anteproyectos;
     this.original.cantidadEstudiantes = this.cantidadEstudiantes;
+    this.original.estudiantesLibres = estudiantesLibres;
   }
 
   /**
@@ -79,6 +80,7 @@ class Profesor extends Usuario {
       usuario?.nombre || "",
       usuario?.sede || "",
       obj.cantidad_estudiantes ?? 0,
+      obj.estudiantes_libres,
       antepros
     );
   }
@@ -95,6 +97,7 @@ class Profesor extends Usuario {
       .select(`
         profesor_id,
         cantidad_estudiantes,
+        estudiantes_libres,
         Usuario:id_usuario (
           id,
           nombre,
@@ -123,6 +126,7 @@ class Profesor extends Usuario {
       .select(`
         profesor_id,
         cantidad_estudiantes,
+        estudiantes_libres,
         Usuario:id_usuario (
           id,
           nombre,
@@ -146,19 +150,46 @@ class Profesor extends Usuario {
    * si ha cambiado respecto a la original.
    */
   async actualizarCantidadEstudiantes() {
+    const nuevosEstudiantesLibres = this.cantidadEstudiantes - (this.original.cantidadEstudiantes - this.original.estudiantesLibres);
+
+    if (nuevosEstudiantesLibres < 0) {
+      return Promise.reject("No se puede reducir la cantidad de estudiantes asignados por debajo del número actual.");
+    }
+
     if (this.original.cantidadEstudiantes !== this.cantidadEstudiantes) {
       const { error } = await supabase
         .from("Profesor")
-        .update({ cantidad_estudiantes: this.cantidadEstudiantes })
+        .update({
+          cantidad_estudiantes: this.cantidadEstudiantes,
+          estudiantes_libres: nuevosEstudiantesLibres
+        })
         .eq("profesor_id", this.profesor_id);
 
       if (error) {
         return Promise.reject(error.message);
       }
-      // Actualizamos el valor original
       this.original.cantidadEstudiantes = this.cantidadEstudiantes;
+      this.original.estudiantesLibres = nuevosEstudiantesLibres;
     }
     return Promise.resolve();
+  }
+
+  /**
+   * Obtiene los profesor_id de todos los profesores que tienen estudiantes_libres > 0
+   * @returns {Promise<number[]>}
+   */
+  static async obtenerProfesoresConEstudiantesLibres() {
+    const { data, error } = await supabase
+      .from("Profesor")
+      .select(`profesor_id,
+        estudiantes_libres`)
+      .gt("estudiantes_libres", 0);
+
+    if (error) {
+      throw error;
+    }
+
+    return data;
   }
 }
 
