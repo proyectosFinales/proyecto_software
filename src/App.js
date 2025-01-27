@@ -60,6 +60,7 @@ import ProfessorEvaluationForm from './view/pages/calificaciones/calificacionAse
 import ProfessorDashboard from './view/pages/calificaciones/calificacionAsesorDashboard.js';
 import PermisosVerCalificaciones from './view/pages/calificaciones/permisosVerCalificaciones.js';
 import Machotes from './view/pages/Machotes.js';
+import CalificacionAsesor from './view/pages/calificaciones/calificacionAsesor';
 
 function App() {
   return (
@@ -285,10 +286,10 @@ function App() {
           }
         />
         <Route
-          path="calificar-asesor"
+          path="/calificar-asesor"
           element={
-            <RutaProtegida
-              element={<ProfessorEvaluationForm />}
+            <RutaProtegida 
+              element={<CalificacionAsesor />} 
               requiredRoles={["3"]}
             />
           }
