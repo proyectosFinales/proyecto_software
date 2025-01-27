@@ -9,7 +9,8 @@ import {
   Users, 
   Database, 
   Calendar, 
-  UserCog
+  UserCog,
+  Building
 } from "lucide-react";
 
 const SidebarCoordinador = ({ show, setShow }) => {
@@ -21,6 +22,7 @@ const SidebarCoordinador = ({ show, setShow }) => {
     { path: "/carga-datos", text: "Base de datos", icon: Database },
     { path: "/citasMenu", text: "Citas y Calendario", icon: Calendar },
     { path: "/gestion-perfiles", text: "Gestionar perfiles", icon: UserCog },
+    { path: "/empresas", text: "Empresas", icon: Building },
   ];
 
   if (!show) return null;

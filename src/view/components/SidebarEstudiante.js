@@ -4,7 +4,8 @@ import { Link } from "react-router-dom";
 import { 
   Home,
   FileText,
-  Calendar
+  Calendar,
+  Mail
 } from "lucide-react";
 
 const SidebarEstudiante = ({ show, setShow }) => {
@@ -13,6 +14,8 @@ const SidebarEstudiante = ({ show, setShow }) => {
     { path: "/anteproyectosEstudiante", text: "Anteproyecto", icon: FileText },
     { path: "/citas-estudiante", text: "Citas", icon: Calendar },
     { path: "/bitacoras", text: "Bitácoras", icon: Calendar },
+    { path: "/cartasEstudiante", text: "Solicitar Carta", icon: Mail },
+    
   ];
 
   return (

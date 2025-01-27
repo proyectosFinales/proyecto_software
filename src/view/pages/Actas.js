@@ -2,28 +2,28 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
-import HeaderEstudiante from '../components/HeaderEstudiante';
+import HeaderProfesor from '../components/HeaderProfesor';
 import { PDFDownloadLink } from "@react-pdf/renderer";
-import Carta from '../PDFblueprints/Carta';
-import Letter from '../PDFblueprints/Letter';
+import Defensa from '../PDFblueprints/Defensa';
+import CosntanciaPDF from '../PDFblueprints/ConstanciaPDF';
+import Entrega from '../PDFblueprints/Entrega';
 
-const CartasEstudiante = () => {
-  const [cartas, setCartas] = useState([]);
+const Actas = () => {
+  const [actas, setActas] = useState([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    consultarAnteproyectos();
+    consultarActas();
   }, []);
 
-  async function consultarInfoEstudiante() {
+  async function consultarInfoProfesor() {
     try {
       const userToken = sessionStorage.getItem('token');
       const { data, error } = await supabase
         .from('Usuario')
         .select(`
-          Estudiante:Estudiante!Estudiante_id_usuario_fkey (
-            estudiante_id,
-            carnet
+          Profesor:Profesor!Profesor_id_usuario_fkey (
+            profesor_id
           )
         `)
         .eq('id', userToken)
@@ -32,7 +32,7 @@ const CartasEstudiante = () => {
       if (!data) {
         return;
       }
-      return data.Estudiante[0].estudiante_id;
+      return data.Profesor[0].profesor_id;
     } catch (error) {
       alert('Error al buscar estudiante' + error);
     }
@@ -40,85 +40,75 @@ const CartasEstudiante = () => {
 
   async function crearCarta() {
     try {
-      const studentID = await consultarInfoEstudiante();
-      const { data, error } = await supabase
-        .from('SolicitudCarta')
-        .select(`
-          id_solicitud
-        `)
-        .eq('estudiante_id', studentID);
-      if (error) {
-        alert('No se pudieron obtener las cartas. ' + error.message);
-        return;
-      }
-      if(data.length != 0){
-        alert("Ya tiene una carta solicitada");
-      }
-      else{
-        navigate('/formularioCarta');
-      }
+      navigate('/machotes');
     } catch (error) {
       alert('Error al consultar cartas: ' + error);
     }
   }
 
-  async function consultarAnteproyectos() {
+  async function consultarActas() {
     try {
-      const studentID = await consultarInfoEstudiante();
+      const profesorID = await consultarInfoProfesor();
       const { data, error } = await supabase
-        .from('SolicitudCarta')
+        .from('Acta')
         .select(`
-          id_solicitud,
+          id,
           estudiante_id,
-          nombre_receptor,
-          puesto_receptor,
-          empresa,
-          genero_emisor,
-          genero_receptor,
-          apellidos_receptor,
-          cedula,
-          idioma,
+          profesor_id,
+          titulo,
+          datos,
+          machote,
           semestre,
-          Estudiante:SolicitudCarta_estudiante_id_fkey1 (
+          Estudiante:acta_estudiante_id_fkey (
             carnet,
             id_usuario,
             Usuario:id_usuario (
               nombre,
-              correo,
-              telefono,
+              sede
+            ),
+            Anteproyecto:anteproyecto_estudiante_id_fkey (
+              id,
+              Empresa:anteproyecto_empresa_id_fkey(
+                nombre
+              )
+            )
+          ),
+          Profesor:acta_profesor_id_fkey (
+            id_usuario,
+            Usuario:id_usuario (
+              nombre,
               sede
             )
           )
         `)
-        .eq('estudiante_id', studentID);
-      console.log(data);
+        .eq('profesor_id', profesorID);
       if (error) {
-        alert('No se pudieron obtener las cartas. ' + error.message);
+        alert('No se pudieron obtener las actas. ' + error.message);
         return;
       }
-      setCartas(data || []);
+      setActas(data || []);
     } catch (error) {
-      alert('Error al consultar anteproyectos: ' + error);
+      alert('Error al consultar actas: ' + error);
     }
   }
 
-  async function eliminarCarta(id) {
+  async function eliminarActa(id) {
     const confirmarEnvio = window.confirm(
-      "¿Está seguro que desea eliminar esta carta?"
+      "¿Está seguro que desea eliminar esta acta?"
     );
     if (!confirmarEnvio) return;
 
     try {
       const { error } = await supabase
-        .from('SolicitudCarta')
+        .from('Acta')
         .delete()
-        .eq('id_solicitud', id);
+        .eq('id', id);
       if (error) {
         alert('Error al eliminar carta: ' + error.message);
         return;
       }
 
-      setCartas((prev) => prev.filter((ap) => ap.id !== id));
+      setActas((prev) => prev.filter((ap) => ap.id !== id));
       console.log(`La carta fue eliminada exitosamente.`);
     } catch (error) {
       alert('Error al eliminar carta:' + error);
@@ -127,38 +117,47 @@ const CartasEstudiante = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
-      <HeaderEstudiante title="Solicitud de cartas para empresa" />
+      <HeaderProfesor title="Solicitud de acta de defensa"/>
         <main className="flex-grow p-6">
           <div className="max-w-7xl mx-auto bg-white p-4 rounded shadow">
             <button
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mb-4"
               onClick={() => crearCarta()}
             >
-              Solicitar Carta
+              Solicitar Acta
             </button>
               <table className="w-full border-collapse border">
                 <thead>
                   <tr className="bg-gray-200 border-b">
-                    <th className="p-3 border-r text-left">Empresa</th>
-                    <th className="p-3 border-r text-left">Receptor</th>
+                    <th className="p-3 border-r text-left">Estudiante</th>
+                    <th className="p-3 border-r text-left">Título</th>
+                    <th className="p-3 border-r text-left">Plantilla</th>
                     <th className="p-3 border-r text-left">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {cartas.map((carta) => (
-                    <tr key={carta.id_solicitud} className="border-b hover:bg-gray-50">
-                      <td className="p-3 border-r">{carta.empresa}</td>
-                      <td className="p-3 border-r">{carta.nombre_receptor} {carta.apellidos_receptor}</td>
+                  {actas.map((acta) => (
+                    <tr key={acta.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3 border-r">{acta.Estudiante.Usuario.nombre}</td>
+                      <td className="p-3 border-r">{acta.titulo}</td>
+                      <td className="p-3 border-r">{acta.machote}</td>
                       <td className="p-3 flex space-x-2">
-                          {(carta.idioma === "Español") && (
-                          <PDFDownloadLink document={<Carta solicitud={carta}/>} fileName={`Carta a empresa ${carta.Estudiante.Usuario.nombre}.pdf`}>
+                          {(acta.machote === "Acta de defensa pública") && (
+                          <PDFDownloadLink document={<Defensa solicitud={acta}/>} fileName={`Acta de defensa pública ${acta.Estudiante.Usuario.nombre}.pdf`}>
                           {({loading}) => (loading ? <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Cargando Documento...</button> : <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
                             Descargar
                           </button> )}
                           </PDFDownloadLink>
                           )}
-                          {(carta.idioma === "Ingles") && (
-                          <PDFDownloadLink document={<Letter solicitud={carta}/>} fileName={`Good standing letter ${carta.Estudiante.Usuario.nombre}.pdf`}>
+                          {(acta.machote === "Acta de entrega de informe final") && (
+                          <PDFDownloadLink document={<Entrega solicitud={acta}/>} fileName={`Acta de entrega de informe final ${acta.Estudiante.Usuario.nombre}.pdf`}>
+                          {({loading}) => (loading ? <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Cargando Documento...</button> : <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+                            Descargar
+                          </button> )}
+                          </PDFDownloadLink>
+                          )}
+                          {(acta.machote === "Constancia de defensa pública") && (
+                          <PDFDownloadLink document={<CosntanciaPDF solicitud={acta}/>} fileName={`Constancia de defensa pública ${acta.Estudiante.Usuario.nombre}.pdf`}>
                           {({loading}) => (loading ? <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Cargando Documento...</button> : <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
                             Descargar
                           </button> )}
@@ -166,7 +165,7 @@ const CartasEstudiante = () => {
                           )}
                           <button
                             onClick={() =>
-                              eliminarCarta(carta.id_solicitud)
+                              eliminarActa(acta.id)
                             }
                             className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                           >
@@ -184,4 +183,4 @@ const CartasEstudiante = () => {
   );
 };
 
-export default CartasEstudiante;
+export default Actas;
