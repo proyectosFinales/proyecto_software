@@ -386,6 +386,30 @@ const EstudianteForm = () => {
               Perfeccionamiento activo
             </label>
           </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value=" Empresa Pública"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Empresa pública
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="PYME"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              PYME
+            </label>
+          </div>
         </div>
 
         <div className={styles.formGroup}>
@@ -500,6 +524,18 @@ const EstudianteForm = () => {
                 required
               />
               Puntarenas
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Guanacaste"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              Guanacaste
             </label>
           </div>
         </div>
