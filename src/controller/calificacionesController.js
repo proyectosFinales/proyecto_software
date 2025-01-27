@@ -1,76 +1,108 @@
 import supabase from "../model/supabase";
 
 /**
- * Obtiene el proyecto actual de un Estudiante para un semestre específico.
- * @param {string} estudiante_id - Estudiante ID
- * @param {number} semestre_id - El semestre actual (por ejemplo, 1, 2, etc.)
- * @returns {Object} Objeto con { proyecto_id, profesor_id }, o lanza error si no existe.
+ * Busca el "Estudiante" dado un usuarioId (en la sesión).
+ * Retorna { estudiante_id, estado } o lanza Error si no existe.
  */
-async function obtenerProyectoEstudiante(estudiante_id, semestre_id) {
-  // Ajusta nombre de tabla, columnas, y filtros según tu esquema.
-  const { data, error } = await supabase
-    .from("Proyecto")
-    .select("id, profesor_id")
-    .eq("estudiante_id", estudiante_id)
-    .eq("semestre_id", semestre_id)
+async function obtenerEstudiantePorUsuario(usuarioId) {
+  const { data: stud, error: errStud } = await supabase
+    .from("Estudiante")
+    .select("estudiante_id, estado")
+    .eq("id_usuario", usuarioId)
     .single();
 
-  if (error) {
-    throw new Error("Error al buscar Proyecto para el estudiante: " + error.message);
+  if (errStud) {
+    throw new Error("Error buscando Estudiante: " + errStud.message);
   }
-
-  if (!data) {
-    throw new Error("No se encontró un Proyecto activo para el estudiante en el semestre " + semestre_id);
+  if (!stud) {
+    throw new Error("No se encontró Estudiante para este usuarioId.");
   }
-
-  return {
-    proyecto_id: data.id,
-    profesor_id: data.profesor_id
-  };
+  return stud;
 }
 
 /**
- * Inserta una fila en la tabla "Calificacion", usando los datos del form.
- * @param {Object} formData   - Objeto con la estructura { serviceRatings: {...}, recommendationScore, starRating, additionalComments }
- * @param {string} estudiante_id 
- * @param {number} semestre_id - Semestre actual
+ * Obtiene el proyecto(s) actual(es) de un Estudiante (sin filtrar semestre).
+ * Retorna caso de uso, aquí escogemos el primero.
  */
-export async function calificarProfesor(formData, estudiante_id, semestre_id = 1) {
-  // 1. Buscar Proyecto del estudiante en el semestre actual.
-  const { proyecto_id, profesor_id } = await obtenerProyectoEstudiante(estudiante_id, semestre_id);
+async function obtenerProyectoEstudiante(estudiante_id) {
+  const { data: proys, error: errProy } = await supabase
+    .from("Proyecto")
+    .select("id, profesor_id, estado")
+    .eq("estudiante_id", estudiante_id);
 
-  // 2. Preparar payload para insertar en "Calificacion".
-  // Ajusta los nombres de columnas (comillas o no) según tu esquema real.
+  if (errProy) {
+    throw new Error("Error buscando Proyecto: " + errProy.message);
+  }
+  if (!proys || proys.length === 0) {
+    throw new Error("No se encontró Proyecto para este estudiante.");
+  }
+
+  return proys[0];
+}
+
+/**
+ * Busca el semestre activo en la tabla Semestre (donde activo = true).
+ */
+async function obtenerSemestreActivo() {
+  const { data: semRow, error: sError } = await supabase
+    .from("Semestre")
+    .select("semestre_id, activo")
+    .eq("activo", true)
+    .single();
+
+  if (sError) {
+    throw new Error("Error buscando Semestre activo: " + sError.message);
+  }
+  if (!semRow) {
+    throw new Error("No se encontró un Semestre activo. Verifica la BD.");
+  }
+  return semRow.semestre_id;
+}
+
+/**
+ * Inserta una fila en la tabla "Calificacion".
+ * @param {Object} formData   - { serviceRatings: {...}, recommendationScore, starRating, additionalComments }
+ * @param {string} usuarioId  - ID del usuario (session token)
+ */
+export async function calificarProfesor(formData, usuarioId) {
+  // 1) Buscar Estudiante
+  const { estudiante_id } = await obtenerEstudiantePorUsuario(usuarioId);
+
+  // 2) Buscar primer Proyecto asociado
+  const proyecto = await obtenerProyectoEstudiante(estudiante_id);
+
+  // 3) Buscar semestre activo
+  const semestre_id = await obtenerSemestreActivo();
+
+  // 4) Construir payload con el semestre_id activo
   const payload = {
-    proyecto_id: proyecto_id,
-    profesor_id: profesor_id,
-    estudiante_id: estudiante_id,
-    semestre_id: semestre_id,
+    proyecto_id: proyecto.id,
+    profesor_id: proyecto.profesor_id,
+    estudiante_id,
+    semestre_id,
 
-    // Extrae los puntajes del formData.serviceRatings
-    score_agilidad: formData.serviceRatings.agilidad,
-    score_empatia: formData.serviceRatings.empatia,
-    score_respeto: formData.serviceRatings.respeto,
-    score_comunicacion: formData.serviceRatings.comunicacion,
-    score_aclaracion: formData.serviceRatings.aclaracion,
-    score_respuestas: formData.serviceRatings.respuestas,
-    score_correccion: formData.serviceRatings.correccion,
-    score_explicacion: formData.serviceRatings.explicacion,
+    score_agilidad:          formData.serviceRatings.agilidad,
+    score_empatia:           formData.serviceRatings.empatia,
+    score_respeto:           formData.serviceRatings.respeto,
+    score_comunicacion:      formData.serviceRatings.comunicacion,
+    score_aclaracion:        formData.serviceRatings.aclaracion,
+    score_respuestas:        formData.serviceRatings.respuestas,
+    score_correccion:        formData.serviceRatings.correccion,
+    score_explicacion:       formData.serviceRatings.explicacion,
     score_retroalimentacion: formData.serviceRatings.retroalimentacion,
 
     recomendacion: formData.recommendationScore,
     star_rating: formData.starRating,
     comentarios: formData.additionalComments
-    // created_at y updated_at se pueden manejar con default NOW() en la BD
   };
 
-  // 3. Insertar en la tabla "Calificacion".
+  // 5) Insertar en "Calificacion"
   const { data, error } = await supabase
     .from("Calificacion")
     .insert([ payload ]);
 
   if (error) {
-    throw new Error("Error al insertar Calificacion: " + error.message);
+    throw new Error("Error al insertar la Calificacion: " + error.message);
   }
 
   return data;
