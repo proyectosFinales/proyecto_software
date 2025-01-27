@@ -18,6 +18,7 @@ import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { FaEdit } from "react-icons/fa";
+import Profesor from '../../controller/profesor';
 
 const FormularioCoordinador = () => {
   // Datos del estudiante (read-only)
@@ -179,6 +180,23 @@ const FormularioCoordinador = () => {
     if (!confirmAprobar) return;
 
     try {
+      // Obtener profesores con estudiantes libres
+      const profesoresConEstudiantesLibres = await Profesor.obtenerProfesoresConEstudiantesLibres();
+      if (profesoresConEstudiantesLibres.length === 0) {
+        throw new Error("No hay profesores disponibles con estudiantes libres.");
+      }
+
+      // Seleccionar un profesor aleatorio
+      const profesor = profesoresConEstudiantesLibres[Math.floor(Math.random() * profesoresConEstudiantesLibres.length)];
+
+      // Actualizar estudiantes_libres del profesor seleccionado
+      const { error: updateProfesorError } = await supabase
+        .from('Profesor')
+        .update({ estudiantes_libres: profesor.estudiantes_libres - 1})
+        .eq('profesor_id', profesor.profesor_id);
+      if (updateProfesorError) throw updateProfesorError;
+      
+      // Actualizar estado del anteproyecto
       const { data, error } = await supabase
         .from('Anteproyecto')
         .update({
@@ -188,6 +206,27 @@ const FormularioCoordinador = () => {
         .eq('id', idAnteproyecto)
         .select();
       if (error) throw error;
+
+      // Insertar registro en la tabla Proyecto
+      const { error: insertProyectoError } = await supabase
+        .from('Proyecto')
+        .insert({
+          profesor_id: profesor.profesor_id,
+          estudiante_id: data[0].estudiante_id, // Asegúrate de tener el estudianteId disponible
+          anteproyecto_id: idAnteproyecto,
+          estado: "Aprobado",
+          semestre_id: 1,
+          fecha_inicio: new Date().toISOString()
+        });
+      if (insertProyectoError) throw insertProyectoError;
+
+      // Actualizar campo asesor en la tabla Estudiante
+      const { error: updateEstudianteError } = await supabase
+        .from('Estudiante')
+        .update({ asesor: profesor.profesor_id })
+        .eq('estudiante_id', data[0].estudiante_id); // Asegúrate de tener el estudianteId disponible
+      if (updateEstudianteError) throw updateEstudianteError;
+      
       alert('Anteproyecto actualizado exitosamente (Aprobado).');
       navigate('/anteproyectosCoordinador');
     } catch (error) {
