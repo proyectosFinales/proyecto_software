@@ -45,6 +45,7 @@ const EstudianteForm = () => {
   const [impacto, setImpacto] = useState('');
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
+  const telRegex = /^(\+?506\s?)?[2-9]\d{7}$/;
 
   const navigate = useNavigate();
   const [infoVisible, setInfoVisible] = useState({});
@@ -219,6 +220,18 @@ const EstudianteForm = () => {
     if (!confirmarEnvio) {
       return;
     }
+    if (!telRegex.test(telefonoContacto)) {
+      alert(
+        "El número de teléfono del asesor industrial no cumple con un formato válido. Debe ser 8 dígitos, con o sin prefijo +506."
+      );
+      return;
+    } 
+    if (!telRegex.test(telefonoHR)) {
+      alert(
+        "El número de teléfono del contacto RRHH no cumple con un formato válido. Debe ser 8 dígitos, con o sin prefijo +506."
+      );
+      return;
+    } 
     if (!estudianteId) {
       errorToast("No se encontró un 'estudiante_id' válido. No se puede insertar.");
       return;
@@ -253,7 +266,6 @@ const EstudianteForm = () => {
           impacto: impacto,
           tipo: tipoProyecto,
           departamento: nombreDepartamento,
-          // estado inicial (opcional): "Pendiente"
           estado: 'Pendiente'
         })
         .select();
