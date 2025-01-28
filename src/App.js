@@ -18,6 +18,7 @@ import FormularioEstudiantes from './view/pages/FormularioEstudiante.js';
 import FormularioCarta from './view/pages/FormularioCarta.js';
 import FormularioCoordinador from './view/pages/FormularioCoordinador.js';
 import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante.js';
+import Categorias from './view/pages/Categorias.jsx';
 import CartasEstudiante from './view/pages/CartasEstudiante.js';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador.js';
 import CargarProfesores from './view/pages/CargarProfesores';
@@ -99,6 +100,10 @@ function App() {
         <Route
           path="/darseBaja"
           element={<RutaProtegida element={<Abandonar />} requiredRoles={["3"]} />}
+        />
+        <Route
+          path="/categorias"
+          element={<RutaProtegida element={<Categorias />} requiredRoles={["1"]} />}
         />
         <Route
           path="/asignaciones"
