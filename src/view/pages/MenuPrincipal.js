@@ -15,7 +15,8 @@ const Menu = () => {
     { to: "/citasMenu", icon: "fas fa-calendar", text: "Citas" },
     { to: "/carga-datos", icon: "fas fa-upload", text: "Carga de Datos" },
     { to: "/dashboardMenu", icon: "fas fa-chart-bar", text: "Reportes y Gráficos" },
-    { to: "/permisos-calificaciones", icon: "fas fa-key", text: "Permisos de Calificaciones" }
+    { to: "/permisos-calificaciones", icon: "fas fa-key", text: "Permisos de Calificaciones" },
+    { to: "/categorias", icon: "fas fa-tags", text: "Categorías de profesores" }
   ];
 
   return (
