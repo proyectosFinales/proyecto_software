@@ -11,13 +11,16 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import * as XLSX from 'xlsx';
 import Modal from '../components/Modal';
+import { fetchSemestres } from '../../controller/Semestre';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, ArcElement);
 
 const DashboardEstudiantes = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selectedProfesor, setSelectedProfesor] = useState('');
+  const [selectedSemestre, setSelectedSemestre] = useState('');
   const [profesores, setProfesores] = useState([]);
+  const [semestres, setSemestres] = useState([]);
   const [chartData, setChartData] = useState({});
   const [estudiantes, setEstudiantes] = useState([]);
   const [modal, setModal] = useState(false);
@@ -47,12 +50,19 @@ const DashboardEstudiantes = () => {
 
     fetchProfesores();
     fetchEstudiantes();
+    fetchSemestres().then(data => {
+      setSemestres([{value: '', label: 'Todos los semestres'}, ...data.map(semestre => ({
+        value: semestre.semestre_id,
+        label: semestre.nombre
+      }))])}).catch(console.error);
   }, []);
 
   useEffect(() => {
-    const data = selectedProfesor
-      ? estudiantes.filter(estudiante => estudiante.asesor === selectedProfesor)
-      : estudiantes;
+    const data = estudiantes.filter(estudiante => {
+      const matchesProfesor = selectedProfesor ? estudiante.asesor === selectedProfesor : true;
+      const matchesSemestre = selectedSemestre ? estudiante.semestre_id == selectedSemestre : true;
+      return matchesProfesor && matchesSemestre;
+    });
 
     const estadoCounts = {
       aprobado: 0,
@@ -92,11 +102,7 @@ const DashboardEstudiantes = () => {
       ],
     });
     setFilteredEstudiantes(data);
-  }, [selectedProfesor, estudiantes]);
-
-  const handleProfesorChange = (e) => {
-    setSelectedProfesor(e.target.value);
-  };
+  }, [selectedProfesor, selectedSemestre, estudiantes]);
 
   const handleDownloadClick = () => {
     console.log('Download clicked');
@@ -140,15 +146,27 @@ const DashboardEstudiantes = () => {
       <SettingsCoordinador show={isMenuOpen} />
       <div className="content-container">
         <div className="filters-container flex justify-between"> 
-          <div className="filter-item">
-            <label htmlFor="profesor">Profesor:</label>
-            <select id="profesor" value={selectedProfesor} onChange={handleProfesorChange}>
-              {profesores.map((profesor) => (
-                <option key={profesor.value} value={profesor.value}>
-                  {profesor.label}
-                </option>
-              ))}
-            </select>
+          <div className="flex gap-4">
+            <div className="filter-item">
+              <label htmlFor="profesor">Profesor:</label>
+              <select id="profesor" value={selectedProfesor} onChange={(e) => setSelectedProfesor(e.target.value)}>
+                {profesores.map((profesor) => (
+                  <option key={profesor.value} value={profesor.value}>
+                    {profesor.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="filter-item">
+              <label htmlFor="semestre">Semestre:</label>
+              <select id="semestre" value={selectedSemestre} onChange={(e) => setSelectedSemestre(e.target.value)} >
+                {semestres.map((semestre) => (
+                  <option key={semestre.value} value={semestre.value}>
+                    {semestre.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <button className="btn btn-primary self-center" onClick={handleDownloadClick}>Descargar Reporte</button>
         </div>
