@@ -125,6 +125,8 @@ function EdicionAsignacionProyectos() {
           prof.profesor_id === profesorId ? { ...prof, original: {...prof.original, estudiantesLibres: prof.original.estudiantesLibres - 1} } : prof
         )
       );
+
+      alert("Proyecto asignado exitosamente");
     } catch (err) {
       console.error("handleAssign error:", err);
     }
@@ -168,6 +170,8 @@ function EdicionAsignacionProyectos() {
           prof.profesor_id === profesorId ? { ...prof, estudiantesLibres: prof.estudiantesLibres + 1 } : prof
         )
       );
+      
+      alert("Proyecto desasignado exitosamente");
     } catch (err) {
       console.error("handleUnassign error:", err);
       alert("Error al desasignar el proyecto");
