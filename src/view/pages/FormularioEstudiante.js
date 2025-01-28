@@ -247,12 +247,6 @@ const EstudianteForm = () => {
       const empresaCount = await consultarEmpresas();
       const contactoCount = await consultarContactos(nombreAsesor);
       const rhCount = await consultarContactos(nombreHR);
-      if(actividadEmpresa == "Otras..."){
-        setActivity(otra);
-      }
-      else{
-        setActivity(actividadEmpresa);
-      }
       if(empresaCount == "empty"){
         await insertarEmpresa();
       }
@@ -296,6 +290,15 @@ const EstudianteForm = () => {
       errorToast('Error al insertar anteproyecto: ' + err.message);
     }
   }
+
+  const handleActividadChange = (e) => {
+    setActividadEmpresa(e.target.value);
+    setActivity(e.target.value);
+  };
+
+  const handleOtroChange = (e) => {
+    setActivity(e.target.value);
+  };
 
   const handleGoBack = () => {
     navigate(-1); // Navega a la página anterior
@@ -442,7 +445,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Retail"
-                onChange={(e) => setActividadEmpresa(e.target.value)}
+                onChange={(e) => handleActividadChange}
                 required
               />
               Retail
@@ -454,7 +457,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Servicio financiero"
-                onChange={(e) => setActividadEmpresa(e.target.value)}
+                onChange={handleActividadChange}
                 required
               />
               Servicio financiero
@@ -466,7 +469,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Manufactura de alimentos"
-                onChange={(e) => setActividadEmpresa(e.target.value)}
+                onChange={handleActividadChange}
                 required
               />
               Manufactura de alimentos
@@ -478,7 +481,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Manufactura médica"
-                onChange={(e) => setActividadEmpresa(e.target.value)}
+                onChange={handleActividadChange}
                 required
               />
               Manufactura médica
@@ -490,7 +493,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Manufactura electrónica"
-                onChange={(e) => setActividadEmpresa(e.target.value)}
+                onChange={handleActividadChange}
                 required
               />
               Manufactura electrónica
@@ -501,22 +504,22 @@ const EstudianteForm = () => {
               <input
                 type="radio"
                 name="actividadEmpresa"
-                value="Otras..."
-                onChange={(e) => setActividadEmpresa(e.target.value)}
+                value="Otras"
+                onChange={handleActividadChange}
                 required
               />
-              Otros...
+              Otras...
             </label>
           </div>
         </div>
 
-        {(actividadEmpresa.estado === "Otras...") && (
+        {(actividadEmpresa === "Otras") && (
           <div className={styles.formGroup}>
             <label>Ingrese la actividad: *</label>
             <input
               type="text"
-              value={nombreEmpresa}
-              onChange={(e) => setOtra(e.target.value)}
+              value={activity}
+              onChange={handleOtroChange}
               required
             />
           </div>
