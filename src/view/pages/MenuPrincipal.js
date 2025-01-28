@@ -8,7 +8,7 @@ const Menu = () => {
 
   const menuItems = [
     { to: "/anteproyectosCoordinador", icon: "fas fa-folder", text: "Anteproyectos" },
-    { to: "/asignaciones", icon: "fas fa-users", text: "Asignaciones" },
+    { to: "/asignaciones/manual", icon: "fas fa-users", text: "Asignaciones" },
     { to: "/aprobarProyectos", icon: "fas fa-check-square", text: "Proyectos" },
     { to: "/gestion-perfiles", icon: "fas fa-user-cog", text: "Gestión de Perfiles" },
     { to: "/empresas", icon: "fas fa-building", text: "Empresas" },
