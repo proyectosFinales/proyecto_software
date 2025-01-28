@@ -19,7 +19,11 @@ export async function getUserInfo(id) {
       telefono,
       Profesor:Profesor!Profesor_id_usuario_fkey (
         profesor_id,
-        cantidad_estudiantes
+        cantidad_estudiantes,
+        categoria_id,
+        Categoria: categoria_id (
+          nombre
+        )
       ),
       Estudiante:Estudiante!Estudiante_id_usuario_fkey (
         estudiante_id,
@@ -187,6 +191,7 @@ export async function updateUserInfo(userData) {
       const { error: errorProf } = await supabase
         .from("Profesor")
         .update({
+          categoria_id: userData.categoria_id
           // Ejemplo: no tocamos "cantidad_estudiantes"
           // ni "id_usuario" (ya está asociado)
         })
