@@ -27,7 +27,9 @@ const EstudianteForm = () => {
 
   // Datos de la empresa y anteproyecto a crear
   const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [otra, setOtra] = useState('');
   const [actividadEmpresa, setActividadEmpresa] = useState('');
+  const [activity, setActivity] = useState('');
   const [distritoEmpresa, setDistritoEmpresa] = useState('');
   const [cantonEmpresa, setCantonEmpresa] = useState('');
   const [provinciaEmpresa, setProvinciaEmpresa] = useState('');
@@ -220,6 +222,10 @@ const EstudianteForm = () => {
     if (!confirmarEnvio) {
       return;
     }
+    if(actividadEmpresa == "Otras..." && otra == ''){
+      alert("Debe ingresar la actividad de la empresa");
+      return;
+    }
     if (!telRegex.test(telefonoContacto)) {
       alert(
         "El número de teléfono del asesor industrial no cumple con un formato válido. Debe ser 8 dígitos, con o sin prefijo +506."
@@ -259,7 +265,7 @@ const EstudianteForm = () => {
         .insert({
           estudiante_id: estudianteId,      // fk
           empresa_id: empresID,
-          actividad: actividadEmpresa,
+          actividad: activity,
           contexto: contexto,
           justificacion: justificacion,
           sintomas: sintomas,
@@ -284,6 +290,15 @@ const EstudianteForm = () => {
       errorToast('Error al insertar anteproyecto: ' + err.message);
     }
   }
+
+  const handleActividadChange = (e) => {
+    setActividadEmpresa(e.target.value);
+    setActivity(e.target.value);
+  };
+
+  const handleOtroChange = (e) => {
+    setActivity(e.target.value);
+  };
 
   const handleGoBack = () => {
     navigate(-1); // Navega a la página anterior
@@ -386,6 +401,30 @@ const EstudianteForm = () => {
               Perfeccionamiento activo
             </label>
           </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="Empresa Pública"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Empresa pública
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="PYME"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              PYME
+            </label>
+          </div>
         </div>
 
         <div className={styles.formGroup}>
@@ -400,13 +439,91 @@ const EstudianteForm = () => {
 
         <div className={styles.formGroup}>
           <label>8. Actividad de la empresa: *</label>
-          <input
-            type="text"
-            value={actividadEmpresa}
-            onChange={(e) => setActividadEmpresa(e.target.value)}
-            required
-          />
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Retail"
+                onChange={(e) => handleActividadChange}
+                required
+              />
+              Retail
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Servicio financiero"
+                onChange={handleActividadChange}
+                required
+              />
+              Servicio financiero
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura de alimentos"
+                onChange={handleActividadChange}
+                required
+              />
+              Manufactura de alimentos
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura médica"
+                onChange={handleActividadChange}
+                required
+              />
+              Manufactura médica
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura electrónica"
+                onChange={handleActividadChange}
+                required
+              />
+              Manufactura electrónica
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Otras"
+                onChange={handleActividadChange}
+                required
+              />
+              Otras...
+            </label>
+          </div>
         </div>
+
+        {(actividadEmpresa === "Otras") && (
+          <div className={styles.formGroup}>
+            <label>Ingrese la actividad: *</label>
+            <input
+              type="text"
+              value={activity}
+              onChange={handleOtroChange}
+              required
+            />
+          </div>
+        )}
 
         <div className={styles.formGroup}>
           <label>9. Ubicación de la empresa (Distrito): *</label>
@@ -500,6 +617,18 @@ const EstudianteForm = () => {
                 required
               />
               Puntarenas
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Guanacaste"
+                onChange={(e) => setProvinciaEmpresa(e.target.value)}
+                required
+              />
+              Guanacaste
             </label>
           </div>
         </div>
@@ -724,6 +853,17 @@ const EstudianteForm = () => {
                 onChange={(e) => setTipoProyecto(e.target.value)}
               />
               Aplicado a PYME
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoProyecto"
+                value="Aplicado a PYME"
+                onChange={(e) => setTipoProyecto(e.target.value)}
+              />
+              Acción Social
             </label>
           </div>
         </div>

@@ -82,7 +82,7 @@ const EstudianteForm = () => {
       const { data, error } = await supabase
         .from('SolicitudCarta')
         .insert({
-          id_estudiante: estudianteId,
+          estudiante_id: estudianteId,
           nombre_receptor: nombreR,
           puesto_receptor: puestoR,
           empresa: nombreEmpresa,
