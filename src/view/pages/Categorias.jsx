@@ -10,7 +10,6 @@ const GestionCategorias = () => {
 
   useEffect(() => {
     fetchCategorias().then(data => {
-      console.log(data);
       setCategorias(data);
     }).catch(console.error);
   }, []);
