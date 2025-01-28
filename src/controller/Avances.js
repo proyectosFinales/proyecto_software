@@ -1,13 +1,42 @@
 import supabase from '../model/supabase';
 
 export const fetchAvances = async (proyectoId) => {
-  const { data, error } = await supabase
+  const { data: avances, error: avancesError } = await supabase
     .from('Avance')
     .select('*')
     .eq('proyecto_id', proyectoId)
     .order('num_avance', { ascending: true });
-  if (error) throw error;
-  return data;
+  if (avancesError) throw avancesError;
+  
+  const updatedAvances = await Promise.all(avances.map(async (avance) => {
+    if (avance.num_avance <= 3 && avance.estado === 'Pendiente') {
+      const { data: calendario, error: calendarioError } = await supabase
+        .from('Calendario')
+        .select('fecha_fin')
+        .eq('nombre', `Entrega Avance ${avance.num_avance}`);
+
+      if (calendarioError) throw calendarioError;
+
+      if(calendario && calendario.length > 0) {
+        const fechaFin = new Date(calendario[0].fecha_fin);
+        const fechaActual = new Date();
+
+        if (fechaActual > fechaFin) {
+          avance.estado = 'Atrasado';
+
+          try {
+            updateAvance(avance.id, 'Atrasado');
+          } catch (error) {
+            throw error;
+          }
+        }
+      }
+    }
+    return avance;
+  }));
+
+  return updatedAvances;
+
 };
 
 export const updateAvance = async (avanceId, nuevoEstado) => {
