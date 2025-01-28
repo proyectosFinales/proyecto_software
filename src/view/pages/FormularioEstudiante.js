@@ -27,7 +27,9 @@ const EstudianteForm = () => {
 
   // Datos de la empresa y anteproyecto a crear
   const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [otra, setOtra] = useState('');
   const [actividadEmpresa, setActividadEmpresa] = useState('');
+  const [activity, setActivity] = useState('');
   const [distritoEmpresa, setDistritoEmpresa] = useState('');
   const [cantonEmpresa, setCantonEmpresa] = useState('');
   const [provinciaEmpresa, setProvinciaEmpresa] = useState('');
@@ -220,6 +222,10 @@ const EstudianteForm = () => {
     if (!confirmarEnvio) {
       return;
     }
+    if(actividadEmpresa == "Otras..." && otra == ''){
+      alert("Debe ingresar la actividad de la empresa");
+      return;
+    }
     if (!telRegex.test(telefonoContacto)) {
       alert(
         "El número de teléfono del asesor industrial no cumple con un formato válido. Debe ser 8 dígitos, con o sin prefijo +506."
@@ -241,6 +247,12 @@ const EstudianteForm = () => {
       const empresaCount = await consultarEmpresas();
       const contactoCount = await consultarContactos(nombreAsesor);
       const rhCount = await consultarContactos(nombreHR);
+      if(actividadEmpresa == "Otras..."){
+        setActivity(otra);
+      }
+      else{
+        setActivity(actividadEmpresa);
+      }
       if(empresaCount == "empty"){
         await insertarEmpresa();
       }
@@ -259,7 +271,7 @@ const EstudianteForm = () => {
         .insert({
           estudiante_id: estudianteId,      // fk
           empresa_id: empresID,
-          actividad: actividadEmpresa,
+          actividad: activity,
           contexto: contexto,
           justificacion: justificacion,
           sintomas: sintomas,
@@ -391,7 +403,7 @@ const EstudianteForm = () => {
               <input
                 type="radio"
                 name="tipoEmpresa"
-                value=" Empresa Pública"
+                value="Empresa Pública"
                 onChange={(e) => setTipoEmpresa(e.target.value)}
                 required
               />
@@ -424,13 +436,91 @@ const EstudianteForm = () => {
 
         <div className={styles.formGroup}>
           <label>8. Actividad de la empresa: *</label>
-          <input
-            type="text"
-            value={actividadEmpresa}
-            onChange={(e) => setActividadEmpresa(e.target.value)}
-            required
-          />
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Retail"
+                onChange={(e) => setActividadEmpresa(e.target.value)}
+                required
+              />
+              Retail
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Servicio financiero"
+                onChange={(e) => setActividadEmpresa(e.target.value)}
+                required
+              />
+              Servicio financiero
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura de alimentos"
+                onChange={(e) => setActividadEmpresa(e.target.value)}
+                required
+              />
+              Manufactura de alimentos
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura médica"
+                onChange={(e) => setActividadEmpresa(e.target.value)}
+                required
+              />
+              Manufactura médica
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura electrónica"
+                onChange={(e) => setActividadEmpresa(e.target.value)}
+                required
+              />
+              Manufactura electrónica
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Otras..."
+                onChange={(e) => setActividadEmpresa(e.target.value)}
+                required
+              />
+              Otros...
+            </label>
+          </div>
         </div>
+
+        {(actividadEmpresa.estado === "Otras...") && (
+          <div className={styles.formGroup}>
+            <label>Ingrese la actividad: *</label>
+            <input
+              type="text"
+              value={nombreEmpresa}
+              onChange={(e) => setOtra(e.target.value)}
+              required
+            />
+          </div>
+        )}
 
         <div className={styles.formGroup}>
           <label>9. Ubicación de la empresa (Distrito): *</label>
@@ -760,6 +850,17 @@ const EstudianteForm = () => {
                 onChange={(e) => setTipoProyecto(e.target.value)}
               />
               Aplicado a PYME
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoProyecto"
+                value="Aplicado a PYME"
+                onChange={(e) => setTipoProyecto(e.target.value)}
+              />
+              Acción Social
             </label>
           </div>
         </div>
