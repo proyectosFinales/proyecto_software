@@ -3,68 +3,48 @@ import { useParams } from 'react-router-dom';
 import Header from '../components/HeaderProfesor';
 import Footer from '../components/Footer';
 import '../styles/Calendario.css';
+import { fetchAvances, updateAvance, addAvance, deleteAvance } from '../../controller/Avances';
 
 const Avances = () => { 
   const { proyectoId } = useParams();
-  const [avances, setAvances] = useState([{id: 1, numero: 1, estado: 'pendiente'}, {id: 2, numero: 2, estado: 'aprobado'}]);
-  const [selectedEstado, setSelectedEstado] = useState('aprobado');
+  const [avances, setAvances] = useState([]);
+  const [selectedEstado, setSelectedEstado] = useState('Aprobado');
+
+  useEffect(() => {
+    fetchAvances(proyectoId)
+      .then(avances => setAvances(avances))
+      .catch(console.error);
+  }, [proyectoId]);
 
   const handleEstadoChange = async (avanceId, nuevoEstado) => {
-    /*try {
-      const { error } = await supabase
-        .from('Avance')
-        .update({ estado: nuevoEstado })
-        .eq('id', avanceId);
-
-      if (error) {
-        console.error('Error updating Avance:', error);
-        return;
-      }
-
-      setAvances(avances.map(avance => 
-        avance.id === avanceId ? { ...avance, estado: nuevoEstado } : avance
-      ));
-    } catch (error) {
-      console.error('Error:', error);
-    }*/
+    updateAvance(avanceId, nuevoEstado).then(() => {
+      setAvances(avances.map(avance => avance.id === avanceId ? { ...avance, estado: nuevoEstado } : avance));
+      alert('Avance actualizado correctamente');
+    }).catch(err => {
+      console.error(err);
+      alert('Ocurrió un error al actualizar el avance');
+    });
   };
 
   const handleAgregarAvance = async () => {
-    /*try {
-      const { data: profesorData, error: profesorError } = await supabase
-        .from('Profesor')
-        .select('profesor_id')
-        .eq('user_id', userId)
-        .single();
+    addAvance(selectedEstado, proyectoId).then(nuevoAvance => {
+      setAvances([...avances, nuevoAvance]);
+      alert('Avance agregado correctamente');
+    }).catch(err => {
+      console.error(err);
+      alert('Ocurrió un error al agregar el avance');
+    });
+  };
 
-      if (profesorError) {
-        console.error('Error fetching Profesor:', profesorError);
-        return;
-      }
-
-      const profesorId = profesorData.profesor_id;
-
-      const { data: nuevoAvanceData, error: nuevoAvanceError } = await supabase
-        .from('Avance')
-        .insert({
-          descripcion: nuevoAvance,
-          estado: selectedEstado,
-          profesor_id: profesorId,
-          estudiante_id: null // Asegúrate de asignar el estudiante_id correcto
-        })
-        .single();
-
-      if (nuevoAvanceError) {
-        console.error('Error adding Avance:', nuevoAvanceError);
-        return;
-      }
-
-      setAvances([...avances, nuevoAvanceData]);
-      setNuevoAvance('');
-      setSelectedEstado('aprobado');
-    } catch (error) {
-      console.error('Error:', error);
-    }*/
+  const handleEliminarUltimoAvance = async () => {
+    const ultimoAvance = avances[avances.length - 1];
+    deleteAvance(ultimoAvance.id).then(() => {
+      setAvances(avances.slice(0, -1));
+      alert('Avance eliminado correctamente');
+    }).catch(err => {
+      console.error(err);
+      alert('Error al borrar el avance');
+    });
   };
 
   return (
@@ -88,13 +68,13 @@ const Avances = () => {
                   <td className="px-4 py-2 border-b">
                     <button
                       className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2"
-                      onClick={() => handleEstadoChange(avance.id, 'aprobado')}
+                      onClick={() => handleEstadoChange(avance.id, 'Aprobado')}
                     >
                       Aprobar
                     </button>
                     <button
                       className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                      onClick={() => handleEstadoChange(avance.id, 'reprobado')}
+                      onClick={() => handleEstadoChange(avance.id, 'Reprobado')}
                     >
                       Reprobar
                     </button>
@@ -113,16 +93,26 @@ const Avances = () => {
               value={selectedEstado}
               onChange={(e) => setSelectedEstado(e.target.value)}
             >
-              <option value="aprobado">Aprobado</option>
-              <option value="reprobado">Reprobado</option>
+              <option value="Aprobado">Aprobado</option>
+              <option value="Reprobado">Reprobado</option>
             </select>
           </div>
-          <button
-            className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            onClick={handleAgregarAvance}
-          >
-            Agregar Avance
-          </button>
+          <div className="flex gap-4">
+            <button
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              onClick={handleAgregarAvance}
+            >
+              Agregar Avance
+            </button>
+            {avances.length > 3 && (
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                onClick={handleEliminarUltimoAvance}
+              >
+                Eliminar Último Avance
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <Footer />
