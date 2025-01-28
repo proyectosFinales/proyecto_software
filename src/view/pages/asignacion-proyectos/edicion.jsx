@@ -5,17 +5,14 @@
  */
 import React, { useEffect, useState, useRef } from "react";
 import Anteproyecto from "../../../controller/anteproyecto";
-import Profesor from "../../../controller/profesor";
-import { generarReporteAsignaciones } from "../../../controller/asignacion.js";
 import Button from "../../components/button";
-import Layout from "../../components/layout";
-import styles from "../../styles/table.module.css";
 import Modal from "../../components/modal.jsx";
 import { FloatInput } from "../../components/input.jsx";
 import { errorToast, successToast } from "../../components/toast";
 import supabase from "../../../model/supabase";
 import HeaderCoordinador from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
+import Profesor from "../../../controller/profesor.js";
 
 /**
  * EdicionAsignacionProyectos
@@ -28,6 +25,7 @@ import Footer from "../../components/Footer";
 function EdicionAsignacionProyectos() {
   const [proyectos, setProyectos] = useState([]);
   const [profesores, setProfesores] = useState([]);
+  const [filteredProfesores, setFilteredProfesores] = useState([]);
   const [loading, setLoading] = useState(true);
 
   /**
@@ -36,7 +34,6 @@ function EdicionAsignacionProyectos() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.debug("Fetching Proyectos...");
         const { data: proyectosData, error: proyectosError } = await supabase
           .from("Proyecto")
           .select(`
@@ -47,13 +44,20 @@ function EdicionAsignacionProyectos() {
             estado,
             fecha_inicio,
             fecha_fin,
-            -- optional, if you want to join with Estudiante->Usuario
             Estudiante:estudiante_id (
               estudiante_id,
+              carnet,
               Usuario:id_usuario (
                 id,
                 nombre,
                 correo
+              )
+            ),
+            Anteproyecto:anteproyecto_id (
+              departamento,
+              empresa_id,
+              Empresa: empresa_id (
+                nombre
               )
             )
           `);
@@ -63,22 +67,10 @@ function EdicionAsignacionProyectos() {
           return;
         }
 
-        console.debug("Fetching Profesores...");
-        const { data: profesoresData, error: profesoresError } = await supabase
-          .from("Profesor")
-          .select(`
-            profesor_id,
-            id_usuario,
-            cantidad_estudiantes
-          `);
-
-        if (profesoresError) {
-          console.error("Error fetching Profesores:", profesoresError);
-          return;
-        }
-
-        setProyectos(proyectosData || []);
-        setProfesores(profesoresData || []);
+        setProyectos(proyectosData);
+        Profesor.obtenerTodos().then((profesoresData) => {
+          setProfesores(profesoresData);
+        }).catch(console.error);
       } catch (error) {
         console.error("Unexpected error:", error);
       } finally {
@@ -89,29 +81,50 @@ function EdicionAsignacionProyectos() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    setFilteredProfesores(profesores.filter((prof) => prof.original.estudiantesLibres > 0));
+  }, [profesores]);
+
   /**
    * Asigna un profesor a un proyecto (UPDATE Proyecto.profesor_id).
    * @param {string} proyectoId
    * @param {string} profesorId
    */
-  const handleAssign = async (proyectoId, profesorId) => {
+  const handleAssign = async (proyectoId, profesorId, estudianteId) => {
+    if(!profesorId) return;
     try {
-      console.debug(`Assigning professor_id = ${profesorId} to proyecto_id = ${proyectoId}`);
-      const { error } = await supabase
+      const { proyectoError } = await supabase
         .from("Proyecto")
         .update({ profesor_id: profesorId })
         .eq("id", proyectoId);
 
-      if (error) {
-        console.error("Error updating Proyecto:", error);
-      } else {
-        // On success, refresh the local state
-        setProyectos((prevProyectos) =>
-          prevProyectos.map((proj) =>
-            proj.id === proyectoId ? { ...proj, profesor_id: profesorId } : proj
-          )
-        );
-      }
+      if (proyectoError) throw proyectoError;
+
+      const { estudianteError } = await supabase
+        .from("Estudiante")
+        .update({ asesor: profesorId })
+        .eq("estudiante_id", estudianteId);
+      
+      if (estudianteError) throw estudianteError;
+
+      const { profesorError } = await supabase
+        .from("Profesor")
+        .update({ estudiantes_libres: profesores.find(p => p.profesor_id === profesorId).original.estudiantesLibres - 1 })
+        .eq("profesor_id", profesorId);
+      
+      if (profesorError) throw profesorError;
+
+      setProyectos((prevProyectos) =>
+        prevProyectos.map((proj) =>
+          proj.id === proyectoId ? { ...proj, profesor_id: profesorId } : proj
+        )
+      );
+
+      setProfesores((prevProfesores) =>
+        prevProfesores.map((prof) =>
+          prof.profesor_id === profesorId ? { ...prof, original: {...prof.original, estudiantesLibres: prof.original.estudiantesLibres - 1} } : prof
+        )
+      );
     } catch (err) {
       console.error("handleAssign error:", err);
     }
@@ -121,26 +134,43 @@ function EdicionAsignacionProyectos() {
    * Desasigna el profesor de un proyecto (UPDATE Proyecto.profesor_id = null).
    * @param {string} proyectoId
    */
-  const handleUnassign = async (proyectoId) => {
+  const handleUnassign = async (proyectoId, estudianteId, profesorId) => {
     try {
-      console.debug(`Unassigning professor for proyecto_id = ${proyectoId}`);
-      const { error } = await supabase
+      const { error : proyectoError } = await supabase
         .from("Proyecto")
         .update({ profesor_id: null })
         .eq("id", proyectoId);
 
-      if (error) {
-        console.error("Error unassigning Proyecto:", error);
-      } else {
-        // On success, refresh the local state
-        setProyectos((prevProyectos) =>
-          prevProyectos.map((proj) =>
-            proj.id === proyectoId ? { ...proj, profesor_id: null } : proj
-          )
-        );
-      }
+      if (proyectoError) throw proyectoError;
+
+      const { estudianteError } = await supabase
+        .from("Estudiante")
+        .update({ asesor: null }) 
+        .eq("estudiante_id", estudianteId);
+      
+      if (estudianteError) throw estudianteError;
+
+      const { profesorError } = await supabase
+        .from("Profesor")
+        .update({ estudiantes_libres: profesores.find(p => p.profesor_id === profesorId).original.estudiantesLibres + 1 })
+        .eq("profesor_id", profesorId);
+      
+      if (profesorError) throw profesorError;
+
+      setProyectos((prevProyectos) =>
+        prevProyectos.map((proj) =>
+          proj.id === proyectoId ? { ...proj, profesor_id: null } : proj
+        )
+      );
+
+      setProfesores((prevProfesores) =>
+        prevProfesores.map((prof) =>
+          prof.profesor_id === profesorId ? { ...prof, estudiantesLibres: prof.estudiantesLibres + 1 } : prof
+        )
+      );
     } catch (err) {
       console.error("handleUnassign error:", err);
+      alert("Error al desasignar el proyecto");
     }
   };
 
@@ -168,9 +198,11 @@ function EdicionAsignacionProyectos() {
             <table className="min-w-full bg-white shadow rounded">
               <thead className="bg-gray-200 text-gray-700">
                 <tr>
-                  <th className="p-3 text-left">Proyecto ID</th>
-                  <th className="p-3 text-left">Estado</th>
-                  <th className="p-3 text-left">Profesor Asignado</th>
+                  <th className="p-3 text-left">Estudiante</th>
+                  <th className="p-3 text-left">Carnet</th>
+                  <th className="p-3 text-left">Empresa</th>
+                  <th className="p-3 text-left">Departamento</th>
+                  <th className="p-3 text-left">Profesor</th>
                   <th className="p-3 text-left">Acciones</th>
                 </tr>
               </thead>
@@ -182,30 +214,43 @@ function EdicionAsignacionProyectos() {
                   return (
                     <tr key={proyecto.id} className="border-b">
                       <td className="p-3 text-sm text-gray-700">
-                        {proyecto.id}
+                        {proyecto.Estudiante.Usuario.nombre}
                       </td>
                       <td className="p-3 text-sm text-gray-700">
-                        {proyecto.estado}
+                        {proyecto.Estudiante.carnet}
                       </td>
                       <td className="p-3 text-sm text-gray-700">
-                        {assignedProf ? assignedProf.profesor_id : "N/A"}
+                        {proyecto.Anteproyecto.Empresa.nombre}
+                      </td>
+                      <td className="p-3 text-sm text-gray-700">
+                        {proyecto.Anteproyecto.departamento}
+                      </td>
+                      <td className="p-3 text-sm text-gray-700">
+                        {assignedProf ? assignedProf.nombre : "N/A"}
                       </td>
                       <td className="p-3 text-sm text-gray-700 space-x-2">
                         {/* Profesor Selection Dropdown */}
                         <select
                           className="border rounded px-2 py-1"
                           value={proyecto.profesor_id || ""}
-                          onChange={(e) => handleAssign(proyecto.id, e.target.value)}
+                          onChange={(e) => handleAssign(proyecto.id, e.target.value, proyecto.estudiante_id)}
                         >
                           <option value="">-- Asignar profesor --</option>
-                          {profesores.map((prof) => (
-                            <option key={prof.profesor_id} value={prof.profesor_id}>
-                              {prof.profesor_id}
+                          {assignedProf && (
+                            <option key={assignedProf.profesor_id} value={assignedProf.profesor_id}>
+                              {assignedProf.nombre}
                             </option>
-                          ))}
+                          )}
+                          {filteredProfesores
+                            .filter((prof) => prof.profesor_id !== proyecto.profesor_id)
+                            .map((prof) => (
+                              <option key={prof.profesor_id} value={prof.profesor_id}>
+                                {prof.nombre}
+                              </option>
+                            ))}
                         </select>
                         <button
-                          onClick={() => handleUnassign(proyecto.id)}
+                          onClick={() => handleUnassign(proyecto.id, proyecto.estudiante_id, proyecto.profesor_id)}
                           disabled={!proyecto.profesor_id}
                           className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                         >
