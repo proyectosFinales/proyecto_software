@@ -61,7 +61,7 @@ const EditarPerfil = () => {
   useEffect(() => {
     const obtenerInfoUsuario = async () => {
       try {
-        console.log(data);
+        const data = await getUserInfo(id);
         // data vendrá con { 
         //   id, correo, contrasena, rol, sede, telefono, nombre,
         //   Profesor: { profesor_id, cantidad_estudiantes },
