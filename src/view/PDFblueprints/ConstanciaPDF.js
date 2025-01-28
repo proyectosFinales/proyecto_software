@@ -99,7 +99,6 @@ const ConstanciaPDF = (solicitud) => {
         setTitulo(solicitud.solicitud.titulo);
         setPersona1(solicitud.solicitud.datos.persona1);
         setPersona2(solicitud.solicitud.datos.persona2);
-        setSede(solicitud.solicitud.Profesor.Usuario.sede);
         setSemestre(solicitud.solicitud.semestre);
         setEmpresa(solicitud.solicitud.Estudiante.Anteproyecto[0].Empresa.nombre);
         if(solicitud.solicitud.datos.aprobacion == "Públicos"){
@@ -109,6 +108,18 @@ const ConstanciaPDF = (solicitud) => {
         else{
           setPublico(" ");
           setConfidencial("x");
+        }
+        if(solicitud.solicitud.Profesor.Usuario.sede == "Central Cartago"){
+          setSede("Cartago");
+        }
+        else if(solicitud.solicitud.Profesor.Usuario.sede == "Local San José"){
+          setSede("San José");
+        }
+        else if(solicitud.solicitud.Profesor.Usuario.sede == "Centro Académico de Limón"){
+          setSede("Limón");
+        }
+        else{
+          setSede("Alajuela");
         }
     }
 

@@ -48,6 +48,7 @@ const Carta = (solicitud) => {
     const [year, setYear] = useState('');
     const [carnet, setCarnet] = useState('');
     const [estudiante, setEstudiante] = useState('');
+    const [provincia, setProvincia] = useState('');
 
     useEffect(() => {
         setData();
@@ -74,13 +75,25 @@ const Carta = (solicitud) => {
         else{
             setGeneroR("Estimada");
         }
+        if(solicitud.solicitud.Estudiante.Usuario.sede == "Central Cartago"){
+            setProvincia("Cartago");
+        }
+        else if(solicitud.solicitud.Estudiante.Usuario.sede == "Local San José"){
+            setProvincia("San José");
+        }
+        else if(solicitud.solicitud.Estudiante.Usuario.sede == "Centro Académico de Limón"){
+            setProvincia("Limón");
+        }
+        else{
+            setProvincia("Alajuela");
+        }
     }
 
     return(
     <Document>
         <Page style={styles.body}>
         <Text style={styles.date}>
-            {solicitud.solicitud.Estudiante.Usuario.sede}, {day} de {month} de {year}. 
+            {provincia}, {day} de {month} de {year}. 
         </Text>
         <Text style={styles.text}>
             {solicitud.solicitud.genero_receptor}{`\n`}

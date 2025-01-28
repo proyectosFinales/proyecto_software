@@ -98,7 +98,6 @@ const Carta = (solicitud) => {
         setNota(solicitud.solicitud.datos.nota);
         setPersona1(solicitud.solicitud.datos.persona1);
         setPersona2(solicitud.solicitud.datos.persona2);
-        setSede(solicitud.solicitud.Profesor.Usuario.sede);
         if(solicitud.solicitud.datos.aprobacion == "Aprobado"){
             setAprobado("x");
             setCorreccion(" ");
@@ -119,6 +118,18 @@ const Carta = (solicitud) => {
         }
         else{
           setRazon(solicitud.solicitud.datos.razon);
+        }
+        if(solicitud.solicitud.Profesor.Usuario.sede == "Central Cartago"){
+          setSede("Cartago");
+        }
+        else if(solicitud.solicitud.Profesor.Usuario.sede == "Local San José"){
+          setSede("San José");
+        }
+        else if(solicitud.solicitud.Profesor.Usuario.sede == "Centro Académico de Limón"){
+          setSede("Limón");
+        }
+        else{
+          setSede("Alajuela");
         }
     }
 
