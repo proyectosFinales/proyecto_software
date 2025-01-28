@@ -1,5 +1,6 @@
 import { React, useState, useEffect } from "react";
 import "../styles/EditarPerfil.css";
+import Select from "react-select";
 import { 
   FaUser, 
   FaIdCard, 
@@ -16,11 +17,14 @@ import { useNavigate } from "react-router-dom";
 import HeaderCoordinador from "../components/HeaderCoordinador";
 import HeaderProfesor from "../components/HeaderProfesor";
 import HeaderEstudiante from "../components/HeaderEstudiante";
+import { fetchCategorias } from "../../controller/Categoria";
 
 const EditarPerfil = () => {
   const [userData, setUserData] = useState({});
   const navigate = useNavigate();
   const id = sessionStorage.getItem("token");
+  const [categorias, setCategorias] = useState([]);
+  const [selectedCategoria, setSelectedCategoria] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,7 +40,7 @@ const EditarPerfil = () => {
       // si quieres evitar que se cambie. 
       // O sea, tu back puede ignorar userData.rol.
 
-      await updateUserInfo(userData);
+      await updateUserInfo({...userData, categoria_id: selectedCategoria.value});
       alert("Usuario modificado con éxito.");
       handleCancel();
     } catch (error) {
@@ -57,7 +61,7 @@ const EditarPerfil = () => {
   useEffect(() => {
     const obtenerInfoUsuario = async () => {
       try {
-        const data = await getUserInfo(id);
+        console.log(data);
         // data vendrá con { 
         //   id, correo, contrasena, rol, sede, telefono, nombre,
         //   Profesor: { profesor_id, cantidad_estudiantes },
@@ -78,8 +82,9 @@ const EditarPerfil = () => {
 
         // Si es profesor
         if (data.rol == 2 && data.Profesor) {
-          baseData.profesor_id = data.Profesor.profesor_id;
-          baseData.cantidad_estudiantes = data.Profesor.cantidad_estudiantes ?? 0;
+          baseData.profesor_id = data.Profesor[0].profesor_id;
+          baseData.cantidad_estudiantes = data.Profesor[0].cantidad_estudiantes ?? 0;
+          setSelectedCategoria({value: data.Profesor[0].categoria_id, label: data.Profesor[0].Categoria.nombre});
         }
 
         // Si es estudiante
@@ -95,11 +100,21 @@ const EditarPerfil = () => {
         alert(error.message);
       }
     };
-
+    
     if (id) {
       obtenerInfoUsuario();
     }
   }, [id]);
+
+  useEffect(() => {
+    fetchCategorias().then(data => {
+      const options = data.map(categoria => ({
+        value: categoria.categoria_id,
+        label: categoria.nombre
+      }));
+      setCategorias([{value: '', label: "-- Asigna una categoria --"}, ...options]);
+    }).catch(console.error);
+  }, []);
 
   // Pequeña función auxiliar: 
   // Mapea rol numérico → nombre textual
@@ -232,6 +247,16 @@ const EditarPerfil = () => {
                       readOnly
                     />
                   </div>
+                </label>
+                <label>
+                  Categoría
+                  <Select
+                    value={selectedCategoria}
+                    onChange={e => setSelectedCategoria(e)}
+                    options={categorias}
+                    placeholder="Seleccione una categoría"
+                    className="mt-2"
+                  />
                 </label>
               </>
             )}
