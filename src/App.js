@@ -7,6 +7,7 @@ import LimpiarToken from './controller/limpiezaToken.js';
 import RutaProtegida from './controller/ProteccionRutas.js';
 
 // Pages
+import Avances from './view/pages/Avances.jsx';
 import Login from './view/pages/Login.js';
 import Menu from './view/pages/MenuPrincipal.js';
 import MenuProfesor from './view/pages/MenuPrincipalProfesor.js';
@@ -291,6 +292,15 @@ function App() {
             <RutaProtegida 
               element={<CalificacionAsesor />} 
               requiredRoles={["3"]}
+            />
+          }
+        />
+        <Route
+          path="/avances/:proyectoId"
+          element={
+            <RutaProtegida 
+              element={<Avances />} 
+              requiredRoles={["2"]}
             />
           }
         />

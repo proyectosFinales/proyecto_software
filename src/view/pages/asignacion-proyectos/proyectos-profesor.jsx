@@ -2,6 +2,7 @@
  * ProyectosAsignadosProfesor.jsx
  * Muestra los anteproyectos asignados a un profesor (según token).
  */
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
 import { descargarAnteproyecto } from "../../../controller/DescargarPDF";
 import Profesor from "../../../controller/profesor";
@@ -11,22 +12,34 @@ import SettingsProfesor from "../../components/SettingsProfesor";
 import supabase from "../../../model/supabase";
 
 const ProyectosAsignadosProfesor = () => {
+  const navigate = useNavigate();
   const [proyectos, setProyectos] = useState([]);
-  const profesorId = sessionStorage.getItem("token"); // Or however you get the professor
+  const userId = sessionStorage.getItem("token"); // Or however you get the professor
 
   useEffect(() => {
-    async function fetchProyectos() {
+    const fetchProyectos = async () => {
       try {
-        const { data, error } = await supabase
-          .from("Proyecto")
+        // Obtener el profesor_id usando el user_id
+        const { data: profesorData, error: profesorError } = await supabase
+          .from('Profesor')
+          .select('profesor_id')
+          .eq('id_usuario', userId)
+          .single();
+
+        if (profesorError)
+          throw new Error('Error fetching Profesor:', profesorError);
+
+        const profesorId = profesorData.profesor_id;
+
+        // Usar el profesor_id para obtener los proyectos
+        const { data: proyectosData, error: proyectosError } = await supabase
+          .from('Proyecto')
           .select(`
             id,
-            profesor_id,
             estado,
             anteproyecto_id,
             estudiante_id,
             Anteproyecto:anteproyecto_id (
-              nombreEmpresa, -- or other columns
               estado
             ),
             Estudiante:estudiante_id (
@@ -37,19 +50,19 @@ const ProyectosAsignadosProfesor = () => {
               )
             )
           `)
-          .eq("profesor_id", profesorId);  // or filter if needed
+          .eq('profesor_id', profesorId);
 
-        if (error) {
-          console.error("Error fetching Proyectos:", error);
-          return;
-        }
-        setProyectos(data || []);
-      } catch (err) {
-        console.error("Unexpected error:", err);
+        if (proyectosError) 
+          throw new Error('Error fetching Proyectos:', proyectosError);
+
+        setProyectos(proyectosData);
+      } catch (error) {
+        console.error('Error:', error);
       }
-    }
+    };
+
     fetchProyectos();
-  }, [profesorId]);
+  }, [userId]);
 
   return (
     <Layout
@@ -66,12 +79,16 @@ const ProyectosAsignadosProfesor = () => {
             <p className="mt-2"><span className="font-semibold">Proyecto ID:</span> {proyecto.id}</p>
             <p><span className="font-semibold">Estado:</span> {proyecto.estado}</p>
             <p><span className="font-semibold">Estudiante:</span> {proyecto.Estudiante?.Usuario?.nombre}</p>
-            <button
-              className="mt-3 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-              onClick={() => descargarAnteproyecto({ ...proyecto.Anteproyecto, estudiantes: proyecto.Estudiante })}
-            >
-              Descargar
-            </button>
+            <div className="flex gap-2 mt-4">
+              <button
+                className="btn btn-primary"
+                onClick={() => descargarAnteproyecto({ ...proyecto.Anteproyecto, estudiantes: proyecto.Estudiante })}
+              >
+                Descargar
+              </button>
+              <button className="btn btn-primary" 
+                onClick={() => navigate(`/avances/${proyecto.id}`)}>Avances</button>
+            </div>
           </li>
         ))}
       </ul>
