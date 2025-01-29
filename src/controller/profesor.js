@@ -37,13 +37,14 @@ class Profesor extends Usuario {
    * @param {number} cantidadEstudiantes - Valor de la columna "cantidad_estudiantes" en la tabla Profesor
    * @param {Anteproyecto[]} anteproyectos - Lista de anteproyectos asociados (opcional)
    */
-  constructor(profesor_id, id_usuario, nombre, sede, cantidadEstudiantes, estudiantesLibres, anteproyectos = []) {
+  constructor(profesor_id, id_usuario, nombre, sede, cantidadEstudiantes, estudiantesLibres, categoria, anteproyectos = []) {
     super(id_usuario, nombre, sede); // Constructor base de Usuario
     this.profesor_id = profesor_id;
     this.cantidadEstudiantes = cantidadEstudiantes ?? 0;
     this.anteproyectos = anteproyectos;
     this.original.cantidadEstudiantes = this.cantidadEstudiantes;
     this.original.estudiantesLibres = estudiantesLibres;
+    this.categoria = categoria;
   }
 
   /**
@@ -81,6 +82,7 @@ class Profesor extends Usuario {
       usuario?.sede || "",
       obj.cantidad_estudiantes ?? 0,
       obj.estudiantes_libres,
+      obj.Categoria ? obj.Categoria.nombre : null,
       antepros
     );
   }
@@ -127,11 +129,15 @@ class Profesor extends Usuario {
         profesor_id,
         cantidad_estudiantes,
         estudiantes_libres,
+        categoria_id,
         Usuario:id_usuario (
           id,
           nombre,
           sede,
           correo
+        ),
+        Categoria:categoria_id (
+          nombre
         )
       `);
     
