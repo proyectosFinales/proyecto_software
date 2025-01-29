@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
+import { fetchCategorias } from '../../controller/Categoria';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/FormularioEstudiante.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
@@ -47,6 +49,8 @@ const EstudianteForm = () => {
   const [impacto, setImpacto] = useState('');
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
+  const [selectedCategoria, setSelectedCategoria] = useState(null);
+  const [categorias, setCategorias] = useState([]);
   const telRegex = /^(\+?506\s?)?[2-9]\d{7}$/;
 
   const navigate = useNavigate();
@@ -57,6 +61,13 @@ const EstudianteForm = () => {
 
   useEffect(() => {
     consultarEstudiante();
+    fetchCategorias().then(data => {
+      const options = data.map(categoria => ({
+        value: categoria.categoria_id,
+        label: categoria.nombre
+      }));
+      setCategorias([{value: '', label: "-- Asigna una categoria --"}, ...options]);
+    }).catch(console.error);
   }, []);
 
   /**
@@ -272,7 +283,8 @@ const EstudianteForm = () => {
           impacto: impacto,
           tipo: tipoProyecto,
           departamento: nombreDepartamento,
-          estado: 'Pendiente'
+          estado: 'Pendiente',
+          categoria_id: selectedCategoria.value
         })
         .select();
       
@@ -864,6 +876,18 @@ const EstudianteForm = () => {
                 onChange={(e) => setTipoProyecto(e.target.value)}
               />
               Acción Social
+            </label>
+          </div>
+          <div>
+            <label>
+              25. Categoría
+              <Select
+                value={selectedCategoria}
+                onChange={e => setSelectedCategoria(e)}
+                options={categorias}
+                placeholder="Seleccione una categoría"
+                className="mt-2"
+              />
             </label>
           </div>
         </div>
