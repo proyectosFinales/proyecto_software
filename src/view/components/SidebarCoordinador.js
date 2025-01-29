@@ -24,8 +24,7 @@ const SidebarCoordinador = ({ show, setShow }) => {
   const menuItems = [
     { path: "/menuCoordinador", text: "Inicio", icon: Home },
     { path: "/anteproyectosCoordinador", text: "Anteproyectos", icon: FileText },
-    { path: "/asignaciones/manual", text: "Asignaciones", icon: Users },
-    { path: "/aprobarProyectos", text: "Proyectos", icon: CheckSquare },
+    { path: "/asignaciones/manual", text: "Proyectos", icon: CheckSquare },
     { path: "/gestion-perfiles", text: "Gestión de Perfiles", icon: UserCog },
     { path: "/empresas", text: "Empresas", icon: Building },
     { path: "/citasMenu", text: "Citas", icon: Calendar },
