@@ -9,12 +9,14 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/EditarFormulario.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import { errorToast, successToast } from '../components/toast';
+import { fetchCategorias } from '../../controller/Categoria';
 
 /**
  * Componente principal de edición.
@@ -67,6 +69,8 @@ const CoordinadorForm = () => {
   const [observaciones, setObservaciones] = useState('');
   const [estado, setEstado] = useState('');
   const [proyecto, setProyecto] = useState('');
+  const [selectedCategoria, setSelectedCategoria] = useState(null);
+  const [categorias, setCategorias] = useState([]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -77,6 +81,16 @@ const CoordinadorForm = () => {
     const params = new URLSearchParams(location.search);
     return params.get(param);
   };
+
+  useEffect(() => {
+    fetchCategorias().then(data => {
+      const options = data.map(categoria => ({
+        value: categoria.categoria_id,
+        label: categoria.nombre
+      }));
+      setCategorias([{value: '', label: "-- Asigna una categoria --"}, ...options]);
+    }).catch(console.error);
+  }, []);
 
   // Al montar, consultar el anteproyecto
   useEffect(() => {
@@ -109,6 +123,7 @@ const CoordinadorForm = () => {
           estudiante_id,
           actividad,
           departamento,
+          categoria_id,
           Estudiante:estudiante_id (
             carnet,
             id_usuario,
@@ -145,9 +160,10 @@ const CoordinadorForm = () => {
           ),
           Proyecto:proyecto_anteproyecto_id_fkey (
             id
+          ),
+          Categoria:categoria_id (
+            nombre
           )
-
-
         `)
         .eq('id', id)
         .single();
@@ -219,6 +235,10 @@ const CoordinadorForm = () => {
           setTelefono(data.Estudiante.Usuario.telefono || '');
           setSede(data.Estudiante.Usuario.sede || '');
         }
+      }
+
+      if(data.Categoria){
+        setSelectedCategoria({value: data.categoria_id, label: data.Categoria.nombre});
       }
     } catch (err) {
       errorToast('Error al consultar anteproyecto: ' + err.message);
@@ -412,7 +432,8 @@ const CoordinadorForm = () => {
           contexto: contexto,
           justificacion: justificacion,
           sintomas: sintomas,
-          impacto: impacto
+          impacto: impacto,
+          categoria_id: selectedCategoria.value
         })
         .eq('id', idAnteproyecto);
         const {error: correctionError} = await supabase
@@ -736,6 +757,19 @@ const CoordinadorForm = () => {
             value={tipoProyecto}
             readOnly
           />
+        </div>
+
+        <div>
+          <label>
+            25. Categoría
+            <Select
+              value={selectedCategoria}
+              onChange={e => setSelectedCategoria(e)}
+              options={categorias}
+              placeholder="Seleccione una categoría"
+              className="mt-2"
+            />
+          </label>
         </div>
 
         <div className={styles.formGroup}>

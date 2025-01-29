@@ -117,6 +117,7 @@ export function descargarAnteproyecto(anteproyecto) {
   addText("Departamento para realizar el proyecto:", anteproyecto.departamento);
   addText("Tipo de proyecto:", anteproyecto.tipo);
   addText("Estado del proyecto:", anteproyecto.estado);
+  addText("Categoría del proyecto:", anteproyecto.Categoria.nombre ?? 'Sin categoría');
   addText("Observaciones por el coordinador:", anteproyecto.comentario);
 
   // Descargar PDF (Nombre sugerido)
