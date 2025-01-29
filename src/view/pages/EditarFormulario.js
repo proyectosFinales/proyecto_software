@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import Select from 'react-select';
-import supabase from '../../model/supabase';
+import supabase from '../../model/supabase'; // Para verificar si ya calificó
 import Footer from '../components/Footer';
 import { errorToast, successToast } from '../components/toast';
 import { fetchCategorias } from '../../controller/Categoria';
