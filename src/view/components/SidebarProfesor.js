@@ -19,7 +19,6 @@ const SidebarProfesor = ({ show, setShow }) => {
     { path: "/disponibilidad-profesor", text: "Disponibilidad para defensas", icon: Calendar },
     { path: "/citas-profesor", text: "Consultar citas", icon: Clock },
     { path: "/bitacoras", text: "Bitácoras", icon: BookOpen },
-    { path: "/ver-calificaciones", text: "Ver calificaciones", icon: Star },
     { path: "/actas", text: "Solicitar acta de defensa", icon: File },
   ];
 
