@@ -55,6 +55,7 @@ const FormularioCoordinador = () => {
   const [correccionS, setCorrecionS] = useState('');
   const [correccionE, setCorrecionE] = useState('');
   const [proyecto, setProyecto] = useState('');
+  const [categoria, setCategoria] = useState('');
 
   // ID del anteproyecto actual
   const [idAnteproyecto, setIdAnteproyecto] = useState(null);
@@ -100,6 +101,7 @@ const FormularioCoordinador = () => {
                 estudiante_id,
                 actividad,
                 departamento,
+                categoria_id,
                 Estudiante:estudiante_id (
                   carnet,
                   id_usuario,
@@ -132,8 +134,10 @@ const FormularioCoordinador = () => {
                 ),
                 Proyecto:proyecto_anteproyecto_id_fkey (
                   id
+                ),
+                Categoria: categoria_id (
+                  nombre
                 )
-      
               `)
               .eq('id', id)
               .single();
@@ -159,6 +163,7 @@ const FormularioCoordinador = () => {
       setImpacto(data.impacto || '');
       setNombreDepartamento(data.departamento || '');
       setTipoProyecto(data.tipo || '');
+      setCategoria(data.Categoria.nombre || '');
       setObservaciones(data.comentario || '');
       if(data.Proyecto.length == 0){
         setProyecto("empty");
@@ -722,6 +727,17 @@ const FormularioCoordinador = () => {
             value={tipoProyecto}
             readOnly
           />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>
+            25. Categoría
+          </label>
+            <input
+              type="text"
+              value={categoria}
+              readOnly
+            />
         </div>
 
         <div className={styles.formGroup}>
