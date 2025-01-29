@@ -5,6 +5,7 @@ import './index.css';
 // Controllers
 import LimpiarToken from './controller/limpiezaToken.js';
 import RutaProtegida from './controller/ProteccionRutas.js';
+import * as AsignacionDefensaController from './controller/AsignacionDefensaController';
 
 // Pages
 import Avances from './view/pages/Avances.jsx';
