@@ -23,6 +23,7 @@ const SettingsEstudiante = ({ show, setShow }) => {
 
   return (
     <>
+      {/* Overlay */}
       {show && (
         <div 
           className="fixed inset-0 bg-black/20 z-40"
@@ -31,6 +32,7 @@ const SettingsEstudiante = ({ show, setShow }) => {
         />
       )}
 
+      {/* Settings Sidebar */}
       <nav 
         className={`
           fixed top-20 right-0 
@@ -38,71 +40,77 @@ const SettingsEstudiante = ({ show, setShow }) => {
           bg-white
           shadow-lg
           z-50
+          flex flex-col
           transition-transform duration-300 ease-in-out
           ${show ? 'translate-x-0' : 'translate-x-full'}
         `}
       >
-        <ul className="list-none p-0 m-0">
-          {menuItems.map((item, index) => {
-            const Icon = item.icon;
-            if (item.path) {
-              return (
-                <Link
-                  key={index}
-                  to={item.path}
-                  className="block no-underline group transition-all duration-200"
-                >
-                  <li className="
-                    flex items-center gap-3
-                    px-6 py-4
-                    text-gray-900
-                    border-b border-gray-100
-                    cursor-pointer
-                    transition-colors duration-200
-                    hover:bg-gray-50
-                    active:bg-gray-100
-                  ">
+        {/* Scrollable menu container */}
+        <div className="flex-1 overflow-y-auto">
+          <ul className="list-none p-0 m-0">
+            {menuItems.map((item, index) => {
+              const Icon = item.icon;
+              if (item.path) {
+                return (
+                  <Link
+                    key={index}
+                    to={item.path}
+                    className="block no-underline group transition-all duration-200"
+                    onClick={() => setShow(false)}
+                  >
+                    <li className="
+                      flex items-center gap-3
+                      px-6 py-4
+                      text-gray-900
+                      border-b border-gray-100
+                      cursor-pointer
+                      transition-colors duration-200
+                      hover:bg-gray-50
+                      active:bg-gray-100
+                    ">
+                      <Icon 
+                        size={20} 
+                        className="text-azul transition-transform duration-200 group-hover:scale-110 flex-shrink-0" 
+                      />
+                      <span className="text-base font-medium">
+                        {item.text}
+                      </span>
+                    </li>
+                  </Link>
+                );
+              } else {
+                return (
+                  <li
+                    key={index}
+                    onClick={item.onClick}
+                    className="
+                      flex items-center gap-3
+                      px-6 py-4
+                      text-gray-900
+                      border-b border-gray-100
+                      cursor-pointer
+                      transition-colors duration-200
+                      hover:bg-gray-50
+                      active:bg-gray-100
+                      group
+                    "
+                  >
                     <Icon 
                       size={20} 
-                      className="text-azul transition-transform duration-200 group-hover:scale-110" 
+                      className="text-azul transition-transform duration-200 group-hover:scale-110 flex-shrink-0" 
                     />
                     <span className="text-base font-medium">
                       {item.text}
                     </span>
                   </li>
-                </Link>
-              );
-            } else {
-              return (
-                <li
-                  key={index}
-                  onClick={item.onClick}
-                  className="
-                    flex items-center gap-3
-                    px-6 py-4
-                    text-gray-900
-                    border-b border-gray-100
-                    cursor-pointer
-                    transition-colors duration-200
-                    hover:bg-gray-50
-                    active:bg-gray-100
-                    group
-                  "
-                >
-                  <Icon 
-                    size={20} 
-                    className="text-azul transition-transform duration-200 group-hover:scale-110" 
-                  />
-                  <span className="text-base font-medium">
-                    {item.text}
-                  </span>
-                </li>
-              );
-            }
-          })}
-        </ul>
+                );
+              }
+            })}
+          </ul>
+        </div>
 
-        <div className="absolute bottom-0 w-full p-4 text-center text-gray-600 text-sm border-t border-gray-200 bg-white">
+        {/* Fixed footer */}
+        <div className="flex-shrink-0 p-4 text-center text-gray-600 text-sm border-t border-gray-200 bg-white">
           Instituto Tecnológico de Costa Rica
         </div>
       </nav>
