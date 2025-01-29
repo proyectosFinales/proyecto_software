@@ -1,4 +1,5 @@
 import supabase from '../model/supabase';
+import { fetchSemestreActual } from './Semestre';
 
 export const fetchAvances = async (proyectoId) => {
   const { data: avances, error: avancesError } = await supabase
@@ -39,12 +40,19 @@ export const fetchAvances = async (proyectoId) => {
 
 };
 
-export const updateAvance = async (avanceId, nuevoEstado) => {
+export const updateAvance = async (avanceId, nuevoEstado, proyectoId) => {
   const { error } = await supabase
     .from('Avance')
     .update({ estado: nuevoEstado })
     .eq('id', avanceId);
   if (error) throw error;
+
+  try {
+    await reprobarEstudiante(proyectoId);
+  } catch (reprobarError) {
+    console.error('Error al reprobar estudiante:', reprobarError);
+    throw reprobarError;
+  }
 };
 
 export const addAvance = async (estado, proyectoId) => {
@@ -71,13 +79,55 @@ export const addAvance = async (estado, proyectoId) => {
 
   if (nuevoAvanceError) throw nuevoAvanceError;
 
+  try {
+    await reprobarEstudiante(proyectoId);
+  } catch (reprobarError) {
+    console.error('Error al reprobar estudiante:', reprobarError);
+    throw reprobarError;
+  }
+
   return nuevoAvanceData;
 }
 
-export const deleteAvance = async (avanceId) => {
+export const deleteAvance = async (avanceId, proyectoId) => {
   const { error } = await supabase
     .from('Avance')
     .delete()
     .eq('id', avanceId);
   if (error) throw error;
+
+  try {
+    await reprobarEstudiante(proyectoId);
+  } catch (reprobarError) {
+    console.error('Error al reprobar estudiante:', reprobarError);
+    throw reprobarError;
+  }
+}
+
+const reprobarEstudiante = async (proyecto_id) => {
+  const { data, error } = await supabase
+    .from('Avance')
+    .select('*')
+    .eq('estado', 'Reprobado')
+    .eq('proyecto_id', proyecto_id);
+  if (error) throw error;
+
+  const estados = data.length > 0 ? ['Reprobado', 'reprobado'] : ['Pendiente', 'en progreso'];
+
+  const { data: proyectoData, error: proyectoError } = await supabase
+    .from('Proyecto')
+    .update({ estado: estados[0] })
+    .eq('id', proyecto_id)
+    .select('estudiante_id');
+  if (proyectoError) throw proyectoError;
+
+  fetchSemestreActual().then(async (semestreId) => {
+    const { data: estudianteData, error: estudianteError } = await supabase
+      .from('Estudiante')
+      .update({ estado: estados[1], semestre_id: semestreId })
+      .eq('estudiante_id', proyectoData[0].estudiante_id);
+    if (estudianteError) throw estudianteError;
+  }).catch(err => {
+    throw err;
+  });
 }
