@@ -233,7 +233,7 @@ const EstudianteForm = () => {
     if (!confirmarEnvio) {
       return;
     }
-    if(actividadEmpresa == "Otras..." && otra == ''){
+    if(actividadEmpresa == "Otras" && otra == ''){
       alert("Debe ingresar la actividad de la empresa");
       return;
     }
@@ -430,30 +430,6 @@ const EstudianteForm = () => {
               <input
                 type="radio"
                 name="tipoEmpresa"
-                value="Servicios del estado"
-                onChange={(e) => setTipoEmpresa(e.target.value)}
-                required
-              />
-              Servicios del Estado
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
-                value="Manufactura Comercial"
-                onChange={(e) => setTipoEmpresa(e.target.value)}
-                required
-              />
-              Manufactura comercial
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoEmpresa"
                 value="PYME"
                 onChange={(e) => setTipoEmpresa(e.target.value)}
                 required
@@ -503,6 +479,18 @@ const EstudianteForm = () => {
             <label>
               <input
                 type="radio"
+                name="tipoEmpresa"
+                value="Servicios del estado"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Servicios del Estado
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
                 name="actividadEmpresa"
                 value="Manufactura de alimentos"
                 onChange={handleActividadChange}
@@ -521,6 +509,18 @@ const EstudianteForm = () => {
                 required
               />
               Manufactura médica
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="Manufactura Comercial"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Manufactura comercial
             </label>
           </div>
           <div>
