@@ -265,18 +265,6 @@ const CoordinadorForm = () => {
     }
   }
 
-  async function borrarCorrecciones() {
-    try{
-      const {error: correctionError} = await supabase
-        .from('Correcciones')
-        .delete()
-        .eq('anteproyecto_id',idAnteproyecto);
-        if (correctionError) throw correctionError;
-    }catch(error){
-      errorToast('Error al borrar correcciones: ' + error.message);
-    }
-  }
-
   async function consultarHR(nombreContact){
     try{
       const { data, error } = await supabase
@@ -476,14 +464,14 @@ const CoordinadorForm = () => {
           if (error) throw error;
         }
 
-        alert('Anteproyecto actualizado exitosamente.');
+        alert('Anteproyecto eliminado exitosamente.');
         navigate('/anteproyectosEstudiante');
       } catch (error) {
-        alert('Error al actualizar anteproyecto: ' + error.message);
+        alert('Error al eliminar anteproyecto: ' + error.message);
       }
     }
     else{
-      alert("No se puede reprobar el anteproyecto, ya se encuentra asignado a un profesor");
+      alert("No se puede eliminar el anteproyecto, ya se encuentra asignado a un profesor");
     }
   }
 
@@ -849,12 +837,15 @@ const CoordinadorForm = () => {
 
         {/* BUTTONS */}
         <div className="flex justify-end gap-4 mt-8">
+        {proyecto == empty && (
           <button
             type="submit"
             className="px-6 py-2 bg-azul text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Editar
           </button>
+        )}
+          {proyecto == empty && (
           <button
             type="button"
             onClick={eliminarAnteproyecto}
@@ -862,12 +853,13 @@ const CoordinadorForm = () => {
           >
             Eliminar
           </button>
+          )}
           <button
             type="button"
             onClick={handleGoBack}
             className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
           >
-            Cancelar
+            Volver
           </button>
         </div>
       </form>
