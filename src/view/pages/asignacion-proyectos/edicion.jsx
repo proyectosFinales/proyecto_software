@@ -13,6 +13,7 @@ import supabase from "../../../model/supabase";
 import HeaderCoordinador from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 import Profesor from "../../../controller/profesor.js";
+import { fetchSemestreActual } from "../../../controller/Semestre";
 
 /**
  * EdicionAsignacionProyectos
@@ -182,7 +183,7 @@ function EdicionAsignacionProyectos() {
     }
   };
 
-  const handleEstadoChange = async (proyectoId, nuevoEstado) => {
+  const handleEstadoChange = async (proyectoId, nuevoEstado, estudianteId) => {
     try{
       const { proyectoError } = await supabase
         .from("Proyecto")
@@ -190,6 +191,17 @@ function EdicionAsignacionProyectos() {
         .eq("id", proyectoId);
 
       if (proyectoError) throw proyectoError;
+
+      fetchSemestreActual().then(async (semestreId) => {
+        const { estudianteError } = await supabase
+          .from("Estudiante")
+          .update({ estado: nuevoEstado === 'Aprobado' ? 'defensa' : 'reprobado',
+            semestre_id: semestreId
+           })
+          .eq("estudiante_id", estudianteId);
+
+          if (estudianteError) throw estudianteError;
+      }).catch((err) => {throw err;});
 
       setProyectos((prevProyectos) =>
         prevProyectos.map((proj) =>
@@ -272,13 +284,13 @@ function EdicionAsignacionProyectos() {
                       </td>
                       <td className="flex p-3 text-sm text-gray-700 space-x-2">
                         <button
-                          onClick={() => handleEstadoChange(proyecto.id, 'Aprobado')}
+                          onClick={() => handleEstadoChange(proyecto.id, 'Aprobado', proyecto.estudiante_id)}
                           className="px-2 py-1 bg-green-500 text-white rounded mr-2"
                         >
                           Aprobar
                         </button>
                         <button
-                          onClick={() => handleEstadoChange(proyecto.id, 'Reprobado')}
+                          onClick={() => handleEstadoChange(proyecto.id, 'Reprobado', proyecto.estudiante_id)}
                           className="px-2 py-1 bg-red-500 text-white rounded"
                         >
                           Reprobar

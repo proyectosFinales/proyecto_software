@@ -1,6 +1,7 @@
 import supabase from "../model/supabase";
 import validateInfo, { validarContraseñaDetallada, validarCorreo, validarCorreoExistente } from "./validarEntradas";
 import sendMail from "../controller/Email";
+import { fetchSemestreActual } from "../controller/Semestre";
 
 export async function signUpNewUser(fullName, carnet, tel, email, password, sede) {
   try {
@@ -32,20 +33,25 @@ export async function signUpNewUser(fullName, carnet, tel, email, password, sede
     
     const usuarioID = userData[0].id;
 
-    // Ahora insertamos en "Estudiante"
-    const { error: studentError } = await supabase
-      .from('Estudiante')
-      .insert([
-        {
-          id_usuario: usuarioID,
-          carnet: carnet,
-          estado: 'en progreso'
-        }
-      ]);
+    fetchSemestreActual().then(async (semestreId) => {
+      const { error: studentError } = await supabase
+        .from('Estudiante')
+        .insert([
+          {
+            id_usuario: usuarioID,
+            carnet: carnet,
+            estado: 'en progreso',
+            semestre_id: semestreId
+          }
+        ]);
 
-    if (studentError) {
-      throw new Error(studentError.message);
-    }
+      if (studentError) {
+        throw new Error(studentError.message);
+      }
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    });
 
     return userData;
   } catch (error) {
@@ -111,12 +117,27 @@ export async function registroProfesor(nombre, correo, contrasena, sede, telefon
 }
 
 export function generarContraseña(longitud = 12) {
-  const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+  const caracteresMinusculas = 'abcdefghijklmnopqrstuvwxyz';
+  const caracteresMayusculas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const digitos = '0123456789';
+  const caracteresEspeciales = '!@#$%^&*()_+';
+  const todosCaracteres = caracteresMinusculas + caracteresMayusculas + digitos + caracteresEspeciales;
+
   let contraseña = '';
-  for (let i = 0; i < longitud; i++) {
-    const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
-    contraseña += caracteres.charAt(indiceAleatorio);
+  contraseña += caracteresMinusculas.charAt(Math.floor(Math.random() * caracteresMinusculas.length));
+  contraseña += caracteresMayusculas.charAt(Math.floor(Math.random() * caracteresMayusculas.length));
+  contraseña += digitos.charAt(Math.floor(Math.random() * digitos.length));
+  contraseña += caracteresEspeciales.charAt(Math.floor(Math.random() * caracteresEspeciales.length));
+
+  for (let i = 4; i < longitud; i++) {
+    const indiceAleatorio = Math.floor(Math.random() * todosCaracteres.length);
+    contraseña += todosCaracteres.charAt(indiceAleatorio);
   }
+
+  // Mezclar la contraseña para evitar patrones predecibles
+  contraseña = contraseña.split('').sort(() => 0.5 - Math.random()).join('');
+  console.log(contraseña);
+
   return contraseña;
 }
 
