@@ -837,7 +837,7 @@ const CoordinadorForm = () => {
 
         {/* BUTTONS */}
         <div className="flex justify-end gap-4 mt-8">
-        {proyecto == empty && (
+        {proyecto == "empty" && (
           <button
             type="submit"
             className="px-6 py-2 bg-azul text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -845,7 +845,7 @@ const CoordinadorForm = () => {
             Editar
           </button>
         )}
-          {proyecto == empty && (
+          {proyecto == "empty" && (
           <button
             type="button"
             onClick={eliminarAnteproyecto}
