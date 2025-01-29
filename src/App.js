@@ -59,7 +59,7 @@ import AgregarEntrada from './view/pages/agregarEntrada.js';
 import DashboardMenu from './view/pages/DashboardMenu';
 import DashboardEstudiantes from './view/pages/DashboardEstudiantes.jsx';
 import ProfessorEvaluationForm from './view/pages/calificaciones/calificacionAsesor.js';
-import ProfessorDashboard from './view/pages/calificaciones/calificacionAsesorDashboard.js';
+import DetailedCalificacionesDashboard from './view/pages/calificaciones/calificacionAsesorDashboard.js';
 import PermisosVerCalificaciones from './view/pages/calificaciones/permisosVerCalificaciones.js';
 import Machotes from './view/pages/Machotes.js';
 import CalificacionAsesor from './view/pages/calificaciones/calificacionAsesor';
@@ -312,9 +312,9 @@ function App() {
         <Route
           path="/dashboard-calificaciones"
           element={
-            <RutaProtegida 
-              element={<ProfessorDashboard />} 
-              requiredRoles={["1"]} 
+            <RutaProtegida
+              element={<DetailedCalificacionesDashboard />}
+              requiredRoles={["1"]}
             />
           }
         />
