@@ -1,13 +1,3 @@
-/**
- * file: src/controller/calificacionesController.js
- *
- * A comprehensive controller for managing "Calificacion" records:
- * - Insert/update calificaciones
- * - Fetch raw calificaciones (with optional filters)
- * - Various aggregators (statistics, trends, breakdowns, distributions)
- * - Helper functions to look up Estudiante, Proyecto, Semestre, etc.
- */
-
 import supabase from "../model/supabase";
 
 /* ------------------------------------------------------
@@ -17,9 +7,6 @@ import supabase from "../model/supabase";
 /**
  * Busca el "Estudiante" dado un usuarioId (ID del usuario de la sesión).
  * Retorna un objeto { estudiante_id, estado } o lanza un Error si no existe.
- *
- * @param  {string} usuarioId - UUID del usuario en la tabla Usuario
- * @return {Promise<{ estudiante_id: string, estado: string }>}
  */
 export async function obtenerEstudiantePorUsuario(usuarioId) {
   const { data: student, error } = await supabase
@@ -38,12 +25,7 @@ export async function obtenerEstudiantePorUsuario(usuarioId) {
 }
 
 /**
- * Obtiene el primer "Proyecto" asociado a un Estudiante.
- * (Si un estudiante tuviera múltiples proyectos, podrías ajustarlo).
- * Retorna { id, profesor_id, estado, semestre_id } o lanza Error si no existe.
- *
- * @param  {string} estudiante_id
- * @return {Promise<Object>}
+ * Obtiene el primer "Proyecto" asociado a un Estudiante (puedes ajustar si hay múltiples).
  */
 export async function obtenerProyectoEstudiante(estudiante_id) {
   const { data: proyectos, error } = await supabase
@@ -63,21 +45,19 @@ export async function obtenerProyectoEstudiante(estudiante_id) {
 /**
  * Busca el semestre activo en la tabla Semestre, donde activo = true.
  * Retorna el semestre_id (integer) o lanza Error si no hay un semestre activo.
- *
- * @return {Promise<number>}
  */
 export async function obtenerSemestreActivo() {
   const { data, error } = await supabase
     .from("Semestre")
-    .select("semestre_id, activo")
-    .eq("activo", true)
+    .select("semestre_id, calendario_id")
+    .not("calendario_id", "is", null)
     .single();
 
   if (error) {
     throw new Error(`Error buscando Semestre activo: ${error.message}`);
   }
   if (!data) {
-    throw new Error("No se encontró un Semestre activo. Verifica la BD.");
+    throw new Error("No se encontró un Semestre con calendario_id. Verifica la BD.");
   }
   return data.semestre_id;
 }
@@ -87,13 +67,8 @@ export async function obtenerSemestreActivo() {
  * ------------------------------------------------------ */
 
 /**
- * Inserta una nueva "Calificacion" en la BD. 
- * Combina datos del usuario (Estudiante) y su Proyecto, y
- * asocia automáticamente el semestre_id activo.
- *
- * @param {Object}  formData   - Contiene las puntuaciones/criterios, recomendación, etc.
- * @param {string}  usuarioId  - UUID del usuario (sesión)
- * @return {Promise<any>}      - Retorna la data insertada o lanza Error.
+ * Inserta una nueva "Calificacion" en la BD. Combina datos del usuario (Estudiante) y 
+ * su Proyecto, y asocia automáticamente el semestre_id activo.
  */
 export async function calificarProfesor(formData, usuarioId) {
   // 1) Buscar el Estudiante
@@ -120,8 +95,8 @@ export async function calificarProfesor(formData, usuarioId) {
     score_correccion:        formData.serviceRatings.correccion,
     score_explicacion:       formData.serviceRatings.explicacion,
     score_retroalimentacion: formData.serviceRatings.retroalimentacion,
-    recomendacion: formData.recommendationScore, // e.g., 1-5
-    star_rating: formData.starRating,           // e.g., 1-5
+    recomendacion: formData.recommendationScore, // e.g., 1..5
+    star_rating: formData.starRating,           // e.g., 1..5
     comentarios: formData.additionalComments
   };
 
@@ -141,11 +116,8 @@ export async function calificarProfesor(formData, usuarioId) {
  * ------------------------------------------------------ */
 
 /**
- * Obtiene un arreglo de "Calificacion", con joins a Profesor->Usuario y Proyecto, 
+ * Obtiene un arreglo de "Calificacion", con joins a Profesor->Usuario y Proyecto,
  * opcionalmente filtradas por 'professorId' y/o 'semesterId'.
- *
- * @param  {Object}   filters - { professorId?: string, semesterId?: number }
- * @return {Promise<Array>}   - Array de calificaciones
  */
 export async function fetchAllCalificaciones({ professorId, semesterId } = {}) {
   let query = supabase
@@ -202,16 +174,7 @@ export async function fetchAllCalificaciones({ professorId, semesterId } = {}) {
  * ------------------------------------------------------ */
 
 /**
- * Aggregator: estadísticos de nivel alto para tarjetas de "Dashboard."
- * Por ejemplo:
- *   - averageRating
- *   - totalReviews
- *   - recommendationScore (promedio)
- *   - responseRate (placeholder, si no se maneja, se fija en 0)
- *   - semesterProgress (puede ser un placeholder o lógica real)
- *
- * @param  {Object}  filters - { semesterId?: number, professorId?: string }
- * @return {Promise<{ averageRating: number, totalReviews: number, recommendationScore: number, responseRate: number, semesterProgress: object }>}
+ * Stats de alto nivel: averageRating, totalReviews, recommendationScore, etc.
  */
 export async function fetchDashboardStats({ semesterId, professorId } = {}) {
   let query = supabase
@@ -235,16 +198,14 @@ export async function fetchDashboardStats({ semesterId, professorId } = {}) {
     sumRecs += row.recomendacion || 0;
   });
 
-  // Evitamos división por cero
   const averageRating = count === 0 ? 0 : sumStars / count;
   const recommendationScore = count === 0 ? 0 : sumRecs / count;
 
-  // EJEMPLO placeholder, en caso de no tener una métrica real
-  // para "tasa de respuesta" o "progreso semestral":
+  // Ejemplo placeholders
   const responseRate = 0;
   const semesterProgress = {
     current: count,
-    total: 100, // cambia esto según tu lógica real
+    total: 100,
     percentage: count ? Math.min(100, (count / 100) * 100) : 0
   };
 
@@ -258,23 +219,9 @@ export async function fetchDashboardStats({ semesterId, professorId } = {}) {
 }
 
 /**
- * Aggregator: Tendencia de calificación (star_rating) a lo largo de varios semestres.
- * Útil para un LineChart en "Tendencia por Semestre."
- *
- * Devuelve un array con objetos del tipo:
- *   [
- *     { semester: "2023-1", rating: 4.2, students: 40 },
- *     { semester: "2023-2", rating: 4.5, students: 52 },
- *     ...
- *   ]
- *
- * @param  {Object}   filters - { professorId?: string }
- * @return {Promise<Array>}
+ * Tendencia de la calificación (star_rating) a través de semestres
  */
 export async function fetchSemesterRatingTrend({ professorId } = {}) {
-  // OPCIÓN 1: Usar un RPC / Postgres Function si la tienes
-  // OPCIÓN 2: Hacer un join manual a la tabla Semestre
-  // EJEMPLO con la tabla "Calificacion" + "Semestre"
   let query = supabase
     .from("Calificacion")
     .select(`
@@ -292,8 +239,7 @@ export async function fetchSemesterRatingTrend({ professorId } = {}) {
     throw new Error(`Error fetching semester rating trend: ${error.message}`);
   }
 
-  // Agrupamos por semestre_id
-  const map = {}; // { [semestre_id]: { semesterName, sumRating, count } }
+  const map = {};
   data.forEach(row => {
     const sId = row.semestre_id;
     const sName = row.Semestre?.nombre || `Sem #${sId}`;
@@ -305,7 +251,6 @@ export async function fetchSemesterRatingTrend({ professorId } = {}) {
     map[sId].count++;
   });
 
-  // Convertimos el map en un array
   const results = Object.keys(map).map(semId => {
     const obj = map[semId];
     const avg = obj.count === 0 ? 0 : obj.sumRating / obj.count;
@@ -316,22 +261,12 @@ export async function fetchSemesterRatingTrend({ professorId } = {}) {
     };
   });
 
-  // Ordenamos (opcional) por nombre de semestre, etc.
+  // Ordenar por nombre de semestre, etc.
   return results.sort((a, b) => (a.semester > b.semester ? 1 : -1));
 }
 
 /**
- * Aggregator: Desglose por criterio. Calcula promedios de campos numéricos 
- * (score_agilidad, score_empatia, etc.) para el conjunto filtrado.
- * Devuelve un array p.ej:
- *   [
- *     { name: 'Agilidad', value: 4.6 },
- *     { name: 'Empatía', value: 4.8 },
- *     ...
- *   ]
- *
- * @param  {Object}   filters - { semesterId?: number, professorId?: string }
- * @return {Promise<Array>}
+ * Desglose por criterio (promedios de score_agilidad, score_empatia, etc.).
  */
 export async function fetchCriteriaBreakdown({ semesterId, professorId } = {}) {
   let query = supabase
@@ -360,7 +295,6 @@ export async function fetchCriteriaBreakdown({ semesterId, professorId } = {}) {
     throw new Error(`Error fetching criteria breakdown: ${error.message}`);
   }
   if (!data || data.length === 0) {
-    // Si no hay datos, retornamos 0 en cada criterio
     return [
       { name: 'Agilidad', value: 0 },
       { name: 'Empatía', value: 0 },
@@ -405,24 +339,15 @@ export async function fetchCriteriaBreakdown({ semesterId, professorId } = {}) {
 }
 
 /**
- * Aggregator: Distribución de "Recomendaciones". 
- * Ideal para un PieChart. Ejemplo simple: 'recomendacion' = 1 => Sí; caso contrario => No.
- * Ajusta la lógica según tu escala (p.ej. 1..5).
- *
- * @param  {Object}   filters - { semesterId?: number, professorId?: string }
- * @return {Promise<Array>}    - Array con [{ name, value }]
+ * Muestra un simple pastel SÍ/NO si 'recomendacion' == 1 => sí, else => no.
  */
 export async function fetchPieData({ semesterId, professorId } = {}) {
   let query = supabase
     .from("Calificacion")
     .select("id, recomendacion");
 
-  if (semesterId) {
-    query = query.eq("semestre_id", semesterId);
-  }
-  if (professorId) {
-    query = query.eq("profesor_id", professorId);
-  }
+  if (semesterId) query = query.eq("semestre_id", semesterId);
+  if (professorId) query = query.eq("profesor_id", professorId);
 
   const { data, error } = await query;
   if (error) {
@@ -432,7 +357,6 @@ export async function fetchPieData({ semesterId, professorId } = {}) {
   let recYes = 0;
   let recNo = 0;
 
-  // Suponiendo recomendacion = 1 => "Sí", otro => "No"
   data.forEach(row => {
     if (row.recomendacion === 1) recYes++;
     else recNo++;
@@ -445,12 +369,7 @@ export async function fetchPieData({ semesterId, professorId } = {}) {
 }
 
 /**
- * Aggregator: Distribución de "recomendacion" en buckets (ej.: 1..5).
- * Útil si manejas recomendacion con rangos, y quieres un Pie/Bar con
- * la cantidad en cada puntuación.
- *
- * @param  {Object}  filters - { semesterId?: number, professorId?: string }
- * @return {Promise<Array>}   - [{ label: '1', count: x }, { label: '2', count: y }, ...]
+ * Distribución de "recomendacion" (1..5).
  */
 export async function fetchRecommendationDistribution({ semesterId, professorId } = {}) {
   let query = supabase
@@ -465,29 +384,21 @@ export async function fetchRecommendationDistribution({ semesterId, professorId 
     throw new Error(`Error fetching recommendation distribution: ${error.message}`);
   }
 
-  // Ejemplo: guardamos recs en un map { '1': count, '2': count, '3': count, '4': count, '5': count }
   const distribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   data.forEach(row => {
     const r = parseInt(row.recomendacion || 0, 10);
     if (distribution[r] !== undefined) {
       distribution[r]++;
-    } else {
-      // Si no está en 1..5, lo sumamos a un "otros" si deseas
     }
   });
 
-  // Convertimos a array
   return Object.keys(distribution).map(k => ({
     score: k,
     count: distribution[k],
-    color: colorForScore(k) // ver func auxiliar abajo
+    color: colorForScore(k)
   }));
 }
 
-/**
- * Función auxiliar para asignar un color a cada bucket de recomendación. 
- * Totalmente personalizable.
- */
 function colorForScore(score) {
   switch (score) {
     case '5': return '#22c55e'; // green
@@ -500,11 +411,7 @@ function colorForScore(score) {
 }
 
 /**
- * Aggregator: últimos comentarios (limite 4) para mostrarlos en dashboard.
- * Retorna un array con objetos { text, semesterName, date }.
- *
- * @param  {Object}   filters - { semesterId?: number, professorId?: string }
- * @return {Promise<Array>}
+ * Últimos comentarios (hasta 4).
  */
 export async function fetchRecentComments({ semesterId, professorId } = {}) {
   let query = supabase
@@ -536,11 +443,7 @@ export async function fetchRecentComments({ semesterId, professorId } = {}) {
 }
 
 /**
- * Aggregator: Distribución de star_rating (1..5). Similar a "recommendationDistribution".
- * Retorna un array con la cuenta de cuántos han dado 1, 2, 3, 4, 5 estrellas.
- *
- * @param  {Object}   filters - { semesterId?: number, professorId?: string }
- * @return {Promise<Array>}    - e.g. [ {star: 1, count: 3}, {star: 2, count: 10}, ... ]
+ * Distribución de star_rating (1..5).
  */
 export async function fetchStarRatingDistribution({ semesterId, professorId } = {}) {
   let query = supabase
@@ -570,15 +473,9 @@ export async function fetchStarRatingDistribution({ semesterId, professorId } = 
 }
 
 /**
- * Aggregator (OPCIONAL): Muestra la calificación promedio de CADA profesor,
- * ordenado desc por star_rating, o cualquier otra métrica.
- * Podrías usarlo para un ranking de profesores (Mejores/Más bajitos).
- *
- * @param  {Object}  filters - { semesterId?: number } (opcional)
- * @return {Promise<Array>}   - e.g. [ { profesor_id, nombreProfesor, avgStar, totalCals }, ... ]
+ * Ranking de profesores (promedio star_rating), filtrado opcional por semestre.
  */
 export async function fetchProfessorRanking({ semesterId } = {}) {
-  // Este query extrae (Profesor->Usuario.nombre) y star_rating
   let query = supabase
     .from("Calificacion")
     .select(`
@@ -602,7 +499,6 @@ export async function fetchProfessorRanking({ semesterId } = {}) {
     throw new Error(`Error fetching professor ranking: ${error.message}`);
   }
 
-  // Agrupamos por profesor_id
   const map = {};
   data.forEach(row => {
     if (!map[row.profesor_id]) {
@@ -616,7 +512,6 @@ export async function fetchProfessorRanking({ semesterId } = {}) {
     map[row.profesor_id].count++;
   });
 
-  // Creamos array final
   const results = Object.keys(map).map(profId => {
     const m = map[profId];
     const avg = m.count === 0 ? 0 : m.sumStars / m.count;
@@ -628,13 +523,8 @@ export async function fetchProfessorRanking({ semesterId } = {}) {
     };
   });
 
-  // Orden descendente
   return results.sort((a, b) => b.avgStar - a.avgStar);
 }
-
-/* ------------------------------------------------------
- *  EXPORT ALL
- * ------------------------------------------------------ */
 
 const calificacionesController = {
   calificarProfesor,
