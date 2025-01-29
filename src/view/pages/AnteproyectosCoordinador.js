@@ -95,29 +95,74 @@ const AnteproyectosCoordinador = () => {
   }, []);
 
   const cambiarEstado = async (anteproyecto) => {
-    try {
-      const { error } = await supabase
-        .from('Anteproyecto')
-        .update({ estado: 'Pendiente' })
-        .eq('id', anteproyecto.id);
+  try {
+    // 1. Buscar el proyecto asociado al anteproyecto
+    const { data: proyectos, error: fetchError } = await supabase
+      .from('Proyecto')
+      .select('id, estudiante_id, profesor_id')
+      .eq('anteproyecto_id', anteproyecto.id);
 
-      if (error) {
-        alert('No se pudo cambiar el estado del anteproyecto. ' + error.message);
-      } else {
-        setAnteproyectos((prev) =>
-          prev.map((item) =>
-            item.id === anteproyecto.id
-              ? { ...item, estado: 'Pendiente' }
-              : item
-          )
-        );
-        alert('Estado del anteproyecto cambiado exitosamente.');
-      }
-    } catch (err) {
-      console.error('Error cambiando el estado:', err);
-      alert('Ocurrió un error al intentar cambiar el estado.');
+    if (fetchError) throw fetchError;
+
+    if (proyectos.length > 0) {
+      const proyecto = proyectos[0];
+
+      // 2. Eliminar el proyecto encontrado
+      const { error: deleteProyectoError } = await supabase
+        .from('Proyecto')
+        .delete()
+        .eq('id', proyecto.id);
+      if (deleteProyectoError) throw deleteProyectoError;
+
+      // 3. Actualizar el estudiante para quitar la relación con el asesor
+      const { error: updateEstudianteError } = await supabase
+        .from('Estudiante')
+        .update({ asesor: null })
+        .eq('estudiante_id', proyecto.estudiante_id);
+      if (updateEstudianteError) throw updateEstudianteError;
+
+      // 4. Aumentar en 1 el número de estudiantes libres del profesor
+      const { data, error: fetchError } = await supabase
+        .from('Profesor')
+        .select('estudiantes_libres')
+        .eq('profesor_id', proyecto.profesor_id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const nuevoValor = data.estudiantes_libres + 1;
+
+      const { error: updateError } = await supabase
+        .from('Profesor')
+        .update({ estudiantes_libres: nuevoValor })
+        .eq('profesor_id', proyecto.profesor_id);
+
+      if (updateError) throw updateError;
     }
-  };
+
+    // 5. Actualizar el estado del anteproyecto a "Pendiente"
+    const { error: updateAnteproyectoError } = await supabase
+      .from('Anteproyecto')
+      .update({ estado: 'Pendiente' })
+      .eq('id', anteproyecto.id);
+    if (updateAnteproyectoError) throw updateAnteproyectoError;
+
+    // 6. Actualizar el estado en el estado de React
+    setAnteproyectos((prev) =>
+      prev.map((item) =>
+        item.id === anteproyecto.id
+          ? { ...item, estado: 'Pendiente' }
+          : item
+      )
+    );
+
+    alert('Estado del anteproyecto cambiado exitosamente y se eliminó el proyecto asociado.');
+  } catch (err) {
+    console.error('Error cambiando el estado:', err);
+    alert('Ocurrió un error al intentar cambiar el estado: ' + err.message);
+  }
+};
+
 
   const filteredAnteproyectos = anteproyectos.filter((anteproyecto) => {
     // Convertimos el texto de búsqueda a minúsculas para hacer una comparación case-insensitive
