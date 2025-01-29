@@ -19,6 +19,7 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { FaEdit } from "react-icons/fa";
 import Profesor from '../../controller/profesor';
+import { addAvance } from '../../controller/Avances';
 
 const FormularioCoordinador = () => {
   // Datos del estudiante (read-only)
@@ -222,16 +223,17 @@ const FormularioCoordinador = () => {
       if (error) throw error;
 
       // Insertar registro en la tabla Proyecto
-      const { error: insertProyectoError } = await supabase
+      const { data: insertProyecto, error: insertProyectoError } = await supabase
         .from('Proyecto')
         .insert({
           profesor_id: profesor.profesor_id,
           estudiante_id: data[0].estudiante_id, // Asegúrate de tener el estudianteId disponible
           anteproyecto_id: idAnteproyecto,
-          estado: "Aprobado",
+          estado: "Pendiente",
           semestre_id: 1,
           fecha_inicio: new Date().toISOString()
-        });
+        })
+        .select('*');
       if (insertProyectoError) throw insertProyectoError;
 
       // Actualizar campo asesor en la tabla Estudiante
@@ -240,6 +242,9 @@ const FormularioCoordinador = () => {
         .update({ asesor: profesor.profesor_id })
         .eq('estudiante_id', data[0].estudiante_id); // Asegúrate de tener el estudianteId disponible
       if (updateEstudianteError) throw updateEstudianteError;
+
+      for (let i = 0; i < 3; i++)
+        await addAvance("Pendiente", insertProyecto[0].id);
       
       alert('Anteproyecto actualizado exitosamente (Aprobado).');
       navigate('/anteproyectosCoordinador');
