@@ -53,12 +53,11 @@ export const addAvance = async (estado, proyectoId) => {
     .select('num_avance')
     .eq('proyecto_id', proyectoId)
     .order('num_avance', { ascending: false })
-    .limit(1)
-    .single();
+    .limit(1);
 
   if (maxNumeroError) throw maxNumeroError;
 
-  const nuevoNumero = maxNumeroData ? maxNumeroData.num_avance + 1 : 1;
+  const nuevoNumero = maxNumeroData.length > 0 ? maxNumeroData[0].num_avance + 1 : 1;
 
   const { data: nuevoAvanceData, error: nuevoAvanceError } = await supabase
     .from('Avance')
