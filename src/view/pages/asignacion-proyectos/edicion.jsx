@@ -182,6 +182,28 @@ function EdicionAsignacionProyectos() {
     }
   };
 
+  const handleEstadoChange = async (proyectoId, nuevoEstado) => {
+    try{
+      const { proyectoError } = await supabase
+        .from("Proyecto")
+        .update({ estado: nuevoEstado })
+        .eq("id", proyectoId);
+
+      if (proyectoError) throw proyectoError;
+
+      setProyectos((prevProyectos) =>
+        prevProyectos.map((proj) =>
+          proj.id === proyectoId ? { ...proj, estado: nuevoEstado } : proj
+        )
+      );
+
+      alert("Estado actualizado exitosamente");
+    } catch (err) {
+      console.error("handleEstadoChange error:", err);
+      alert("Error al actualizar el estado del proyecto");
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex flex-col">
@@ -211,6 +233,7 @@ function EdicionAsignacionProyectos() {
                   <th className="p-3 text-left">Empresa</th>
                   <th className="p-3 text-left">Departamento</th>
                   <th className="p-3 text-left">Categoría de anteproyecto</th>
+                  <th className="p-3 text-left">Estado de proyecto</th>
                   <th className="p-3 text-left">Profesor</th>
                   <th className="p-3 text-left">Categoría de profesor</th>
                   <th className="p-3 text-left">Acciones</th>
@@ -239,13 +262,27 @@ function EdicionAsignacionProyectos() {
                         {proyecto.Anteproyecto.Categoria?.nombre ?? "N/A"}
                       </td>
                       <td className="p-3 text-sm text-gray-700">
+                        {proyecto.estado}
+                      </td>
+                      <td className="p-3 text-sm text-gray-700">
                         {assignedProf ? assignedProf.nombre : "N/A"}
                       </td>
                       <td className="p-3 text-sm text-gray-700">
                         {assignedProf ? assignedProf.categoria ?? "N/A" : "N/A"}
                       </td>
                       <td className="flex p-3 text-sm text-gray-700 space-x-2">
-                        {/* Profesor Selection Dropdown */}
+                        <button
+                          onClick={() => handleEstadoChange(proyecto.id, 'Aprobado')}
+                          className="px-2 py-1 bg-green-500 text-white rounded mr-2"
+                        >
+                          Aprobar
+                        </button>
+                        <button
+                          onClick={() => handleEstadoChange(proyecto.id, 'Reprobado')}
+                          className="px-2 py-1 bg-red-500 text-white rounded"
+                        >
+                          Reprobar
+                        </button>
                         <select
                           className="border rounded px-2 py-1"
                           value={proyecto.profesor_id || ""}
