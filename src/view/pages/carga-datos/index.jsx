@@ -17,68 +17,99 @@ import { supabase } from '../../../model/Cliente';
 const InicioCargaDatos = () => {
   const [modal, setModal] = useState(false);
 
-  /**
-   * Ejemplo de limpieza de la BD:
-   * - Buscamos Anteproyectos con estado "Finalizado"
-   * - Eliminamos sus estudiantes en 'Usuario'
-   * - Borramos disponibilidad, etc.
-   * - Actualizamos 'semestre_id' a 0 o nulo en Anteproyecto, Cita
-   */
+  // Función para realizar un borrado en cascada en las tablas relacionadas en la base de datos.
+  // Se elimina **todos** los registros de las tablas que no deben mantenerse, 
+  // asegurando que las relaciones de claves foráneas se resuelvan correctamente.
+  //
+  // Tablas que **se borran**:
+  // - 'anteproyecto', 'bitacora', 'entrada', 'anteproyectocontacto', 'avance', 
+  // - 'proyecto', 'semestre', 'contactoempresa' 
+  // - además de los registros de 'acta', 'usuario', 'profesor', 'estudiante'.
+  //
+  // Las tablas que **se mantienen** (no se borran):
+  // - 'Categoria', 'Machote', 'Acta', 'ContactosEmpresa', 'Empresa', 'Calificaciones'
+  //
+  // Cada eliminación de registros se realiza de manera secuencial para garantizar la consistencia de los datos y la resolución de las dependencias entre tablas.
+  // Si ocurre un error en cualquier paso, el proceso se detiene y se lanza un error con el mensaje correspondiente.
+
   const ReiniciarBaseDatos = async () => {
     if (!window.confirm('¿Está seguro(a) de que desea eliminar los registros?')) return;
+  
     try {
-      // 1. Anteproyectos finalizados => obtener sus estudiante_id
-      const { data: anteFinalizados, error: anteFinalError } = await supabase
+      // Borrar dependencias de Anteproyecto primero
+      const { error: anteproyectoContactoError } = await supabase
+        .from('AnteproyectoContacto')
+        .delete();
+      if (anteproyectoContactoError) throw anteproyectoContactoError;
+  
+      const { error: correccionesError } = await supabase
+        .from('Correcciones')
+        .delete();
+      if (correccionesError) throw correccionesError;
+  
+      // Ahora sí se puede borrar Anteproyecto
+      const { error: anteproyectoError } = await supabase
         .from('Anteproyecto')
-        .select('estudiante_id')
-        .eq('estado', 'Finalizado'); // Ajusta si en tu enum existe "Finalizado"
+        .delete();
+      if (anteproyectoError) throw anteproyectoError;
+  
+      // Borrar dependencias de Bitácoras primero
+      const { error: entradaError } = await supabase
+        .from('Entrada')
+        .delete();
+      if (entradaError) throw entradaError;
+  
+      // Ahora se puede borrar Bitácora
+      const { error: bitacoraError } = await supabase
+        .from('Bitacora')
+        .delete();
+      if (bitacoraError) throw bitacoraError;
+  
+      // Borrar Avances del Proyecto
+      const { error: avanceError } = await supabase
+        .from('Avance')
+        .delete();
+      if (avanceError) throw avanceError;
+  
+      // Borrar SolicitudCarta antes de profesores y estudiantes
+  
+      const { error: solicitudCartaError } = await supabase
+        .from('SolicitudCarta')
+        .delete();
+      if (solicitudCartaError) throw solicitudCartaError;
 
-      if (anteFinalError) throw anteFinalError;
+      const {error: CalificacionError} = await supabase
+        .from('Calificacion')
+        .delete();
 
-      // 2. Tomar esos estudiante_id y borrar de 'Usuario'
-      const idEstudiantes = anteFinalizados.map(a => a.estudiante_id);
-      if (idEstudiantes.length > 0) {
-        const { error: userDeleteError } = await supabase
-          .from('Usuario')
-          .delete()
-          .in('id', idEstudiantes);
+      if(CalificacionError) throw CalificacionError;
 
-        if (userDeleteError) throw userDeleteError;
-      }
-
-      // 3. Borrar todas las disponibilidades
-      //    (antes se llamaba 'disponibilidadCitas', ahora 'Disponibilidad').
-      const { error: dispError } = await supabase
-        .from('disponibilidad')
-        .delete()
-        .neq('id', '-1'); // Si tenías esa lógica especial, sino quítalo
-
-      if (dispError) throw dispError;
-
-      // 4. Actualizar Anteproyecto para limpiar semestres
-      const { error: anteUpdateError } = await supabase
-        .from('Anteproyecto')
-        .update({ /* semestre_id: null */ })
-        // .eq('semestre_id', 1)  // si manejas semestres con ID=1
-        .neq('id', ''); // Para forzar actualizaciones, ajusta tu lógica
-
-      if (anteUpdateError) throw anteUpdateError;
-
-      // 5. Actualizar Cita (antes 'citas')
-      const { error: citaUpdateError } = await supabase
+      const {error: citaError} = await supabase
         .from('Cita')
-        .update({ /* semestre_id: null */ })
-        // .eq('semestre_id', 1)
-        .neq('cita_id', ''); // ajusta a tu lógica
-      if (citaUpdateError) throw citaUpdateError;
+        .delete();
 
-      alert('Los registros han sido limpiados correctamente.');
+      if(citaError) throw citaError;
+  
+      // Borrar Proyecto antes de los semestres (aunque los semestres no se eliminarán)
+      const { error: proyectoError } = await supabase
+        .from('Proyecto')
+        .delete();
+      if (proyectoError) throw proyectoError;
+  
+      // Borrar Calendario en lugar de Evento
+      const { error: calendarioError } = await supabase
+        .from('Calendario')
+        .delete();
+      if (calendarioError) throw calendarioError;
+  
+      console.log('Borrado en cascada completado correctamente');
     } catch (error) {
-      console.error('Error al eliminar registros:', error);
-      alert('Hubo un error al eliminar los registros.');
+      console.error('Error durante el borrado en cascada:', error.message);
+      alert('Error durante el borrado en cascada: ' + error.message);
     }
     setModal(false);
   };
+  
 
   return (
     <>
