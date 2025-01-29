@@ -56,7 +56,11 @@ function EdicionAsignacionProyectos() {
             Anteproyecto:anteproyecto_id (
               departamento,
               empresa_id,
+              categoria_id,
               Empresa: empresa_id (
+                nombre
+              ),
+              Categoria: categoria_id (
                 nombre
               )
             )
@@ -206,7 +210,9 @@ function EdicionAsignacionProyectos() {
                   <th className="p-3 text-left">Carnet</th>
                   <th className="p-3 text-left">Empresa</th>
                   <th className="p-3 text-left">Departamento</th>
+                  <th className="p-3 text-left">Categoría de anteproyecto</th>
                   <th className="p-3 text-left">Profesor</th>
+                  <th className="p-3 text-left">Categoría de profesor</th>
                   <th className="p-3 text-left">Acciones</th>
                 </tr>
               </thead>
@@ -230,9 +236,15 @@ function EdicionAsignacionProyectos() {
                         {proyecto.Anteproyecto.departamento}
                       </td>
                       <td className="p-3 text-sm text-gray-700">
+                        {proyecto.Anteproyecto.Categoria?.nombre ?? "N/A"}
+                      </td>
+                      <td className="p-3 text-sm text-gray-700">
                         {assignedProf ? assignedProf.nombre : "N/A"}
                       </td>
-                      <td className="p-3 text-sm text-gray-700 space-x-2">
+                      <td className="p-3 text-sm text-gray-700">
+                        {assignedProf ? assignedProf.categoria ?? "N/A" : "N/A"}
+                      </td>
+                      <td className="flex p-3 text-sm text-gray-700 space-x-2">
                         {/* Profesor Selection Dropdown */}
                         <select
                           className="border rounded px-2 py-1"
