@@ -80,11 +80,19 @@ const DisponibilidadProfesor = () => {
     return day === 6 || day === 0; // 6 es sábado, 0 es domingo
   };
 
+  // --- Helper to parse "dia" safely as local day ---
+  const parseLocalDate = (dbDateString) => {
+    // Force noon to avoid any timezone shift off-by-one:
+    return new Date(`${dbDateString}T12:00:00`);
+  };
+
   const tileClassName = ({ date }) => {
+    // Compare using yyyy-MM-dd from both the calendar date and the db date
     const formattedDate = format(date, 'yyyy-MM-dd');
-    const hasDisponibilidad = disponibilidad.some(
-      d => format(new Date(d.dia), 'yyyy-MM-dd') === formattedDate
-    );
+    const hasDisponibilidad = disponibilidad.some(d => {
+      const dbDate = parseLocalDate(d.dia);
+      return format(dbDate, 'yyyy-MM-dd') === formattedDate;
+    });
     
     let classes = [];
     
@@ -96,7 +104,10 @@ const DisponibilidadProfesor = () => {
       classes.push('weekend');
     }
     
-    if (selectedDate && format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')) {
+    if (
+      selectedDate &&
+      format(date, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd')
+    ) {
       classes.push('selected-date');
     }
     
@@ -128,8 +139,11 @@ const DisponibilidadProfesor = () => {
 
   const isTimeSlotOverlapping = (newSlot, existingSlots) => {
     return existingSlots.some(slot => {
-      return (newSlot.inicio >= slot.hora_inicio && newSlot.inicio < slot.hora_fin) ||
-             (newSlot.fin > slot.hora_inicio && newSlot.fin <= slot.hora_fin);
+      return (
+        newSlot.inicio >= slot.hora_inicio && newSlot.inicio < slot.hora_fin
+      ) || (
+        newSlot.fin > slot.hora_inicio && newSlot.fin <= slot.hora_fin
+      );
     });
   };
 
@@ -140,8 +154,16 @@ const DisponibilidadProfesor = () => {
     }
 
     try {
-      const formattedDate = format(selectedDate, 'yyyy-MM-dd');
-      
+      // Safeguard: set the selected date to noon local so we never slip to a previous day
+      const localDateCopy = new Date(selectedDate.getTime());
+      localDateCopy.setHours(12, 0, 0, 0);
+
+      // Build YYYY-MM-DD manually
+      const year = localDateCopy.getFullYear();
+      const month = String(localDateCopy.getMonth() + 1).padStart(2, '0');
+      const day = String(localDateCopy.getDate()).padStart(2, '0');
+      const formattedDate = `${year}-${month}-${day}`;
+
       // Verificar traslapes con disponibilidades existentes
       const { data: existing } = await supabase
         .from('disponibilidad')
@@ -151,7 +173,8 @@ const DisponibilidadProfesor = () => {
 
       // Filtrar slots que no se traslapan
       const validTimeSlots = selectedTimeSlots.filter(slot => 
-        !isTimeSlotOverlapping(slot, existing || []));
+        !isTimeSlotOverlapping(slot, existing || [])
+      );
 
       if (validTimeSlots.length === 0) {
         errorToast('Los horarios seleccionados se traslapan con disponibilidades existentes');
@@ -266,14 +289,16 @@ const DisponibilidadProfesor = () => {
             {selectedDate && showTimeSelector && (
               <div className="mt-6 space-y-4 bg-gray-50 p-4 rounded-lg">
                 <h3 className="font-medium text-lg md:text-xl text-center">
-                  {format(selectedDate, 'EEEE d \'de\' MMMM \'de\' yyyy', { locale: es })}
+                  {format(selectedDate, "EEEE d 'de' MMMM 'de' yyyy", { locale: es })}
                 </h3>
                 <div className="time-slots-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                   {HORARIOS_PREDEFINIDOS.map((horario, index) => (
                     <button
                       key={index}
                       className={`time-slot-btn p-3 md:p-4 text-sm md:text-base ${
-                        selectedTimeSlots.some(slot => slot.inicio === horario.inicio && slot.fin === horario.fin)
+                        selectedTimeSlots.some(
+                          slot => slot.inicio === horario.inicio && slot.fin === horario.fin
+                        )
                           ? 'selected bg-blue-100 border-blue-500'
                           : 'bg-white hover:bg-gray-50'
                       }`}
@@ -291,7 +316,8 @@ const DisponibilidadProfesor = () => {
                     disabled={selectedTimeSlots.length === 0}
                   >
                     <i className="fas fa-plus mr-2"></i>
-                    Agregar {selectedTimeSlots.length} horario{selectedTimeSlots.length !== 1 ? 's' : ''}
+                    Agregar {selectedTimeSlots.length} horario
+                    {selectedTimeSlots.length !== 1 ? 's' : ''}
                   </button>
                   <button
                     onClick={() => setShowTimeSelector(false)}
@@ -325,31 +351,34 @@ const DisponibilidadProfesor = () => {
                       // Si es la misma fecha, ordenar por hora
                       return a.hora_inicio.localeCompare(b.hora_inicio);
                     })
-                    .map((disp) => (
-                    <div
-                      key={disp.id}
-                      className="availability-item hover:shadow-md"
-                    >
-                      <div>
-                        <p className="text-base md:text-lg font-medium">
-                          {format(new Date(disp.dia), 'EEEE d \'de\' MMMM', { locale: es })}
-                        </p>
-                        <div className="flex items-center text-gray-600">
-                          <i className="far fa-clock mr-2"></i>
-                          <p className="text-sm md:text-base">
-                            {disp.hora_inicio.slice(0, 5)} - {disp.hora_fin.slice(0, 5)}
-                          </p>
+                    .map((disp) => {
+                      const dispDate = parseLocalDate(disp.dia);
+                      return (
+                        <div
+                          key={disp.id}
+                          className="availability-item hover:shadow-md"
+                        >
+                          <div>
+                            <p className="text-base md:text-lg font-medium">
+                              {format(dispDate, "EEEE d 'de' MMMM", { locale: es })}
+                            </p>
+                            <div className="flex items-center text-gray-600">
+                              <i className="far fa-clock mr-2"></i>
+                              <p className="text-sm md:text-base">
+                                {disp.hora_inicio.slice(0, 5)} - {disp.hora_fin.slice(0, 5)}
+                              </p>
+                            </div>
+                          </div>
+                          <button
+                            onClick={() => handleEliminarDisponibilidad(disp.id)}
+                            className="delete-btn hover:bg-red-100"
+                            title="Eliminar disponibilidad"
+                          >
+                            <i className="fas fa-trash-alt"></i>
+                          </button>
                         </div>
-                      </div>
-                      <button
-                        onClick={() => handleEliminarDisponibilidad(disp.id)}
-                        className="delete-btn hover:bg-red-100"
-                        title="Eliminar disponibilidad"
-                      >
-                        <i className="fas fa-trash-alt"></i>
-                      </button>
-                    </div>
-                  ))}
+                      );
+                    })}
                 </div>
               )}
             </div>

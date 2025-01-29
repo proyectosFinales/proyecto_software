@@ -49,7 +49,7 @@ const InicioCargaDatos = () => {
       // 3. Borrar todas las disponibilidades
       //    (antes se llamaba 'disponibilidadCitas', ahora 'Disponibilidad').
       const { error: dispError } = await supabase
-        .from('Disponibilidad')
+        .from('disponibilidad')
         .delete()
         .neq('id', '-1'); // Si tenías esa lógica especial, sino quítalo
 
