@@ -1,15 +1,11 @@
 // /controllers/AsignacionDefensaController.js
+
 import { v4 as uuidv4 } from "uuid";
 import supabase from "../model/supabase";
 
-/**
- * Main function: assign defenses (Citas) to all eligible projects.
- * Returns { assigned: number, unassigned: string[] }
- *   - "unassigned" is an array of error messages explaining why each project wasn't assigned.
- */
 export async function assignAllDefensas() {
   try {
-    // STEP 1: Fetch all candidate projects
+    console.log("=== assignAllDefensas: Starting... ===");
     const { data: projects, error: projectErr } = await supabase
       .from("Proyecto")
       .select(`
@@ -32,13 +28,13 @@ export async function assignAllDefensas() {
 
     if (projectErr) throw projectErr;
 
-    // Filter out only "Aprobado" + "Defensa" + no existing Cita
+    // Filter to "Aprobado" + "Defensa" + no Cita
     const toAssign = [];
     for (const p of projects) {
       const projState = p.estado?.toLowerCase();
       const studState = p.Estudiante?.estado?.toLowerCase();
       if (projState === "aprobado" && studState === "defensa") {
-        // check no existing Cita
+        // check no Cita
         const { data: existingCita, error: citaErr } = await supabase
           .from("Cita")
           .select("cita_id")
@@ -54,7 +50,6 @@ export async function assignAllDefensas() {
     let assignedCount = 0;
     const notAssigned = [];
 
-    // STEP 2: Try to assign each project
     for (const project of toAssign) {
       const result = await assignOneDefensa(project);
       if (result.success) {
@@ -64,6 +59,7 @@ export async function assignAllDefensas() {
       }
     }
 
+    console.log("=== assignAllDefensas: Done. ===");
     return {
       assigned: assignedCount,
       unassigned: notAssigned,
@@ -74,120 +70,115 @@ export async function assignAllDefensas() {
   }
 }
 
-/**
- * Assign exactly ONE defense (Cita) for a given project, if possible.
- * We'll attempt all free tutor slots in chronological order and pick
- * the first one that yields 2 lectores. If none works, return an error message.
- */
 async function assignOneDefensa(project) {
   try {
-    // 1) Get the tutor's name for user-friendly errors
     const tutorName = project?.Profesor?.Usuario?.nombre || "Profesor desconocido";
+    console.log(`\n--- assignOneDefensa for Project [${project.id}], tutor: ${tutorName} ---`);
 
-    // 2) Find all free tutor slots
+    // Tutor slots
     const freeTutorSlots = await findTutorFreeSlots(project.profesor_id);
     if (!freeTutorSlots || freeTutorSlots.length === 0) {
-      // no tutor availability
-      return {
-        success: false,
-        reason: `No hay disponibilidades para el profesor ${tutorName}.`,
-      };
+      const msg = `No hay disponibilidades para el profesor ${tutorName}.`;
+      console.warn(msg);
+      return { success: false, reason: msg };
     }
 
-    // We'll attempt each slot until we find 2 lectores
+    // Try each slot in ascending day/time order
     for (const slot of freeTutorSlots) {
-      const dia = slot.dia;
-      const horaInicio = slot.hora_inicio;
-      const horaFin = slot.hora_fin;
+      const dayString = slot.dia;
+      const startTime = slot.hora_inicio;
+      const endTime = slot.hora_fin;
+      console.log(`Trying slot => ${dayString} ${startTime}-${endTime} for tutor ${tutorName}`);
 
-      // 3) Try to find 2 lectores for this slot
+      // find 2 lectores
       const lectorResult = await buscarDosLectores(
-        dia,
-        horaInicio,
-        horaFin,
+        dayString,
+        startTime,
+        endTime,
         project.profesor_id,
         project.semestre_id
       );
-      // lectorResult: { success: boolean, lectores?: string[], message?: string }
 
       if (lectorResult.success && lectorResult.lectores?.length === 2) {
-        // We have 2 lectores; insert the new Cita referencing this slot
+        console.log(
+          `✓ Found 2 lectores for slot ${dayString} ${startTime}-${endTime}:`,
+          lectorResult.lectores
+        );
+
+        // Insert Cita
         const citaId = uuidv4();
         const { error: insertErr } = await supabase.from("Cita").insert({
           cita_id: citaId,
           proyecto_id: project.id,
           estudiante_id: project.estudiante_id,
-          semestre_id: project.semestre_id, // ensure this is never "null" string
+          semestre_id: project.semestre_id,
           tutor: project.profesor_id,
           lector1: lectorResult.lectores[0],
           lector2: lectorResult.lectores[1],
-          disponibilidad_id: slot.id, // store the tutor's chosen slot
+          disponibilidad_id: slot.id,
         });
 
-        if (insertErr) throw insertErr;
-        // success, return
+        if (insertErr) {
+          throw new Error(`Error inserting Cita: ${insertErr.message}`);
+        }
+
+        console.log(`✓ Inserted Cita for project ${project.id}, ID: ${citaId}`);
         return { success: true };
       } else {
-        // either not success or didn't find 2
-        // keep trying next slot
-        // you might log something for debugging
+        // no 2 lectores found here
+        console.warn(
+          `✗ No 2 lectores found at ${dayString} ${startTime}-${endTime}. Reason: ${
+            lectorResult.message || "unknown"
+          }`
+        );
       }
     }
 
     // If we exit the loop, no slot worked
-    return {
-      success: false,
-      reason: `No se encontró ningún horario en el que el profesor ${tutorName} y dos lectores pudieran asistir.`,
-    };
+    const failMsg = `No se encontró ningún horario en el que el profesor ${tutorName} y dos lectores pudieran asistir.`;
+    console.warn(failMsg);
+    return { success: false, reason: failMsg };
   } catch (err) {
     console.error("❌ Error in assignOneDefensa:", err);
     return { success: false, reason: err.message };
   }
 }
 
-/**
- * Finds all "disponibilidad" rows for a given tutor that are not used in any other Cita.
- * Return them as an array (with {id, dia, hora_inicio, hora_fin...}).
- */
 async function findTutorFreeSlots(tutorId) {
-  // 1) all availability for that professor
   const { data: allSlots, error: slotErr } = await supabase
     .from("disponibilidad")
     .select("*")
     .eq("profesor_id", tutorId);
-  if (slotErr) throw slotErr;
 
+  if (slotErr) throw slotErr;
   if (!allSlots || allSlots.length === 0) {
     return [];
   }
 
-  // 2) filter out the ones used by a cita
+  // filter out used
   const free = [];
   for (const slot of allSlots) {
-    // check if there's a cita referencing this slot
     const { data: used, error: usedErr } = await supabase
       .from("Cita")
       .select("cita_id")
       .eq("disponibilidad_id", slot.id)
       .maybeSingle();
     if (usedErr) throw usedErr;
-
     if (!used) {
       free.push(slot);
     }
   }
 
-  // (optional) sort by date/time if you want chronological
+  // sort ascending by date/time
   free.sort((a, b) => {
-    // first compare day
     const dateA = new Date(a.dia);
     const dateB = new Date(b.dia);
-    const diffDate = dateA - dateB;
-    if (diffDate !== 0) return diffDate;
+    const diff = dateA - dateB;
+    if (diff !== 0) return diff;
 
-    // if same day, compare hora_inicio
-    const [hA, mA, sA] = a.hora_inicio.split(":").map(Number);
-    const [hB, mB, sB] = b.hora_inicio.split(":").map(Number);
+    // same day => compare hour
+    const [hA, mA] = a.hora_inicio.split(":").map(Number);
+    const [hB, mB] = b.hora_inicio.split(":").map(Number);
     return hA * 60 + mA - (hB * 60 + mB);
   });
 
@@ -195,24 +186,13 @@ async function findTutorFreeSlots(tutorId) {
 }
 
 /**
- * Try to find TWO lector professors who can attend a given day/time.
- * Return { success: boolean, lectores?: string[], message?: string }
- *
- * - We get all professors except the tutor
- * - Check capacity for each
- * - Check they have matching availability for (dia, horaInicio, horaFin)
- * - Check they're not double-booked at that same date/time
- * - If at least 2 are found, success
- * - Otherwise, fail with a message explaining how many we actually found
+ * KEY CHANGE: lectorCapacity = 2 * cantidad_estudiantes
+ * (Ignoring 'estudiantes_libres' now, per your request.)
  */
-async function buscarDosLectores(
-  dia,
-  horaInicio,
-  horaFin,
-  excludeProfId,
-  semestreId
-) {
-  // 1) fetch all professors with their name, capacity, etc.
+async function buscarDosLectores(dia, horaInicio, horaFin, excludeProfId, semestreId) {
+  console.log(
+    `buscarDosLectores => Day: ${dia}, Time: ${horaInicio}-${horaFin}, excluding tutor: ${excludeProfId}`
+  );
   const { data: profs, error: profsErr } = await supabase
     .from("Profesor")
     .select(`
@@ -225,19 +205,19 @@ async function buscarDosLectores(
     `);
   if (profsErr) throw profsErr;
 
-  // Filter out the tutor
+  // Filter out tutor
   const possibleLectores = profs.filter((p) => p.profesor_id !== excludeProfId);
 
-  // We'll build an array of { profId, profName } who are actually eligible
   const eligible = [];
 
   for (const prof of possibleLectores) {
     const profId = prof.profesor_id;
     const profName = prof.Usuario?.nombre || "Profesor sin nombre";
-    const realStudents = prof.cantidad_estudiantes - prof.estudiantes_libres;
-    const lectorCapacity = 2 * realStudents;
 
-    // Count how many times they've served as lector in the same semester
+    // --- [Key line changed here] ---
+    const lectorCapacity = 2 * prof.cantidad_estudiantes;
+
+    // how many times they've served as lector
     const { data: lectorCitas, error: lectorErr } = await supabase
       .from("Cita")
       .select("cita_id")
@@ -246,28 +226,26 @@ async function buscarDosLectores(
     if (lectorErr) throw lectorErr;
 
     if (lectorCitas.length >= lectorCapacity) {
-      // This professor is at capacity, skip
+      console.log(`- ${profName} is at lector capacity (limit ${lectorCapacity}), skip.`);
       continue;
     }
 
-    // check if they have a matching availability row
-    const { data: lectorSlot, error: lectorSlotErr } = await supabase
+    // check if they have availability
+    const { data: lectorSlot } = await supabase
       .from("disponibilidad")
-      .select("id")
+      .select("id, dia, hora_inicio, hora_fin")
       .eq("profesor_id", profId)
       .eq("dia", dia)
       .eq("hora_inicio", horaInicio)
       .eq("hora_fin", horaFin)
       .maybeSingle();
-    if (lectorSlotErr) throw lectorSlotErr;
+
     if (!lectorSlot) {
-      // they don't have that day/time
+      // no matching day/time
       continue;
     }
 
-    // Check double booking for same day/time
-    // We'll look for any Cita that references a disponibilidad with the same day/time
-    // and has lector1 or lector2 = profId
+    // check double-booking
     const { data: conflictCitas, error: conflictErr } = await supabase
       .from("Cita")
       .select(
@@ -286,43 +264,38 @@ async function buscarDosLectores(
       .or(`lector1.eq.${profId},lector2.eq.${profId}`);
     if (conflictErr) throw conflictErr;
 
-    // see if any have the same day/time
-    const isDoubleBooked = conflictCitas.some((cita) => {
-      return (
-        cita.disponibilidad?.dia === dia &&
-        cita.disponibilidad?.hora_inicio === horaInicio &&
-        cita.disponibilidad?.hora_fin === horaFin
-      );
-    });
+    const isDoubleBooked = conflictCitas.some(
+      (c) =>
+        c.disponibilidad?.dia === dia &&
+        c.disponibilidad?.hora_inicio === horaInicio &&
+        c.disponibilidad?.hora_fin === horaFin
+    );
     if (isDoubleBooked) {
-      // can't serve as lector at the same time
+      console.log(`- ${profName} is double-booked at ${dia} ${horaInicio}-${horaFin}, skip.`);
       continue;
     }
 
-    // If we got here, professor is eligible
+    // if we got here, we can use them as lector
     eligible.push({ profId, profName });
   }
 
-  // We need at least 2
+  // need at least 2
   if (eligible.length < 2) {
-    return {
-      success: false,
-      message: `Se requieren 2 profesores lectores disponibles, pero solo se encontró(n) ${eligible.length} para la fecha/horario ${dia} ${horaInicio}-${horaFin}.`,
-    };
+    const msg = `Se requieren 2 profesores lectores. Solo se encontró(n) ${eligible.length} para ${dia} ${horaInicio}-${horaFin}.`;
+    return { success: false, message: msg };
   }
 
-  // pick any 2 (random or first two)
+  // pick 2 randomly
   shuffleArray(eligible);
   const chosen = eligible.slice(0, 2);
 
+  console.log(`buscarDosLectores => Found ${eligible.length} eligible, chosen:`, chosen);
   return {
     success: true,
     lectores: [chosen[0].profId, chosen[1].profId],
-    message: `Elegidos: ${chosen[0].profName} y ${chosen[1].profName}.`,
   };
 }
 
-/** Utility: shuffle array in-place */
 function shuffleArray(array) {
   for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
