@@ -17,7 +17,7 @@ const Avances = () => {
   }, [proyectoId]);
 
   const handleEstadoChange = async (avanceId, nuevoEstado) => {
-    updateAvance(avanceId, nuevoEstado).then(() => {
+    updateAvance(avanceId, nuevoEstado, proyectoId).then(() => {
       setAvances(avances.map(avance => avance.id === avanceId ? { ...avance, estado: nuevoEstado } : avance));
       alert('Avance actualizado correctamente');
     }).catch(err => {
@@ -38,7 +38,7 @@ const Avances = () => {
 
   const handleEliminarUltimoAvance = async () => {
     const ultimoAvance = avances[avances.length - 1];
-    deleteAvance(ultimoAvance.id).then(() => {
+    deleteAvance(ultimoAvance.id, proyectoId).then(() => {
       setAvances(avances.slice(0, -1));
       alert('Avance eliminado correctamente');
     }).catch(err => {
