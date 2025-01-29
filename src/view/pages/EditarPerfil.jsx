@@ -1,5 +1,4 @@
 import { React, useState, useEffect } from "react";
-import "../styles/EditarPerfil.css";
 import Select from "react-select";
 import { 
   FaUser, 
@@ -8,8 +7,8 @@ import {
   FaEnvelope, 
   FaLock, 
   FaMapMarked, 
-  FaUsers,    // Para mostrar cantidad de estudiantes (ejemplo)
-  FaShieldAlt // Para mostrar rol (ejemplo)
+  FaUsers,
+  FaShieldAlt
 } from 'react-icons/fa';
 import Footer from "../components/Footer";
 import { getUserInfo, updateUserInfo } from "../../controller/userInfo";
@@ -25,6 +24,7 @@ const EditarPerfil = () => {
   const id = sessionStorage.getItem("token");
   const [categorias, setCategorias] = useState([]);
   const [selectedCategoria, setSelectedCategoria] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -36,15 +36,14 @@ const EditarPerfil = () => {
 
   const handleSave = async () => {
     try {
-      // IMPORTANTE: no modificar el rol en el upsert
-      // si quieres evitar que se cambie. 
-      // O sea, tu back puede ignorar userData.rol.
-
-      await updateUserInfo({...userData, categoria_id: selectedCategoria.value});
+      setIsLoading(true);
+      await updateUserInfo({...userData, categoria_id: selectedCategoria?.value});
       alert("Usuario modificado con éxito.");
       handleCancel();
     } catch (error) {
       alert(error.message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -61,15 +60,8 @@ const EditarPerfil = () => {
   useEffect(() => {
     const obtenerInfoUsuario = async () => {
       try {
+        setIsLoading(true);
         const data = await getUserInfo(id);
-        // data vendrá con { 
-        //   id, correo, contrasena, rol, sede, telefono, nombre,
-        //   Profesor: { profesor_id, cantidad_estudiantes },
-        //   Estudiante: { estudiante_id, carnet, asesor, estado }, 
-        // }
-
-        // Construimos userData para el front
-        // Nota: 'rol' siempre en string para compararlo fácilmente
         const baseData = {
           id: data.id,
           rol: data.rol?.toString(),
@@ -80,14 +72,12 @@ const EditarPerfil = () => {
           nombre: data.nombre
         };
 
-        // Si es profesor
         if (data.rol == 2 && data.Profesor) {
           baseData.profesor_id = data.Profesor[0].profesor_id;
           baseData.cantidad_estudiantes = data.Profesor[0].cantidad_estudiantes ?? 0;
           setSelectedCategoria({value: data.Profesor[0].categoria_id, label: data.Profesor[0].Categoria.nombre});
         }
 
-        // Si es estudiante
         if (data.rol == 3 && data.Estudiante) {
           baseData.estudiante_id = data.Estudiante.estudiante_id;
           baseData.carnet = data.Estudiante.carnet || "";
@@ -98,6 +88,8 @@ const EditarPerfil = () => {
         setUserData(baseData);
       } catch (error) {
         alert(error.message);
+      } finally {
+        setIsLoading(false);
       }
     };
     
@@ -116,8 +108,6 @@ const EditarPerfil = () => {
     }).catch(console.error);
   }, []);
 
-  // Pequeña función auxiliar: 
-  // Mapea rol numérico → nombre textual
   const getRolLabel = (rolNum) => {
     switch (rolNum) {
       case "1": return "Coordinador";
@@ -127,201 +117,246 @@ const EditarPerfil = () => {
     }
   };
 
+  const InputField = ({ icon: Icon, label, name, type = "text", value, onChange, readOnly = false }) => (
+    <div className="mb-6">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        {label}
+      </label>
+      <div className="relative rounded-md shadow-sm">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+          <Icon className="h-5 w-5 text-azul" />
+        </div>
+        <input
+          type={type}
+          name={name}
+          value={value || ""}
+          onChange={onChange}
+          readOnly={readOnly}
+          className={`
+            w-full pl-10 pr-4 py-2.5
+            border border-gray-300 rounded-lg
+            focus:outline-none focus:ring-2 focus:ring-azul focus:border-transparent
+            ${readOnly ? 'bg-gray-50 cursor-not-allowed' : 'bg-white hover:border-azul'}
+            transition-all duration-200
+          `}
+        />
+      </div>
+    </div>
+  );
+
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
+      {/* Dynamic Header based on role */}
       {userData.rol === "1" && <HeaderCoordinador title="Editar Perfil" />}
       {userData.rol === "2" && <HeaderProfesor title="Editar Perfil" />}
       {userData.rol === "3" && <HeaderEstudiante title="Editar Perfil" />}
 
-      <div className="center-container">
-        <div className="edit-user-container">
-          <div className="edit-user-info">
-            <h2>Editar Información</h2>
-
-            {/* Rol (readOnly) */}
-            <label>
-              Rol (no modificable)
-              <div className="input-container-editar">
-                <FaShieldAlt className="icon-editar" />
-                <input
-                  type="text"
-                  name="rol"
-                  className="input-field-editar"
-                  value={getRolLabel(userData.rol) || ""}
-                  readOnly
-                />
-              </div>
-            </label>
-
-            {/* Nombre (todos los roles lo pueden editar, excepto si no quieres...) */}
-            <label>
-              Nombre
-              <div className="input-container-editar">
-                <FaUser className="icon-editar" />
-                <input
-                  type="text"
-                  name="nombre"
-                  className="input-field-editar"
-                  value={userData.nombre || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </label>
-
-            {/* Para todos: Correo electrónico */}
-            <label>
-              Correo electrónico
-              <div className="input-container-editar">
-                <FaEnvelope className="icon-editar" />
-                <input
-                  type="email"
-                  name="correo"
-                  className="input-field-editar"
-                  value={userData.correo || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </label>
-
-            {/* Contraseña */}
-            <label>
-              Contraseña
-              <div className="input-container-editar">
-                <FaLock className="icon-editar" />
-                <input
-                  type="text"
-                  name="contrasena"
-                  className="input-field-editar"
-                  value={userData.contrasena || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </label>
-
-            {/* Sede */}
-            <label>Sede</label>
-            <div className="input-container-editar">
-              <FaMapMarked className="icon-sede" />
-              <select
-                name="sede"
-                className="sede-dropdown"
-                value={userData.sede || ""}
-                onChange={handleChange}
-              >
-                <option value="">Seleccione una sede</option>
-                <option value="Central Cartago">Central Cartago</option>
-                <option value="Local San José">Local San José</option>
-                <option value="Local San Carlos">Local San Carlos</option>
-                <option value="Limón">Centro Académico de Limón</option>
-                <option value="Alajuela">Centro Académico de Alajuela</option>
-              </select>
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {isLoading ? (
+          <div className="flex justify-center items-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-azul"></div>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden transition-shadow duration-300 hover:shadow-xl">
+            <div className="bg-gradient-to-r from-azul to-blue-500 px-6 py-4">
+              <h2 className="text-2xl font-bold text-white">
+                Editar Información de Usuario
+              </h2>
             </div>
 
-            {/* Teléfono */}
-            <label>
-              Teléfono
-              <div className="input-container-editar">
-                <FaPhone className="icon-editar" />
-                <input
-                  type="text"
-                  name="telefono"
-                  className="input-field-editar"
-                  value={userData.telefono || ""}
-                  onChange={handleChange}
-                />
-              </div>
-            </label>
-
-            {/* Si es PROFESOR (rol=2): mostrar cantidad_estudiantes en modo readOnly */}
-            {userData.rol === "2" && (
-              <>
-                <label>
-                  Cantidad de estudiantes asignados
-                  <div className="input-container-editar">
-                    <FaUsers className="icon-editar" />
-                    <input
-                      type="number"
-                      name="cantidad_estudiantes"
-                      className="input-field-editar"
-                      value={userData.cantidad_estudiantes || 0}
-                      readOnly
-                    />
-                  </div>
-                </label>
-                <label>
-                  Categoría
-                  <Select
-                    value={selectedCategoria}
-                    onChange={e => setSelectedCategoria(e)}
-                    options={categorias}
-                    placeholder="Seleccione una categoría"
-                    className="mt-2"
+            <div className="p-6 md:p-8 space-y-6">
+              {/* Basic Information Section */}
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Rol */}
+                  <InputField
+                    icon={FaShieldAlt}
+                    label="Rol (no modificable)"
+                    name="rol"
+                    value={getRolLabel(userData.rol)}
+                    readOnly={true}
                   />
-                </label>
-              </>
-            )}
 
-            {/* Si es ESTUDIANTE (rol=3): mostrar carnet, estado, asesor, etc. */}
-            {userData.rol === "3" && (
-              <>
-                <label>
-                  Carnet
-                  <div className="input-container-editar">
-                    <FaIdCard className="icon-editar" />
-                    <input
-                      type="text"
-                      name="carnet"
-                      className="input-field-editar"
-                      value={userData.carnet || ""}
-                      onChange={handleChange}
-                    />
+                  {/* Nombre */}
+                  <InputField
+                    icon={FaUser}
+                    label="Nombre"
+                    name="nombre"
+                    value={userData.nombre}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Contact Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Correo */}
+                  <InputField
+                    icon={FaEnvelope}
+                    label="Correo electrónico"
+                    name="correo"
+                    type="email"
+                    value={userData.correo}
+                    onChange={handleChange}
+                  />
+
+                  {/* Teléfono */}
+                  <InputField
+                    icon={FaPhone}
+                    label="Teléfono"
+                    name="telefono"
+                    value={userData.telefono}
+                    onChange={handleChange}
+                  />
+                </div>
+
+                {/* Security Information */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Contraseña */}
+                  <InputField
+                    icon={FaLock}
+                    label="Contraseña"
+                    name="contrasena"
+                    type="password"
+                    value={userData.contrasena}
+                    onChange={handleChange}
+                  />
+
+                  {/* Sede */}
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sede
+                    </label>
+                    <div className="relative rounded-md shadow-sm">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <FaMapMarked className="h-5 w-5 text-azul" />
+                      </div>
+                      <select
+                        name="sede"
+                        value={userData.sede || ""}
+                        onChange={handleChange}
+                        className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-azul focus:border-transparent hover:border-azul transition-all duration-200"
+                      >
+                        <option value="">Seleccione una sede</option>
+                        <option value="Central Cartago">Central Cartago</option>
+                        <option value="Local San José">Local San José</option>
+                        <option value="Local San Carlos">Local San Carlos</option>
+                        <option value="Limón">Centro Académico de Limón</option>
+                        <option value="Alajuela">Centro Académico de Alajuela</option>
+                      </select>
+                    </div>
                   </div>
-                </label>
+                </div>
 
-                {/* Asesor (si quieres que sea editable o no) */}
-                <label>
-                  Asesor (no modificable)
-                  <div className="input-container-editar">
-                    <FaUser className="icon-editar" />
-                    <input
-                      type="text"
-                      name="asesor"
-                      className="input-field-editar"
-                      value={userData.asesor || ""}
-                      readOnly
-                    />
+                {/* Professor-specific fields */}
+                {userData.rol === "2" && (
+                  <div className="space-y-6 border-t pt-6">
+                    <h3 className="text-lg font-medium text-gray-900">Información de Profesor</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <InputField
+                        icon={FaUsers}
+                        label="Cantidad de estudiantes asignados"
+                        name="cantidad_estudiantes"
+                        type="number"
+                        value={userData.cantidad_estudiantes}
+                        readOnly={true}
+                      />
+                      
+                      <div className="mb-6">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Categoría
+                        </label>
+                        <Select
+                          value={selectedCategoria}
+                          onChange={e => setSelectedCategoria(e)}
+                          options={categorias}
+                          placeholder="Seleccione una categoría"
+                          className="rounded-lg"
+                          styles={{
+                            control: (base, state) => ({
+                              ...base,
+                              minHeight: '42px',
+                              borderRadius: '0.5rem',
+                              borderColor: state.isFocused ? '#2563EB' : '#D1D5DB',
+                              boxShadow: state.isFocused ? '0 0 0 2px rgba(37, 99, 235, 0.2)' : 'none',
+                              '&:hover': {
+                                borderColor: '#2563EB'
+                              }
+                            }),
+                            menu: (base) => ({
+                              ...base,
+                              borderRadius: '0.5rem',
+                              overflow: 'hidden'
+                            })
+                          }}
+                        />
+                      </div>
+                    </div>
                   </div>
-                </label>
+                )}
 
-                <label>
-                  Estado (no modificable)
-                  <div className="input-container-editar">
-                    <FaIdCard className="icon-editar" />
-                    <input
-                      type="text"
-                      name="estado"
-                      className="input-field-editar"
-                      value={userData.estado || ""}
-                      readOnly
-                    />
+                {/* Student-specific fields */}
+                {userData.rol === "3" && (
+                  <div className="space-y-6 border-t pt-6">
+                    <h3 className="text-lg font-medium text-gray-900">Información de Estudiante</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <InputField
+                        icon={FaIdCard}
+                        label="Carnet"
+                        name="carnet"
+                        value={userData.carnet}
+                        onChange={handleChange}
+                      />
+
+                      <InputField
+                        icon={FaUser}
+                        label="Asesor (no modificable)"
+                        name="asesor"
+                        value={userData.asesor}
+                        readOnly={true}
+                      />
+
+                      <InputField
+                        icon={FaIdCard}
+                        label="Estado (no modificable)"
+                        name="estado"
+                        value={userData.estado}
+                        readOnly={true}
+                      />
+                    </div>
                   </div>
-                </label>
-              </>
-            )}
+                )}
+              </div>
 
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row justify-end gap-4 pt-6 border-t">
+                <button
+                  onClick={handleCancel}
+                  className="w-full sm:w-auto px-6 py-2.5 bg-gray-500 text-white rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleSave}
+                  disabled={isLoading}
+                  className={`
+                    w-full sm:w-auto px-6 py-2.5 
+                    bg-azul text-white rounded-lg 
+                    hover:bg-blue-700 
+                    focus:outline-none focus:ring-2 focus:ring-azul focus:ring-offset-2 
+                    transition-all duration-200
+                    ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
+                  `}
+                >
+                  {isLoading ? 'Guardando...' : 'Guardar'}
+                </button>
+              </div>
+            </div>
           </div>
-          <div className="edit-actions">
-            <button className="btn-cancel" onClick={handleCancel}>
-              Cancelar
-            </button>
-            <button className="btn-save" onClick={handleSave}>
-              Guardar
-            </button>
-          </div>
-        </div>
-        <Footer />
+        )}
       </div>
-    </>
+
+      <Footer />
+    </div>
   );
 };
 

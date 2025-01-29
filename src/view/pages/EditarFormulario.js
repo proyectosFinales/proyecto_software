@@ -9,10 +9,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
 import { useNavigate, useLocation } from 'react-router-dom';
-import styles from '../styles/EditarFormulario.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
+import Select from 'react-select';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import { errorToast, successToast } from '../components/toast';
@@ -25,20 +24,15 @@ const CoordinadorForm = () => {
   // Campos del estudiante (propios de Estudiante y de Usuario)
   const [userId, setUserId] = useState('');            // PK en Usuario
   const [estudianteId, setEstudianteId] = useState(''); // PK en Estudiante
+  const [idAnteproyecto, setIdAnteproyecto] = useState('');
+  const [estado, setEstado] = useState('');
 
   // Datos de Usuario (nombre, correo, telefono, sede)
   const [nombre, setNombre] = useState('');
-  const [correo, setCorreo] = useState('');
-  const [telefono, setTelefono] = useState('');
-  const [sede, setSede] = useState('');
-
-  // Datos propios de Estudiante (carnet, cedula, etc.)
   const [carnet, setCarnet] = useState('');
-  // Si manejas `cedula` en la tabla Estudiante, agrégalo:
-  // const [cedula, setCedula] = useState('');
-
-  // Datos de Anteproyecto
-  const [idAnteproyecto, setIdAnteproyecto] = useState('');
+  const [telefono, setTelefono] = useState('');
+  const [correo, setCorreo] = useState('');
+  const [sede, setSede] = useState('');
   const [tipoEmpresa, setTipoEmpresa] = useState('');
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [actividadEmpresa, setActividadEmpresa] = useState('');
@@ -52,29 +46,34 @@ const CoordinadorForm = () => {
   const [nombreHR, setNombreHR] = useState('');
   const [telefonoHR, setTelefonoHR] = useState('');
   const [correoHR, setCorreoHR] = useState('');
+  
+  // Estados para el contenido actual y anterior
   const [contexto, setContexto] = useState('');
   const [oldContexto, setOldContexto] = useState('');
-  const [contextoC, setContextoC] = useState('');
   const [justificacion, setJustificacion] = useState('');
   const [oldJustificacion, setOldJustificacion] = useState('');
-  const [justificacionC, setJustificacionC] = useState('');
   const [sintomas, setSintomas] = useState('');
   const [oldSintomas, setOldSintomas] = useState('');
-  const [sintomasC, setSintomasC] = useState('');
   const [impacto, setImpacto] = useState('');
   const [oldImpacto, setOldImpacto] = useState('');
-  const [impactoC, setImpactoC] = useState('');
+  
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
   const [observaciones, setObservaciones] = useState('');
-  const [estado, setEstado] = useState('');
   const [proyecto, setProyecto] = useState('');
+  const [infoVisible, setInfoVisible] = useState({});
   const [selectedCategoria, setSelectedCategoria] = useState(null);
   const [categorias, setCategorias] = useState([]);
+  
+  // Correction states for form validation
+  const [contextoC, setContextoC] = useState('');
+  const [justificacionC, setJustificacionC] = useState('');
+  const [sintomasC, setSintomasC] = useState('');
+  const [impactoC, setImpactoC] = useState('');
+  const [nombreDepartamentoC, setNombreDepartamentoC] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
-  const [infoVisible, setInfoVisible] = useState({});
 
   // Obtener query param "id" (anteproyecto ID)
   const getQueryParam = (param) => {
@@ -497,271 +496,337 @@ const CoordinadorForm = () => {
   };
 
   return (
-    <div>
-      <header className={styles.encabezado_formulario}>
-        <h1>Editar Anteproyecto</h1>
+    <div className="min-h-screen bg-gray-50">
+      <header className="h-20 bg-gray-300 flex items-center justify-center border-b border-black">
+        <h1 className="text-2xl font-bold">Editar Anteproyecto</h1>
       </header>
 
-      <form className={styles.form} onSubmit={editarAnteproyecto}>
-        {/* DATOS DEL ESTUDIANTE (Usuario + Estudiante) */}
-        <h2>Datos del estudiante</h2>
+      <form onSubmit={editarAnteproyecto} className="max-w-7xl mx-auto my-8 p-6 bg-white rounded-lg shadow-md">
+        {/* DATOS DEL ESTUDIANTE */}
+        <h2 className="text-xl font-bold mb-6 border-b pb-2">Datos del estudiante</h2>
 
-        <div className={styles.formGroup}>
-          <label>1. Nombre del estudiante:</label>
-          <input
-            type="text"
-            value={nombre}
-            readOnly
-            /* readOnly si no quieres que lo edite */
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>2. Carnet:</label>
-          <input
-            type="text"
-            value={carnet}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>3. Teléfono:</label>
-          <input
-            type="text"
-            value={telefono}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>4. Correo electrónico:</label>
-          <input
-            type="email"
-            value={correo}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>5. Sede:</label>
-          <input
-            type="text"
-            value={sede}
-            readOnly
-          />
+        <div className="space-y-6">
+          {/* Each form group */}
+          <div className="space-y-2">
+            <label className="block font-semibold">1. Nombre del estudiante:</label>
+            <input
+              type="text"
+              value={nombre}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">2. Carnet:</label>
+            <input
+              type="text"
+              value={carnet}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">3. Teléfono:</label>
+            <input
+              type="text"
+              value={telefono}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">4. Correo electrónico:</label>
+            <input
+              type="email"
+              value={correo}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">5. Sede:</label>
+            <input
+              type="text"
+              value={sede}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
         </div>
 
         {/* DATOS DE LA EMPRESA */}
-        <h2>Datos de la empresa</h2>
-        <div className={styles.formGroup}>
-          <label>6. Tipo de Empresa:</label>
-          <input
-            type="text"
-            value={tipoEmpresa}
-            readOnly
-          />
+        <h2 className="text-xl font-bold mt-8 mb-6 border-b pb-2">Datos de la empresa</h2>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="block font-semibold">6. Tipo de Empresa:</label>
+            <input
+              type="text"
+              value={tipoEmpresa}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">7. Nombre de la empresa:</label>
+            <input
+              type="text"
+              value={nombreEmpresa}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">8. Actividad de la empresa:</label>
+            <input
+              type="text"
+              value={actividadEmpresa}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="block font-semibold">9. Distrito:</label>
+              <input
+                type="text"
+                value={distritoEmpresa}
+                readOnly
+                className="w-full p-2 border rounded-md bg-gray-100"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block font-semibold">10. Cantón:</label>
+              <input
+                type="text"
+                value={cantonEmpresa}
+                readOnly
+                className="w-full p-2 border rounded-md bg-gray-100"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="block font-semibold">11. Provincia:</label>
+              <input
+                type="text"
+                value={provinciaEmpresa}
+                readOnly
+                className="w-full p-2 border rounded-md bg-gray-100"
+              />
+            </div>
+          </div>
         </div>
 
-        <div className={styles.formGroup}>
-          <label>7. Nombre de la empresa:</label>
-          <input
-            type="text"
-            value={nombreEmpresa}
-            readOnly
-          />
-        </div>
+        {/* DATOS DE CONTACTOS */}
+        <h2 className="text-xl font-bold mt-8 mb-6 border-b pb-2">Datos de contactos en la empresa</h2>
 
-        <div className={styles.formGroup}>
-          <label>8. Actividad de la empresa:</label>
-          <input
-            type="text"
-            value={actividadEmpresa}
-            readOnly
-          />
-        </div>
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="block font-semibold">12. Nombre del asesor industrial:</label>
+            <input
+              type="text"
+              value={nombreAsesor}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>9. Distrito:</label>
-          <input
-            type="text"
-            value={distritoEmpresa}
-            readOnly
-          />
-        </div>
+          <div className="space-y-2">
+            <label className="block font-semibold">13. Puesto que desempeña el asesor:</label>
+            <input
+              type="text"
+              value={puestoAsesor}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>10. Cantón:</label>
-          <input
-            type="text"
-            value={cantonEmpresa}
-            readOnly
-          />
-        </div>
+          <div className="space-y-2">
+            <label className="block font-semibold">14. Teléfono del contacto:</label>
+            <input
+              type="text"
+              value={telefonoContacto}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>11. Provincia:</label>
-          <input
-            type="text"
-            value={provinciaEmpresa}
-            readOnly
-          />
-        </div>
+          <div className="space-y-2">
+            <label className="block font-semibold">15. Correo del contacto:</label>
+            <input
+              type="email"
+              value={correoContacto}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
 
-        {/* DATOS DE CONTACTOS EN LA EMPRESA */}
-        <div className={styles.formGroup}>
-          <label>12. Nombre del asesor industrial:</label>
-          <input
-            type="text"
-            value={nombreAsesor}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>13. Puesto que desempeña el asesor:</label>
-          <input
-            type="text"
-            value={puestoAsesor}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>14. Teléfono del contacto:</label>
-          <input
-            type="text"
-            value={telefonoContacto}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>15. Correo del contacto:</label>
-          <input
-            type="email"
-            value={correoContacto}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>16. Nombre del contacto de RRHH:</label>
-          <input
-            type="text"
-            value={nombreHR}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>17. Teléfono RRHH:</label>
-          <input
-            type="text"
-            value={telefonoHR}
-            readOnly
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>18. Correo RRHH:</label>
-          <input
-            type="email"
-            value={correoHR}
-            readOnly
-          />
+          <div className="space-y-2">
+            <label className="block font-semibold">16. Nombre del contacto de RRHH:</label>
+            <input
+              type="text"
+              value={nombreHR}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">17. Teléfono RRHH:</label>
+            <input
+              type="text"
+              value={telefonoHR}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">18. Correo RRHH:</label>
+            <input
+              type="email"
+              value={correoHR}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
         </div>
 
         {/* DATOS DEL PROYECTO */}
-        <h2>Datos del proyecto</h2>
-        <div className={styles.formGroup}>
-          <label>
-            19. Contexto:
-            <AiOutlineInfoCircle
-              className={styles.infoIcon}
-              onClick={() => toggleInfo('contexto')}
+        <h2 className="text-xl font-bold mt-8 mb-6 border-b pb-2">Datos del proyecto</h2>
+
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <label className="block font-semibold flex items-center">
+              19. Contexto:
+              <AiOutlineInfoCircle
+                className="ml-2 text-blue-500 cursor-pointer"
+                onClick={() => toggleInfo('contexto')}
+              />
+            </label>
+            <textarea
+              value={contexto}
+              onChange={(e) => setContexto(e.target.value)}
+              required
+              className="w-full p-2 border rounded-md min-h-[100px]"
             />
-          </label>
-          <textarea
-            value={contexto}
-            onChange={(e) => setContexto(e.target.value)}
-            required
-          />
-          {infoVisible.contexto && <p className="info-text">Explicación sobre el contexto...</p>}
-          <p className={styles.correctionText}>
-            {contextoC}
-          </p>
-        </div>
+            {infoVisible.contexto && (
+              <p className="text-sm text-gray-600 mt-1">Explicación sobre el contexto...</p>
+            )}
+            {contextoC && (
+              <p className="text-red-600 mt-1">{contextoC}</p>
+            )}
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>
-            20. Justificación:
-            <AiOutlineInfoCircle
-              className={styles.infoIcon}
-              onClick={() => toggleInfo('justificacion')}
+          <div className="space-y-2">
+            <label className="block font-semibold flex items-center">
+              20. Justificación:
+              <AiOutlineInfoCircle
+                className="ml-2 text-blue-500 cursor-pointer"
+                onClick={() => toggleInfo('justificacion')}
+              />
+            </label>
+            <textarea
+              value={justificacion}
+              onChange={(e) => setJustificacion(e.target.value)}
+              required
+              className="w-full p-2 border rounded-md min-h-[100px]"
             />
-          </label>
-          <textarea
-            value={justificacion}
-            onChange={(e) => setJustificacion(e.target.value)}
-            required
-          />
-          {infoVisible.justificacion && <p className="info-text">Información sobre la justificación...</p>}
-          <p className={styles.correctionText}>
-            {justificacionC}
-          </p>
-        </div>
+            {infoVisible.justificacion && (
+              <p className="text-sm text-gray-600 mt-1">Información sobre la justificación...</p>
+            )}
+            {justificacionC && (
+              <p className="text-red-600 mt-1">{justificacionC}</p>
+            )}
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>
-            21. Síntomas:
-            <AiOutlineInfoCircle
-              className={styles.infoIcon}
-              onClick={() => toggleInfo('sintomas')}
-              
+          <div className="space-y-2">
+            <label className="block font-semibold flex items-center">
+              21. Síntomas:
+              <AiOutlineInfoCircle
+                className="ml-2 text-blue-500 cursor-pointer"
+                onClick={() => toggleInfo('sintomas')}
+              />
+            </label>
+            <textarea
+              value={sintomas}
+              onChange={(e) => setSintomas(e.target.value)}
+              required
+              className="w-full p-2 border rounded-md min-h-[100px]"
             />
-          </label>
-          <textarea
-            value={sintomas}
-            onChange={(e) => setSintomas(e.target.value)}
-            required
-          />
-          {infoVisible.sintomas && <p className="info-text">Descripción de los síntomas...</p>}
-          <p className={styles.correctionText}>
-            {sintomasC}
-          </p>
-        </div>
+            {infoVisible.sintomas && (
+              <p className="text-sm text-gray-600 mt-1">Información sobre los síntomas...</p>
+            )}
+            {sintomasC && (
+              <p className="text-red-600 mt-1">{sintomasC}</p>
+            )}
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>
-            22. Efectos o impactos para la empresa:
-            <AiOutlineInfoCircle
-              className={styles.infoIcon}
-              onClick={() => toggleInfo('impacto')}
+          <div className="space-y-2">
+            <label className="block font-semibold flex items-center">
+              22. Impacto:
+              <AiOutlineInfoCircle
+                className="ml-2 text-blue-500 cursor-pointer"
+                onClick={() => toggleInfo('impacto')}
+              />
+            </label>
+            <textarea
+              value={impacto}
+              onChange={(e) => setImpacto(e.target.value)}
+              required
+              className="w-full p-2 border rounded-md min-h-[100px]"
             />
-          </label>
-          <textarea
-            value={impacto}
-            onChange={(e) => setImpacto(e.target.value)}
-            required
-          />
-          {infoVisible.impacto && <p className="info-text">Descripción del impacto...</p>}
-          <p className={styles.correctionText}>
-            {impactoC}
-          </p>
-        </div>
+            {infoVisible.impacto && (
+              <p className="text-sm text-gray-600 mt-1">Información sobre el impacto...</p>
+            )}
+            {impactoC && (
+              <p className="text-red-600 mt-1">{impactoC}</p>
+            )}
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>23. Departamento:</label>
-          <input
-            type="text"
-            value={nombreDepartamento}
-            readOnly
-          />
-        </div>
+          <div className="space-y-2">
+            <label className="block font-semibold flex items-center">
+              23. Nombre del departamento:
+              <AiOutlineInfoCircle
+                className="ml-2 text-blue-500 cursor-pointer"
+                onClick={() => toggleInfo('departamento')}
+              />
+            </label>
+            <input
+              type="text"
+              value={nombreDepartamento}
+              onChange={(e) => setNombreDepartamento(e.target.value)}
+              required
+              className="w-full p-2 border rounded-md"
+            />
+            {infoVisible.departamento && (
+              <p className="text-sm text-gray-600 mt-1">Información sobre el departamento...</p>
+            )}
+            {nombreDepartamentoC && (
+              <p className="text-red-600 mt-1">{nombreDepartamentoC}</p>
+            )}
+          </div>
 
-        <div className={styles.formGroup}>
-          <label>24. Tipo de Proyecto:</label>
-          <input
-            type="text"
-            value={tipoProyecto}
-            readOnly
-          />
-        </div>
+          <div className="space-y-2">
+            <label className="block font-semibold">24. Tipo de Proyecto:</label>
+            <input
+              type="text"
+              value={tipoProyecto}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100"
+            />
+          </div>
 
-        <div>
-          <label>
-            25. Categoría
+          <div className="space-y-2">
+            <label className="block font-semibold">25. Categoría</label>
             <Select
               value={selectedCategoria}
               onChange={e => setSelectedCategoria(e)}
@@ -769,41 +834,44 @@ const CoordinadorForm = () => {
               placeholder="Seleccione una categoría"
               className="mt-2"
             />
-          </label>
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">Observaciones del profesor:</label>
+            <textarea
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              readOnly
+              className="w-full p-2 border rounded-md bg-gray-100 min-h-[100px]"
+            />
+          </div>
         </div>
 
-        <div className={styles.formGroup}>
-          <label>Observaciones del profesor:</label>
-          <textarea
-            value={observaciones}
-            onChange={(e) => setObservaciones(e.target.value)}
-            readOnly
-          />
-        </div>
-
-        <div className={styles.contenedor_botones_formCoordinador}>
+        {/* BUTTONS */}
+        <div className="flex justify-end gap-4 mt-8">
           <button
             type="submit"
-            className={`${styles.button} ${styles.aprobar}`}
+            className="px-6 py-2 bg-azul text-white rounded-md hover:bg-blue-700 transition-colors"
           >
             Editar
           </button>
           <button
             type="button"
-            className={`${styles.button} ${styles.cancelar}`}
             onClick={eliminarAnteproyecto}
+            className="px-6 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
           >
             Eliminar
           </button>
           <button
             type="button"
-            className={`${styles.button} ${styles.cancelar}`}
             onClick={handleGoBack}
+            className="px-6 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 transition-colors"
           >
             Cancelar
           </button>
         </div>
       </form>
+
       <Footer />
     </div>
   );
