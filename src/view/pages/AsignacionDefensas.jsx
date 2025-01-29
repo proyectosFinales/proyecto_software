@@ -1,42 +1,42 @@
 // /pages/AsignacionDefensas.js
 
 import React, { useEffect, useState } from "react";
-import Header from "../components/HeaderCoordinador"; // or your Header
-import Footer from "../components/Footer";            // or your Footer
-import supabase from "../../model/supabase";             // your Supabase client
+import Header from "../components/HeaderCoordinador";
+import Footer from "../components/Footer";
+import supabase from "../../model/supabase";
 import { assignAllDefensas } from "../../controller/AsignacionDefensaController";
 import { successToast, errorToast } from "../components/toast";
 
 /**
- * This page:
- *  1) Fetches and displays projects that are pending defense assignment
- *  2) Has a button to call the "assignAllDefensas" controller
- *  3) Shows results (# assigned, reasons for unassigned) and updates the pending list
+ * A page to:
+ *  - List "Aprobado"+"Defensa" projects with no Cita
+ *  - Let you auto-assign defenses
+ *  - Show results
+ *  - Warn if all lectores might be at capacity
  */
 const AsignacionDefensas = () => {
   const [pendingProjects, setPendingProjects] = useState([]);
   const [statusMessage, setStatusMessage] = useState("");
   const [assigningInProgress, setAssigningInProgress] = useState(false);
 
-  // Store final results from assignment
+  // Show final results
   const [assignedCount, setAssignedCount] = useState(0);
   const [unassignedReasons, setUnassignedReasons] = useState([]);
 
-  // On mount, fetch "pending" projects
   useEffect(() => {
     fetchPendingDefensas();
   }, []);
 
   /**
-   * Fetch all "pending" projects that:
-   *   - Proyecto.estado = "Aprobado"
-   *   - Estudiante.estado = "Defensa"
+   * Gather all "pending defense" projects:
+   *   - Proyecto.estado = Aprobado
+   *   - Estudiante.estado = Defensa
    *   - No existing Cita
-   * This is just to display them; the actual assignment logic is in the controller.
    */
   async function fetchPendingDefensas() {
     try {
-      setStatusMessage("Buscando proyectos pendientes...");
+      setStatusMessage("Buscando proyectos pendientes de defensa...");
+
       const { data: projects, error } = await supabase
         .from("Proyecto")
         .select(`
@@ -65,13 +65,13 @@ const AsignacionDefensas = () => {
         return;
       }
 
-      // Filter them to the "Aprobado + Defensa + no Cita" group
+      // Filter out only those truly pending
       const filtered = [];
       for (const p of projects) {
         const projState = p.estado?.toLowerCase();
         const studState = p.Estudiante?.estado?.toLowerCase();
         if (projState === "aprobado" && studState === "defensa") {
-          // check no existing Cita
+          // check no Cita
           const { data: existing, error: exErr } = await supabase
             .from("Cita")
             .select("cita_id")
@@ -88,7 +88,7 @@ const AsignacionDefensas = () => {
         setStatusMessage("No hay proyectos pendientes de defensa.");
       } else {
         setStatusMessage(
-          `Se encontraron ${filtered.length} proyecto(s) pendientes de defensa.`
+          `Se encontraron ${filtered.length} proyecto(s) pendiente(s) de defensa.`
         );
       }
     } catch (err) {
@@ -98,28 +98,24 @@ const AsignacionDefensas = () => {
   }
 
   /**
-   * Call the improved controller to assign all possible defenses.
+   * Trigger auto-assignment by calling the updated "assignAllDefensas" controller.
    */
   async function handleAssignDefensas() {
     try {
       setAssigningInProgress(true);
-      setStatusMessage("Asignando defensas, por favor espera...");
+      setStatusMessage("Asignando defensas... revisa la consola para logs de depuración.");
 
-      // Call the more detailed controller
-      const result = await assignAllDefensas(); 
-      // e.g. { assigned: number, unassigned: string[] }
-
+      const result = await assignAllDefensas();
+      // { assigned, unassigned: string[] }
       setAssignedCount(result.assigned || 0);
       setUnassignedReasons(result.unassigned || []);
 
-      // Show success message
       if (result.assigned > 0) {
         successToast(`¡Asignadas ${result.assigned} defensa(s) exitosamente!`);
       } else {
-        successToast("No se asignaron defensas nuevas.");
+        successToast("No se asignaron defensas nuevas, revisa disponibilidad o capacidad.");
       }
 
-      // Refresh the pending list
       await fetchPendingDefensas();
       setStatusMessage("Proceso de asignación finalizado.");
     } catch (err) {
@@ -132,34 +128,29 @@ const AsignacionDefensas = () => {
 
   return (
     <div>
-      {/* Header (Coordinator) */}
       <Header title="Asignación de Defensas" />
-
       <main className="p-4">
         <h2 className="text-xl font-semibold mb-4">Proyectos listos para defensa</h2>
 
-        {/* Show current status/instructions */}
-        <p className="mb-6">{statusMessage}</p>
+        <p className="mb-4">{statusMessage}</p>
 
-        {/* If there are pending projects, list them */}
+        {/* List pending projects if any */}
         {pendingProjects.length > 0 && (
           <div className="mb-6">
             <h3 className="font-semibold mb-2">Proyectos pendientes:</h3>
             <ul className="list-disc pl-5">
-              {pendingProjects.map((proj) => (
-                <li key={proj.id} className="mb-2">
-                  <strong>Estudiante:</strong>{" "}
-                  {proj.Estudiante?.Usuario?.nombre || "N/A"}
+              {pendingProjects.map((p) => (
+                <li key={p.id} className="mb-2">
+                  <strong>Estudiante:</strong> {p.Estudiante?.Usuario?.nombre || "N/A"}
                   {" | "}
-                  <strong>Profesor:</strong>{" "}
-                  {proj.Profesor?.Usuario?.nombre || "N/A"}
+                  <strong>Profesor:</strong> {p.Profesor?.Usuario?.nombre || "N/A"}
                 </li>
               ))}
             </ul>
           </div>
         )}
 
-        {/* Button to trigger auto-assignment */}
+        {/* Button to assign */}
         <div className="mb-6">
           <button
             onClick={handleAssignDefensas}
@@ -170,29 +161,36 @@ const AsignacionDefensas = () => {
           </button>
         </div>
 
-        {/* Show assignment results */}
+        {/* Show results */}
         {(assignedCount > 0 || unassignedReasons.length > 0) && (
-          <div className="mt-4 p-4 border rounded-md">
+          <div className="mt-4 p-4 border rounded-md bg-gray-50">
             <h4 className="font-semibold mb-2">Resultados:</h4>
             <p>Defensas asignadas: {assignedCount}</p>
 
             {unassignedReasons.length > 0 && (
               <div className="mt-2">
-                <p className="font-semibold">
-                  No se pudo asignar cita a los siguientes casos:
-                </p>
+                <p className="font-semibold">No se pudo asignar cita a los siguientes casos:</p>
                 <ul className="list-disc pl-5">
                   {unassignedReasons.map((reason, idx) => (
                     <li key={idx}>{reason}</li>
                   ))}
                 </ul>
+
+                {/* Additional user-friendly note if capacity was a problem */}
+                {unassignedReasons.some((r) => r.includes("lector capacity") || r.includes("at lector capacity")) && (
+                  <div className="mt-3 text-red-600">
+                    <p>
+                      Parece que algunos profesores han alcanzado su límite de defensorías (2 * su cantidad_estudiantes). 
+                      Considere <strong>agregar más profesores</strong> o <strong>aumentar la capacidad</strong> de los existentes
+                      para poder asignar más lectores.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
       </main>
-
-      {/* Footer */}
       <Footer />
     </div>
   );
