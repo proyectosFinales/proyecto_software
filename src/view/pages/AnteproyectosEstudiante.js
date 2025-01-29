@@ -83,6 +83,7 @@ const AnteproyectosEstudiante = () => {
           actividad,
           departamento,
           comentario,
+          categoria_id,
           Estudiante:estudiante_id (
             carnet,
             id_usuario,
@@ -112,6 +113,9 @@ const AnteproyectosEstudiante = () => {
               correo,
               telefono
             )
+          ),
+          Categoria:categoria_id (
+            nombre
           )
         `)
         .eq('estudiante_id', studentID);
