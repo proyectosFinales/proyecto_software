@@ -21,6 +21,7 @@ const CitasMenu = () => {
         .select('cita_id, anteproyecto_id, lector1, lector2')
         .eq('semestre_id', 1);
       if (appointmentError) throw appointmentError;
+      console.log("[DEBUG] Appointments found:", appointments); // DEBUG
 
       // 2. Fetch all anteproyectos con estado 'Aprobado' en este semestre
       const { data: allAnteproyectos, error: anteproyectosError } = await supabase
@@ -30,25 +31,48 @@ const CitasMenu = () => {
         .eq('semestre_id', 1);
       if (anteproyectosError) throw anteproyectosError;
 
+      // CHANGED: Also fetch full list of Profesor to map IDs to names
+      const { data: allProfesores, error: professorError } = await supabase
+        .from('Profesor')
+        .select('profesor_id, nombre');
+      if (professorError) throw professorError;
+      console.log("[DEBUG] All professors found:", allProfesores); // DEBUG
+
       // Asignar IDs de anteproyecto que ya tienen cita
       const assignedAnteproyectoIds = new Set(appointments.map(app => app.anteproyecto_id));
       // Filtrar anteproyectos sin cita
       const unassignedAnteproyectos = allAnteproyectos.filter(
         ap => !assignedAnteproyectoIds.has(ap.id)
       );
+      console.log("[DEBUG] unassignedAnteproyectos:", unassignedAnteproyectos); // DEBUG
 
       // 3. Loop through each appointment and attempt to assign two lecturers
       for (const appointment of appointments) {
         // 4. Fetch available professors for this appointment
         // Suponiendo que tu tabla "Disponibilidad" o "DisponibilidadCitas" se llame "Disponibilidad"
         const { data: availableProfessors, error: professorsError } = await supabase
-          .from('Disponibilidad')
+          .from('disponibilidad')
           .select('profesor_id')
           .eq('cita_id', appointment.cita_id)
           .eq('disponible', true); // Ajusta si tu campo es boolean
         if (professorsError) throw professorsError;
 
+        console.log(`[DEBUG] For Cita ${appointment.cita_id}, availableProfessors:`, availableProfessors); // DEBUG
+
         const availableProfessorIds = availableProfessors.map(prof => prof.profesor_id);
+
+        // Suppose you have a situation you previously logged:
+        // "No hay disponibilidad para prof. b04472..."
+        // We'll do something like:
+        if (availableProfessorIds.length < 2) {
+          // CHANGED: We find the professor's name from "allProfesores"
+          const profNames = availableProfessorIds.map(pid => {
+            const found = allProfesores.find(p => p.profesor_id === pid);
+            return found ? found.nombre : `Desconocido (ID: ${pid})`;
+          });
+          // Then log the name(s) instead of the ID:
+          console.warn("[DEBUG] No hay suficiente disponibilidad para:", profNames.join(", ")); 
+        }
 
         // 5. Buscar un anteproyecto sin asignar que tenga al menos 2 profesores elegibles
         let selectedStudentAnteproyecto = null;
@@ -121,6 +145,14 @@ const CitasMenu = () => {
             unassignedAnteproyectos.splice(index, 1);
           }
         }
+      }
+
+      // CHANGED: If we detect an unassigned project, we can show professor name
+      if (unassignedAnteproyectos.length > 0) {
+        unassignedAnteproyectos.forEach(ap => {
+          // Example message:
+          console.warn(`[DEBUG] El anteproyecto ${ap.id} no fue asignado: no hay disponibilidad de profesores.`);
+        });
       }
 
       console.log('Lecturer assignments completed successfully.');

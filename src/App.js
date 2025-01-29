@@ -63,6 +63,7 @@ import DetailedCalificacionesDashboard from './view/pages/calificaciones/calific
 import PermisosVerCalificaciones from './view/pages/calificaciones/permisosVerCalificaciones.js';
 import Machotes from './view/pages/Machotes.js';
 import CalificacionAsesor from './view/pages/calificaciones/calificacionAsesor';
+import AsignacionDefensas from './view/pages/AsignacionDefensas';
 
 function App() {
   return (
@@ -323,6 +324,15 @@ function App() {
           element={
             <RutaProtegida 
               element={<PermisosVerCalificaciones />} 
+              requiredRoles={["1"]} 
+            />
+          }
+        />
+        <Route
+          path="/asignacion-defensas"
+          element={
+            <RutaProtegida
+              element={<AsignacionDefensas />}
               requiredRoles={["1"]} 
             />
           }
