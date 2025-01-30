@@ -458,7 +458,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Retail"
-                onChange={(e) => handleActividadChange}
+                onChange={handleActividadChange}
                 required
               />
               Retail
@@ -482,7 +482,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Servicios del estado"
-                onChange={(e) => setTipoEmpresa(e.target.value)}
+                onChange={handleActividadChange}
                 required
               />
               Servicios del Estado
@@ -518,7 +518,7 @@ const EstudianteForm = () => {
                 type="radio"
                 name="actividadEmpresa"
                 value="Manufactura Comercial"
-                onChange={(e) => setTipoEmpresa(e.target.value)}
+                onChange={handleActividadChange}
                 required
               />
               Manufactura comercial
