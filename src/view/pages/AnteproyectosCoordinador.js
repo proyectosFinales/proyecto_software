@@ -25,7 +25,31 @@ const AnteproyectosCoordinador = () => {
     const dataToExport = anteproyectos.map((p) => ({
       ID: p.id,
       'Nombre del Estudiante': p.Estudiante?.Usuario?.nombre || 'N/A',
+      'Carnet': p.Estudiante.carnet,
+      'Correo': p.Estudiante.Usuario.correo,
+      'Correo': p.Estudiante.Usuario.telefono,
+      'Sede': p.Estudiante.Usuario.sede,
+      'Empresa': p.Empresa.nombre,
+      'Tipo de Empresa': p.Empresa.tipo,
+      'Actividad de empresa': p.Empresa.actividad,
+      'Provincia': p.Empresa.provincia,
+      'Cantón': p.Empresa.canton,
+      'Distrito': p.Empresa.distrito,
+      'Contacto Asesor': p.AnteproyectoContacto.ContactoEmpresa.nombre,
+      'Puesto': p.AnteproyectoContacto.ContactoEmpresa.departamento,
+      'Telefono': p.AnteproyectoContacto.ContactoEmpresa.telefono,
+      'Correo': p.AnteproyectoContacto.ContactoEmpresa.correo,
+      'Contacto RRHH': p.AnteproyectoContacto.RRHH.nombre,
+      'Puesto': p.AnteproyectoContacto.RRHH.departamento,
+      'Telefono': p.AnteproyectoContacto.RRHH.telefono,
+      'Correo': p.AnteproyectoContacto.RRHH.correo,
       'Estado del proyecto': p.estado,
+      'Contexto': p.contexto,
+      'Justificación': p.justificacion,
+      'Síntomas': p.sintomas,
+      'Impacto': p.impacto,
+      'Observaciones': p.observaciones,
+      
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
@@ -67,7 +91,8 @@ const AnteproyectosCoordinador = () => {
             tipo,
             provincia,
             canton,
-            distrito
+            distrito,
+            actividad
           ),
           AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
             ContactoEmpresa:contacto_id(
