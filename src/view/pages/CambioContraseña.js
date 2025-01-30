@@ -38,13 +38,13 @@ const CambioContraseña = () => {
       return;
     }
 
-    if (!validarContraseñaDetallada(newPassword)) {
+    if (validarContraseñaDetallada(newPassword)) {
+      alert("La contraseña no es válida, debe contener al menos 8 caracteres \
+        y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caracter especial");
+    } else {
       cambiarContraseña(id, newPassword);
       alert("La constraseña fue cambiada exitósamente. Por favor, inicia sesión con las nuevas credenciales.");
       navigate("/");
-    } else {
-      alert("La contraseña no es válida, debe contener al menos 8 caracteres \
-y que mínimo contenga:\n- 1 minúscula\n- 1 mayúscula\n- 1 número\n- 1 caracter especial");
     }
 
     return;
