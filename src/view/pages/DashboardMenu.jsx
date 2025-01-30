@@ -19,7 +19,7 @@ const DashboardMenu = () => {
       text: "Calificaciones de Profesores"
     },
     {
-      to: "/avances-proyectos",
+      to: "/dashboard-avances",
       icon: "fas fa-tasks",
       text: "Avances de Proyectos"
     }
