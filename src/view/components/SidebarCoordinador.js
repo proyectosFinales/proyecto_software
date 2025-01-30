@@ -6,8 +6,6 @@ import {
   Home, 
   FileText, 
   CheckSquare, 
-  Users, 
-  Database, 
   Calendar, 
   UserCog,
   Building,
@@ -30,11 +28,8 @@ const SidebarCoordinador = ({ show, setShow }) => {
     { path: "/calendario", text: "Calendario", icon: Calendar },
     { path: "/carga-datos", text: "Carga de Datos", icon: Upload },
     { path: "/dashboardMenu", text: "Reportes y Gráficos", icon: BarChart },
-    { path: "/permisos-calificaciones", text: "Permisos de Calificaciones", icon: Key },
     { path: "/categorias", text: "Categorías de profesores", icon: Tags },
-    { path: "/bitacoras-coordinador", text: "Bitácoras", icon: BookOpen },
-    { path: "/actas-coordinador", text: "Actas de defensa", icon: File },
-    { path: "/asignacion-proyectos", text: "Asignación de Proyectos", icon: ClipboardList },
+    { path: "/asignacion-defensas", text: "Asignación de Defensas", icon: ClipboardList }
   ];
 
   return (
