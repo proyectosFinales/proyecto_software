@@ -11,7 +11,7 @@ const Menu = () => {
     { to: "/asignaciones/manual", icon: "fas fa-check-square", text: "Proyectos" },
     { to: "/gestion-perfiles", icon: "fas fa-user-cog", text: "Gestión de Perfiles" },
     { to: "/empresas", icon: "fas fa-building", text: "Empresas" },
-    { to: "/citasMenu", icon: "fas fa-calendar", text: "Citas" },
+    { to: "/calendario", icon: "fas fa-calendar", text: "Calendario" },
     { to: "/carga-datos", icon: "fas fa-upload", text: "Carga de Datos" },
     { to: "/dashboardMenu", icon: "fas fa-chart-bar", text: "Reportes y Gráficos" },
     { to: "/categorias", icon: "fas fa-tags", text: "Categorías de profesores" },

@@ -27,7 +27,7 @@ const SidebarCoordinador = ({ show, setShow }) => {
     { path: "/asignaciones/manual", text: "Proyectos", icon: CheckSquare },
     { path: "/gestion-perfiles", text: "Gestión de Perfiles", icon: UserCog },
     { path: "/empresas", text: "Empresas", icon: Building },
-    { path: "/citasMenu", text: "Citas", icon: Calendar },
+    { path: "/calendario", text: "Calendario", icon: Calendar },
     { path: "/carga-datos", text: "Carga de Datos", icon: Upload },
     { path: "/dashboardMenu", text: "Reportes y Gráficos", icon: BarChart },
     { path: "/permisos-calificaciones", text: "Permisos de Calificaciones", icon: Key },
