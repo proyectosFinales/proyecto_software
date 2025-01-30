@@ -142,6 +142,7 @@ const FormularioCoordinador = () => {
               `)
               .eq('id', id)
               .single();
+      console.log(data);
       if (error) throw error;
       // Rellenar campos de anteproyecto
       setIdAnteproyecto(data.id);
