@@ -38,7 +38,7 @@ const CambioContraseña = () => {
       return;
     }
 
-    if (validarContraseñaDetallada(newPassword)) {
+    if (!validarContraseñaDetallada(newPassword)) {
       cambiarContraseña(id, newPassword);
       alert("La constraseña fue cambiada exitósamente. Por favor, inicia sesión con las nuevas credenciales.");
       navigate("/");

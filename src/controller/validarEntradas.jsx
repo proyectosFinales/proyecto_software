@@ -55,6 +55,7 @@ export function validateInfo(carnet, tel, email, password, checkPass = true) {
  * y retorna un string con el mensaje de error (o "" si todo bien).
  */
 export function validarContraseñaDetallada(contraseña) {
+  
   if (!contraseña || contraseña.length < 8) {
     return "La contraseña debe tener al menos 8 caracteres.";
   }
