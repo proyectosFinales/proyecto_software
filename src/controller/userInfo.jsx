@@ -7,7 +7,8 @@ import validateInfo, {
 } from "./validarEntradas";
 
 export async function getUserInfo(id) {
-  const { data, error } = await supabase
+  // First get the user data
+  const { data: userData, error: userError } = await supabase
     .from("Usuario")
     .select(`
       id,
@@ -16,32 +17,57 @@ export async function getUserInfo(id) {
       contrasena,
       rol,
       sede,
-      telefono,
-      Profesor:Profesor!Profesor_id_usuario_fkey (
-        profesor_id,
-        cantidad_estudiantes,
-        categoria_id,
-        Categoria: categoria_id (
-          nombre
-        )
-      ),
-      Estudiante:Estudiante!Estudiante_id_usuario_fkey (
-        estudiante_id,
-        carnet,
-        asesor,
-        estado
-      )
+      telefono
     `)
     .eq("id", id)
     .single();
     
-  if (!data || error) {
-    const msg = error
-      ? `Hubo un problema al consultar datos de usuario. Detalle Supabase: ${error.message}`
+  if (!userData || userError) {
+    const msg = userError
+      ? `Hubo un problema al consultar datos de usuario. Detalle Supabase: ${userError.message}`
       : "No se encontraron datos para ese usuario.";
     throw new Error(msg);
   }
-  return data;
+
+  // If it's a student, get their data from Estudiante table
+  if (userData.rol === 3) {
+    const { data: estudianteData, error: estudianteError } = await supabase
+      .from("Estudiante")
+      .select("*")
+      .eq("id_usuario", id)
+      .single();
+
+    if (estudianteError) {
+      console.error("Error fetching estudiante:", estudianteError);
+    } else if (estudianteData) {
+      userData.Estudiante = estudianteData;
+    }
+  }
+
+  // If it's a professor, get their data
+  if (userData.rol === 2) {
+    const { data: profesorData, error: profesorError } = await supabase
+      .from("Profesor")
+      .select(`
+        profesor_id,
+        cantidad_estudiantes,
+        categoria_id,
+        Categoria (
+          nombre
+        )
+      `)
+      .eq("id_usuario", id)
+      .single();
+
+    if (profesorError) {
+      console.error("Error fetching profesor:", profesorError);
+    } else if (profesorData) {
+      userData.Profesor = [profesorData]; // Keep the same structure as before
+    }
+  }
+
+  console.log("Raw data from getUserInfo:", userData); // For debugging
+  return userData;
 }
 
 export async function gestionUserInfo(id) {
