@@ -136,7 +136,6 @@ export function generarContraseña(longitud = 12) {
 
   // Mezclar la contraseña para evitar patrones predecibles
   contraseña = contraseña.split('').sort(() => 0.5 - Math.random()).join('');
-  console.log(contraseña);
 
   return contraseña;
 }
@@ -148,6 +147,5 @@ export const sendMailToNewUser = async (to, password) => {
     `Contraseña ${password}\n\n` +
     "\nInstituto Tecnológico de Costar Rica,\n" +
     "Escuela de Producción Industrial.";
-  console.log(mensaje);
   sendMail(to, "Acceso a plataforma Proyectos Finales", mensaje);
 };
