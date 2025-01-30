@@ -104,14 +104,13 @@ const Actas = () => {
         .delete()
         .eq('id', id);
       if (error) {
-        alert('Error al eliminar carta: ' + error.message);
+        alert('Error al eliminar acta: ' + error.message);
         return;
       }
 
       setActas((prev) => prev.filter((ap) => ap.id !== id));
-      console.log(`La carta fue eliminada exitosamente.`);
     } catch (error) {
-      alert('Error al eliminar carta:' + error);
+      alert('Error al eliminar acta:' + error);
     }
   }
 
