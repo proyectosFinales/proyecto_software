@@ -17,6 +17,7 @@ import HeaderCoordinador from "../components/HeaderCoordinador";
 import HeaderProfesor from "../components/HeaderProfesor";
 import HeaderEstudiante from "../components/HeaderEstudiante";
 import { fetchCategorias } from "../../controller/Categoria";
+import supabase from "../../model/supabase";
 
 const EditarPerfil = () => {
   const [userData, setUserData] = useState({});
@@ -72,19 +73,21 @@ const EditarPerfil = () => {
           nombre: data.nombre
         };
 
-        if (data.rol == 2 && data.Profesor) {
+        if (data.rol == 2 && data.Profesor && data.Profesor.length > 0) {
           baseData.profesor_id = data.Profesor[0].profesor_id;
           baseData.cantidad_estudiantes = data.Profesor[0].cantidad_estudiantes ?? 0;
-          setSelectedCategoria({value: data.Profesor[0].categoria_id, label: data.Profesor[0].Categoria.nombre});
+          setSelectedCategoria({value: data.Profesor[0].categoria_id, label: data.Profesor[0].Categoria?.nombre});
         }
 
         if (data.rol == 3 && data.Estudiante) {
           baseData.estudiante_id = data.Estudiante.estudiante_id;
           baseData.carnet = data.Estudiante.carnet || "";
-          baseData.asesor = data.Estudiante.asesor || "";
-          baseData.estado = data.Estudiante.estado || "";
+          baseData.asesor = data.Estudiante.asesor || "Sin asignar";
+          baseData.estado = data.Estudiante.estado || "En progreso";
         }
 
+        console.log("User data:", data); // For debugging
+        console.log("Base data:", baseData); // For debugging
         setUserData(baseData);
       } catch (error) {
         alert(error.message);
@@ -304,24 +307,55 @@ const EditarPerfil = () => {
                         label="Carnet"
                         name="carnet"
                         value={userData.carnet}
-                        onChange={handleChange}
+                        readOnly={true}
                       />
 
                       <InputField
                         icon={FaUser}
-                        label="Asesor (no modificable)"
+                        label="Asesor"
                         name="asesor"
-                        value={userData.asesor}
+                        value={userData.asesor || "Sin asignar"}
                         readOnly={true}
                       />
 
                       <InputField
                         icon={FaIdCard}
-                        label="Estado (no modificable)"
+                        label="Estado"
                         name="estado"
-                        value={userData.estado}
+                        value={userData.estado || "Sin estado"}
                         readOnly={true}
                       />
+
+                      {/* Abandonar button */}
+                      <div className="md:col-span-2">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            if (window.confirm(
+                              "¿Está seguro/a que desea abandonar el proyecto? " +
+                              "Esta acción cambiará su estado a 'retirado' y es permanente. " +
+                              "No podrá revertir esta acción."
+                            )) {
+                              supabase
+                                .from('Estudiante')
+                                .update({ estado: 'retirado' })
+                                .eq('estudiante_id', userData.estudiante_id)
+                                .then(({ error }) => {
+                                  if (error) {
+                                    alert('Error al abandonar el proyecto: ' + error.message);
+                                  } else {
+                                    alert('Has abandonado el proyecto exitosamente.');
+                                    setUserData({ ...userData, estado: 'retirado' });
+                                  }
+                                });
+                            }
+                          }}
+                          className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          disabled={userData.estado === 'retirado'}
+                        >
+                          {userData.estado === 'retirado' ? 'Proyecto Abandonado' : 'Abandonar Proyecto'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
