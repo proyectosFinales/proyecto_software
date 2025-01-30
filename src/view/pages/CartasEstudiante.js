@@ -12,7 +12,7 @@ const CartasEstudiante = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    consultarAnteproyectos();
+    consultarCartas();
   }, []);
 
   async function consultarInfoEstudiante() {
@@ -62,7 +62,7 @@ const CartasEstudiante = () => {
     }
   }
 
-  async function consultarAnteproyectos() {
+  async function consultarCartas() {
     try {
       const studentID = await consultarInfoEstudiante();
       const { data, error } = await supabase
@@ -91,7 +91,6 @@ const CartasEstudiante = () => {
           )
         `)
         .eq('estudiante_id', studentID);
-      console.log(data);
       if (error) {
         alert('No se pudieron obtener las cartas. ' + error.message);
         return;
@@ -103,6 +102,7 @@ const CartasEstudiante = () => {
   }
 
   async function eliminarCarta(id) {
+    console.log(cartas);
     const confirmarEnvio = window.confirm(
       "¿Está seguro que desea eliminar esta carta?"
     );
@@ -118,8 +118,7 @@ const CartasEstudiante = () => {
         return;
       }
 
-      setCartas((prev) => prev.filter((ap) => ap.id !== id));
-      console.log(`La carta fue eliminada exitosamente.`);
+      setCartas((prev) => prev.filter((ap) => ap.id_solicitud !== id));
     } catch (error) {
       alert('Error al eliminar carta:' + error);
     }
