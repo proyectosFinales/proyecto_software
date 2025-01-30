@@ -26,7 +26,7 @@ export const fetchAvances = async (proyectoId) => {
           avance.estado = 'Atrasado';
 
           try {
-            updateAvance(avance.id, 'Atrasado');
+            updateAvance(avance.id, 'Atrasado', proyectoId);
           } catch (error) {
             throw error;
           }
@@ -40,18 +40,79 @@ export const fetchAvances = async (proyectoId) => {
 
 };
 
-export const updateAvance = async (avanceId, nuevoEstado, proyectoId) => {
+export const fetchAvancesSinProyecto = async () => {
+  const { data: avances, error: avancesError } = await supabase
+    .from('Avance')
+    .select(`
+      id,
+      num_avance, 
+      estado, 
+      proyecto_id,
+      fecha_avance,
+      Proyecto:proyecto_id (
+        estudiante_id, 
+        profesor_id,
+        Estudiante:estudiante_id (
+          id_usuario,
+          carnet,
+          Usuario:id_usuario (
+            nombre
+          )
+        ),
+        Profesor:profesor_id (
+          id_usuario,
+          Usuario:id_usuario (
+            nombre
+          )
+        )
+      )`
+    ).order('fecha_avance', { ascending: false });
+  if (avancesError) throw avancesError;
+  
+  const updatedAvances = await Promise.all(avances.map(async (avance) => {
+    if (avance.num_avance <= 3 && avance.estado === 'Pendiente') {
+      const { data: calendario, error: calendarioError } = await supabase
+        .from('Calendario')
+        .select('fecha_fin')
+        .eq('nombre', `Entrega Avance ${avance.num_avance}`);
+
+      if (calendarioError) throw calendarioError;
+
+      if(calendario && calendario.length > 0) {
+        const fechaFin = new Date(calendario[0].fecha_fin);
+        const fechaActual = new Date();
+
+        if (fechaActual > fechaFin) {
+          avance.estado = 'Atrasado';
+
+          try {
+            updateAvance(avance.id, 'Atrasado');
+          } catch (error) {
+            throw error;
+          }
+        }
+      }
+    }
+    return avance;
+  }));
+
+  return updatedAvances;
+};
+
+export const updateAvance = async (avanceId, nuevoEstado, proyectoId = null) => {
   const { error } = await supabase
     .from('Avance')
     .update({ estado: nuevoEstado })
     .eq('id', avanceId);
   if (error) throw error;
 
-  try {
-    await reprobarEstudiante(proyectoId);
-  } catch (reprobarError) {
-    console.error('Error al reprobar estudiante:', reprobarError);
-    throw reprobarError;
+  if (proyectoId) {
+    try {
+      await reprobarEstudiante(proyectoId);
+    } catch (reprobarError) {
+      console.error('Error al reprobar estudiante:', reprobarError);
+      throw reprobarError;
+    }
   }
 };
 

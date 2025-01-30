@@ -28,6 +28,7 @@ import Empresas from './view/pages/Empresas.js';
 import EditarEmpresa from './view/pages/EditarEmpresa.js';
 import CrearContacto from './view/pages/CrearContacto.js';
 import Contactos from './view/pages/Contactos.js';
+import DashboardAvances from './view/pages/DashboardAvances.jsx';
 import EditarContacto from './view/pages/EditarContacto.js';
 import FormularioEmpresa from './view/pages/FormularioEmpresa.js';
 import Citas from './view/pages/Citas.js';
@@ -102,6 +103,10 @@ function App() {
         <Route
           path="/darseBaja"
           element={<RutaProtegida element={<Abandonar />} requiredRoles={["3"]} />}
+        />
+        <Route
+          path="dashboard-avances"
+          element={<RutaProtegida element={<DashboardAvances />} requiredRoles={["1"]} />}
         />
         <Route
           path="/categorias"
