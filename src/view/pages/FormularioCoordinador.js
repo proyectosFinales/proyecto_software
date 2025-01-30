@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import sendMail from "../../controller/Email";
 import { useNavigate, useLocation } from 'react-router-dom';
 import styles from '../styles/FormularioCoordinador.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
@@ -435,6 +436,15 @@ const FormularioCoordinador = () => {
     if (!confirmReprobar) return;
     if(proyecto == "empty"){
       try {
+        const mensaje = "Buenas,\n" +
+        "Le informamos por este medio que, tras la revisión de su anteproyecto, este ha sido rechazado por las siguientes razones:\n" +
+        "Le invitamos a revisar las observaciones y, si así lo desea, presentar una nueva propuesta.\n" +
+        `${observaciones}`+
+        "En caso de requerir orientación o aclaraciones sobre los puntos señalados, puede ponerse en contacto contacto con el coordinador de carrera.\n" +
+        "\nInstituto Tecnológico de Costar Rica,\n" +
+        "Escuela de Producción Industrial.";
+        sendMail(correo, "Anteproyecto Reprobado", mensaje);
+        
         const contactoCount = await consultarContactos(nombreAsesor);
         const rhCount = await consultarHR(nombreHR);
         await eliminarAnteContact();
