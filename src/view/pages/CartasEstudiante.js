@@ -102,7 +102,6 @@ const CartasEstudiante = () => {
   }
 
   async function eliminarCarta(id) {
-    console.log(cartas);
     const confirmarEnvio = window.confirm(
       "¿Está seguro que desea eliminar esta carta?"
     );
