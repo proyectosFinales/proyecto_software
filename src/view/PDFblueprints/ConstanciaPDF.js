@@ -89,7 +89,6 @@ const ConstanciaPDF = (solicitud) => {
     }, []);
 
     function setData(){
-        console.log(solicitud);
         const today = new Date();
         setDay(today.getDate());
         setMonth(today.toLocaleString('es-ES', { month: 'long' }));

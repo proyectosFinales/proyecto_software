@@ -86,8 +86,6 @@ const EditarPerfil = () => {
           baseData.estado = data.Estudiante.estado || "En progreso";
         }
 
-        console.log("User data:", data); // For debugging
-        console.log("Base data:", baseData); // For debugging
         setUserData(baseData);
       } catch (error) {
         alert(error.message);
