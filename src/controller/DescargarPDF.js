@@ -59,8 +59,12 @@ export function descargarAnteproyecto(anteproyecto) {
    * @param {string} value Contenido a imprimir
    */
   function addText(label, value) {
+    if (value === undefined || value === null) {
+      value = "No especificado";
+    }
+    
     const labelText = `${label} `;
-    const textDividido = doc.splitTextToSize(value || "", textWidth);
+    const textDividido = doc.splitTextToSize(value.toString() || "", textWidth);
     let requiredHeight = textDividido.length * lineSpacing;
 
     // Ajustar la altura para texto en varias líneas
@@ -86,28 +90,39 @@ export function descargarAnteproyecto(anteproyecto) {
 
   // Sección de datos del estudiante (si existe)
   doc.setFontSize(12);
-  addText("Nombre del estudiante:", anteproyecto.Estudiante.Usuario.nombre);
-  addText("Carnet:", anteproyecto.Estudiante.carnet);
-  addText("Teléfono:", anteproyecto.Estudiante.Usuario.telefono);
-  addText("Correo:", anteproyecto.Estudiante.Usuario.correo);
-  addText("Sede:", anteproyecto.Estudiante.Usuario.sede);
+  if (anteproyecto.Estudiante?.Usuario) {
+    addText("Nombre del estudiante:", anteproyecto.Estudiante.Usuario.nombre);
+    addText("Carnet:", anteproyecto.Estudiante.carnet);
+    addText("Teléfono:", anteproyecto.Estudiante.Usuario.telefono);
+    addText("Correo:", anteproyecto.Estudiante.Usuario.correo);
+    addText("Sede:", anteproyecto.Estudiante.Usuario.sede);
+  }
 
   // Sección de datos de la empresa
-  addText("Nombre de la Empresa:", anteproyecto.Empresa.nombre);
-  addText("Tipo de Empresa:", anteproyecto.Empresa.tipo);
-  addText("Actividad de la empresa:", anteproyecto.actividad);
-  addText("Ubicación de la empresa (distrito):", anteproyecto.Empresa.distrito);
-  addText("Ubicación de la empresa (cantón):", anteproyecto.Empresa.canton);
-  addText("Ubicación de la empresa (provincia):", anteproyecto.Empresa.provincia);
+  if (anteproyecto.Empresa) {
+    addText("Nombre de la Empresa:", anteproyecto.Empresa.nombre);
+    addText("Tipo de Empresa:", anteproyecto.Empresa.tipo);
+    addText("Actividad de la empresa:", anteproyecto.actividad);
+    addText("Ubicación de la empresa (distrito):", anteproyecto.Empresa.distrito);
+    addText("Ubicación de la empresa (cantón):", anteproyecto.Empresa.canton);
+    addText("Ubicación de la empresa (provincia):", anteproyecto.Empresa.provincia);
+  }
 
   // Datos de contactos
-  addText("Nombre del asesor industrial:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.nombre);
-  addText("Puesto que desempeña el asesor industrial:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.departamento);
-  addText("Teléfono del contacto:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.telefono);
-  addText("Correo del contacto:", anteproyecto.AnteproyectoContacto[0].ContactoEmpresa.correo);
-  addText("Nombre del contacto de recursos humanos:", anteproyecto.AnteproyectoContacto[0].RRHH.nombre);
-  addText("Teléfono del contacto de recursos humanos:", anteproyecto.AnteproyectoContacto[0].RRHH.telefono);
-  addText("Correo del contacto de recursos humanos:", anteproyecto.AnteproyectoContacto[0].RRHH.correo);
+  if (anteproyecto.AnteproyectoContacto?.[0]) {
+    const contacto = anteproyecto.AnteproyectoContacto[0];
+    if (contacto.ContactoEmpresa) {
+      addText("Nombre del asesor industrial:", contacto.ContactoEmpresa.nombre);
+      addText("Puesto que desempeña el asesor industrial:", contacto.ContactoEmpresa.departamento);
+      addText("Teléfono del contacto:", contacto.ContactoEmpresa.telefono);
+      addText("Correo del contacto:", contacto.ContactoEmpresa.correo);
+    }
+    if (contacto.RRHH) {
+      addText("Nombre del contacto de recursos humanos:", contacto.RRHH.nombre);
+      addText("Teléfono del contacto de recursos humanos:", contacto.RRHH.telefono);
+      addText("Correo del contacto de recursos humanos:", contacto.RRHH.correo);
+    }
+  }
 
   // Datos de contenido del anteproyecto
   addText("Contexto:", anteproyecto.contexto);
@@ -117,11 +132,12 @@ export function descargarAnteproyecto(anteproyecto) {
   addText("Departamento para realizar el proyecto:", anteproyecto.departamento);
   addText("Tipo de proyecto:", anteproyecto.tipo);
   addText("Estado del proyecto:", anteproyecto.estado);
-  addText("Categoría del proyecto:", anteproyecto.Categoria.nombre ?? 'Sin categoría');
+  addText("Categoría del proyecto:", anteproyecto.Categoria?.nombre || "Sin categoría");
   addText("Observaciones por el coordinador:", anteproyecto.comentario);
 
   // Descargar PDF (Nombre sugerido)
-  doc.save(`Anteproyecto_${anteproyecto.Estudiante.Usuario.nombre || 'SinNombre'}.pdf`);
+  const nombreArchivo = anteproyecto.Estudiante?.Usuario?.nombre || 'SinNombre';
+  doc.save(`Anteproyecto_${nombreArchivo}.pdf`);
 }
 
 /**
