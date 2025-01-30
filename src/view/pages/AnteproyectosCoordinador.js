@@ -137,19 +137,21 @@ const AnteproyectosCoordinador = () => {
         .eq('proyecto_id', proyecto.id);
       if (bitacoraFetchError) throw bitacoraFetchError;
 
-      const bitacora = bitacoras[0];
+      if(bitacoras.length > 0){
+        const bitacora = bitacoras[0];
 
-      const { error: deteleEntrada} = await supabase
-        .from('Entrada')
-        .delete()
-        .eq('bitacora_id', bitacora.id);
-      if (deteleEntrada) throw deteleEntrada;
+        const { error: deteleEntrada} = await supabase
+          .from('Entrada')
+          .delete()
+          .eq('bitacora_id', bitacora.id);
+        if (deteleEntrada) throw deteleEntrada;
 
-      const { error: bitacoraError } = await supabase
-        .from('Bitacora')
-        .delete()
-        .eq('proyecto_id', proyecto.id);
-      if (bitacoraError) throw bitacoraError;
+        const { error: bitacoraError } = await supabase
+          .from('Bitacora')
+          .delete()
+          .eq('proyecto_id', proyecto.id);
+        if (bitacoraError) throw bitacoraError;    
+      }
 
       const {error: deleteAvance} = await supabase
         .from('Avance')
