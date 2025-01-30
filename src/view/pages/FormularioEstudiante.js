@@ -132,7 +132,8 @@ const EstudianteForm = () => {
           tipo: tipoEmpresa,
           provincia: provinciaEmpresa,
           canton: cantonEmpresa,
-          distrito: distritoEmpresa
+          distrito: distritoEmpresa,
+          actividad: actividadEmpresa
         })
         .select();
         if (error){
@@ -233,7 +234,7 @@ const EstudianteForm = () => {
     if (!confirmarEnvio) {
       return;
     }
-    if(actividadEmpresa == "Otras" && otra == ''){
+    if(actividadEmpresa == "Otras" && (activity == '' || activity == 'Otras')){
       alert("Debe ingresar la actividad de la empresa");
       return;
     }
@@ -479,7 +480,7 @@ const EstudianteForm = () => {
             <label>
               <input
                 type="radio"
-                name="tipoEmpresa"
+                name="actividadEmpresa"
                 value="Servicios del estado"
                 onChange={(e) => setTipoEmpresa(e.target.value)}
                 required
@@ -515,7 +516,7 @@ const EstudianteForm = () => {
             <label>
               <input
                 type="radio"
-                name="tipoEmpresa"
+                name="actividadEmpresa"
                 value="Manufactura Comercial"
                 onChange={(e) => setTipoEmpresa(e.target.value)}
                 required

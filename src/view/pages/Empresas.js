@@ -31,6 +31,7 @@ const Empresas = () => {
           provincia,
           canton,
           distrito,
+          actividad,
           ContactoEmpresa:contactoempresa_empresa_id_fkey (
             id         
           )
@@ -103,6 +104,7 @@ const Empresas = () => {
                 <th className="px-4 py-2 font-medium">Provincia</th>
                 <th className="px-4 py-2 font-medium">Cantón</th>
                 <th className="px-4 py-2 font-medium">Distrito</th>
+                <th className="px-4 py-2 font-medium">Actividad</th>
                 <th className="px-4 py-2 font-medium">Cantidad de contactos</th>
                 <th className="px-4 py-2 font-medium"></th>
               </tr>
@@ -115,6 +117,7 @@ const Empresas = () => {
                   <td className="px-4 py-2">{empresa.provincia}</td>
                   <td className="px-4 py-2">{empresa.canton}</td>
                   <td className="px-4 py-2">{empresa.distrito}</td>
+                  <td className="px-4 py-2">{empresa.actividad}</td>
                   <td className="px-4 py-2">{empresa.ContactoEmpresa.length}</td>
                   <td className="px-4 py-2">
                     <div className="flex gap-2">

@@ -65,6 +65,10 @@ const Empresas = () => {
     navigate(`/editarContacto?id=${id}`);
   }
 
+  function handleGoBack(){
+    navigate(-1);
+  }
+
   async function eliminarContacto(id,count) {
       const confirmarEnvio = window.confirm(
         "¿Está seguro que desea eliminar este contacto?"
@@ -93,41 +97,47 @@ const Empresas = () => {
     }
 
   return (
-    <div className={styles.anteproyectos_coordinador_contenedor}>
+    <div className="flex flex-col min-h-screen bg-gray-50">
       <Header title="Contactos" />
       <div>
-        <main className={styles.lista_anteproyectos_coordinador}>
+        <main className="flex-grow p-4 md:p-8">
           <button
-            className={styles.generar_reporte}
+            className="mb-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
             onClick={() => crearContacto()}
           >
             Crear Contacto
           </button>
-          <div className={styles.contenedor_tabla}>
-            <table className={styles2.table}>
-              <thead>
+          <button
+          onClick={handleGoBack}
+          className="mb-4 px-4 py-2 bg-red-600 text-white rounded shadow hover:bg-red-700"
+        >
+          Volver
+        </button>
+          <div className="overflow-x-auto bg-white shadow rounded">
+            <table className="min-w-full text-left border">
+              <thead className="border-b bg-gray-100">
                 <tr>
-                  <th>Nombre</th>
-                  <th>Puesto</th>
-                  <th>Correo</th>
-                  <th>Teléfono</th>
-                  <th>Proyectos asesorados</th>
-                  <th></th>
+                  <th className="px-4 py-2 font-medium">Nombre</th>
+                  <th className="px-4 py-2 font-medium">Puesto</th>
+                  <th className="px-4 py-2 font-medium">Correo</th>
+                  <th className="px-4 py-2 font-medium">Teléfono</th>
+                  <th className="px-4 py-2 font-medium">Proyectos asesorados</th>
+                  <th className="px-4 py-2 font-medium"></th>
                 </tr>
               </thead>
               <tbody>
                 {contactos.map((contacto) => (
-                  <tr key={contacto.id}>
-                    <td>{contacto.nombre}</td>
-                    <td>{contacto.departamento}</td>
-                    <td>{contacto.correo}</td>
-                    <td>{contacto.telefono}</td>
-                    <td>{(contacto.AnteproyectoContacto.length)+(contacto.RecursosHumanos.length)}</td>
-                    <td>
-                      <div className={styles.contenedor_botones_anteproyectos_coordinador}>
+                  <tr key={contacto.id} className="border-b hover:bg-gray-50">
+                    <td className="px-4 py-2">{contacto.nombre}</td>
+                    <td className="px-4 py-2">{contacto.departamento}</td>
+                    <td className="px-4 py-2">{contacto.correo}</td>
+                    <td className="px-4 py-2">{contacto.telefono}</td>
+                    <td className="px-4 py-2">{(contacto.AnteproyectoContacto.length)+(contacto.RecursosHumanos.length)}</td>
+                    <td className="px-4 py-2">
+                      <div className="flex gap-2">
                         <button
                           onClick={() => editarContacto(contacto.id,contacto.empresa_id)}
-                          className={`${styles.btn} ${styles.revisar}`}
+                          className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
                         >
                           Editar
                         </button>
@@ -136,7 +146,7 @@ const Empresas = () => {
                           onClick={() =>
                             eliminarContacto(contacto.id,((contacto.AnteproyectoContacto.length)+(contacto.RecursosHumanos.length)))
                           }
-                          className={`${styles.btn} ${styles.eliminar}`}
+                          className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
                         >
                           Eliminar
                         </button>

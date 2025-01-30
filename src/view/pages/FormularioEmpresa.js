@@ -13,6 +13,8 @@ const FormularioEmpresa = () => {
   const [canton, setCanton] = useState('');
   const [provincia, setProvincia] = useState('');
   const [empresaID, setEmpresaID] = useState('');
+  const [actividad, setActividadEmpresa] = useState('');
+  const [activity, setActivity] = useState('');
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -46,6 +48,10 @@ const FormularioEmpresa = () => {
     if (!confirmarEnvio) {
       return;
     }
+    if(actividad == "Otras" && (activity == '' || activity == 'Otras')){
+      alert("Debe ingresar la actividad de la empresa");
+      return;
+    }
     try {
       const repetido = await consultarEmpresa(nombre);
       if(repetido == true){
@@ -56,7 +62,8 @@ const FormularioEmpresa = () => {
           tipo: tipo,
           provincia: provincia,
           canton: canton,
-          distrito: distrito
+          distrito: distrito,
+          actividad: activity
         })
         .select();
         navigate(-1);
@@ -70,6 +77,15 @@ const FormularioEmpresa = () => {
       alert('Error al crear empresa: ' + err.message);
     }
   }
+
+  const handleActividadChange = (e) => {
+    setActividadEmpresa(e.target.value);
+    setActivity(e.target.value);
+  };
+
+  const handleOtroChange = (e) => {
+    setActivity(e.target.value);
+  };
 
   const handleGoBack = () => {
     navigate(-1);
@@ -99,7 +115,6 @@ const FormularioEmpresa = () => {
                 type="radio"
                 name="tipoEmpresa"
                 value="Zona franca"
-                checked={tipo === "Zona franca"}
                 onChange={(e) => setTipo(e.target.value)}
                 required
               />
@@ -112,7 +127,6 @@ const FormularioEmpresa = () => {
                 type="radio"
                 name="tipoEmpresa"
                 value="Régimen definitivo"
-                checked={tipo === "Régimen definitivo"}
                 onChange={(e) => setTipo(e.target.value)}
                 required
               />
@@ -125,11 +139,34 @@ const FormularioEmpresa = () => {
                 type="radio"
                 name="tipoEmpresa"
                 value="Perfeccionamiento activo"
-                checked={tipo === "Perfeccionamiento activo"}
                 onChange={(e) => setTipo(e.target.value)}
                 required
               />
               Perfeccionamiento activo
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="Empresa Pública"
+                onChange={(e) => setTipo(e.target.value)}
+                required
+              />
+              Empresa pública
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="PYME"
+                onChange={(e) => setTipo(e.target.value)}
+                required
+              />
+              PYME
             </label>
           </div>
         </div>
@@ -207,6 +244,18 @@ const FormularioEmpresa = () => {
               Puntarenas
             </label>
           </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="provinciaEmpresa"
+                value="Guanacaste"
+                onChange={(e) => setProvincia(e.target.value)}
+                required
+              />
+              Guanacaste
+            </label>
+          </div>
         </div>
 
         <div className={styles.formGroup}>
@@ -228,6 +277,118 @@ const FormularioEmpresa = () => {
             required
           />
         </div>
+
+        <div className={styles.formGroup}>
+          <label>6. Actividad de la empresa: *</label>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Retail"
+                onChange={handleActividadChange}
+                required
+              />
+              Retail
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Servicio financiero"
+                onChange={handleActividadChange}
+                required
+              />
+              Servicio financiero
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Servicios del estado"
+                onChange={handleActividadChange}
+                required
+              />
+              Servicios del Estado
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura de alimentos"
+                onChange={handleActividadChange}
+                required
+              />
+              Manufactura de alimentos
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura médica"
+                onChange={handleActividadChange}
+                required
+              />
+              Manufactura médica
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura Comercial"
+                onChange={handleActividadChange}
+                required
+              />
+              Manufactura comercial
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Manufactura electrónica"
+                onChange={handleActividadChange}
+                required
+              />
+              Manufactura electrónica
+            </label>
+          </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="actividadEmpresa"
+                value="Otras"
+                onChange={handleActividadChange}
+                required
+              />
+              Otras...
+            </label>
+          </div>
+        </div>
+
+        {(actividad === "Otras") && (
+          <div className={styles.formGroup}>
+            <label>Ingrese la actividad: *</label>
+            <input
+              type="text"
+              value={activity}
+              onChange={handleOtroChange}
+              required
+            />
+          </div>
+        )}
 
         <div className={styles.contenedor_botones_formCoordinador}>
           <button

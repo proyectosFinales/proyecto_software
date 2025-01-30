@@ -196,7 +196,7 @@ const ConstanciaPDF = (solicitud) => {
           </View>
         </View>
         <Text style={styles.footer}>
-          Sede {sede}, {day} de {month} del {year}
+          {sede}, {day} de {month} del {year}
         </Text>
         </Page>
     </Document>

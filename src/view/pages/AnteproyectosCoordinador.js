@@ -261,12 +261,14 @@ const AnteproyectosCoordinador = () => {
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center gap-2">
+                    {(anteproyecto.estado !== "Correccion") && (
                       <button
                         onClick={() => handleRevisar(anteproyecto.id)}
                         className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
                       >
                         Revisar
                       </button>
+                    )}
                       <button
                         onClick={() => descargarAnteproyecto(anteproyecto)}
                         className="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
