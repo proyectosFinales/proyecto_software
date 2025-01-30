@@ -107,6 +107,38 @@ const AnteproyectosCoordinador = () => {
     if (proyectos.length > 0) {
       const proyecto = proyectos[0];
 
+      const {data: bitacoras, error: bitacoraFetchError} = await supabase
+        .from('Bitacora')
+        .select('id')
+        .eq('proyecto_id', proyecto.id);
+      if (bitacoraFetchError) throw bitacoraFetchError;
+
+      const bitacora = bitacoras[0];
+
+      const { error: deteleEntrada} = await supabase
+        .from('Entrada')
+        .delete()
+        .eq('bitacora_id', bitacora.id);
+      if (deteleEntrada) throw deteleEntrada;
+
+      const { error: bitacoraError } = await supabase
+        .from('Bitacora')
+        .delete()
+        .eq('proyecto_id', proyecto.id);
+      if (bitacoraError) throw bitacoraError;
+
+      const {error: deleteAvance} = await supabase
+        .from('Avance')
+        .delete()
+        .eq('proyecto_id', proyecto.id);
+      if (deleteAvance) throw deleteAvance;
+
+      const { error: deleteCitaError } = await supabase
+        .from('Cita')
+        .delete()
+        .eq('proyecto_id', proyecto.id);
+      if (deleteCitaError) throw deleteCitaError;
+
       // 2. Eliminar el proyecto encontrado
       const { error: deleteProyectoError } = await supabase
         .from('Proyecto')
