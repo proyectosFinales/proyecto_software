@@ -114,6 +114,14 @@ const AgregarBitacora = () => {
             `)
             .eq('estudiante_id', estudianteId);
 
+            if (error) {
+                throw new Error('Error al obtener el estudiante');
+            }
+
+            if(estudiante[0].asesor === null){
+              throw new Error('El estudiante no tiene un profesor');
+            }
+
             setProfesor(estudiante[0].asesor);
 
             if (error) {
@@ -131,6 +139,7 @@ const AgregarBitacora = () => {
 
       } catch (error) {
         console.error('Error fetching data:', error);
+        alert(error.message);
       }
     };
 
