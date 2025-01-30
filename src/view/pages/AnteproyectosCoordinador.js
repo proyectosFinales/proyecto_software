@@ -35,14 +35,14 @@ const AnteproyectosCoordinador = () => {
       'Provincia': p.Empresa.provincia,
       'Cantón': p.Empresa.canton,
       'Distrito': p.Empresa.distrito,
-      'Contacto Asesor': p.AnteproyectoContacto.ContactoEmpresa.nombre,
-      'Puesto': p.AnteproyectoContacto.ContactoEmpresa.departamento,
-      'Telefono': p.AnteproyectoContacto.ContactoEmpresa.telefono,
-      'Correo': p.AnteproyectoContacto.ContactoEmpresa.correo,
-      'Contacto RRHH': p.AnteproyectoContacto.RRHH.nombre,
-      'Puesto': p.AnteproyectoContacto.RRHH.departamento,
-      'Telefono': p.AnteproyectoContacto.RRHH.telefono,
-      'Correo': p.AnteproyectoContacto.RRHH.correo,
+      'Contacto Asesor': p.AnteproyectoContacto[0].ContactoEmpresa.nombre,
+      'Puesto': p.AnteproyectoContacto[0].ContactoEmpresa.departamento,
+      'Telefono': p.AnteproyectoContacto[0].ContactoEmpresa.telefono,
+      'Correo': p.AnteproyectoContacto[0].ContactoEmpresa.correo,
+      'Contacto RRHH': p.AnteproyectoContacto[0].RRHH.nombre,
+      'Puesto': p.AnteproyectoContacto[0].RRHH.departamento,
+      'Telefono': p.AnteproyectoContacto[0].RRHH.telefono,
+      'Correo': p.AnteproyectoContacto[0].RRHH.correo,
       'Estado del proyecto': p.estado,
       'Contexto': p.contexto,
       'Justificación': p.justificacion,
@@ -51,7 +51,6 @@ const AnteproyectosCoordinador = () => {
       'Observaciones': p.observaciones,
       
     }));
-
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Anteproyectos');
