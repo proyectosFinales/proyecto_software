@@ -104,7 +104,7 @@ const DashboardAvances = () => {
   }, [avances, selectedEstudiante, selectedProfesor]);
 
   useEffect(() => {
-    const results = avances.filter(avance => {
+    const results = filteredAvances.filter(avance => {
       return avance.Proyecto?.Estudiante?.Usuario?.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         avance.Proyecto?.Estudiante?.carnet.toLowerCase().includes(searchTerm.toLowerCase()) ||
         avance.Proyecto?.Profesor?.Usuario?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
