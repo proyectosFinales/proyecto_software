@@ -23,3 +23,15 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
+cypress.config.js
+package-lock.json
+package.json
+cypress/e2e/calificaciones/calificacionAsesor.cy.js
+cypress/e2e/calificaciones/calificacionesController.cy.js
+cypress/screenshots/calificacionAsesor.cy.js/Calificacion Asesor Form -- should handle API errors gracefully (failed).png
+cypress/screenshots/calificacionAsesor.cy.js/Calificacion Asesor Form -- should submit form with valid data (failed) (attempt 2).png
+cypress/screenshots/calificacionAsesor.cy.js/Calificacion Asesor Form -- should submit form with valid data (failed) (attempt 3).png
+cypress/screenshots/calificacionAsesor.cy.js/Calificacion Asesor Form -- should submit form with valid data (failed).png
+cypress/support/commands.js
+cypress/support/e2e.js
+cypress/support/index.d.ts

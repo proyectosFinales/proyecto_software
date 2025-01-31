@@ -309,13 +309,11 @@ function shuffleArray(array) {
 
 /**
  * Lists all existing `Cita` records, with proper relationship names 
- * matching your actual FK constraints. 
  */
 export async function listAllCitas() {
   console.log("=== listAllCitas: Fetching all Citas with details... ===");
   try {
-    // IMPORTANT: Ensure the table & constraint references EXACTLY match your schema 
-    // e.g. "Profesor" vs "profesor", "Cita_tutor_fkey" vs "cita_tutor_fkey".
+
     const { data: citas, error } = await supabase
       .from("Cita")
       .select(`
@@ -512,7 +510,6 @@ export async function updateCita(citaId, updates) {
     if (updates.disponibilidad_id) patch.disponibilidad_id = updates.disponibilidad_id;
     if (updates.lector1) patch.lector1 = updates.lector1;
     if (updates.lector2) patch.lector2 = updates.lector2;
-    // Add more columns if needed
 
     const { error: updateErr } = await supabase
       .from("Cita")
