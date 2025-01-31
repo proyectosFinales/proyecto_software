@@ -25,7 +25,7 @@ export async function obtenerEstudiantePorUsuario(usuarioId) {
 }
 
 /**
- * Obtiene el primer "Proyecto" asociado a un Estudiante (puedes ajustar si hay múltiples).
+ * Obtiene el primer "Proyecto" asociado a un Estudiante.
  */
 export async function obtenerProyectoEstudiante(estudiante_id) {
   const { data: proyectos, error } = await supabase
@@ -174,7 +174,7 @@ export async function fetchAllCalificaciones({ professorId, semesterId } = {}) {
  * ------------------------------------------------------ */
 
 /**
- * Stats de alto nivel: averageRating, totalReviews, recommendationScore, etc.
+ * Stats: averageRating, totalReviews, recommendationScore, etc.
  */
 export async function fetchDashboardStats({ semesterId, professorId } = {}) {
   let query = supabase
@@ -339,7 +339,7 @@ export async function fetchCriteriaBreakdown({ semesterId, professorId } = {}) {
 }
 
 /**
- * Muestra un simple pastel SÍ/NO si 'recomendacion' == 1 => sí, else => no.
+ * Muestra un simple SÍ/NO si 'recomendacion' == 1 => sí, else => no.
  */
 export async function fetchPieData({ semesterId, professorId } = {}) {
   let query = supabase
