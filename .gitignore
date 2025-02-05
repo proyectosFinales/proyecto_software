@@ -35,3 +35,5 @@ cypress/screenshots/calificacionAsesor.cy.js/Calificacion Asesor Form -- should 
 cypress/support/commands.js
 cypress/support/e2e.js
 cypress/support/index.d.ts
+cypress/
+.scannerwork
