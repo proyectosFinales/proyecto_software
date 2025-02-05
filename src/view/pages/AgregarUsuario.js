@@ -86,14 +86,20 @@ const AgregarUsuario = () => {
         alert('Profesor agregado con éxito.');
       } else {
         // Estudiante
-        await signUpNewUser(
-          nuevoUsuario.nombre,
-          nuevoUsuario.carnet,
-          nuevoUsuario.numero,
-          nuevoUsuario.correo,
-          nuevoUsuario.contraseña,
-          nuevoUsuario.sede
-        );
+        try {
+          await signUpNewUser(
+            nuevoUsuario.nombre,
+            nuevoUsuario.carnet,
+            nuevoUsuario.numero,
+            nuevoUsuario.correo,
+            nuevoUsuario.contraseña,
+            nuevoUsuario.sede
+          );
+        } catch (error) {
+          alert(error.message);
+          console.error(error);
+          return;
+        }
         alert('Estudiante agregado con éxito.');
       }
 

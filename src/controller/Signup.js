@@ -30,10 +30,11 @@ export async function signUpNewUser(fullName, carnet, tel, email, password, sede
     if (userError) {
       throw new Error(userError.message);
     }
-    
+
     const usuarioID = userData[0].id;
 
-    fetchSemestreActual().then(async (semestreId) => {
+    try {
+      const semestreId = await fetchSemestreActual();
       const { error: studentError } = await supabase
         .from('Estudiante')
         .insert([
@@ -46,12 +47,12 @@ export async function signUpNewUser(fullName, carnet, tel, email, password, sede
         ]);
 
       if (studentError) {
+        await supabase.from('Usuario').delete().eq('id', usuarioID);
         throw new Error(studentError.message);
       }
-    })
-    .catch((error) => {
+    } catch (error) {
       throw new Error(error.message);
-    });
+    }
 
     return userData;
   } catch (error) {
@@ -120,7 +121,7 @@ export function generarContraseña(longitud = 12) {
   const caracteresMinusculas = 'abcdefghijklmnopqrstuvwxyz';
   const caracteresMayusculas = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const digitos = '0123456789';
-  const caracteresEspeciales = '!@#$%^&*()_+';
+  const caracteresEspeciales = '!@#$%&*?.';
   const todosCaracteres = caracteresMinusculas + caracteresMayusculas + digitos + caracteresEspeciales;
 
   let contraseña = '';
