@@ -40,7 +40,10 @@ const Actas = () => {
 
   async function crearCarta() {
     try {
-      navigate('/machotes');
+      if(actas.length > 0) 
+        alert('Ya ha solicitado una carta de acta, para solicitar otra debe eliminar la actual.');
+      else
+        navigate('/machotes');
     } catch (error) {
       alert('Error al consultar cartas: ' + error);
     }
