@@ -179,6 +179,19 @@ const InicioCargaDatos = () => {
       if (error) throw error;
     }
 
+    // Borrar disponibilidad de profesores
+    const { data: disponibilidadData, error: disponibilidadError } = await supabase
+      .from('disponibilidad')
+      .select('id');  
+    if (disponibilidadError) throw disponibilidadError;
+    for (const item of disponibilidadData) {
+      const { error } = await supabase
+        .from('disponibilidad')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
     alert('Borrado completado correctamente');
   } catch (error) {
     console.error('Error durante el borrado:', error.message);
