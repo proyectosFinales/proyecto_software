@@ -33,82 +33,159 @@ const InicioCargaDatos = () => {
   // Si ocurre un error en cualquier paso, el proceso se detiene y se lanza un error con el mensaje correspondiente.
 
   const ReiniciarBaseDatos = async () => {
-    if (!window.confirm('¿Está seguro(a) de que desea eliminar los registros?')) return;
-  
-    try {
-      // Borrar dependencias de Anteproyecto primero
-      const { error: anteproyectoContactoError } = await supabase
+  if (!window.confirm('¿Está seguro(a) de que desea eliminar los registros?')) return;
+
+  try {
+    // Borrar dependencias de AnteproyectoContacto primero
+    const { data: anteproyectoContactoData, error: anteproyectoContactoError } = await supabase
+      .from('AnteproyectoContacto')
+      .select('id');  
+    if (anteproyectoContactoError) throw anteproyectoContactoError;
+    for (const item of anteproyectoContactoData) {
+      const { error } = await supabase
         .from('AnteproyectoContacto')
-        .delete();
-      if (anteproyectoContactoError) throw anteproyectoContactoError;
-  
-      const { error: correccionesError } = await supabase
-        .from('Correcciones')
-        .delete();
-      if (correccionesError) throw correccionesError;
-  
-      // Ahora sí se puede borrar Anteproyecto
-      const { error: anteproyectoError } = await supabase
-        .from('Anteproyecto')
-        .delete();
-      if (anteproyectoError) throw anteproyectoError;
-  
-      // Borrar dependencias de Bitácoras primero
-      const { error: entradaError } = await supabase
-        .from('Entrada')
-        .delete();
-      if (entradaError) throw entradaError;
-  
-      // Ahora se puede borrar Bitácora
-      const { error: bitacoraError } = await supabase
-        .from('Bitacora')
-        .delete();
-      if (bitacoraError) throw bitacoraError;
-  
-      // Borrar Avances del Proyecto
-      const { error: avanceError } = await supabase
-        .from('Avance')
-        .delete();
-      if (avanceError) throw avanceError;
-  
-      // Borrar SolicitudCarta antes de profesores y estudiantes
-  
-      const { error: solicitudCartaError } = await supabase
-        .from('SolicitudCarta')
-        .delete();
-      if (solicitudCartaError) throw solicitudCartaError;
-
-      const {error: CalificacionError} = await supabase
-        .from('Calificacion')
-        .delete();
-
-      if(CalificacionError) throw CalificacionError;
-
-      const {error: citaError} = await supabase
-        .from('Cita')
-        .delete();
-
-      if(citaError) throw citaError;
-  
-      // Borrar Proyecto antes de los semestres (aunque los semestres no se eliminarán)
-      const { error: proyectoError } = await supabase
-        .from('Proyecto')
-        .delete();
-      if (proyectoError) throw proyectoError;
-  
-      // Borrar Calendario en lugar de Evento
-      const { error: calendarioError } = await supabase
-        .from('Calendario')
-        .delete();
-      if (calendarioError) throw calendarioError;
-  
-      console.log('Borrado en cascada completado correctamente');
-    } catch (error) {
-      console.error('Error durante el borrado en cascada:', error.message);
-      alert('Error durante el borrado en cascada: ' + error.message);
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
     }
-    setModal(false);
-  };
+
+    // Borrar dependencias de Correcciones
+    const { data: correccionesData, error: correccionesError } = await supabase
+      .from('Correcciones')
+      .select('id');  
+    if (correccionesError) throw correccionesError;
+    for (const item of correccionesData) {
+      const { error } = await supabase
+        .from('Correcciones')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Anteproyecto
+    const { data: anteproyectoData, error: anteproyectoError } = await supabase
+      .from('Anteproyecto')
+      .select('id');  
+    if (anteproyectoError) throw anteproyectoError;
+    for (const item of anteproyectoData) {
+      const { error } = await supabase
+        .from('Anteproyecto')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Entrada
+    const { data: entradaData, error: entradaError } = await supabase
+      .from('Entrada')
+      .select('id');  
+    if (entradaError) throw entradaError;
+    for (const item of entradaData) {
+      const { error } = await supabase
+        .from('Entrada')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Bitacora
+    const { data: bitacoraData, error: bitacoraError } = await supabase
+      .from('Bitacora')
+      .select('id');  
+    if (bitacoraError) throw bitacoraError;
+    for (const item of bitacoraData) {
+      const { error } = await supabase
+        .from('Bitacora')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Avance
+    const { data: avanceData, error: avanceError } = await supabase
+      .from('Avance')
+      .select('id');  
+    if (avanceError) throw avanceError;
+    for (const item of avanceData) {
+      const { error } = await supabase
+        .from('Avance')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de SolicitudCarta
+    const { data: solicitudCartaData, error: solicitudCartaError } = await supabase
+      .from('SolicitudCarta')
+      .select('id_solicitud');  
+    if (solicitudCartaError) throw solicitudCartaError;
+    for (const item of solicitudCartaData) {
+      const { error } = await supabase
+        .from('SolicitudCarta')
+        .delete()
+        .eq('id_solicitud', item.id_solicitud); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Calificacion
+    const { data: calificacionData, error: calificacionError } = await supabase
+      .from('Calificacion')
+      .select('id');  
+    if (calificacionError) throw calificacionError;
+    for (const item of calificacionData) {
+      const { error } = await supabase
+        .from('Calificacion')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Cita
+    const { data: citaData, error: citaError } = await supabase
+      .from('Cita')
+      .select('cita_id');  
+    if (citaError) throw citaError;
+    for (const item of citaData) {
+      const { error } = await supabase
+        .from('Cita')
+        .delete()
+        .eq('cita_id', item.cita_id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Proyecto
+    const { data: proyectoData, error: proyectoError } = await supabase
+      .from('Proyecto')
+      .select('id');  
+    if (proyectoError) throw proyectoError;
+    for (const item of proyectoData) {
+      const { error } = await supabase
+        .from('Proyecto')
+        .delete()
+        .eq('id', item.id); 
+      if (error) throw error;
+    }
+
+    // Borrar dependencias de Calendario
+    const { data: calendarioData, error: calendarioError } = await supabase
+      .from('Calendario')
+      .select('calendario_id');  
+    if (calendarioError) throw calendarioError;
+    for (const item of calendarioData) {
+      const { error } = await supabase
+        .from('Calendario')
+        .delete()
+        .eq('calendario_id', item.calendario_id); 
+      if (error) throw error;
+    }
+
+    alert('Borrado completado correctamente');
+  } catch (error) {
+    console.error('Error durante el borrado:', error.message);
+    alert('Error durante el borrado: ' + error.message);
+  }
+  setModal(false);
+};
   
 
   return (
