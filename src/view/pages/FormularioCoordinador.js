@@ -134,7 +134,7 @@ const FormularioCoordinador = () => {
                     telefono
                   )
                 ),
-                Proyecto:proyecto_anteproyecto_id_fkey (
+                Proyecto:Proyecto_anteproyecto_id_fkey (
                   id
                 ),
                 Categoria: categoria_id (
@@ -166,7 +166,7 @@ const FormularioCoordinador = () => {
       setImpacto(data.impacto || '');
       setNombreDepartamento(data.departamento || '');
       setTipoProyecto(data.tipo || '');
-      setCategoria(data.Categoria.nombre || '');
+      setCategoria(data.Categoria?.nombre || '');
       setObservaciones(data.comentario || '');
       if(data.Proyecto.length == 0){
         setProyecto("empty");
