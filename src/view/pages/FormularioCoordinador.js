@@ -202,15 +202,16 @@ const FormularioCoordinador = () => {
         throw new Error("No hay profesores disponibles con estudiantes libres.");
       }
 
+      // Obtener semestre
+      const { data: semestreData, error: semestreError } = await supabase
+        .from('Semestre')
+        .select('semestre_id')
+        .neq('calendario_id', 0)
+        .single();
+      if (semestreError) throw semestreError;
+
       // Seleccionar un profesor aleatorio
       const profesor = profesoresConEstudiantesLibres[Math.floor(Math.random() * profesoresConEstudiantesLibres.length)];
-
-      // Actualizar estudiantes_libres del profesor seleccionado
-      const { error: updateProfesorError } = await supabase
-        .from('Profesor')
-        .update({ estudiantes_libres: profesor.estudiantes_libres - 1})
-        .eq('profesor_id', profesor.profesor_id);
-      if (updateProfesorError) throw updateProfesorError;
       
       // Actualizar estado del anteproyecto
       const { data, error } = await supabase
@@ -231,7 +232,7 @@ const FormularioCoordinador = () => {
           estudiante_id: data[0].estudiante_id, // Asegúrate de tener el estudianteId disponible
           anteproyecto_id: idAnteproyecto,
           estado: "Pendiente",
-          semestre_id: 1,
+          semestre_id: semestreData.semestre_id,
           fecha_inicio: new Date().toISOString()
         })
         .select('*');
@@ -243,6 +244,13 @@ const FormularioCoordinador = () => {
         .update({ asesor: profesor.profesor_id })
         .eq('estudiante_id', data[0].estudiante_id); // Asegúrate de tener el estudianteId disponible
       if (updateEstudianteError) throw updateEstudianteError;
+
+      // Actualizar estudiantes_libres del profesor seleccionado
+      const { error: updateProfesorError } = await supabase
+        .from('Profesor')
+        .update({ estudiantes_libres: profesor.estudiantes_libres - 1})
+        .eq('profesor_id', profesor.profesor_id);
+      if (updateProfesorError) throw updateProfesorError;
 
       for (let i = 0; i < 3; i++)
         await addAvance("Pendiente", insertProyecto[0].id);
