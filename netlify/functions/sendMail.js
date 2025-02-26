@@ -1,41 +1,31 @@
-const axios = require('axios');
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS
+  }
+});
 
 exports.handler = async function(event, context) {
   const { destino, asunto, mensaje } = JSON.parse(event.body);
 
-  const data = JSON.stringify({
-    "Messages": [{
-      "From": {
-        "Email": "proyectosoftware07@gmail.com",
-        "Name": "Proyectos finales escuela de Produccion Industrial"
-      },
-      "To": [{
-        "Email": destino,
-        "Name": "Querido usuario"
-      }],
-      "Subject": asunto,
-      "TextPart": mensaje
-    }]
-  });
-
-  const config = {
-    method: 'post',
-    url: process.env.MAIL_JET_URL,
-    data: data,
-    headers: { 'Content-Type': 'application/json' },
-    auth: {
-      username: process.env.MAIL_JET_USERNAME,
-      password: process.env.MAIL_JET_PASSWORD
-    },
-  };
-
   try {
-    await axios(config);
+    let info = await transporter.sendMail({
+      from: `"Proyectos finales escuela de Produccion Industrial" <${process.env.SMTP_USER}>`,
+      to: destino,
+      subject: asunto,
+      text: mensaje
+    });
+
+    console.log(`Correo enviado a: ${destino}`);
     return {
       statusCode: 200,
       body: JSON.stringify({ message: "Email sent successfully!" })
     };
   } catch (error) {
+    console.error(`Error enviando a ${destino}:`, error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
