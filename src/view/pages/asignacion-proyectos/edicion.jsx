@@ -98,6 +98,8 @@ function EdicionAsignacionProyectos() {
   const handleAssign = async (proyectoId, profesorId, estudianteId) => {
     if(!profesorId) return;
     try {
+      const profesorAnteriorId = proyectos.find(proj => proj.id === proyectoId).profesor_id;
+
       const { proyectoError } = await supabase
         .from("Proyecto")
         .update({ profesor_id: profesorId })
@@ -119,6 +121,15 @@ function EdicionAsignacionProyectos() {
       
       if (profesorError) throw profesorError;
 
+      if (profesorAnteriorId) {
+        const { error: profesorAnteriorError } = await supabase
+          .from("Profesor")
+          .update({ estudiantes_libres: profesores.find(p => p.profesor_id === profesorAnteriorId).original.estudiantesLibres + 1 })
+          .eq("profesor_id", profesorAnteriorId);
+
+        if (profesorAnteriorError) throw profesorAnteriorError;
+      }
+
       setProyectos((prevProyectos) =>
         prevProyectos.map((proj) =>
           proj.id === proyectoId ? { ...proj, profesor_id: profesorId } : proj
@@ -126,10 +137,18 @@ function EdicionAsignacionProyectos() {
       );
 
       setProfesores((prevProfesores) =>
-        prevProfesores.map((prof) =>
-          prof.profesor_id === profesorId ? { ...prof, original: {...prof.original, estudiantesLibres: prof.original.estudiantesLibres - 1} } : prof
-        )
-      );
+      prevProfesores.map((prof) => {
+        if (prof.profesor_id === profesorId) {
+          return { ...prof, original: { ...prof.original, estudiantesLibres: prof.original.estudiantesLibres - 1 } };
+        } else if (prof.profesor_id === profesorAnteriorId) {
+          return { ...prof, original: { ...prof.original, estudiantesLibres: prof.original.estudiantesLibres + 1 } };
+        } else {
+          return prof;
+        }
+      })
+    );
+
+
 
       alert("Proyecto asignado exitosamente");
     } catch (err) {
@@ -172,7 +191,7 @@ function EdicionAsignacionProyectos() {
 
       setProfesores((prevProfesores) =>
         prevProfesores.map((prof) =>
-          prof.profesor_id === profesorId ? { ...prof, estudiantesLibres: prof.estudiantesLibres + 1 } : prof
+          prof.profesor_id === profesorId ?  { ...prof, original: {...prof.original, estudiantesLibres: prof.original.estudiantesLibres - 1} } : prof
         )
       );
       
