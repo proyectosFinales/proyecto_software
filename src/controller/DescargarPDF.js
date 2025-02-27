@@ -102,7 +102,7 @@ export function descargarAnteproyecto(anteproyecto) {
   if (anteproyecto.Empresa) {
     addText("Nombre de la Empresa:", anteproyecto.Empresa.nombre);
     addText("Tipo de Empresa:", anteproyecto.Empresa.tipo);
-    addText("Actividad de la empresa:", anteproyecto.actividad);
+    addText("Actividad de la empresa:", anteproyecto.Empresa.actividad);
     addText("Ubicación de la empresa (distrito):", anteproyecto.Empresa.distrito);
     addText("Ubicación de la empresa (cantón):", anteproyecto.Empresa.canton);
     addText("Ubicación de la empresa (provincia):", anteproyecto.Empresa.provincia);

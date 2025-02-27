@@ -138,7 +138,8 @@ const CoordinadorForm = () => {
             tipo,
             provincia,
             canton,
-            distrito
+            distrito,
+            actividad
           ),
           AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
             ContactoEmpresa:contacto_id(
@@ -193,7 +194,7 @@ const CoordinadorForm = () => {
       }
       setTipoEmpresa(data.Empresa.tipo || '');
       setNombreEmpresa(data.Empresa.nombre || '');
-      setActividadEmpresa(data.actividad || '');
+      setActividadEmpresa(data.Empresa.actividad || '');
       setDistritoEmpresa(data.Empresa.distrito || '');
       setCantonEmpresa(data.Empresa.canton || '');
       setProvinciaEmpresa(data.Empresa.provincia || '');
