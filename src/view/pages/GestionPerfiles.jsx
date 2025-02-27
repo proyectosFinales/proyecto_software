@@ -7,6 +7,7 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
 import Modal from "../components/Modal";
+import { sendMailToNewUser } from '../../controller/Signup';
 
 /**
  * GestionPerfiles.jsx
@@ -184,6 +185,18 @@ const GestionPerfiles = () => {
 
     setFilteredUsers(temp);
   }, [filter, searchTerm, users]);
+
+  const sendEmailsToProfessors = async () => {
+    try {
+      const profesores = users.filter((user) => user.rol === 2);
+      for (const profesor of profesores)
+        await sendMailToNewUser(nuevoUsuario.correo, nuevoUsuario.contraseña);
+      alert('Correos enviados exitosamente a todos los profesores.');
+    } catch (error) {
+      console.error('Error al enviar correos:', error.message);
+      alert('Hubo un error al enviar los correos.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -445,6 +458,12 @@ const GestionPerfiles = () => {
                 onClick={handleUserAdd}
               >
                 Agregar usuario
+              </button>
+              <button
+                className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
+                onClick={sendEmailsToProfessors}
+              >
+                Enviar correos
               </button>
             </div>
           </div>
