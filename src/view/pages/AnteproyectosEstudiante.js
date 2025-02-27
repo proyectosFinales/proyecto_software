@@ -99,7 +99,8 @@ const AnteproyectosEstudiante = () => {
             tipo,
             provincia,
             canton,
-            distrito
+            distrito,
+            actividad
           ),
           AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
             ContactoEmpresa:contacto_id(

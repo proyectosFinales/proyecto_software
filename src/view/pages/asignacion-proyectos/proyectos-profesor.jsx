@@ -40,7 +40,54 @@ const ProyectosAsignadosProfesor = () => {
             anteproyecto_id,
             estudiante_id,
             Anteproyecto:anteproyecto_id (
-              estado
+              estado,
+              empresa_id,
+              contexto,
+              justificacion,
+              sintomas,
+              estado,
+              impacto,
+              tipo,
+              comentario,
+              estudiante_id,
+              actividad,
+              departamento,
+              comentario,
+              categoria_id,
+              Estudiante:estudiante_id (
+                carnet,
+                id_usuario,
+                Usuario:id_usuario (
+                  nombre,
+                  correo,
+                  telefono,
+                  sede
+                )
+              ),
+              Empresa:empresa_id (
+                nombre,
+                tipo,
+                provincia,
+                canton,
+                distrito,
+                actividad
+              ),
+              AnteproyectoContacto:anteproyectocontacto_anteproyecto_id_fkey (
+                ContactoEmpresa:contacto_id(
+                  nombre,
+                  correo,
+                  departamento,
+                  telefono
+                ),
+                RRHH:rrhh_id(
+                  nombre,
+                  correo,
+                  telefono
+                )
+              ),
+              Categoria:categoria_id (
+                nombre
+              )
             ),
             Estudiante:estudiante_id (
               estudiante_id,
