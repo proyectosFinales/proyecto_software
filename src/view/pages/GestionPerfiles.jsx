@@ -189,8 +189,10 @@ const GestionPerfiles = () => {
   const sendEmailsToProfessors = async () => {
     try {
       const profesores = users.filter((user) => user.rol === 2);
-      for (const profesor of profesores)
-        await sendMailToNewUser(profesor.correo, profesor.contrasena);
+      for (const profesor of profesores) {
+        console.log('Enviando correo a:', profesor.correo, 'con contraseña:', profesor.contrasena);
+        // await sendMailToNewUser(profesor.correo, profesor.contrasena);
+      }
       alert('Correos enviados exitosamente a todos los profesores.');
     } catch (error) {
       console.error('Error al enviar correos:', error.message);
