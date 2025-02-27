@@ -284,6 +284,7 @@ export async function getAllUsers() {
       rol,
       nombre,
       correo,
+      contrasena,
       profesor:Profesor (
         profesor_id,
         cantidad_estudiantes

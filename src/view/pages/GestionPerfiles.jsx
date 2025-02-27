@@ -190,7 +190,7 @@ const GestionPerfiles = () => {
     try {
       const profesores = users.filter((user) => user.rol === 2);
       for (const profesor of profesores)
-        await sendMailToNewUser(profesor.correo, profesor.contraseña);
+        await sendMailToNewUser(profesor.correo, profesor.contrasena);
       alert('Correos enviados exitosamente a todos los profesores.');
     } catch (error) {
       console.error('Error al enviar correos:', error.message);
