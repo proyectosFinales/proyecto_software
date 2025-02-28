@@ -82,7 +82,7 @@ const EditarPerfil = () => {
         if (data.rol == 3 && data.Estudiante) {
           baseData.estudiante_id = data.Estudiante.estudiante_id;
           baseData.carnet = data.Estudiante.carnet || "";
-          baseData.asesor = data.Estudiante.asesor || "Sin asignar";
+          baseData.asesor = data.Estudiante.Profesor?.Usuario?.nombre || "Sin asignar";
           baseData.estado = data.Estudiante.estado || "En progreso";
         }
 
