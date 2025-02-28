@@ -33,7 +33,17 @@ export async function getUserInfo(id) {
   if (userData.rol === 3) {
     const { data: estudianteData, error: estudianteError } = await supabase
       .from("Estudiante")
-      .select("*")
+      .select(`
+        estudiante_id, 
+        carnet, 
+        asesor, 
+        estado,
+        Profesor (
+          id_usuario,
+          Usuario (
+            nombre
+          )
+        )`)
       .eq("id_usuario", id)
       .single();
 
