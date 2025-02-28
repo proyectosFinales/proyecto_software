@@ -15,7 +15,11 @@ const Calendario = () => {
     { value: 'Plazo para establecer disponibilidad', label: 'Plazo para establecer disponibilidad' },
     { value: 'Defensas', label: 'Defensas' },
     { value: 'Actas', label: 'Actas' },
-    { value: 'Semestre', label: 'Semestre' }
+    { value: 'Semestre', label: 'Semestre' },
+    { value: 'Informe Final', label: 'Informe Final' },
+    { value: 'Informe Preliminar', label: 'Informe Preliminar' },
+    { value: 'Informe a Coordinación', label: 'Informe a Coordinación' },
+    { value: 'Informe Completo para Actas', label: 'Informe Completo para Actas' }
   ]
   const [events, setEvents] = useState([]);
   const [editableEvent, setEditableEvent] = useState(null);
