@@ -166,6 +166,7 @@ const Bitacoras = () => {
     setEntradas([]);
   };
 
+
   const handleAgregarBitacora = async () => {
     try {
       if (rol === 2) {
@@ -337,7 +338,10 @@ const Bitacoras = () => {
                           {entrada.fecha}
                         </td>
                         <td className="px-4 py-4 text-sm text-gray-900">
-                          {JSON.parse(entrada.contenido.slice(0, 100))}...
+                        {typeof entrada.contenido === "string"
+                            ? entrada.contenido.slice(0, 100)
+                            : JSON.stringify(entrada.contenido).slice(0, 100)
+                          }...
                         </td>
                         <td>
                           {(entrada.aprobada_prof===true)
