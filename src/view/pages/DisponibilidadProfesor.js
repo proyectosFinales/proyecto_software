@@ -42,17 +42,22 @@ const DisponibilidadProfesor = () => {
         
         if (profData) {
           setProfesorId(profData.profesor_id);
-          
+
+          const toLocalDate = (dateString) => {
+            const [year, month, day] = dateString.split('-').map(Number);
+            return new Date(year, month - 1, day);
+          };
+
           const { data: calData } = await supabase
             .from('Calendario')
             .select('fecha_inicio, fecha_fin')
             .eq('nombre', 'Defensas')
             .single();
-          
+           
           if (calData) {
             setPeriodoDefensas({
-              inicio: new Date(calData.fecha_inicio),
-              fin: new Date(calData.fecha_fin)
+              inicio: toLocalDate(calData.fecha_inicio),
+              fin: toLocalDate(calData.fecha_fin)
             });
           }
 
@@ -71,13 +76,17 @@ const DisponibilidadProfesor = () => {
         setIsLoading(false);
       }
     };
-
     fetchInitialData();
   }, []);
 
   const isWeekend = (date) => {
     const day = getDay(date);
     return day === 6 || day === 0; // 6 es sábado, 0 es domingo
+  };
+
+  const isSunday = (date) => {
+    const day = getDay(date);
+    return day === 0; // 6 es sábado, 0 es domingo
   };
 
   // --- Helper to parse "dia" safely as local day ---
@@ -100,7 +109,7 @@ const DisponibilidadProfesor = () => {
       classes.push('has-disponibilidad');
     }
     
-    if (isWeekend(date)) {
+    if ((isWeekend(date) && (date < periodoDefensas.inicio || date > periodoDefensas.fin)) || isSunday(date)) {
       classes.push('weekend');
     }
     
@@ -116,11 +125,11 @@ const DisponibilidadProfesor = () => {
 
   const tileDisabled = ({ date }) => {
     if (!periodoDefensas.inicio || !periodoDefensas.fin) return true;
-    return date < periodoDefensas.inicio || date > periodoDefensas.fin || isWeekend(date);
+    return date < periodoDefensas.inicio || date > periodoDefensas.fin || isSunday(date);
   };
 
   const handleDateClick = (date) => {
-    if (isWeekend(date)) return;
+    if (isSunday(date)) return;
     setSelectedDate(date);
     setSelectedTimeSlots([]);
     setShowTimeSelector(true);
