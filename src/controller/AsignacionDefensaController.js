@@ -2,6 +2,8 @@
 
 import { v4 as uuidv4 } from "uuid";
 import supabase from "../model/supabase";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 /* =====================================
    1) AUTO-ASSIGN DEFENSES (CITAS)
@@ -342,7 +344,7 @@ export async function listAllCitas() {
             nombre
           )
         ),
-        proyecto:Proyecto!cita_proyecto_id_fkey (
+        proyecto:Proyecto!Cita_proyecto_id_fkey (
           id,
           estado,
           Estudiante:estudiante_id (
@@ -604,4 +606,32 @@ async function validateSingleLector(profId, dia, horaInicio, horaFin, semestreId
   }
 
   return { success: true };
+}
+
+export function generateReports (data) {
+  console.log(data);
+  const filteredData = data.map((c) => ({
+      Día: c.day,
+      Inicio: c.startTime,
+      Fin: c.endTime,
+      Tutor: c.tutorName,
+      Primer_Lector: c.lector1Name,
+      Segundo_Lector: c.lector2Name,
+      Estado_de_Proyecto: c.proyectoEstado,
+      Estudiante: c.estudianteName,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Citas de defensa");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(blob, "Asignaciones de defensas");
 }

@@ -14,6 +14,7 @@ import {
   assignAllDefensas,
   listAllCitas,
   updateCita,
+  generateReports
 } from "../../controller/AsignacionDefensaController";
 
 /**
@@ -480,6 +481,10 @@ const AsignacionDefensas = () => {
     }
   }
 
+  function handleGeneration(){
+    generateReports(allCitas);
+  }
+
   // Modify handleEditCita to bypass lector availability checks
   async function handleEditCita(e) {
     e.preventDefault();
@@ -652,6 +657,7 @@ const AsignacionDefensas = () => {
                 Nueva Defensa
               </button>
             </div>
+            
 
             {/* The Calendar */}
             <Calendar
@@ -704,6 +710,13 @@ const AsignacionDefensas = () => {
               </div>
             </div>
           </div>
+          <div className="flex items-start justify-center text-white">
+            <button onClick={() => handleGeneration()}
+              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              Descargar asignaciones
+            </button>
+          </div>
+
 
           {/* RIGHT: Create / Edit form */}
           {(isCreatingNew || editCitaId) && (
