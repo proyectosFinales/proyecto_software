@@ -14,7 +14,9 @@ import {
   assignAllDefensas,
   listAllCitas,
   updateCita,
-  generateReports
+  generateReports,
+  generateAvailability,
+  availabilityReports
 } from "../../controller/AsignacionDefensaController";
 
 /**
@@ -57,6 +59,9 @@ const AsignacionDefensas = () => {
   // Reference data
   const [allProfesores, setAllProfesores] = useState([]);
 
+  const [allAvailabilities, setAllAvailabilities] = useState([]);
+  
+
   // We define 6 daily time slots
   const TIME_SLOTS = [
     { start: "07:30:00", end: "09:30:00" },
@@ -77,6 +82,7 @@ const AsignacionDefensas = () => {
     fetchPendingDefensas();
     fetchAllCitas();
     fetchProfesores();
+    fetchAllAvailabilites();
   }, []);
 
   // 1.1) Pending
@@ -147,6 +153,15 @@ const AsignacionDefensas = () => {
       setAllCitas(citasData);
     } catch (err) {
       console.error("Error fetching all Citas:", err);
+    }
+  }
+
+  async function fetchAllAvailabilites() {
+    try {
+      const availabilityData = await availabilityReports();
+      setAllAvailabilities(availabilityData);
+    } catch (err) {
+      console.error("Error fetching all availabilites:", err);
     }
   }
 
@@ -485,6 +500,10 @@ const AsignacionDefensas = () => {
     generateReports(allCitas);
   }
 
+  function handleAvailability(){
+    generateAvailability(allAvailabilities);
+  }
+
   // Modify handleEditCita to bypass lector availability checks
   async function handleEditCita(e) {
     e.preventDefault();
@@ -712,8 +731,12 @@ const AsignacionDefensas = () => {
           </div>
           <div className="flex items-start justify-center text-white">
             <button onClick={() => handleGeneration()}
-              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
               Descargar Asignaciones
+            </button>
+            <button onClick={() => handleAvailability()}
+              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
+              Descargar Disponibilidades
             </button>
           </div>
 

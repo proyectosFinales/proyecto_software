@@ -609,7 +609,6 @@ async function validateSingleLector(profId, dia, horaInicio, horaFin, semestreId
 }
 
 export function generateReports (data) {
-  console.log(data);
   const filteredData = data.map((c) => ({
       Día: c.day,
       Inicio: c.startTime,
@@ -634,4 +633,59 @@ export function generateReports (data) {
     });
 
     saveAs(blob, "Asignaciones de defensas");
+}
+
+export async function availabilityReports() {
+  try {
+    const { data: availabilities, error } = await supabase
+      .from("disponibilidad")
+      .select(`
+        id,
+        profesor_id,
+        hora_inicio,
+        hora_fin,
+        dia,
+        profesor:Disponibilidad_profesor_id_fkey (
+          profesor_id,
+          id_usuario,
+          usuario:Profesor_id_usuario_fkey (
+            nombre
+          )
+        )
+      `);
+
+    if (error) throw error;
+    return availabilities.map((a) => ({
+      start: a.hora_inicio,
+      end: a.hora_fin,
+      day: a.dia,
+      nombre: a.profesor?.usuario?.nombre,
+    }));
+  } catch (err) {
+    console.error("❌ Error in listAllCitas:", err);
+    throw err;
+  }
+}
+
+export function generateAvailability (data) {
+  const filteredData = data.map((a) => ({
+      Profesor: a.nombre,
+      Día: a.day,
+      Inicio: a.start,
+      Fin: a.end
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(filteredData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Citas de defensa");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
+
+    saveAs(blob, "Disponibilidades de Profesores");
 }
