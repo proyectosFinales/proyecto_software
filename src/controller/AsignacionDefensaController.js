@@ -676,7 +676,7 @@ export function generateAvailability (data) {
     }));
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Citas de defensa");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Fechas de disponibilidad");
 
     const excelBuffer = XLSX.write(workbook, {
       bookType: "xlsx",
