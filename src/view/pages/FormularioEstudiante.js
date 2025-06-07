@@ -29,6 +29,7 @@ const EstudianteForm = () => {
 
   // Datos de la empresa y anteproyecto a crear
   const [nombreEmpresa, setNombreEmpresa] = useState('');
+  const [sending, setSending] = useState(false)
   const [otra, setOtra] = useState('');
   const [actividadEmpresa, setActividadEmpresa] = useState('');
   const [activity, setActivity] = useState('');
@@ -254,7 +255,7 @@ const EstudianteForm = () => {
       errorToast("No se encontró un 'estudiante_id' válido. No se puede insertar.");
       return;
     }
-
+    setSending(true)
     try {
       const empresaCount = await consultarEmpresas();
       const contactoCount = await consultarContactos(nombreAsesor);
@@ -290,18 +291,20 @@ const EstudianteForm = () => {
         .select();
       
 
-      if (error){ 
+      if (error){
         throw error;
       }
       else{
         insertarAnteContact(data[0].id, contactID, rrhhID);
       }
       successToast('Anteproyecto insertado exitosamente');
+      setSending(false)
       navigate('/anteproyectosEstudiante');
     } catch (err) {
       console.error('Error al insertar anteproyecto:', err);
       errorToast('Error al insertar anteproyecto: ' + err.message);
     }
+    setSending(false)
   }
 
   const handleActividadChange = (e) => {
@@ -918,9 +921,11 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.contenedorBotonesFormEstudiante}>
-          <button type="submit" className={`${styles.button} ${styles.enviar}`}>
-            Enviar
-          </button>
+          {(sending === false) && (
+            <button type="submit" className={`${styles.button} ${styles.enviar}`}>
+              Enviar
+            </button>
+          )}
           <button
             type="button"
             className={`${styles.button} ${styles.cancelar}`}
