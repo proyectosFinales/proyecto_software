@@ -94,6 +94,10 @@ const AnteproyectosEstudiante = () => {
               sede
             )
           ),
+          Correcciones:correcciones_anteproyecto_id_fkey (
+            seccion,
+            contenido
+          ),
           Empresa:empresa_id (
             nombre,
             tipo,

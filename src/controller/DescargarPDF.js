@@ -84,7 +84,7 @@ export function descargarAnteproyecto(anteproyecto) {
 
     // Contenido en texto normal
     doc.setFont("Helvetica", "normal");
-    doc.text(textDividido, 20, yPosition + 10);
+    doc.text(textDividido, 20, yPosition + 7);
     yPosition += requiredHeight + 10;
   }
 
@@ -125,10 +125,34 @@ export function descargarAnteproyecto(anteproyecto) {
   }
 
   // Datos de contenido del anteproyecto
+  const correccionC = anteproyecto.Correcciones.find(c => c.seccion === 'Contexto');
+  const correccionJ = anteproyecto.Correcciones.find(c => c.seccion === 'Justificacion');
+  const correccionS = anteproyecto.Correcciones.find(c => c.seccion === 'Sintomas');
+  const correccionI = anteproyecto.Correcciones.find(c => c.seccion === 'Impacto');
   addText("Contexto:", anteproyecto.contexto);
+  doc.setTextColor(255, 0, 0);
+  if (correccionC){
+    addText("Correccion de contexto solicitada",correccionC.contenido);
+  }
+  doc.setTextColor(0, 0, 0);
   addText("Justificación del trabajo:", anteproyecto.justificacion);
+  doc.setTextColor(255, 0, 0);
+  if (correccionJ){
+    addText("Correccion de justificación solicitada",correccionJ.contenido);
+  }
+  doc.setTextColor(0, 0, 0);
   addText("Síntomas principales:", anteproyecto.sintomas);
+  doc.setTextColor(255, 0, 0);
+  if (correccionS){
+    addText("Correccion de síntomas solicitada",correccionS.contenido);
+  }
+  doc.setTextColor(0, 0, 0);
   addText("Efectos o impactos para la empresa:", anteproyecto.impacto);
+  doc.setTextColor(255, 0, 0);
+  if (correccionI){
+    addText("Correccion efectos o impactos solicitada",correccionI.contenido);
+  }
+  doc.setTextColor(0, 0, 0);
   addText("Departamento para realizar el proyecto:", anteproyecto.departamento);
   addText("Tipo de proyecto:", anteproyecto.tipo);
   addText("Estado del proyecto:", anteproyecto.estado);
