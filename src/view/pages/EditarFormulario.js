@@ -96,6 +96,7 @@ const CoordinadorForm = () => {
     const id = getQueryParam('id');
     if (id) {
       consultarAnteproyecto(id);
+      //consultarProyecto(id);
     }
   }, [location]);
 
@@ -103,6 +104,8 @@ const CoordinadorForm = () => {
    * Consulta datos del anteproyecto y su estudiante,
    * uniendo con Usuario a través de Estudiante.id_usuario => Usuario.id.
    */
+
+  
 
   async function consultarAnteproyecto(id) {
     try {
@@ -158,16 +161,15 @@ const CoordinadorForm = () => {
             seccion,
             contenido
           ),
-          Proyecto:proyecto_anteproyecto_id_fkey (
+          Proyecto!left (
             id
           ),
-          Categoria:categoria_id (
+          Categoria:Anteproyecto_categoria_id_fkey (
             nombre
           )
         `)
         .eq('id', id)
         .single();
-        console.log(data);
       if (error) throw error;
       // Llenar estados
       setIdAnteproyecto(data.id);
