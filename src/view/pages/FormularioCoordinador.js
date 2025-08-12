@@ -207,13 +207,13 @@ const FormularioCoordinador = () => {
       const { data: semestreData, error: semestreError } = await supabase
         .from('Semestre')
         .select('semestre_id')
-        .neq('calendario_id', 0)
-        .single();
+        .select();
       if (semestreError) throw semestreError;
 
       // Seleccionar un profesor aleatorio
       const profesor = profesoresConEstudiantesLibres[Math.floor(Math.random() * profesoresConEstudiantesLibres.length)];
-      
+      const lastIndex = semestreData.length-1;
+      const semestreDataSingle = semestreData[lastIndex];
       // Actualizar estado del anteproyecto
       const { data, error } = await supabase
         .from('Anteproyecto')
@@ -233,7 +233,7 @@ const FormularioCoordinador = () => {
           estudiante_id: data[0].estudiante_id, // Asegúrate de tener el estudianteId disponible
           anteproyecto_id: idAnteproyecto,
           estado: "Pendiente",
-          semestre_id: semestreData.semestre_id,
+          semestre_id: semestreDataSingle.semestre_id,
           fecha_inicio: new Date().toISOString()
         })
         .select('*');
@@ -255,7 +255,6 @@ const FormularioCoordinador = () => {
 
       for (let i = 0; i < 3; i++)
         await addAvance("Pendiente", insertProyecto[0].id);
-      
       alert('Anteproyecto actualizado exitosamente (Aprobado).');
       navigate('/anteproyectosCoordinador');
     } catch (error) {
