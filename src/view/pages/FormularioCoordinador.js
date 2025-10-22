@@ -168,7 +168,7 @@ const FormularioCoordinador = () => {
       setTipoProyecto(data.tipo || '');
       setCategoria(data.Categoria?.nombre || '');
       setObservaciones(data.comentario || '');
-      if(data.Proyecto.length == 0){
+      if(data.Proyecto.length === 0){
         setProyecto("empty");
       }
       else{
@@ -198,8 +198,8 @@ const FormularioCoordinador = () => {
 
     try {
       // Obtener profesores con estudiantes libres
-      const profesoresConEstudiantesLibres = await Profesor.obtenerProfesoresConEstudiantesLibres();
-      if (profesoresConEstudiantesLibres.length === 0) {
+      const profesoresConEstudiantesLibres = await Profesor.obtenerProfesoresConEstudiantesLibres(); // Asegurarse de si realmente hace falta validar que hayan profesores
+      if (profesoresConEstudiantesLibres.length === 0) {                                             // disponibles con estudiantes libres. Y solamente aceptarlos.
         throw new Error("No hay profesores disponibles con estudiantes libres.");
       }
 
@@ -255,6 +255,15 @@ const FormularioCoordinador = () => {
 
       for (let i = 0; i < 3; i++)
         await addAvance("Pendiente", insertProyecto[0].id);
+
+      //Para enviar el correo al estudiante de que le aprobaron el anteproyecto
+      const mensaje = "Buenas,\n" +
+        "Le informamos por este medio que, tras la revisión de su anteproyecto, este ha sido APROBADO.\n" +
+        "En caso de requerir orientación o aclaraciones sobre cualquier aspecto relacionado al proceso, puede ponerse en contacto contacto con el coordinador de carrera.\n" +
+        "\nInstituto Tecnológico de Costar Rica,\n" +
+        "Escuela de Producción Industrial.";
+      sendMail(correo, "Anteproyecto Aprobado", mensaje);
+
       alert('Anteproyecto actualizado exitosamente (Aprobado).');
       navigate('/anteproyectosCoordinador');
     } catch (error) {
@@ -290,16 +299,16 @@ const FormularioCoordinador = () => {
           estado: "Correccion"
         })
         .eq('id', idAnteproyecto);
-      if(correccionC != ''){
+      if(correccionC !== ''){
         await insertarCorreccion("Contexto",correccionC);
       }
-      if(correccionE != ''){
+      if(correccionE !== ''){
         await insertarCorreccion("Impacto",correccionE);
       }
-      if(correccionS != ''){
+      if(correccionS !== ''){
         await insertarCorreccion("Sintomas",correccionS);
       }
-      if(correccionJ != ''){
+      if(correccionJ !== ''){
         await insertarCorreccion("Justificacion",correccionJ);
       }
       
@@ -325,7 +334,7 @@ const FormularioCoordinador = () => {
         `)
         .eq('nombre', nombreContact)
         .single();
-      if(data.AnteproyectoContact.length==1){
+      if(data.AnteproyectoContact.length===1){
         return true;
       }
       else{
@@ -365,7 +374,7 @@ const FormularioCoordinador = () => {
         `)
         .eq('nombre', nombreEmpresa)
         .single();
-      if(data.ContactoEmpresa.length == 0){
+      if(data.ContactoEmpresa.length === 0){
         return true;
       }
       else{
@@ -421,7 +430,7 @@ const FormularioCoordinador = () => {
         .eq('nombre', nombreContact)
         .single();
       if(error) throw error;
-      if(data.AnteproyectoContact.length==1){
+      if(data.AnteproyectoContact.length===1){
         return true;
       }
       else{
@@ -441,7 +450,7 @@ const FormularioCoordinador = () => {
     e.preventDefault();
     const confirmReprobar = window.confirm("¿Está seguro de REPROBAR el anteproyecto? Asegúrese de incluir la razón en las observaciones");
     if (!confirmReprobar) return;
-    if(proyecto == "empty"){
+    if(proyecto === "empty"){
       try {
         const mensaje = "Buenas,\n" +
         "Le informamos por este medio que, tras la revisión de su anteproyecto, este ha sido rechazado por las siguientes razones:\n" +
@@ -456,14 +465,14 @@ const FormularioCoordinador = () => {
         const rhCount = await consultarHR(nombreHR);
         await eliminarAnteContact();
         await eliminarAnteproyecto();
-        if(contactoCount==true){
+        if(contactoCount===true){
           await eliminarContacto(nombreAsesor);
         }
-        if(rhCount==true){
+        if(rhCount===true){
           await eliminarContacto(nombreHR);
         }
         const empresaCount = await consultarEmpresas();
-        if(empresaCount == true){
+        if(empresaCount === true){
           const { error } = await supabase
           .from('Empresa')
           .delete()
@@ -479,6 +488,47 @@ const FormularioCoordinador = () => {
     }
     else{
       alert("No se puede reprobar el anteproyecto, ya se encuentra asignado a un profesor");
+    }
+  }
+
+  /**
+   * Para corregir => estado = "Para corregir" + guardar observaciones
+   */
+
+  async function paraCorregirAnteproyecto(e) {
+    e.preventDefault();
+    const confirmCorregir = window.confirm("¿Está seguro de MANDAR A CORREGIR el anteproyecto?\n\nAsegúrese de incluir la razón en las observaciones");
+    if (!confirmCorregir) return;
+    if(proyecto === "empty"){
+      try {
+        // Actualizar estado del anteproyecto
+        const { data, error } = await supabase
+          .from('Anteproyecto')
+          .update({
+            comentario: observaciones,
+            estado: "Correccion"
+          })
+          .eq('id', idAnteproyecto)
+          .select();
+        if (error) throw error;
+
+        const mensaje = "Buenas,\n" +
+        "Le informamos por este medio que, tras la revisión de su anteproyecto, se le solicita que lo corrija por las siguientes razones:\n" +
+        `${observaciones}`+
+        "Le invitamos a revisar las observaciones y, si así lo desea, corregirlo para reevaluarlo nuevamente.\n" +
+        "En caso de requerir orientación o aclaraciones sobre los puntos señalados, puede ponerse en contacto contacto con el coordinador de carrera.\n" +
+        "\nInstituto Tecnológico de Costar Rica,\n" +
+        "Escuela de Producción Industrial.";
+        sendMail(correo, "Anteproyecto Para Corregir", mensaje);
+        
+        alert('Anteproyecto actualizado exitosamente (Para corregir).');
+        navigate('/anteproyectosCoordinador');
+      } catch (error) {
+        alert('Error al actualizar anteproyecto: ' + error.message);
+      }
+    }
+    else{
+      alert("No se puede mandar a corregir el anteproyecto, ya se encuentra asignado a un profesor.");
     }
   }
 
@@ -764,7 +814,15 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>Observaciones del profesor</label>
+          <label>Observaciones del coordinador
+            <AiOutlineInfoCircle
+              className="ml-2 text-blue-500 cursor-pointer"
+              onClick={() => toggleInfo('observaciones')}
+            />
+          </label>
+          {infoVisible.observaciones && (
+              <p className="text-sm text-gray-600 mt-1">Son observaciones realizadas para la mejora del anteproyecto que se hicieron al estudiante y una vez aprobado son de referencia para el profesor asesor aunque fueron solventadas por el estudiante.</p>
+            )}
           <textarea
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
@@ -788,6 +846,12 @@ const FormularioCoordinador = () => {
             Enviar
           </button>
           )}
+          <button
+            className={`${styles.button} ${styles.aprobar}`}
+            onClick={paraCorregirAnteproyecto}
+          >
+            Para Corregir
+          </button>
           <button
             type="submit"
             className={`${styles.button} ${styles.reprobar}`}

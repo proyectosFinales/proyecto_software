@@ -20,6 +20,7 @@ import FormularioCarta from './view/pages/FormularioCarta.js';
 import FormularioCoordinador from './view/pages/FormularioCoordinador.js';
 import AnteproyectosEstudiante from './view/pages/AnteproyectosEstudiante.js';
 import Categorias from './view/pages/Categorias.jsx';
+import TipoProyecto from './view/pages/TipoProyecto.jsx';
 import CartasEstudiante from './view/pages/CartasEstudiante.js';
 import AnteproyectosCoordinador from './view/pages/AnteproyectosCoordinador.js';
 import CargarProfesores from './view/pages/CargarProfesores';
@@ -111,6 +112,10 @@ function App() {
         <Route
           path="/categorias"
           element={<RutaProtegida element={<Categorias />} requiredRoles={["1"]} />}
+        />
+        <Route
+          path="/tipos-de-proyectos"
+          element={<RutaProtegida element={<TipoProyecto />} requiredRoles={["1"]} />}
         />
         <Route
           path="/asignaciones"
@@ -253,7 +258,8 @@ function App() {
         />
         
         {/* Nested routes example */}
-        <Route path="/carga-datos">
+        {/* Revisar estas rutas porque la carga de datos tambien esta fallando, la segunda ruta se define en otro lado */}
+        <Route path="/carga-datos"> 
           <Route
             index
             element={<RutaProtegida element={<InicioCargaDatos />} requiredRoles={["1"]} />}

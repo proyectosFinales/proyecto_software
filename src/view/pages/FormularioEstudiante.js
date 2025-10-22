@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { fetchCategorias } from '../../controller/Categoria';
+import { fetchTiposProyectos } from '../../controller/TipoProyecto';
 import { useNavigate } from 'react-router-dom';
 import styles from '../styles/FormularioEstudiante.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
@@ -50,6 +51,8 @@ const EstudianteForm = () => {
   const [impacto, setImpacto] = useState('');
   const [nombreDepartamento, setNombreDepartamento] = useState('');
   const [tipoProyecto, setTipoProyecto] = useState('');
+  const [tiposProyectos, setTiposProyectos] = useState([]);
+  const [selectedTipoProyecto, setSelectedTipoProyecto] = useState(null);
   const [selectedCategoria, setSelectedCategoria] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const telRegex = /^(\+?506\s?)?[2-9]\d{7}$/;
@@ -68,6 +71,17 @@ const EstudianteForm = () => {
         label: categoria.nombre
       }));
       setCategorias([{value: '', label: "-- Asigna una categoria --"}, ...options]);
+    }).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    fetchTiposProyectos().then(data => {
+      const options = data.map(TIPO=> ({
+        //Se envia el nombre en value, ya que en la BD no se guarda el id, como en categorias
+        value: TIPO.nombre,
+        label: TIPO.nombre
+      }));
+      setTiposProyectos([{value: '', label: "-- Asigna un tipo de proyecto --"}, ...options]);
     }).catch(console.error);
   }, []);
 
@@ -194,7 +208,7 @@ const EstudianteForm = () => {
           nombre
         `)
         .eq('nombre', nombreEmpresa)
-      if(data.length == 0){
+      if(data.length === 0){
         return "empty";
       }
       else{
@@ -215,7 +229,7 @@ const EstudianteForm = () => {
           nombre
         `)
         .eq('nombre', nombreContact)
-      if(data.length == 0){
+      if(data.length === 0){
         return "empty";
       }
       else{
@@ -235,7 +249,7 @@ const EstudianteForm = () => {
     if (!confirmarEnvio) {
       return;
     }
-    if(actividadEmpresa == "Otras" && (activity == '' || activity == 'Otras')){
+    if(actividadEmpresa === "Otras" && (activity === '' || activity === 'Otras')){
       alert("Debe ingresar la actividad de la empresa");
       return;
     }
@@ -255,20 +269,24 @@ const EstudianteForm = () => {
       errorToast("No se encontró un 'estudiante_id' válido. No se puede insertar.");
       return;
     }
+    if ((nombreDepartamento || '').length > 40) {
+      alert("El nombre del departamento no puede exceder 40 caracteres.");
+      return;
+    }
     setSending(true)
     try {
       const empresaCount = await consultarEmpresas();
       const contactoCount = await consultarContactos(nombreAsesor);
       const rhCount = await consultarContactos(nombreHR);
-      if(empresaCount == "empty"){
+      if(empresaCount === "empty"){
         await insertarEmpresa();
       }
       const empresID = await consultarEmpresas();
-      if(contactoCount == "empty"){
+      if(contactoCount === "empty"){
         await insertarContacto(nombreAsesor, puestoAsesor, correoContacto, telefonoContacto, empresID);
       }
       const contactID = await consultarContactos(nombreAsesor);
-      if(rhCount == "empty"){
+      if(rhCount === "empty"){
         await insertarContacto(nombreHR, 'Recursos Humanos', correoHR, telefonoHR, empresID);
       }
       const rrhhID = await consultarContactos(nombreHR);
@@ -283,7 +301,7 @@ const EstudianteForm = () => {
           justificacion: justificacion,
           sintomas: sintomas,
           impacto: impacto,
-          tipo: tipoProyecto,
+          tipo: selectedTipoProyecto.value,
           departamento: nombreDepartamento,
           estado: 'Pendiente',
           categoria_id: selectedCategoria.value
@@ -843,67 +861,22 @@ const EstudianteForm = () => {
           <input
             type="text"
             value={nombreDepartamento}
-            onChange={(e) => setNombreDepartamento(e.target.value)}
+            onChange={(e) => setNombreDepartamento(e.target.value.slice(0, 40))}
+            maxLength={40}
             required
           />
         </div>
 
         <div className={styles.formGroup}>
-          <label>24. Tipo de proyecto: *</label>
           <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoProyecto"
-                value="Extensión"
-                onChange={(e) => setTipoProyecto(e.target.value)}
-                required
-              />
-              Extensión
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoProyecto"
-                value="Investigación"
-                onChange={(e) => setTipoProyecto(e.target.value)}
-              />
-              Investigación
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoProyecto"
-                value="Aplicado a empresa"
-                onChange={(e) => setTipoProyecto(e.target.value)}
-              />
-              Aplicado a empresa
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoProyecto"
-                value="Aplicado a PYME"
-                onChange={(e) => setTipoProyecto(e.target.value)}
-              />
-              Aplicado a PYME
-            </label>
-          </div>
-          <div>
-            <label>
-              <input
-                type="radio"
-                name="tipoProyecto"
-                value="Aplicado a PYME"
-                onChange={(e) => setTipoProyecto(e.target.value)}
-              />
-              Acción Social
+            <label>24. Tipo de proyecto: *
+              <Select
+                value={selectedTipoProyecto}
+                onChange={e => setSelectedTipoProyecto(e)}
+                options={tiposProyectos}
+                placeholder="Seleccione un tipo de proyecto"
+                className="mt-2"
+                />
             </label>
           </div>
           <div>

@@ -280,7 +280,7 @@ const CoordinadorForm = () => {
           )
         `)
         .eq('nombre', nombreContact)
-        .single();
+        //.single();
       if(data.AnteproyectoContact.length==1){
         return true;
       }
@@ -288,8 +288,8 @@ const CoordinadorForm = () => {
         return false;
       }
     } catch(err){
-      console.error('Error al buscar contacto', err);
-      alert('Error al buscar contacto' + err.message);
+      console.error('Error al buscar contacto: ', err);
+      alert('Error al buscar contacto: ' + err.message);
     }
   }
 
@@ -390,7 +390,7 @@ const CoordinadorForm = () => {
           )
         `)
         .eq('nombre', nombreContact)
-        .single();
+        //.single();
       if(error) throw error;
       if(data.AnteproyectoContact.length==1){
         return true;
@@ -399,11 +399,11 @@ const CoordinadorForm = () => {
         return false;
       }
     } catch(err){
-      console.error('Error al buscar contacto', err);
-      alert('Error al buscar contacto' + err.message);
+      console.error('Error al buscar contacto: ', err);
+      alert('Error al buscar contacto: ' + err.message);
     }
   }
-
+  
   async function editarAnteproyecto(e) {
     e.preventDefault();
     const confirmUpdate = window.confirm("¿Está seguro de ACTUALIZAR el anteproyecto?");
@@ -452,6 +452,7 @@ const CoordinadorForm = () => {
         await eliminarCorrecciones();
         await eliminarAnteContact();
         await borrarAnteproyecto();
+
         if(contactoCount==true){
           await eliminarContacto(nombreAsesor);
         }
@@ -828,13 +829,21 @@ const CoordinadorForm = () => {
           </div>
 
           <div className="space-y-2">
-            <label className="block font-semibold">Observaciones del profesor:</label>
+            <label className="block font-semibold">Observaciones del coordinador:
+              <AiOutlineInfoCircle
+                className="ml-2 text-blue-500 cursor-pointer"
+                onClick={() => toggleInfo('observaciones')}
+              />
+            </label>
             <textarea
               value={observaciones}
               onChange={(e) => setObservaciones(e.target.value)}
               readOnly
               className="w-full p-2 border rounded-md bg-gray-100 min-h-[100px]"
             />
+            {infoVisible.observaciones && (
+              <p className="text-sm text-gray-600 mt-1">Son observaciones realizadas para la mejora del anteproyecto que se hicieron al estudiante y una vez aprobado son de referencia para el profesor asesor aunque fueron solventadas por el estudiante.</p>
+            )}
           </div>
         </div>
 

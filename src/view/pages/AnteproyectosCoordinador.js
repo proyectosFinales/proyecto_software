@@ -12,6 +12,10 @@ const AnteproyectosCoordinador = () => {
   const [searchText, setSearchText] = useState('');
   const navigate = useNavigate();
 
+  //Para ordenar alfabéticamente
+  const [sortField, setSortField] = useState(null);
+  const [sortAsc, setSortAsc] = useState(true);
+
   const handleRevisar = (id) => {
     navigate('/formulario-coordinador?id=' + id);
   };
@@ -23,33 +27,35 @@ const AnteproyectosCoordinador = () => {
     }
 
     const dataToExport = anteproyectos.map((p) => ({
+      // El orden nuevo solicitado
       ID: p.id,
-      'Nombre del Estudiante': p.Estudiante?.Usuario?.nombre || 'N/A',
-      'Carnet': p.Estudiante.carnet,
-      'Correo': p.Estudiante.Usuario.correo,
-      'Correo': p.Estudiante.Usuario.telefono,
+      'Estatus del proyecto': p.estado,
       'Sede': p.Estudiante.Usuario.sede,
-      'Empresa': p.Empresa.nombre,
-      'Tipo de Empresa': p.Empresa.tipo,
-      'Actividad de empresa': p.Empresa.actividad,
-      'Provincia': p.Empresa.provincia,
-      'Cantón': p.Empresa.canton,
-      'Distrito': p.Empresa.distrito,
-      'Contacto Asesor': p.AnteproyectoContacto[0].ContactoEmpresa.nombre,
-      'Puesto': p.AnteproyectoContacto[0].ContactoEmpresa.departamento,
-      'Telefono': p.AnteproyectoContacto[0].ContactoEmpresa.telefono,
-      'Correo': p.AnteproyectoContacto[0].ContactoEmpresa.correo,
-      'Contacto RRHH': p.AnteproyectoContacto[0].RRHH.nombre,
-      'Puesto': p.AnteproyectoContacto[0].RRHH.departamento,
-      'Telefono': p.AnteproyectoContacto[0].RRHH.telefono,
-      'Correo': p.AnteproyectoContacto[0].RRHH.correo,
-      'Estado del proyecto': p.estado,
+      'Nombre del estudiante': p.Estudiante?.Usuario?.nombre || 'N/A',
+      'Carnet': p.Estudiante.carnet,
+      'Teléfono del estudiante': p.Estudiante.Usuario.telefono,
+      'Correo del estudiante': p.Estudiante.Usuario.correo,
+      'Nombre de la empresa': p.Empresa.nombre,
+      'Tipo de empresa': p.Empresa.tipo,
+      'Actividad de la empresa': p.Empresa.actividad,
+      'Ubicación de la empresa (provincia)': p.Empresa.provincia,
+      'Ubicación de la empresa (cantón)': p.Empresa.canton,
+      'Ubicación de la empresa (distrito)': p.Empresa.distrito,
+      'Nombre del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.nombre,
+      'Puesto que desempeña el asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.departamento,
+      'Teléfono del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.telefono,
+      'Correo del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.correo,
+      'Nombre del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.nombre,
+      'Teléfono del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.telefono,
+      'Correo del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.correo,
       'Contexto': p.contexto,
       'Justificación': p.justificacion,
       'Síntomas': p.sintomas,
-      'Impacto': p.impacto,
+      'Efectos o impactos': p.impacto,
+      'Departamento donde realizará el proyecto': p.departamento,
+      'Tipo de proyecto': p.tipo,
+      'Categoría del proyecto': p.Categoria.nombre,
       'Observaciones': p.observaciones,
-      
     })); 
     const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
@@ -60,6 +66,16 @@ const AnteproyectosCoordinador = () => {
   useEffect(() => {
     const fetchAnteproyectos = async () => {
       const { data, error } = await supabase
+      //Para que el cambio sea efectivo, haria falta:
+      //1. en esta solicitud, el atributo tipo agregarle _id
+      //2. agregar TipoProyecto:tipo_id(
+      //            nombre
+      //          ),
+      //3. en la BD, el atributo de Anteproyecto tipo, ponerlo como tipo_id
+      //4. ese mismo atributo ponerle una foreign key a la tabla TipoProyecto
+      //5. a todas las filas de Anteproyecto, en el atributo tipo, ponerle el id del tipo de proyecto correspondiente
+      //o dejarlo asi, las dos tablas no se relacionan internamente, pero en la interfaz si para guardar la info que
+      //existe en TipoProyecto
         .from('Anteproyecto')
         .select(`
           id,
@@ -75,6 +91,10 @@ const AnteproyectosCoordinador = () => {
           actividad,
           departamento,
           comentario,
+          categoria_id,
+          Categoria:categoria_id (
+            nombre
+          ),
           Estudiante:estudiante_id (
             carnet,
             id_usuario,
@@ -243,6 +263,38 @@ const AnteproyectosCoordinador = () => {
     );
   });
   
+  // Ordenamiento alfabético
+  const sortedAnteproyectos = React.useMemo(() => {
+    if (!sortField) return filteredAnteproyectos; // Sin orden
+    return [...filteredAnteproyectos].sort((a, b) => {
+      let aValue = '', bValue = '';
+      if (sortField === 'nombre') {
+        aValue = a.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
+        bValue = b.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
+      } else if (sortField === 'estado') {
+        aValue = a.estado?.toLowerCase() || '';
+        bValue = b.estado?.toLowerCase() || '';
+      } else if (sortField === 'empresa') {
+        aValue = a.Empresa?.nombre?.toLowerCase() || '';
+        bValue = b.Empresa?.nombre?.toLowerCase() || '';
+      }
+      if (aValue < bValue) return sortAsc ? -1 : 1;
+      if (aValue > bValue) return sortAsc ? 1 : -1;
+      return 0;
+    });
+  }, [filteredAnteproyectos, sortField, sortAsc]);
+
+  const handleSort = (field) => {
+    if (sortField !== field) {
+      setSortField(field);
+      setSortAsc(true);
+    } else if (sortAsc) {
+      setSortAsc(false);
+    } else {
+      setSortField(null); // Estado "sin orden"
+      setSortAsc(true);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -271,14 +323,50 @@ const AnteproyectosCoordinador = () => {
           <table className="table-auto w-full border border-gray-300">
             <thead className="bg-gray-100">
               <tr>
-                <th className="px-3 py-2 text-left border-b border-gray-300">Nombre</th>
-                <th className="px-3 py-2 text-left border-b border-gray-300">Estado</th>
-                <th className="px-3 py-2 text-left border-b border-gray-300">Empresa</th>
+                <th className="px-3 py-2 text-left border-b border-gray-300"
+                    onClick={() => handleSort('nombre')}>
+                      Nombre &nbsp;
+                      <span style={{fontSize: '0.9em'}}>
+                        <span style={{
+                          color: sortField === 'nombre' && sortAsc ? '#1d4ed8' : '#bbb',
+                          fontWeight: sortField === 'nombre' && sortAsc ? 'bold' : 'normal'
+                        }}>▲</span>
+                        <span style={{
+                          color: sortField === 'nombre' && !sortAsc ? '#1d4ed8' : '#bbb',
+                          fontWeight: sortField === 'nombre' && !sortAsc ? 'bold' : 'normal'
+                        }}>▼</span>
+                      </span></th>
+                <th className="px-3 py-2 text-left border-b border-gray-300"
+                    onClick={() => handleSort('estado')}>
+                      Estado&nbsp;
+                      <span style={{fontSize: '0.9em'}}>
+                        <span style={{
+                          color: sortField === 'estado' && sortAsc ? '#1d4ed8' : '#bbb',
+                          fontWeight: sortField === 'estado' && sortAsc ? 'bold' : 'normal'
+                        }}>▲</span>
+                        <span style={{
+                          color: sortField === 'estado' && !sortAsc ? '#1d4ed8' : '#bbb',
+                          fontWeight: sortField === 'estado' && !sortAsc ? 'bold' : 'normal'
+                        }}>▼</span>
+                      </span></th>
+                <th className="px-3 py-2 text-left border-b border-gray-300"
+                    onClick={() => handleSort('empresa')}>
+                      Empresa &nbsp;
+                      <span style={{fontSize: '0.9em'}}>
+                        <span style={{
+                          color: sortField === 'empresa' && sortAsc ? '#1d4ed8' : '#bbb',
+                          fontWeight: sortField === 'empresa' && sortAsc ? 'bold' : 'normal'
+                        }}>▲</span>
+                        <span style={{
+                          color: sortField === 'empresa' && !sortAsc ? '#1d4ed8' : '#bbb',
+                          fontWeight: sortField === 'empresa' && !sortAsc ? 'bold' : 'normal'
+                        }}>▼</span>
+                      </span></th>
                 <th className="px-3 py-2 text-left border-b border-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {filteredAnteproyectos.map((anteproyecto) => (
+              {sortedAnteproyectos.map((anteproyecto) => (
                 <tr key={anteproyecto.id} className="border-b border-gray-200">
                   <td className="px-3 py-2">
                     {anteproyecto.Estudiante?.Usuario?.nombre || "Sin nombre"}

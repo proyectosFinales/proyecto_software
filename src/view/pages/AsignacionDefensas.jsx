@@ -731,11 +731,11 @@ const AsignacionDefensas = () => {
           </div>
           <div className="flex items-start justify-center text-white">
             <button onClick={() => handleGeneration()}
-              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
               Descargar Asignaciones
             </button>
             <button onClick={() => handleAvailability()}
-              class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
               Descargar Disponibilidades
             </button>
           </div>
