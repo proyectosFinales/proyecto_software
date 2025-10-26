@@ -1,3 +1,16 @@
+
+/**
+ * Hace fecth de la funcion definida en la carpeta netlify/functions para enviar un correo.
+ * La funcion habilitada en la pagina de Netlify habilita un endpoint para enviar correos.
+ * 
+ * NOTA: para hacer pruebas de forma local, se debe ejecutar: npx netlify dev
+ * de lo contrario no servira el endpoint abreviado en el controlador
+ * y no se enviaran los correos.
+ * 
+ * @param {*} destino direccion de correo al que se le enviara el correo.
+ * @param {*} asunto asunto del correo.
+ * @param {*} mensaje todo el texto que se le quiera enviar al destinatario.
+ */
 const sendMail = (destino, asunto, mensaje) => {
   console.log("sendMail: preparing to send email to", destino);
 

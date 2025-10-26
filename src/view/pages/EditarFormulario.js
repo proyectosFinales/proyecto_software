@@ -82,6 +82,9 @@ const CoordinadorForm = () => {
     return params.get(param);
   };
 
+// Correos de los coordinadores a avisar sobre cambios en anteproyectos
+const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
+
   useEffect(() => {
     fetchCategorias().then(data => {
       const options = data.map(categoria => ({
@@ -90,6 +93,8 @@ const CoordinadorForm = () => {
       }));
       setCategorias([{value: '', label: "-- Asigna una categoria --"}, ...options]);
     }).catch(console.error);
+
+    buscarCorreosCoordinadores();
   }, []);
 
   // Al montar, consultar el anteproyecto
@@ -100,6 +105,24 @@ const CoordinadorForm = () => {
       //consultarProyecto(id);
     }
   }, [location]);
+
+  /**
+   * Buscar los correos de usuarios con rol = 1 (coordinadores)
+   */
+  const buscarCorreosCoordinadores = async () => {
+    const { data, error } = await supabase
+      .from('Usuario')
+      .select(`
+        correo
+      `)
+      .eq('rol', '1');
+    if (error) {
+      alert('No se pudieron obtener los correos de los coordinadores: ' + error.message);
+      errorToast('No se pudieron obtener los correos de los coordinadores.');
+      return;
+    }
+    setCorreosCoordinadores(data || []);
+  };
 
   /**
    * Consulta datos del anteproyecto y su estudiante,
@@ -175,7 +198,7 @@ const CoordinadorForm = () => {
       // Llenar estados
       setIdAnteproyecto(data.id);
       setEstado(data.estado);
-      if(data.estado == "Correccion"){
+      if(data.estado === "Correccion"){
         data.Correcciones.forEach(item => {
           switch(item.seccion) {
             case "Justificacion":
@@ -219,7 +242,7 @@ const CoordinadorForm = () => {
       setNombreDepartamento(data.departamento || '');
       setTipoProyecto(data.tipo || '');
       setObservaciones(data.comentario || '');
-      if(data.Proyecto.length == 0){
+      if(data.Proyecto.length === 0){
         setProyecto("empty")
       }
       else{
@@ -252,16 +275,16 @@ const CoordinadorForm = () => {
    * Editar la información del anteproyecto y los datos del estudiante (Usuario/Estudiante).
    */
   function verificarCorrecion(){
-    if(contextoC != '' && (contexto == oldContexto)){
+    if(contextoC !== '' && (contexto === oldContexto)){
       return false;
     }
-    else if(justificacionC != '' && (justificacion == oldJustificacion)){
+    else if(justificacionC !== '' && (justificacion === oldJustificacion)){
       return false;
     }
-    else if(impactoC != '' && (impacto == oldImpacto)){
+    else if(impactoC !== '' && (impacto === oldImpacto)){
       return false;
     }
-    else if(sintomasC != '' && (sintomas == oldSintomas)){
+    else if(sintomasC !== '' && (sintomas === oldSintomas)){
       return false;
     }
     else{
@@ -282,7 +305,7 @@ const CoordinadorForm = () => {
         `)
         .eq('nombre', nombreContact)
         //.single();
-      if(data.AnteproyectoContact.length==1){
+      if(data.AnteproyectoContact.length===1){
         return true;
       }
       else{
@@ -337,7 +360,7 @@ const CoordinadorForm = () => {
         `)
         .eq('nombre', nombreEmpresa)
         .single();
-      if(data.ContactoEmpresa.length == 0){
+      if(data.ContactoEmpresa.length === 0){
         return true;
       }
       else{
@@ -393,7 +416,7 @@ const CoordinadorForm = () => {
         .eq('nombre', nombreContact)
         //.single();
       if(error) throw error;
-      if(data.AnteproyectoContact.length==1){
+      if(data.AnteproyectoContact.length===1){
         return true;
       }
       else{
@@ -409,7 +432,7 @@ const CoordinadorForm = () => {
     e.preventDefault();
     const confirmUpdate = window.confirm("¿Está seguro de ACTUALIZAR el anteproyecto?");
     if (!confirmUpdate) return;
-    if(estado == "Correccion" && (verificarCorrecion() == false)) {
+    if(estado === "Correccion" && (verificarCorrecion() === false)) {
       alert("Todavía hay correcciones pendientes, estas se ven en texto de color rojo");
       return;
     }
@@ -435,11 +458,30 @@ const CoordinadorForm = () => {
       if (antError) throw antError;
 
       //Notificacion al mismo estudiante de que se ha actualizado su anteproyecto
-      const mensaje = "Buenas,\n" +
-        "Se ha actualizado su anteproyecto.\n" +
+      const mensajeEstudiante = `Buenas, para informarle que se ha actualizado el anteproyecto del estudiante ${nombre} el ${new Date().toLocaleString()}.\n` +
+        `\nCampos actualizados:\n` +
+        `${contextoC === '' && (contexto !== oldContexto) ? `Contexto: ${contexto}\n` : "Contexto: sin cambios.\n"}` +
+        `${justificacionC === '' && (justificacion !== oldJustificacion) ? `Justificación: ${justificacion}\n` : "Justificación: sin cambios.\n"}` +
+        `${impactoC === '' && (impacto !== oldImpacto) ? `Impacto: ${impacto}\n` : "Impacto: sin cambios.\n"}` +
+        `${sintomasC === '' && (sintomas !== oldSintomas) ? `Síntomas: ${sintomas}\n` : "Síntomas: sin cambios.\n"}` +
+        `Categoría del proyecto: ${selectedCategoria.label}\n` +
         "\nInstituto Tecnológico de Costar Rica,\n" +
         "Escuela de Producción Industrial.";
-      sendMail(correo, 'Actualización de Anteproyecto', mensaje);
+      sendMail(correo, 'Actualización de Anteproyecto', mensajeEstudiante);
+
+      // Notificación a los coordinadores de los estudiantes que han actualizado su anteproyecto
+      correosCoordinadores.map((coordinador) => {
+        const mensajeCoordinador = `Buenas, para informarle que el estudiante con la siguiente información:\n` +
+          `Nombre: ${nombre}\n` +
+          `Carnet: ${carnet}\n` +
+          `Correo: ${correo}\n` +
+          `Teléfono: ${telefono}\n` +
+          `Fecha de modificación: ${new Date().toLocaleString()}\n` +
+          "\nHa actualizado la información del anteproyecto.\n" +
+          "\nInstituto Tecnológico de Costar Rica,\n" +
+          "Escuela de Producción Industrial.";
+        sendMail(coordinador.correo, 'Estudiante actualizó su Anteproyecto', mensajeCoordinador)
+      });
 
       successToast('Modificaciones realizadas exitosamente');
       // Redirigir a donde gustes
@@ -453,7 +495,7 @@ const CoordinadorForm = () => {
     e.preventDefault();
     const confirmReprobar = window.confirm("¿Está seguro de que quiere borrar el anteproyecto?");
     if (!confirmReprobar) return;
-    if(proyecto == "empty"){
+    if(proyecto === "empty"){
       try {
         const contactoCount = await consultarContactos(nombreAsesor);
         const rhCount = await consultarHR(nombreHR);
@@ -461,14 +503,14 @@ const CoordinadorForm = () => {
         await eliminarAnteContact();
         await borrarAnteproyecto();
 
-        if(contactoCount==true){
+        if(contactoCount===true){
           await eliminarContacto(nombreAsesor);
         }
-        if(rhCount==true){
+        if(rhCount===true){
           await eliminarContacto(nombreHR);
         }
         const empresaCount = await consultarEmpresas();
-        if(empresaCount == true){
+        if(empresaCount === true){
           const { error } = await supabase
           .from('Empresa')
           .delete()
@@ -805,6 +847,7 @@ const CoordinadorForm = () => {
               value={nombreDepartamento}
               onChange={(e) => setNombreDepartamento(e.target.value)}
               required
+              readOnly
               className="w-full p-2 border rounded-md"
             />
             {infoVisible.departamento && (
@@ -857,7 +900,7 @@ const CoordinadorForm = () => {
 
         {/* BUTTONS */}
         <div className="flex justify-end gap-4 mt-8">
-        {proyecto == "empty" && (
+        {proyecto === "empty" && (
           <button
             type="submit"
             className="px-6 py-2 bg-azul text-white rounded-md hover:bg-blue-700 transition-colors"
@@ -865,7 +908,7 @@ const CoordinadorForm = () => {
             Editar
           </button>
         )}
-          {proyecto == "empty" && (
+          {proyecto === "empty" && (
           <button
             type="button"
             onClick={eliminarAnteproyecto}

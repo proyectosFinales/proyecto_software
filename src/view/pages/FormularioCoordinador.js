@@ -514,7 +514,7 @@ const FormularioCoordinador = () => {
 
         const mensaje = "Buenas,\n" +
         "Le informamos por este medio que, tras la revisión de su anteproyecto, se le solicita que lo corrija por las siguientes razones:\n" +
-        `${observaciones}`+
+        `${observaciones}\n`+
         "Le invitamos a revisar las observaciones y, si así lo desea, corregirlo para reevaluarlo nuevamente.\n" +
         "En caso de requerir orientación o aclaraciones sobre los puntos señalados, puede ponerse en contacto contacto con el coordinador de carrera.\n" +
         "\nInstituto Tecnológico de Costar Rica,\n" +
