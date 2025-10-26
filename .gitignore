@@ -40,3 +40,4 @@ cypress/
 
 # Local Netlify folder
 .netlify
+.vscode/c_cpp_properties.json

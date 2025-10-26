@@ -16,6 +16,7 @@ import supabase from '../../model/supabase'; // Para verificar si ya calificó
 import Footer from '../components/Footer';
 import { errorToast, successToast } from '../components/toast';
 import { fetchCategorias } from '../../controller/Categoria';
+import sendMail from "../../controller/Email";
 
 /**
  * Componente principal de edición.
@@ -432,6 +433,13 @@ const CoordinadorForm = () => {
           .eq('anteproyecto_id',idAnteproyecto);
       if (correctionError) throw correctionError;
       if (antError) throw antError;
+
+      //Notificacion al mismo estudiante de que se ha actualizado su anteproyecto
+      const mensaje = "Buenas,\n" +
+        "Se ha actualizado su anteproyecto.\n" +
+        "\nInstituto Tecnológico de Costar Rica,\n" +
+        "Escuela de Producción Industrial.";
+      sendMail(correo, 'Actualización de Anteproyecto', mensaje);
 
       successToast('Modificaciones realizadas exitosamente');
       // Redirigir a donde gustes
