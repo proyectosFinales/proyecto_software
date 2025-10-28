@@ -438,7 +438,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
     }
     try {
       // Actualizar el Anteproyecto (campos de la empresa, etc.)
-      const estado = "Pendiente"
+      const estado = "Corregido"
       const { error: antError } = await supabase
         .from('Anteproyecto')
         .update({
@@ -905,7 +905,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
             type="submit"
             className="px-6 py-2 bg-azul text-white rounded-md hover:bg-blue-700 transition-colors"
           >
-            Editar
+            {estado === "Correccion" ? "Actualizar" : "Editar"}
           </button>
         )}
           {proyecto === "empty" && (

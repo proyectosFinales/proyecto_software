@@ -459,6 +459,18 @@ const EstudianteForm = () => {
               PYME
             </label>
           </div>
+          <div>
+            <label>
+              <input
+                type="radio"
+                name="tipoEmpresa"
+                value="Organismo Internacional"
+                onChange={(e) => setTipoEmpresa(e.target.value)}
+                required
+              />
+              Organismo Internacional
+            </label>
+          </div>
         </div>
 
         <div className={styles.formGroup}>

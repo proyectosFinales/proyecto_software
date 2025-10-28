@@ -294,12 +294,12 @@ const Bitacoras = () => {
             {/* Encabezado del modal */}
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Entradas de la Bitácora</h2>
-              <button
+              {/* <button
                 className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center text-xl shadow transition-colors duration-200"
                 onClick={handleAgregarEntrada}
               >
                 +
-              </button>
+              </button> */}
             </div>
 
             {/* Contenido del modal con scroll */}
