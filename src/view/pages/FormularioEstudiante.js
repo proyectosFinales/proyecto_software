@@ -28,6 +28,15 @@ const EstudianteForm = () => {
   const [correo, setCorreo] = useState('');
   const [sede, setSede] = useState('');
 
+  // Datos académicos del estudiante
+  const [semestrePropuesto, setSemestrePropuesto] = useState(null);
+  const [situacionLaboral, setSituacionLaboral] = useState(null);
+  const [haPerdido, setHaPerdido] = useState(false);
+  const [historialReprobacion, setHistorialReprobacion] = useState([]); // Array para la lista de reprobaciones
+  const [causaPerdida, setCausaPerdida] = useState(null);
+  const [semestrePerdida, setSemestrePerdida] = useState(null);
+  const [anioPerdida, setAnioPerdida] = useState('');
+
   // Datos de la empresa y anteproyecto a crear
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [sending, setSending] = useState(false)
@@ -84,6 +93,31 @@ const EstudianteForm = () => {
       setTiposProyectos([{value: '', label: "-- Asigna un tipo de proyecto --"}, ...options]);
     }).catch(console.error);
   }, []);
+
+
+// ENUMs de la Base de Datos. Si, no es muy practico, pero funciona por ahora.
+const opcionesSemestre = [
+  { value: 'I', label: 'I Semestre' },
+  { value: 'II', label: 'II Semestre' }
+];
+
+const opcionesSituacionLaboral = [
+  { value: 'Trabaja', label: 'Trabaja' },
+  { value: 'Trabaja y estudia', label: 'Trabaja y estudia' },
+  { value: 'Solo estudia', label: 'Solo estudia' }
+];
+ 
+// Causas de pérdida de la práctica
+const opcionesCausasPerdida = [
+  { value: 'Situaciones familiares', label: 'Situaciones familiares' },
+  { value: 'Por Trabajo', label: 'Por Trabajo' },
+  { value: 'Por asesoría inadecuada de profesor asesor', label: 'Por asesoría inadecuada de profesor asesor' },
+  { value: 'Situaciones de la empresa', label: 'Situaciones de la empresa' },
+  { value: 'Por falta de datos de la empresa', label: 'Por falta de datos de la empresa' },
+  { value: 'Por mala organización del tiempo', label: 'Por mala organización del tiempo' },
+  { value: 'Situaciones de salud certificada', label: 'Situaciones de salud certificada' }
+];
+
 
   /**
    * Consulta datos del Usuario y Estudiante asociados al token.
@@ -278,6 +312,19 @@ const EstudianteForm = () => {
       const empresaCount = await consultarEmpresas();
       const contactoCount = await consultarContactos(nombreAsesor);
       const rhCount = await consultarContactos(nombreHR);
+
+      //--- Actualizar la situación laboral del estudiante con lo que colocó el porque esta esto aquí es una buena pregunta.
+      const { error: updateEstudianteError } = await supabase
+        .from('Estudiante')
+        .update({ 
+          situacion_laboral: situacionLaboral.value 
+        })
+        .eq('estudiante_id', estudianteId);
+      if (updateEstudianteError) {
+        throw new Error(`Error actualizando datos del estudiante: ${updateEstudianteError.message}`);
+      }
+      //---
+
       if(empresaCount === "empty"){
         await insertarEmpresa();
       }
@@ -304,7 +351,8 @@ const EstudianteForm = () => {
           tipo: selectedTipoProyecto.value,
           departamento: nombreDepartamento,
           estado: 'Pendiente',
-          categoria_id: selectedCategoria.value
+          categoria_id: selectedCategoria.value,
+          semestre_propuesto: semestrePropuesto.value,
         })
         .select();
       
@@ -315,6 +363,30 @@ const EstudianteForm = () => {
       else{
         insertarAnteContact(data[0].id, contactID, rrhhID);
       }
+
+      if (haPerdido && historialReprobacion.length > 0) {
+        
+        // Mapeamos el array de estado a lo que la BD espera
+        const historialData = historialReprobacion.map(entry => ({
+          estudiante_id: estudianteId,
+          causa: entry.causa.value,
+          semestre: entry.semestre.value,
+          anio: parseInt(entry.anio, 10),
+          detalle: `Añadido durante creación de anteproyecto`
+        }));
+
+        const { error: historialError } = await supabase
+          .from('HistorialReprobacion')
+          .insert(historialData);
+
+        if (historialError) {
+          // No lanzamos error para no revertir el anteproyecto, 
+          // pero sí notificamos
+          console.error("Error insertando historial:", historialError);
+          errorToast(`El anteproyecto se guardó, pero hubo un error guardando el historial: ${historialError.message}`);
+        }
+      }
+
       successToast('Anteproyecto insertado exitosamente');
       setSending(false)
       navigate('/anteproyectosEstudiante');
@@ -325,6 +397,37 @@ const EstudianteForm = () => {
     setSending(false)
   }
 
+  /**
+   * Agrega una entrada al array de historial de reprobación.
+   */
+  const handleAgregarHistorial = () => {
+    if (!causaPerdida || !semestrePerdida || !anioPerdida) {
+      errorToast("Debe seleccionar causa, semestre y año para agregar un historial.");
+      return;
+    }
+    
+    const nuevaEntrada = {
+      causa: causaPerdida,
+      semestre: semestrePerdida,
+      anio: anioPerdida
+    };
+
+    setHistorialReprobacion([...historialReprobacion, nuevaEntrada]);
+
+    // Limpiar campos del sub-formulario
+    setCausaPerdida(null);
+    setSemestrePerdida(null);
+    setAnioPerdida('');
+  };
+
+  /**
+   * Quita una entrada del array de historial (por índice).
+   */
+  const handleQuitarHistorial = (index) => {
+    setHistorialReprobacion(historialReprobacion.filter((_, i) => i !== index));
+  };
+
+  
   const handleActividadChange = (e) => {
     setActividadEmpresa(e.target.value);
     setActivity(e.target.value);
@@ -904,6 +1007,126 @@ const EstudianteForm = () => {
             </label>
           </div>
         </div>
+        
+        <div className={styles.formGroup}>
+          <label>
+            26. Situación laboral actual: *
+            <Select
+              value={situacionLaboral}
+              onChange={setSituacionLaboral}
+              options={opcionesSituacionLaboral}
+              placeholder="Seleccione su situación laboral"
+              className="mt-2"
+              required
+            />
+          </label>
+        </div>
+
+        <div>
+            <label>
+              27. Semestre propuesto: *
+              <Select
+                value={semestrePropuesto}
+                onChange={setSemestrePropuesto}
+                options={opcionesSemestre}
+                placeholder="Seleccione el semestre"
+                className="mt-2"
+                required
+              />
+            </label>
+        </div>
+
+        
+        <div className={`${styles.formGroup} ${styles.toggle}`}>
+          <label htmlFor="haPerdidoCheck">
+            28- ¿Ha perdido el proyecto de graduación anteriormente?
+          </label>
+          <input
+            id="haPerdidoCheck"
+            type="checkbox"
+            checked={haPerdido}
+            onChange={(e) => setHaPerdido(e.target.checked)}
+            className={styles.checkbox}
+          />
+        </div>
+
+
+        {/* Formulario sobre el historial */}
+        {haPerdido && (
+          <div className={`${styles.formGroup} ${styles.fullWidth} ${styles.historialBox}`}>
+            <p>Por favor, indique la(s) causa(s) de la pérdida:</p>
+            <div className={styles.historialGrid}>
+              <label>
+                Causa:
+                <Select
+                  value={causaPerdida}
+                  onChange={setCausaPerdida}
+                  options={opcionesCausasPerdida}
+                  placeholder="Seleccione la causa"
+                />
+              </label>
+              <label>
+                Semestre:
+                <Select
+                  value={semestrePerdida}
+                  onChange={setSemestrePerdida}
+                  options={opcionesSemestre}
+                  placeholder="Semestre"
+                />
+              </label>
+              <label>
+                Año:
+                <input
+                  type="number"
+                  placeholder="Ej: 2024"
+                  value={anioPerdida}
+                  min="1975"
+                  max="2100"
+                  onChange={(e) => setAnioPerdida(e.target.value)}
+                />
+              </label>
+              <button
+                type="button"
+                className={`${styles.button} ${styles.agregarHistorial}`}
+                onClick={handleAgregarHistorial}
+              >
+                Agregar
+              </button>
+            </div>
+
+            {historialReprobacion.length > 0 && (
+              <table className={styles.historialTable}>
+                <thead>
+                  <tr>
+                    <th>Causa</th>
+                    <th>Semestre</th>
+                    <th>Año</th>
+                    <th>Quitar</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historialReprobacion.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.causa.label}</td>
+                      <td>{item.semestre.label}</td>
+                      <td>{item.anio}</td>
+                      <td>
+                        <button
+                          type="button"
+                          className={styles.quitarHistorial}
+                          onClick={() => handleQuitarHistorial(index)}
+                        >
+                          X
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        )}
+        
 
         <div className={styles.contenedorBotonesFormEstudiante}>
           {(sending === false) && (

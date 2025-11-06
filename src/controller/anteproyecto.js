@@ -35,6 +35,7 @@ const consultaAnteproyectos = () => {
       actividad,
       fecha_creacion,
       ultima_modificacion,
+      semestre_propuesto, -- (nuevo)
 
       -- Relación con Estudiante:
       Estudiante:estudiante_id (
@@ -42,6 +43,7 @@ const consultaAnteproyectos = () => {
         carnet,
         cedula,
         asesor, 
+        situacion_laboral, -- (nuevo)
         Usuario:id_usuario (
           id,
           nombre,
@@ -72,6 +74,7 @@ class Anteproyecto {
   estudiante;       // Objeto Estudiante
   encargado;        // Objeto Profesor (si corresponde)
   anteproyectosPerdidos = [];
+  semestre_propuesto; // (nuevo)
 
   constructor(
     id, nombreEmpresa, estado, 
@@ -79,7 +82,8 @@ class Anteproyecto {
     nombreAsesor, puestoAsesor, telefonoContacto, correoContacto,
     nombreHR, telefonoHR, correoHR,
     contexto, justificacion, sintomas, impacto, nombreDepartamento, tipoProyecto, observaciones,
-    estudiante, encargado
+    estudiante, encargado,
+    semestre_propuesto, // (nuevo)
   ) {
     this.id = id;
     this.nombreEmpresa = nombreEmpresa;
@@ -103,6 +107,7 @@ class Anteproyecto {
     this.nombreDepartamento = nombreDepartamento;
     this.tipoProyecto = tipoProyecto;
     this.observaciones = observaciones;
+    this.semestre_propuesto = semestre_propuesto; // you guessed it, (nuevo)
     this.estudiante = estudiante;
     this.encargado = encargado;
   }
@@ -149,6 +154,7 @@ class Anteproyecto {
       "Desconocido",         // nombreDepartamento (no se maneja en la nueva BD, agrégalo si gustas)
       "Desconocido",         // tipoProyecto
       obj.comentario || "",  // observaciones
+      obj.semestre_propuesto, // (nuevo)
       Estudiante.from(obj.Estudiante),
       encargado
     );

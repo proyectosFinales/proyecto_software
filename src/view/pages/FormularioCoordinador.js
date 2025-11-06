@@ -59,6 +59,13 @@ const FormularioCoordinador = () => {
   const [proyecto, setProyecto] = useState('');
   const [categoria, setCategoria] = useState('');
 
+
+  const [semestrePropuesto, setSemestrePropuesto] = useState('');
+  const [situacionLaboral, setSituacionLaboral] = useState('');
+  const [haPerdido, setHaPerdido] = useState(false);
+  const [historialReprobacion, setHistorialReprobacion] = useState([]);
+
+
   // ID del anteproyecto actual
   const [idAnteproyecto, setIdAnteproyecto] = useState(null);
 
@@ -104,9 +111,11 @@ const FormularioCoordinador = () => {
                 actividad,
                 departamento,
                 categoria_id,
+                semestre_propuesto,
                 Estudiante:estudiante_id (
                   carnet,
                   id_usuario,
+                  situacion_laboral,
                   Usuario:id_usuario (
                     nombre,
                     correo,
@@ -182,6 +191,26 @@ const FormularioCoordinador = () => {
         setTelefono(data.Estudiante.Usuario.telefono || '');
         setSede(data.Estudiante.Usuario.sede || '');
       }
+
+      // (nuevo)
+      setSemestrePropuesto(data.semestre_propuesto || 'No especificado');
+      setSituacionLaboral(data.Estudiante.situacion_laboral || 'No especificado');
+
+      const { data: historial, error: historialError } = await supabase
+        .from('HistorialReprobacion')
+        .select('*')
+        .eq('estudiante_id', data.estudiante_id); // Usamos el ID de estudiante cargado
+
+      if (historialError) {
+        console.error("Error cargando historial:", historialError);
+      }
+
+      if (historial && historial.length > 0) {
+        setHaPerdido(true);
+        setHistorialReprobacion(historial); 
+      }
+
+
     } catch (err) {
       console.error('Error al consultar anteproyecto:', err);
       alert('Error al consultar anteproyecto: ' + err.message);
@@ -811,6 +840,56 @@ const FormularioCoordinador = () => {
               value={categoria}
               readOnly
             />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>26. Situación laboral:</label>
+          <input
+            type="text"
+            value={situacionLaboral}
+            readOnly
+          />
+        </div>
+
+        
+        <div className={`${styles.formGroup} ${haPerdido ? styles.historialBox : ''}`}>
+          <label style={{ fontWeight: 'bold' }}>27. Historial de Reprobación:</label>
+          
+          {haPerdido ? (
+            /* Si haPerdido es true, muestra la tabla */
+            <table className={styles.historialTable}>
+              <thead>
+                <tr>
+                  <th>Causa</th>
+                  <th>Semestre</th>
+                  <th>Año</th>
+                </tr>
+              </thead>
+              <tbody>
+                {historialReprobacion.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item.causa}</td>
+                    <td>{item.semestre}</td>
+                    <td>{item.anio}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            /* Si haPerdido es false, muestra el aviso */
+            <p className={styles.historialInfo}>
+              El estudiante no reporta reprobar previamente.
+            </p>
+          )}
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>28. Semestre propuesto:</label>
+          <input
+            type="text"
+            value={semestrePropuesto}
+            readOnly
+          />
         </div>
 
         <div className={styles.formGroup}>

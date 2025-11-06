@@ -29,6 +29,19 @@ class Estudiante extends Usuario {
   telefono;
 
   /**
+   * Situación laboral del estudiante (Enum en la BD) (nuevo)
+   * @type {string}
+   */
+  situacion_laboral;
+
+  /**
+   * Año de ingreso (Integer) (nuevo)
+   * @type {number}
+   */
+  anio_ingreso;
+
+
+  /**
    * @param {string} estudiante_id - PK en la tabla Estudiante
    * @param {string} id_usuario    - PK de la tabla Usuario (FK en Estudiante)
    * @param {string} nombre        - Nombre del Usuario
@@ -36,12 +49,16 @@ class Estudiante extends Usuario {
    * @param {string} correo        - Correo del Usuario
    * @param {string} carnet        - Carnet del Estudiante
    * @param {string} telefono      - Teléfono (si lo guardas en Usuario, lo traerás de ahí)
+   * @param {string} situacion_laboral - (nuevo, ya comenté arriba que hace)
+   * @param {number} anio_ingreso      - (nuevo)
    */
-  constructor(estudiante_id, id_usuario, nombre, sede, correo, carnet, telefono) {
+  constructor(estudiante_id, id_usuario, nombre, sede, correo, carnet, telefono, situacion_laboral, anio_ingreso) {
     super(id_usuario, nombre, sede, correo);
     this.estudiante_id = estudiante_id;
     this.carnet = carnet;
     this.telefono = telefono;
+    this.situacion_laboral = situacion_laboral;
+    this.anio_ingreso = anio_ingreso;
   }
 
   /**
@@ -76,7 +93,9 @@ class Estudiante extends Usuario {
       usuario?.sede || "",
       usuario?.correo || "",
       obj.carnet || "",
-      usuario?.telefono || ""
+      usuario?.telefono || "",
+      obj.situacion_laboral, // (nuevo)
+      obj.anio_ingreso       // (nuevo)
     );
   }
 
@@ -89,6 +108,8 @@ class Estudiante extends Usuario {
         carnet,
         asesor,
         semestre_id,
+        situacion_laboral, -- (nuevo)
+        anio_ingreso,      -- (nuevo)
         Usuario:id_usuario (
           id,
           nombre,

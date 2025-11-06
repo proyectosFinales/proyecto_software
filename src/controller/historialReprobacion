@@ -1,0 +1,118 @@
+/**
+ * historialReprobacion.js
+ *
+ * Clase que modela y controla la entidad HistorialReprobacion,
+ * para el manejo del historial de reprobaciones de estudiantes.
+ * 
+ * -> Ojala esta tabla se mantenga lo más vacia posible :)
+ */
+
+import supabase from "../model/supabase";
+
+/**
+ * Representa una entrada en el historial de reprobaciones de un estudiante.
+ */
+class HistorialReprobacion {
+  id;
+  estudiante_id;
+  causa;
+  semestre;
+  anio;
+  detalle;
+  fecha_registro;
+
+  /**
+   * @param {string} id - PK en la tabla HistorialReprobacion
+   * @param {string} estudiante_id - FK del estudiante
+   * @param {string} causa - (Enum) Causa de la pérdida
+   * @param {string} semestre - (Enum) Semestre en que perdió
+   * @param {number} anio - Año en que perdió, no se puede llamar año porque la ñ no es una letra válida en SQL, entonces... eso, anio. ¡Por esto se programa en inglés!
+   * @param {string} detalle - Texto opcional
+   * @param {string} fecha_registro - Timestamp
+   */
+  constructor(id, estudiante_id, causa, semestre, anio, detalle, fecha_registro) {
+    this.id = id;
+    this.estudiante_id = estudiante_id;
+    this.causa = causa;
+    this.semestre = semestre;
+    this.anio = anio;
+    this.detalle = detalle;
+    this.fecha_registro = fecha_registro;
+  }
+
+  /**
+   * Construye un HistorialReprobacion a partir de un objeto
+   * proveniente de Supabase.
+   * @param {Object} obj - El objeto de datos crudo de Supabase
+   * @returns {HistorialReprobacion} Instancia de la clase
+   */
+  static from(obj) {
+    if (!obj) return null;
+
+    return new HistorialReprobacion(
+      obj.id,
+      obj.estudiante_id,
+      obj.causa,
+      obj.semestre,
+      obj.anio,
+      obj.detalle,
+      obj.fecha_registro
+    );
+  }
+
+  /**
+   * Define la consulta base para la tabla HistorialReprobacion.
+   */
+  static _consultaBase() {
+    return supabase.from("HistorialReprobacion").select(`
+      id,
+      estudiante_id,
+      causa,
+      semestre,
+      anio,
+      detalle,
+      fecha_registro
+    `);
+  }
+
+  /**
+   * Obtiene todas las entradas del historial de reprobación
+   * para un estudiante específico.
+   *
+   * @param {string} estudianteId - El UUID del estudiante
+   * @returns {Promise<HistorialReprobacion[]>} Un array de instancias de HistorialReprobacion
+   */
+  static async obtenerPorEstudiante(estudianteId) {
+    const { data, error } = await HistorialReprobacion._consultaBase()
+      .eq("estudiante_id", estudianteId);
+
+    if (error) {
+      console.error("Error al obtener historial de reprobación:", error);
+      throw error;
+    }
+
+    return data.map(HistorialReprobacion.from);
+  }
+
+  /**
+   * Agrega una nueva entrada al historial de reprobación.
+   *
+   * @param {Object} historialData - Objeto con { estudiante_id, causa, semestre, anio, detalle }
+   * @returns {Promise<HistorialReprobacion>} La instancia de la entrada creada
+   */
+  static async agregarEntrada(historialData) {
+    const { data, error } = await supabase
+      .from("HistorialReprobacion")
+      .insert([historialData])
+      .select(); // .select() devuelve el registro recién insertado
+
+    if (error) {
+      console.error("Error al agregar entrada al historial:", error);
+      throw error;
+    }
+
+    return data ? HistorialReprobacion.from(data[0]) : null;
+  }
+}
+
+export default HistorialReprobacion;

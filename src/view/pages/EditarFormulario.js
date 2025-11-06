@@ -66,6 +66,27 @@ const CoordinadorForm = () => {
   const [selectedCategoria, setSelectedCategoria] = useState(null);
   const [categorias, setCategorias] = useState([]);
   
+
+
+  const [semestrePropuesto, setSemestrePropuesto] = useState(null);
+
+  const [situacionLaboral, setSituacionLaboral] = useState(null);
+
+  const [haPerdido, setHaPerdido] = useState(false);
+  const [historialReprobacion, setHistorialReprobacion] = useState([]);
+
+  const opcionesSemestre = [
+    { value: 'I', label: 'I Semestre' },
+    { value: 'II', label: 'II Semestre' }
+  ];
+
+  const opcionesSituacionLaboral = [
+    { value: 'Trabaja', label: 'Trabaja' },
+    { value: 'Trabaja y estudia', label: 'Trabaja y estudia' },
+    { value: 'Solo estudia', label: 'Solo estudia' }
+  ];
+
+
   // Correction states for form validation
   const [contextoC, setContextoC] = useState('');
   const [justificacionC, setJustificacionC] = useState('');
@@ -150,9 +171,11 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           actividad,
           departamento,
           categoria_id,
+          semestre_propuesto,
           Estudiante:estudiante_id (
             carnet,
             id_usuario,
+            situacion_laboral
             Usuario:id_usuario (
               nombre,
               correo,
@@ -266,6 +289,30 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
       if(data.Categoria){
         setSelectedCategoria({value: data.categoria_id, label: data.Categoria.nombre});
       }
+
+
+    setSemestrePropuesto(
+      opcionesSemestre.find(o => o.value === data.semestre_propuesto) || null
+    );
+    setSituacionLaboral(
+      opcionesSituacionLaboral.find(o => o.value === data.Estudiante.situacion_laboral) || null
+    );
+
+    const { data: historial, error: historialError } = await supabase
+      .from('HistorialReprobacion')
+      .select('*')
+      .eq('estudiante_id', data.estudiante_id);
+
+    if (historialError) {
+      console.error("Error cargando historial:", historialError);
+    }
+
+    if (historial && historial.length > 0) {
+      setHaPerdido(true);
+      setHistorialReprobacion(historial);
+    }
+
+
     } catch (err) {
       errorToast('Error al consultar anteproyecto: ' + err.message);
     }
@@ -447,7 +494,8 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           justificacion: justificacion,
           sintomas: sintomas,
           impacto: impacto,
-          categoria_id: selectedCategoria.value
+          categoria_id: selectedCategoria.value,
+          semestre_propuesto: semestrePropuesto.value
         })
         .eq('id', idAnteproyecto);
         const {error: correctionError} = await supabase
@@ -517,6 +565,14 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           .eq('nombre', nombreEmpresa);
           if (error) throw error;
         }
+
+        const { error: estudianteError } = await supabase
+        .from('Estudiante')
+        .update({
+          situacion_laboral: situacionLaboral.value
+        })
+        .eq('estudiante_id', estudianteId); 
+        if (estudianteError) throw estudianteError;
 
         alert('Anteproyecto eliminado exitosamente.');
         navigate('/anteproyectosEstudiante');
@@ -878,6 +934,59 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
               className="mt-2"
             />
           </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">26. Situación laboral actual:</label>
+            <Select
+              value={situacionLaboral}
+              onChange={setSituacionLaboral}
+              options={opcionesSituacionLaboral}
+              placeholder="Seleccione su situación laboral"
+              className="mt-2"
+              // Solo editable si el estado es "Correccion"
+              isDisabled={estado !== "Correccion"}
+            />
+          </div>
+
+          
+          <div className="space-y-2">
+            <label className="block font-semibold">Semestre propuesto:</label>
+            <Select
+              value={semestrePropuesto}
+              onChange={setSemestrePropuesto}
+              options={opcionesSemestre}
+              placeholder="Seleccione el semestre"
+              className="mt-2"
+              // Solo editable si el estado es "Correccion"
+              isDisabled={estado !== "Correccion"}
+            />
+          </div>
+
+
+          {haPerdido && (
+            <div className="space-y-2 p-4 bg-gray-100 rounded-md border">
+              <h3 className="font-semibold text-gray-800">Historial de Reprobación (Solo lectura)</h3>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b">
+                    <th className="p-2 text-left">Causa</th>
+                    <th className="p-2 text-left">Semestre</th>
+                    <th className="p-2 text-left">Año</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historialReprobacion.map((item, index) => (
+                    <tr key={index} className="border-b">
+                      <td className="p-2">{item.causa}</td>
+                      <td className="p-2">{item.semestre}</td>
+                      <td className="p-2">{item.anio}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          
 
           <div className="space-y-2">
             <label className="block font-semibold">Observaciones del coordinador:

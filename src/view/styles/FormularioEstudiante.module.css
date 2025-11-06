@@ -101,3 +101,89 @@ button:hover {
 .aviso{
   font-size: 20px;
 }
+
+
+
+
+.toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px; 
+  padding: 10px 0;
+  font-weight: 500;
+}
+
+.checkbox {
+  width: 1.3em;  
+  height: 1.3em;
+  cursor: pointer;
+  accent-color: #004a99; 
+}
+
+.historialBox {
+  background: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+
+
+.historialGrid {
+  display: grid;
+  grid-template-columns: 3fr 1fr 1fr auto; 
+  gap: 15px; 
+  align-items: flex-end;
+  margin-bottom: 20px; 
+}
+
+.agregarHistorial {
+  height: 38px; 
+  padding: 0 15px;
+  background-color: #28a745; 
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  white-space: nowrap; 
+}
+
+.agregarHistorial:hover {
+  background-color: #218838;
+}
+
+
+.historialTable {
+  width: 100%;
+  border-collapse: collapse; 
+}
+
+.historialTable th,
+.historialTable td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+  font-size: 0.9em;
+}
+
+.historialTable th {
+  background-color: #f2f2f2;
+}
+
+.quitarHistorial {
+  background: #dc3545;
+  color: white;
+  border: none;
+  border-radius: 50%; /* Círculo :D */
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+  font-weight: bold;
+  line-height: 22px;
+  padding: 0;
+}
+.quitarHistorial:hover {
+  background: #c82333;
+}
