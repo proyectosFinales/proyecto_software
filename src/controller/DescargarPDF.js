@@ -7,6 +7,9 @@
 
 import jsPDF from 'jspdf';
 
+import autoTable from "jspdf-autotable";
+import logoTec from '../view/PDFblueprints/logoTec.jpg';
+
 /**
  * Genera un PDF con la información de un anteproyecto.
  * @param {Object} anteproyecto Objeto con la información necesaria.
@@ -491,3 +494,90 @@ export function descargarPerfiles(dataProfes, dataEstudiantes) {
   doc.save(`Reporte_de_Perfiles.pdf`);
   
 }
+
+
+// Función auxiliar para generar header y footer en los PDFs
+const generarHeaderFooterPDF = (doc, titulo) => {
+  // Header
+  try {
+    // Esta imagen es usada en otros blueprints de PDF
+    doc.addImage(logoTec, 'JPG', 10, 10, 25, 26);
+  } catch (e) {
+    console.error("Error al cargar imagen logoTec.jpg", e);
+  }
+  
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("Instituto Tecnológico de Costa Rica", 40, 18);
+  doc.setFontSize(12);
+  doc.setFont("helvetica", "normal");
+  doc.text("Reporte: " + titulo, 40, 24);
+  doc.setLineWidth(0.5);
+  doc.line(10, 40, doc.internal.pageSize.width - 10, 40);
+
+  // Footer
+  const pageCount = doc.internal.getNumberOfPages();
+  doc.setFontSize(10);
+  doc.text(
+    "Página " + pageCount,
+    doc.internal.pageSize.width / 2,
+    doc.internal.pageSize.height - 10,
+    { align: "center" }
+  );
+};
+
+// Generar PDF para el dashboard de avances
+export const generarPDFDashboardAvances = (datosGrafico, tituloReporte) => {
+  const doc = new jsPDF();
+  generarHeaderFooterPDF(doc, tituloReporte);
+
+  // Columnas para la tabla del PDF
+  const columnas = ["Estado", "Cantidad"];
+  // Mapear los datos del grafico (ej. [{ name: 'Aprobado', value: 10 }])
+  const filas = datosGrafico.map(item => [item.name, item.value]);
+
+  autoTable(doc, {
+    startY: 50,
+    head: [columnas],
+    body: filas,
+  });
+
+  doc.save(`Reporte_Avances_Proyectos.pdf`);
+};
+
+// Generar PDF para el dashboard de estado de estudiantes
+export const generarPDFDashboardEstudiantes = (datosGrafico, tituloReporte) => {
+  const doc = new jsPDF();
+  generarHeaderFooterPDF(doc, tituloReporte);
+
+  // Columnas para la tabla del PDF
+  const columnas = ["Estado", "Cantidad"];
+  // Mapear los datos del grafico
+  const filas = datosGrafico.map(item => [item.name, item.value]);
+
+  autoTable(doc, {
+    startY: 50,
+    head: [columnas],
+    body: filas,
+  });
+
+  doc.save(`Reporte_Estado_Estudiantes.pdf`);
+};
+
+export const generarPDFDashboardCalificaciones = (datosGrafico, tituloReporte) => {
+  const doc = new jsPDF();
+  generarHeaderFooterPDF(doc, tituloReporte);
+
+  // Columnas para la tabla del PDF
+  const columnas = ["Profesor", "Calificación Promedio"];
+  // Mapear los datos del grafico
+  const filas = datosGrafico.map(item => [item.name, item.value.toFixed(2)]);
+
+  autoTable(doc, {
+    startY: 50,
+    head: [columnas],
+    body: filas,
+  });
+
+  doc.save(`Reporte_Calificaciones_Profesores.pdf`);
+};

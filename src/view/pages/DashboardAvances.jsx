@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react'; // Chale
 import {
   ResponsiveContainer,
   BarChart, Bar,
@@ -27,6 +27,9 @@ import * as XLSX from 'xlsx';
 import Profesor from '../../controller/profesor';
 import Estudiante from '../../controller/estudiante';
 
+import {getDetallesAvancesParaReporte } from '../../controller/Avances';
+import { generarPDFDashboardAvances } from '../../controller/DescargarPDF';
+
 const DashboardAvances = () => {
   const [avances, setAvances] = useState([]);
   const [filteredAvances, setFilteredAvances] = useState([]);
@@ -41,6 +44,35 @@ const DashboardAvances = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const itemsPerPage = 10;
+
+  const barChartRef = useRef(null);
+  const pieChartRef = useRef(null);
+  const handlePrintChart = (chartRef) => {
+    if (!chartRef.current) return;
+
+    // Ocultar todo excepto el grafico
+    const originalContents = document.body.innerHTML;
+    const printContents = chartRef.current.innerHTML;
+    
+    document.body.innerHTML = printContents;
+    // Aplicar estilos basicos para la impresion
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media print {
+        body { margin: 20px; }
+        .recharts-responsive-container { width: 100% !important; height: 400px !important; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    window.print(); // Abre el dialogo de impresion
+
+    // Restaurar la pagina
+    document.body.innerHTML = originalContents;
+    document.head.removeChild(style);
+    // Recargar los scripts o estilos si es necesario (a veces se pierden)
+    window.location.reload(); 
+  };
 
   useEffect(() => {
     const fetchProfesores = async () => {
@@ -120,36 +152,60 @@ const DashboardAvances = () => {
     ));
   }, [searchedAvances, currentPage]);
 
-  const handleDownloadPDF = () => {
-    const doc = new jsPDF();
-    autoTable(doc, {
-      head: [['Número', 'Estudiante', 'Carnet', 'Profesor', 'Estado', 'Fecha']],
-      body: searchedAvances.map(avance => [
-        avance.num_avance,
-        avance.Proyecto?.Estudiante?.Usuario?.nombre || 'N/A',
-        avance.Proyecto?.Estudiante?.carnet || 'N/A',
-        avance.Proyecto?.Profesor?.Usuario?.nombre || 'N/A',
-        avance.estado,
-        new Date(avance.fecha_avance).toLocaleDateString()
-      ])
-    });
-    doc.save('reporte_avances.pdf');
+const handleDownloadPDF = () => {
+    // REQ-30: Esta funcion ahora imprime los graficos/stats
+    if (!stats) {
+      alert("No hay estadísticas para generar el PDF.");
+      return;
+    }
+
+    // Convertir el objeto stats a los datos que espera el grafico
+    const datosGrafico = [
+      { name: 'Aprobados', value: stats.aprobados || 0 },
+      { name: 'Pendientes', value: stats.pendientes || 0 },
+      { name: 'Reprobados', value: stats.reprobados || 0 },
+      { name: 'Atrasados', value: stats.atrasados || 0 }
+    ];
+
+    // Llamar a la funcion del controlador que genera el PDF
+    generarPDFDashboardAvances(datosGrafico, "Resumen de Avances de Proyectos");
   };
 
-  const handleDownloadExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(searchedAvances.map(avance => ({
-      Número: avance.num_avance,
-      Estudiante: avance.Proyecto?.Estudiante?.Usuario?.nombre || 'N/A',
-      Carnet: avance.Proyecto?.Estudiante?.carnet || 'N/A',
-      Profesor: avance.Proyecto?.Profesor?.Usuario?.nombre || 'N/A',
-      Estado: avance.estado,
-      Fecha: new Date(avance.fecha_avance).toLocaleDateString()
-    })));
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Avances');
-    XLSX.writeFile(workbook, 'reporte_avances.xlsx');
+
+const handleDownloadExcel = async () => {
+    try {
+      const data = await getDetallesAvancesParaReporte();
+      
+      if (!data || data.length === 0) {
+        alert("No hay datos detallados para exportar.");
+        return;
+      }
+
+      // Mapear los datos al formato deseado (coincide con el backend)
+      const formattedData = data.map(avance => ({
+        Estudiante: avance.estudiante,
+        Profesor: avance.profesor,
+        "Tipo de Avance": avance.titulo,
+        Semestre: avance.semestre,
+        Fecha: avance.fecha,
+        Estado: avance.estado
+      }));
+
+      // Usar XLSX para crear el archivo Excel
+      const worksheet = XLSX.utils.json_to_sheet(formattedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Detalle Avances');
+      
+      // Escribir y descargar el archivo
+      XLSX.writeFile(workbook, 'Reporte_Detalle_Avances.xlsx');
+
+    } catch (error) {
+      console.error("Error al generar el reporte de Excel:", error.message);
+      alert("Error al generar el reporte.");
+    }
   };
 
+  
   const getColorForEstado = (estado) => {
     switch (estado) {
       case 'Aprobado': return '#22c55e';
@@ -213,9 +269,9 @@ const DashboardAvances = () => {
           <div className="flex gap-4">
             <button
               onClick={handleDownloadPDF}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center gap-2"
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2"
             >
-              <Download className="w-5 h-5" /> PDF
+              <Download className="w-5 h-5" /> Resumen (PDF)
             </button>
             <button
               onClick={handleDownloadExcel}
@@ -253,8 +309,14 @@ const DashboardAvances = () => {
         )}
         {/* Gráficos */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6" ref={barChartRef}>
             <h2 className="text-xl font-semibold mb-4">Estados de Avances</h2>
+            <button 
+                onClick={() => handlePrintChart(barChartRef)}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+              >
+                Imprimir Gráfico
+              </button>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={[
@@ -279,8 +341,14 @@ const DashboardAvances = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6" ref={pieChartRef}>
             <h2 className="text-xl font-semibold mb-4">Distribución de Estados</h2>
+            <button 
+                onClick={() => handlePrintChart(pieChartRef)}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+              >
+                Imprimir Gráfico
+              </button>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>

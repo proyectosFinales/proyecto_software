@@ -108,8 +108,8 @@ class Estudiante extends Usuario {
         carnet,
         asesor,
         semestre_id,
-        situacion_laboral, -- (nuevo)
-        anio_ingreso,      -- (nuevo)
+        situacion_laboral, 
+        anio_ingreso,      
         Usuario:id_usuario (
           id,
           nombre,

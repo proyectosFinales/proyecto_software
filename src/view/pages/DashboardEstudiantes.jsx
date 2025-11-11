@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import {useRef} from 'react';
 import {
   ResponsiveContainer,
   BarChart, Bar,
@@ -36,6 +37,35 @@ const DashboardEstudiantes = () => {
   const [paginatedEstudiantes, setPaginatedEstudiantes] = useState([]);
   const [stats, setStats] = useState(null);
   const itemsPerPage = 10;
+
+  const barChartRef = useRef(null);
+  const pieChartRef = useRef(null);
+  const handlePrintChart = (chartRef) => {
+    if (!chartRef.current) return;
+
+    // Ocultar todo excepto el grafico
+    const originalContents = document.body.innerHTML;
+    const printContents = chartRef.current.innerHTML;
+    
+    document.body.innerHTML = printContents;
+    // Aplicar estilos basicos para la impresion
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media print {
+        body { margin: 20px; }
+        .recharts-responsive-container { width: 100% !important; height: 400px !important; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    window.print(); // Abre el dialogo de impresion
+
+    // Restaurar la pagina
+    document.body.innerHTML = originalContents;
+    document.head.removeChild(style);
+    // Recargar la pagina para asegurar que los estilos de React se reapliquen
+    window.location.reload(); 
+  };
 
   useEffect(() => {
     const fetchProfesores = async () => {
@@ -241,8 +271,14 @@ const DashboardEstudiantes = () => {
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6" ref={barChartRef}>
             <h2 className="text-xl font-semibold mb-4">Distribución de Estados</h2>
+            <button 
+                onClick={() => handlePrintChart(barChartRef)}
+                className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+              >
+                Imprimir Gráfico
+            </button>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData}>
@@ -269,8 +305,14 @@ const DashboardEstudiantes = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow p-6" ref={pieChartRef}>
             <h2 className="text-xl font-semibold mb-4">Proporción de Estados</h2>
+            <button 
+            	  onClick={() => handlePrintChart(pieChartRef)}
+            	  className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm"
+          	  >
+            	  Imprimir Gráfico
+          	  </button>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
