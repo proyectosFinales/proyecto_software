@@ -251,3 +251,243 @@ export function descargarProyecto(proyecto) {
 
   doc.save(`Proyecto_${proyecto.nombreEmpresa || 'SinNombre'}.pdf`);
 }
+
+/**
+ * Genera un PDF con la información de las bitácoras.
+ * @param {Object} bitacorasYentradas Objeto con la información necesaria.
+ * * @param {boolean} isProfe para saber quien es el que esta creando el pdf.
+ * Ejemplo esperado:
+ * [
+ *  {
+ *    Estudiante: {nombreUsuario: {nombre: ...} }
+ *    Profesor: {nombreUsuario: {nombre: ...} }
+ *    entradas:
+ *      [
+ *        {
+ *            id: ...,
+ *            bitacora_id: ...,
+ *            falta.................
+ *        }
+ *      ]
+ *  }
+ * ]
+ */
+export function descargarBitacoras(bitacorasYentradas, isProfe) {
+  const doc = new jsPDF();
+
+  // Obtener fecha actual
+  const fechaActual = new Date();
+  const dia = fechaActual.getDate();
+  const mes = fechaActual.getMonth() + 1;
+  const anio = fechaActual.getFullYear();
+  const fechaFormateada = `${dia}/${mes}/${anio}`;
+
+  // Título
+  doc.setFontSize(18);
+  doc.text('Bitácoras', 20, 20);
+
+  // Posición inicial del texto
+  let yPosition = 40;
+  const lineSpacing = 10;
+
+  // Ancho de la página y espacio disponible
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const textWidth = pageWidth - 40; // Margen de 20px a cada lado
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Fecha en la esquina superior derecha
+  doc.setFontSize(10);
+  doc.text(`${fechaFormateada}`, textWidth, 10);
+
+  /**
+   * Añade texto dinámicamente, con salto de página si se supera el límite.
+   * @param {string} label Etiqueta del campo
+   * @param {string} value Contenido a imprimir
+   */
+  function addText(label, value) {
+    if (value === undefined || value === null) {
+      value = "No especificado";
+    }
+    
+    const labelText = `${label} `;
+    const textDividido = doc.splitTextToSize(value.toString() || "", textWidth);
+    let requiredHeight = textDividido.length * lineSpacing;
+
+    // Ajustar la altura para texto en varias líneas
+    if (textDividido.length > 1) {
+      requiredHeight = (textDividido.length * 5) + 5; 
+    }
+
+    // Verificar si hay espacio en la página actual
+    if (yPosition + requiredHeight > pageHeight - 20) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    // Etiqueta en negrita
+    doc.setFont("Helvetica", "bold");
+    doc.text(labelText, 20, yPosition);
+
+    // Contenido en texto normal
+    doc.setFont("Helvetica", "normal");
+    doc.text(textDividido, 20, yPosition + 7);
+    yPosition += requiredHeight + 10;
+  }
+
+  // Sección de datos del estudiante (si existe)
+  doc.setFontSize(12);
+
+  if (bitacorasYentradas.length === 0) {
+    alert('No hay bitácoras para generar el reporte');
+    return;
+  }
+
+  for (let index = 0; index < bitacorasYentradas.length; index++) {
+    addText(`${index+1}. Fecha Creación Bitácora`, bitacorasYentradas[index].fecha_creacion);
+    addText('Estudiante', bitacorasYentradas[index].Estudiante.nombreUsuario.nombre);
+    addText('Profesor', bitacorasYentradas[index].Profesor.nombreUsuario.nombre);
+    addText('Fecha Creación Entrada', bitacorasYentradas[index].entradas[0]?.fecha || 'Bitácora sin entradas');
+    addText('Estatus Profesor', bitacorasYentradas[index].entradas[0]
+                                ?
+                                bitacorasYentradas[index].entradas[0].aprobada_prof === false ? 'Pendiente' : 'Aprobada'
+                                : 'Bitácora sin entradas');
+    addText('Estatus Estudiante', bitacorasYentradas[index].entradas[0]
+                                  ?
+                                  bitacorasYentradas[index].entradas[0].aprobada_est === false ? 'Pendiente' : 'Aprobada'
+                                  : 'Bitácora sin entradas');
+    addText('Estatus', bitacorasYentradas[index].entradas[0]
+                      ?
+                      bitacorasYentradas[index].entradas[0].aprobada_est === true && bitacorasYentradas[index].entradas[0].aprobada_prof === true ? 'Aprobada' : 'Pendiente'
+                      : 'Bitácora sin entradas');
+    addText('Fecha Ultima Actualización', bitacorasYentradas[index].entradas[0]?.fecha || 'Bitácora sin entradas');
+    addText('Puntos Analizados', bitacorasYentradas[index].entradas[0]?.contenido ? JSON.parse(bitacorasYentradas[index].entradas[0].contenido || "Mal parseado")[0] : 'Bitácora sin entradas');
+    addText('Asuntos Pendientes', bitacorasYentradas[index].entradas[0]?.contenido ? JSON.parse(bitacorasYentradas[index].entradas[0].contenido || "Mal parseado")[1] : 'Bitácora sin entradas');
+    addText('Observaciones', bitacorasYentradas[index].entradas[0]?.contenido ? JSON.parse(bitacorasYentradas[index].entradas[0].contenido || "Mal parseado")[2] : 'Bitácora sin entradas');
+    addText(' ', ' ');
+  }
+
+  // Descargar PDF (Nombre sugerido)
+  if (isProfe) {
+    const nombreUser = `${bitacorasYentradas[0].Profesor.nombreUsuario.nombre}`;
+    doc.save(`Bitacoras_${nombreUser}.pdf`);
+  } else {
+    const nombreUser = `${bitacorasYentradas[0].Estudiante.nombreUsuario.nombre}`;
+    doc.save(`Bitacoras_${nombreUser}.pdf`);
+  }
+  
+}
+
+/**
+ * Crea un PDF con la informacion de los perfiles de profesores y estudiantes.
+ * @param {*} dataProfes 
+ * @param {*} dataEstudiantes 
+ * @returns 
+ */
+export function descargarPerfiles(dataProfes, dataEstudiantes) {
+  const doc = new jsPDF();
+
+  // Obtener fecha actual
+  const fechaActual = new Date();
+  const dia = fechaActual.getDate();
+  const mes = fechaActual.getMonth() + 1;
+  const anio = fechaActual.getFullYear();
+  const fechaFormateada = `${dia}/${mes}/${anio}`;
+
+  // Título
+  doc.setFontSize(18);
+  doc.text('Perfiles', 20, 20);
+
+  // Posición inicial del texto
+  let yPosition = 40;
+  const lineSpacing = 10;
+
+  // Ancho de la página y espacio disponible
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const textWidth = pageWidth - 40; // Margen de 20px a cada lado
+  const pageHeight = doc.internal.pageSize.getHeight();
+
+  // Fecha en la esquina superior derecha
+  doc.setFontSize(10);
+  doc.text(`${fechaFormateada}`, textWidth, 10);
+
+  /**
+   * Añade texto dinámicamente, con salto de página si se supera el límite.
+   * @param {string} label Etiqueta del campo
+   * @param {string} value Contenido a imprimir
+   */
+  function addText(label, value) {
+    if (value === undefined || value === null) {
+      value = "No especificado";
+    }
+    
+    const labelText = `${label} `;
+    const textDividido = doc.splitTextToSize(value.toString() || "", textWidth);
+    let requiredHeight = textDividido.length * lineSpacing;
+
+    // Ajustar la altura para texto en varias líneas
+    if (textDividido.length > 1) {
+      requiredHeight = (textDividido.length * 5) + 5; 
+    }
+
+    // Verificar si hay espacio en la página actual
+    if (yPosition + requiredHeight > pageHeight - 20) {
+      doc.addPage();
+      yPosition = 20;
+    }
+
+    // Etiqueta en negrita
+    doc.setFont("Helvetica", "bold");
+    doc.text(labelText, 20, yPosition);
+
+    // Contenido en texto normal
+    doc.setFont("Helvetica", "normal");
+    doc.text(textDividido, 20, yPosition + 7);
+    yPosition += requiredHeight + 10;
+  }
+
+  // Sección de datos del estudiante (si existe)
+  doc.setFontSize(12);
+
+  if (dataProfes.length === 0) {
+    alert('No hay perfiles de profesores para generar el reporte');
+    return;
+  }
+
+  if (dataEstudiantes.length === 0) {
+    alert('No hay perfiles de estudiantes para generar el reporte');
+    return;
+  }
+
+  //Agrega la informacion de todos los profesores
+  addText(`Datos de profesores.`,' ');
+  for (let i = 0; i < dataProfes.length; i++) {
+    addText(`${i + 1}. Profesor`, dataProfes[i].Usuario.nombre);
+    addText('Correo', dataProfes[i].Usuario.correo);
+    addText('Teléfono', dataProfes[i].Usuario.telefono);
+    addText('Sede', dataProfes[i].Usuario.sede);
+    addText('Cantidad de estudiantes', dataProfes[i].cantidad_estudiantes);
+    addText('Cantidad de estudiantes libres', dataProfes[i].estudiantes_libres);
+    addText(' ', ' ');
+  }
+
+  //Agrega la informacion de todos los estudiantes
+  addText(`Datos de estudiantes.`,' ');
+  for (let i = 0; i < dataEstudiantes.length; i++) {
+    addText(`${i + 1}. Estudiante`, dataEstudiantes[i].Usuario.nombre);
+    addText('Correo', dataEstudiantes[i].Usuario.correo);
+    addText('Teléfono', dataEstudiantes[i].Usuario.telefono);
+    addText('Sede', dataEstudiantes[i].Usuario.sede);
+    addText('Carnet', dataEstudiantes[i].carnet);
+    addText('Asesor', dataEstudiantes[i]?.Profesor?.Usuario.nombre || 'Sin asesor asignado');
+    addText('Situacion Laboral', dataEstudiantes[i]?.situacion_laboral || 'No especificado');
+    addText('Año de ingreso', dataEstudiantes[i]?.anio_ingreso || 'No especificado');
+    addText('Semestre', dataEstudiantes[i].Semestre.nombre);
+    addText('Fecha de Inicio', dataEstudiantes[i].Semestre.fecha_inicio);
+    addText('Fecha de Fin', dataEstudiantes[i].Semestre.fecha_fin);
+    addText(' ', ' ');
+  }
+
+  // Descargar PDF (Nombre sugerido)
+  doc.save(`Reporte_de_Perfiles.pdf`);
+  
+}
