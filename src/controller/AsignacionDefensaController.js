@@ -42,22 +42,45 @@ export async function assignAllDefensas() {
 
     if (projectErr) throw projectErr;
 
+    const reportesRequeridos = [
+      "Informe Preliminar", 
+      "Informe Final", 
+      "Informe a Coordinación"
+    ];
+
     // Filter to "Aprobado" + "Defensa" + no existing Cita
     const toAssign = [];
-    for (const p of projects) {
-      const projState = p.estado?.toLowerCase();
+  for (const p of projects) {
       const studState = p.Estudiante?.estado?.toLowerCase();
-      if (projState === "aprobado" && studState === "defensa") {
-        // check no existing cita
-        const { data: existingCita, error: citaErr } = await supabase
-          .from("Cita")
-          .select("cita_id")
-          .eq("proyecto_id", p.id)
-          .maybeSingle();
-        if (citaErr) throw citaErr;
 
-        if (!existingCita) {
-          toAssign.push(p);
+      // 1. Validar que el estudiante este en estado "Defensa"
+      if (studState === "defensa") {
+        
+        const { data: reporteAprobado, error: reporteErr } = await supabase
+          .from("Acta") // Se consulta la tabla Acta
+          .select("id")
+          .eq("estudiante_id", p.estudiante_id)
+          .in("titulo", reportesRequeridos) // Que sea uno de los informes
+          .eq("datos->>estado", "Aprobado") // Y que su estado en el JSON sea "Aprobado"
+          .limit(1)
+          .maybeSingle();
+
+        if (reporteErr) throw reporteErr;
+
+        // Si existe un reporte aprobado, se continua
+        if (reporteAprobado) {
+          // 3. Validar que no tenga ya una cita asignada
+          const { data: existingCita, error: citaErr } = await supabase
+            .from("Cita")
+            .select("cita_id")
+            .eq("proyecto_id", p.id)
+            .maybeSingle();
+          
+          if (citaErr) throw citaErr;
+
+          if (!existingCita) {
+            toAssign.push(p);
+          }
         }
       }
     }

@@ -63,6 +63,7 @@ const AsignacionDefensas = () => {
   
 
   // We define 6 daily time slots
+  // Nota 11/11/2025: ... Por favor no usar esto :)
   const TIME_SLOTS = [
     { start: "07:30:00", end: "09:30:00" },
     { start: "09:30:00", end: "11:30:00" },
