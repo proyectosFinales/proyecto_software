@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import supabase from '../../model/supabase';
+import { descargarEmpresas } from '../../controller/DescargarPDF';
 
 const Empresas = () => {
   const [empresas, setEmpresas] = useState([]);
@@ -83,17 +84,31 @@ const Empresas = () => {
     }
   }
 
+  const handleReporteEmpresas = () => {
+    descargarEmpresas(empresas);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <Header title="Empresas" />
 
       <main className="flex-grow p-4 md:p-8">
-        <button
-          onClick={crearEmpresa}
-          className="mb-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
-        >
-          Crear Empresa
-        </button>
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
+          <button
+            onClick={crearEmpresa}
+            className="mb-4 px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+          >
+            Crear Empresa
+          </button>
+          
+          <button
+            onClick={handleReporteEmpresas}
+            className="mb-4 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+          >
+            Generar Reporte
+          </button>
+        </div>
 
         <div className="overflow-x-auto bg-white shadow rounded">
           <table className="min-w-full text-left border">
