@@ -657,7 +657,6 @@ export function descargarEmpresas(dataEmpresas) {
     alert('No hay empresas para generar el reporte');
     return;
   }
-  console.log(dataEmpresas);
 
   //Añade la info de las empresas al pdf
   for (let i = 0; i < dataEmpresas.length; i++) {
@@ -673,3 +672,32 @@ export function descargarEmpresas(dataEmpresas) {
   // Descargar PDF (Nombre sugerido)
   doc.save(`Reporte_de_Empresas.pdf`);
 }
+
+/**
+ * Genera y descarga el PDF con el reporte de los eventos existentes en el calendario.
+ * @param {*} dataCalendario la coleccion con la info de los eventos.
+ */
+export const generarPDFCalendario = (dataCalendario) => {
+  const doc = new jsPDF();
+
+  generarHeaderFooterPDF(doc, 'Eventos del Calendario');
+
+  // Columnas para la tabla del PDF
+  const columnas = ["Nombre", "Fecha Inicio", "Fecha Fin"];
+
+  const toUTF8 = (str) => {
+  if (!str) return "";
+    return String(str).normalize("NFC");
+  };
+
+  // Mapear los datos del grafico
+  const filas = dataCalendario.map(item => [toUTF8(item.nombre), toUTF8(item.fechaInicio), toUTF8(item.fechaFin)]);
+
+  autoTable(doc, {
+    startY: 50,
+    head: [columnas],
+    body: filas,
+  });
+
+  doc.save(`Reporte_Calendario.pdf`);
+};

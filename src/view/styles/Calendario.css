@@ -60,9 +60,25 @@
   gap: 20px;
 }
 
+.input-field-text {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .input-row {
   display: flex;
   gap: 20px;
+  align-items: end;
+}
+
+/* Cuando el ancho de la pantalla sea menor a 600px */
+@media (max-width: 600px) {
+  .input-row {
+    flex-direction: column; /* los apila verticalmente */
+    align-items: stretch;   /* (opcional) hace que ocupen todo el ancho */
+  }
 }
 
 .input-container-gestion {
@@ -76,9 +92,26 @@
   border-radius: 4px;
 }
 
+.input-field-fechas {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
 .input-container-gestion label {
   display: block;
   margin-bottom: 5px;
+}
+
+.btn-create-event {
+  padding: 10px 20px;
+  background-color: #1E3A8A;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
 .btn-add-event {
