@@ -13,6 +13,9 @@ import Footer from "../../components/Footer";
 const CantidadProyectosProfesor = () => {
   console.log('CantidadProyectosProfesor: Component rendering');
   const [profesores, setProfesores] = useState([]);
+  const [filtroSemestre, setFiltroSemestre] = useState("");
+  const [filtroAno, setFiltroAno] = useState("");
+  const [profesoresFiltrados, setProfesoresFiltrados] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [proyectossinProfesor, setProyectossinProfesor] = useState(0);
@@ -24,7 +27,7 @@ const CantidadProyectosProfesor = () => {
       try {
         const data = await Profesor.obtenerTodos();
         setProfesores(data);
-        
+        setProfesoresFiltrados(data);
         // Obtener cantidad de proyectos sin profesor
         const cantProyectos = await Proyecto.obtenerCantidadProyectossinProfesor();
         setProyectossinProfesor(cantProyectos);
@@ -37,6 +40,17 @@ const CantidadProyectosProfesor = () => {
     };
     fetchProfesores();
   }, []);
+
+  useEffect(() => {
+    let filtrados = profesores;
+    if (filtroSemestre) {
+      filtrados = filtrados.filter(p => String(p.semestre) === String(filtroSemestre));
+    }
+    if (filtroAno) {
+      filtrados = filtrados.filter(p => String(p.año) === String(filtroAno));
+    }
+    setProfesoresFiltrados(filtrados);
+  }, [filtroSemestre, filtroAno, profesores]);
 
   // Actualiza en tiempo real la propiedad "cantidadEstudiantes"
   const actualizarCantidad = useCallback((indice, evento) => {
@@ -130,10 +144,10 @@ const CantidadProyectosProfesor = () => {
               </h2>
               
               {/* Badge flotante pequeño - esquina superior derecha */}
-              <div className="absolute -top-2 -right-2 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-lg shadow-md p-2 hover:shadow-lg transition-shadow duration-200 w-14 h-14 flex items-center justify-center">
-                <div className="text-center">
+              <div className="absolute -top-2 -right-2 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-lg shadow-md p-2 hover:shadow-lg transition-shadow duration-200 w-44 h-14 flex items-center justify-center">
+                <div className="flex flex-col items-center w-full">
                   <div className="text-lg font-bold leading-none">{proyectossinProfesor}</div>
-                  <div className="text-xs font-semibold leading-tight">sin asignar</div>
+                  <div className="text-xs sm:text-sm font-semibold leading-tight w-full text-center">Proyectos sin asignar</div>
                 </div>
               </div>
             </div>
@@ -141,6 +155,54 @@ const CantidadProyectosProfesor = () => {
               Ajuste la cantidad máxima de estudiantes que cada profesor puede supervisar.
             </p>
           </div>
+
+          {/* Filtros */}
+          <div className="mb-2 flex flex-wrap gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
+              <select
+                value={filtroSemestre}
+                onChange={e => setFiltroSemestre(e.target.value)}
+                className="px-3 py-2 border rounded-lg"
+              >
+                <option value="">Todos</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
+              <select
+                value={filtroAno}
+                onChange={e => setFiltroAno(e.target.value)}
+                className="px-3 py-2 border rounded-lg"
+              >
+                <option value="">Todos</option>
+                {Array.from({length: 10}, (_, i) => new Date().getFullYear() - i).map(ano => (
+                  <option key={ano} value={ano}>{ano}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Mensaje de advertencia si el filtro no es el año y semestre actual */}
+          {(() => {
+            const fecha = new Date();
+            const anoActual = fecha.getFullYear();
+            const mes = fecha.getMonth() + 1;
+            const semestreActual = mes <= 7 ? 1 : 2;
+            if (
+              (filtroAno && Number(filtroAno) !== anoActual) ||
+              (filtroSemestre && Number(filtroSemestre) !== semestreActual)
+            ) {
+              return (
+                <div className="mb-4 text-xs text-red-600">
+                  Solo se puede editar la disponibilidad en el año y semestre actual.
+                </div>
+              );
+            }
+            return null;
+          })()}
 
           {/* Enhanced responsive table section */}
           <div className="overflow-x-auto bg-white rounded-lg shadow -mx-4 sm:mx-0">
@@ -151,40 +213,64 @@ const CantidadProyectosProfesor = () => {
                     <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Profesor
                     </th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    
+                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Disponibilidad
                     </th>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
                       Proyectos Asignados
                     </th>
+                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                      Semestre
+                    </th>
+                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                      Año
+                    </th>
+
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {profesores.map((profesor, i) => (
-                    <tr 
-                      key={profesor.profesor_id} 
-                      className="hover:bg-gray-50 transition-colors duration-150"
-                    >
-                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
-                        {profesor.nombre}
-                      </td>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap">
-                        <input
-                          type="number"
-                          className="w-16 sm:w-20 px-2 sm:px-3 py-1 sm:py-2 border rounded-md 
-                                   focus:outline-none focus:ring-2 focus:ring-blue-500 
-                                   text-xs sm:text-sm"
-                          value={profesor.disponibilidad}
-                          onChange={(e) => actualizarCantidad(i, e)}
-                          min="0"
-                          max="20"
-                        />
-                      </td>
-                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
-                        {profesor.proyectosAsignados}
-                      </td>
-                    </tr>
-                  ))}
+                  {profesoresFiltrados.map((profesor, i) => {
+                    // Determinar semestre y año actual
+                    const fecha = new Date();
+                    const anoActual = fecha.getFullYear();
+                    const mes = fecha.getMonth() + 1; // Enero = 1
+                    const semestreActual = mes <= 7 ? 1 : 2;
+                    const esEditable = Number(profesor.año) === anoActual && Number(profesor.semestre) === semestreActual;
+                    return (
+                      <tr 
+                        key={profesor.profesor_id} 
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                          {profesor.nombre}
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
+                          <input
+                            type="number"
+                            className="w-16 sm:w-20 px-2 sm:px-3 py-1 sm:py-2 border rounded-md 
+                                     focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                     text-xs sm:text-sm"
+                            value={profesor.disponibilidad}
+                            onChange={e => esEditable && actualizarCantidad(i, e)}
+                            min="0"
+                            max="20"
+                            disabled={!esEditable}
+                            style={!esEditable ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
+                          />
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
+                          {profesor.proyectosAsignados}
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
+                          {profesor.semestre}
+                        </td>
+                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
+                          {profesor.año}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -11,6 +11,7 @@ class Profesor extends Usuario {
    */
   profesor_id;
 
+
   /**
    * Disponibilidad de espacios (de AsignacionesProfesor.disponibilidad)
    * @type {number}
@@ -22,6 +23,18 @@ class Profesor extends Usuario {
    * @type {number}
    */
   proyectosAsignados;
+
+  /**
+   * Semestre de la asignación (de AsignacionesProfesor.semestre)
+   * @type {number}
+   */
+  semestre;
+
+  /**
+   * Año de la asignación (de AsignacionesProfesor.año)
+   * @type {number}
+   */
+  año;
 
   /**
    * Categoría del profesor
@@ -51,12 +64,14 @@ class Profesor extends Usuario {
    * @param {string} categoria          - Categoría del profesor
    * @param {Anteproyecto[]} anteproyectos - Lista de anteproyectos asociados (opcional)
    */
-  constructor(profesor_id, id_usuario, nombre, sede, disponibilidad, proyectosAsignados, categoria, anteproyectos = []) {
+  constructor(profesor_id, id_usuario, nombre, sede, disponibilidad, proyectosAsignados, categoria, semestre, año, anteproyectos = []) {
     super(id_usuario, nombre, sede);
     this.profesor_id = profesor_id;
     this.disponibilidad = disponibilidad ?? 0;
     this.proyectosAsignados = proyectosAsignados ?? 0;
     this.categoria = categoria;
+    this.semestre = semestre ?? null;
+    this.año = año ?? null;
     this.anteproyectos = anteproyectos;
     this.original.disponibilidad = this.disponibilidad;
     this.original.proyectosAsignados = this.proyectosAsignados;
@@ -96,6 +111,8 @@ class Profesor extends Usuario {
       obj.disponibilidad ?? 0,
       obj.asignados ?? 0,
       obj.categoria_nombre || null,
+      obj.semestre ?? null,
+      obj.año ?? null,
       antepros
     );
   }
@@ -134,7 +151,7 @@ class Profesor extends Usuario {
       // Query 2: Obtenemos los datos de asignación
       const { data: asignacionData, error: errorAsignacion } = await supabase
         .from("AsignacionesProfesor")
-        .select("disponibilidad, asignados")
+        .select("disponibilidad, asignados, semestre, año")
         .eq("idProfesor", profesor_id)
         .single();
 
@@ -145,6 +162,8 @@ class Profesor extends Usuario {
       // Combinamos los datos
       const disponibilidad = asignacionData?.disponibilidad ?? 0;
       const asignados = asignacionData?.asignados ?? 0;
+      const semestre = asignacionData?.semestre ?? null;
+      const año = asignacionData?.año ?? null;
 
       return new Profesor(
         profesorData.profesor_id,
@@ -153,7 +172,9 @@ class Profesor extends Usuario {
         profesorData.Usuario?.sede || "",
         disponibilidad,
         asignados,
-        profesorData.Categoria?.nombre || null
+        profesorData.Categoria?.nombre || null,
+        semestre,
+        año
       );
     } catch (error) {
       console.error("Error en fromID:", error);
@@ -202,27 +223,29 @@ class Profesor extends Usuario {
       // Query 2: Obtenemos TODAS las asignaciones
       const { data: asignaciones, error: errorAsignaciones } = await supabase
         .from("AsignacionesProfesor")
-        .select("idProfesor, disponibilidad, asignados");
+        .select("idProfesor, disponibilidad, asignados, semestre, año");
 
       if (errorAsignaciones) {
         console.error("Error obteniendo asignaciones:", errorAsignaciones);
         throw errorAsignaciones;
       }
 
-      // Creamos un mapa para búsqueda rápida: idProfesor -> {disponibilidad, asignados}
+      // Creamos un mapa para búsqueda rápida: idProfesor -> {disponibilidad, asignados, semestre, año}
       const mapaAsignaciones = new Map();
       if (asignaciones && asignaciones.length > 0) {
         asignaciones.forEach(asignacion => {
           mapaAsignaciones.set(asignacion.idProfesor, {
             disponibilidad: asignacion.disponibilidad,
-            asignados: asignacion.asignados
+            asignados: asignacion.asignados,
+            semestre: asignacion.semestre,
+            año: asignacion.año
           });
         });
       }
 
       // Combinamos los datos: profesores + asignaciones
       return profesores.map(profesor => {
-        const asignacion = mapaAsignaciones.get(profesor.profesor_id) || { disponibilidad: 0, asignados: 0 };
+        const asignacion = mapaAsignaciones.get(profesor.profesor_id) || { disponibilidad: 0, asignados: 0, semestre: null, año: null };
 
         return new Profesor(
           profesor.profesor_id,
@@ -231,7 +254,9 @@ class Profesor extends Usuario {
           profesor.Usuario?.sede || "",
           asignacion.disponibilidad,
           asignacion.asignados,
-          profesor.Categoria?.nombre || null
+          profesor.Categoria?.nombre || null,
+          asignacion.semestre,
+          asignacion.año
         );
       });
     } catch (error) {
