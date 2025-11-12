@@ -24,6 +24,11 @@ import { fetchSemestreActual } from "../../../controller/Semestre";
  * @returns JSX
  */
 function EdicionAsignacionProyectos() {
+  // Obtener semestre y año actual igual que en HeaderCoordinador
+  const fecha = new Date();
+  const anoActual = fecha.getFullYear();
+  const mes = fecha.getMonth() + 1;
+  const semestreActual = mes <= 7 ? 1 : 2;
   const [proyectos, setProyectos] = useState([]);
   const [profesores, setProfesores] = useState([]);
   const [filteredProfesores, setFilteredProfesores] = useState([]);
@@ -347,7 +352,14 @@ function EdicionAsignacionProyectos() {
                             </option>
                           )}
                           {filteredProfesores
-                            .filter((prof) => prof.profesor_id !== proyecto.profesor_id)
+                            .filter((prof) => {
+                              // Filtrar por semestre y año actual
+                              return (
+                                prof.año === anoActual &&
+                                prof.semestre === semestreActual &&
+                                prof.profesor_id !== proyecto.profesor_id
+                              );
+                            })
                             .map((prof) => (
                               <option key={prof.profesor_id} value={prof.profesor_id}>
                                 {prof.nombre}
