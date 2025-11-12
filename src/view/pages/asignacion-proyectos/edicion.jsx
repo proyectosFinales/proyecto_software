@@ -75,6 +75,7 @@ function EdicionAsignacionProyectos() {
         setProyectos(proyectosData);
         Profesor.obtenerTodos().then((profesoresData) => {
           setProfesores(profesoresData);
+          console.log("Profesores cargados:", profesoresData);
         }).catch(console.error);
       } catch (error) {
         console.error("Unexpected error:", error);
@@ -86,9 +87,16 @@ function EdicionAsignacionProyectos() {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    setFilteredProfesores(profesores.filter((prof) => prof.original.estudiantesLibres > 0));
-  }, [profesores]);
+    useEffect(() => {
+      // Filtra profesores que tienen disponibilidad mayor a asignados
+      const filtrados = profesores.filter((prof) => {
+        const disponibilidad = prof.original.disponibilidad ?? 0;
+        const asignados = prof.original.proyectosAsignados ?? 0;
+        return disponibilidad > asignados;
+      });
+      setFilteredProfesores(filtrados);
+      console.log("Filtered Profesores: ", filtrados);
+    }, [profesores]);
 
   /**
    * Asigna un profesor a un proyecto (UPDATE Proyecto.profesor_id).
