@@ -3,7 +3,7 @@ import validateInfo, { validarContraseñaDetallada, validarCorreo, validarCorreo
 import sendMail from "../controller/Email";
 import { fetchSemestreActual } from "../controller/Semestre";
 
-export async function signUpNewUser(fullName, carnet, tel, email, password, sede) {
+export async function signUpNewUser(fullName, carnet, tel, email, password, sede, provincia, canton, distrito) {
   try {
     const result = await validarCorreoExistente(email, "");
     if (!result) {
@@ -22,7 +22,10 @@ export async function signUpNewUser(fullName, carnet, tel, email, password, sede
           contrasena: password,
           rol: 3, // Estudiante
           sede: sede,
-          telefono: tel
+          telefono: tel,
+          provincia: provincia,
+          canton: canton,
+          distrito: distrito
         }
       ])
       .select();
@@ -64,7 +67,7 @@ export async function signUpNewUser(fullName, carnet, tel, email, password, sede
  * Registro de profesor (RFN1).
  * En la nueva BD, la tabla Profesor se relaciona con Usuario. 
  */
-export async function registroProfesor(nombre, correo, contrasena, sede, telefono) {
+export async function registroProfesor(nombre, correo, contrasena, sede, telefono, provincia, canton, distrito) {
   try {
     if (!validarCorreo(correo)) {
       throw new Error("El correo no cumple con un formato válido.");
@@ -85,7 +88,10 @@ export async function registroProfesor(nombre, correo, contrasena, sede, telefon
           contrasena,
           rol: 2, // Profesor
           sede,
-          telefono
+          telefono,
+          provincia,
+          canton,
+          distrito
         }
       ])
       .select();

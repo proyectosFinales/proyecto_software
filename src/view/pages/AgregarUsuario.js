@@ -32,7 +32,10 @@ const AgregarUsuario = () => {
     numero: '',
     correo: '',
     contraseña: generarContraseña(),
-    sede: ''
+    sede: '',
+    provincia: '',
+    canton: '',
+    distrito: ''
   });
 
   const navigate = useNavigate();
@@ -58,16 +61,19 @@ const AgregarUsuario = () => {
       numero: '',
       correo: '',
       contraseña: generarContraseña(),
-      sede: ''
+      sede: '',
+      provincia: '',
+      canton: '',
+      distrito: ''
     }));
   };
 
   const handleAgregarUsuario = async () => {
     try {
       // Validaciones
-      if (!validarCorreo(usuario.correo)) {
-        throw new Error("El correo ingresado no es válido. Ej: usuario@ejemplo.com");
-      }
+      // if (!validarCorreo(usuario.correo)) {
+      //   throw new Error("El correo ingresado no es válido. Ej: usuario@ejemplo.com");
+      // }
       if (!validarTelefono(usuario.numero)) {
         throw new Error("El número de teléfono no es válido. Debe ser 8 dígitos o +506XXXXXXXX.");
       }
@@ -81,7 +87,10 @@ const AgregarUsuario = () => {
           nuevoUsuario.correo,
           nuevoUsuario.contraseña,
           nuevoUsuario.sede,
-          nuevoUsuario.numero
+          nuevoUsuario.numero,
+          nuevoUsuario.provincia,
+          nuevoUsuario.canton,
+          nuevoUsuario.distrito
         );
         alert('Profesor agregado con éxito.');
       } else {
@@ -93,7 +102,10 @@ const AgregarUsuario = () => {
             nuevoUsuario.numero,
             nuevoUsuario.correo,
             nuevoUsuario.contraseña,
-            nuevoUsuario.sede
+            nuevoUsuario.sede,
+            nuevoUsuario.provincia,
+            nuevoUsuario.canton,
+            nuevoUsuario.distrito
           );
         } catch (error) {
           alert(error.message);
@@ -263,6 +275,57 @@ const AgregarUsuario = () => {
                   <option value="Limón">Centro Académico de Limón</option>
                   <option value="Alajuela">Centro Académico de Alajuela</option>
                 </select>
+              </div>
+            </div>
+            
+            {/* Provincia */}
+            <div>
+              <label className="block text-gray-700">Provincia:</label>
+              <div className="relative mt-1">
+                <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
+                <input
+                  type="text"
+                  name="provincia"
+                  className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none"
+                  placeholder="Ej: Cartago"
+                  value={usuario.provincia}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Canton */}
+            <div>
+              <label className="block text-gray-700">Cantón:</label>
+              <div className="relative mt-1">
+                <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
+                <input
+                  type="text"
+                  name="canton"
+                  className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none"
+                  placeholder="Ej: Cartago"
+                  value={usuario.canton}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+            </div>
+
+            {/* Distrito */}
+            <div>
+              <label className="block text-gray-700">Distrito:</label>
+              <div className="relative mt-1">
+                <FaEnvelope className="absolute left-3 top-3 text-gray-400" />
+                <input
+                  type="text"
+                  name="distrito"
+                  className="w-full pl-10 pr-3 py-2 border rounded focus:outline-none"
+                  placeholder="Ej: Oriental"
+                  value={usuario.distrito}
+                  onChange={handleInputChange}
+                  required
+                />
               </div>
             </div>
 

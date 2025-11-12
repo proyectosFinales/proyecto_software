@@ -113,6 +113,9 @@ export async function gestionUserInfo(id) {
         rol,
         sede,
         telefono,
+        provincia,
+        canton,
+        distrito,
         profesor:Profesor (
           profesor_id,
           cantidad_estudiantes
@@ -129,6 +132,9 @@ export async function gestionUserInfo(id) {
         rol,
         sede,
         telefono,
+        provincia,
+        canton,
+        distrito,
         estudiante:Estudiante (
           estudiante_id,
           carnet,
@@ -352,7 +358,10 @@ export async function editUserGestion(user) {
         correo: user.correo,
         contrasena: user.contrasena, // <--- sin ñ
         sede: user.sede,
-        telefono: user.telefono
+        telefono: user.telefono,
+        provincia: user.provincia,
+        canton: user.canton,
+        distrito: user.distrito
       })
       .eq("id", user.id);
     if (error) {
