@@ -176,7 +176,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
             carnet,
             id_usuario,
             situacion_laboral
-            Usuario:id_usuario (
+            Usuario:Estudiante_id_usuario_fkey (
               nombre,
               correo,
               telefono,
@@ -247,6 +247,10 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
       setDistritoEmpresa(data.Empresa.distrito || '');
       setCantonEmpresa(data.Empresa.canton || '');
       setProvinciaEmpresa(data.Empresa.provincia || '');
+
+      const contactoPrincipal = data.AnteproyectoContacto?.[0]?.ContactoEmpresa;
+      const contactoRRHH = data.AnteproyectoContacto?.[0]?.RRHH;
+
       setNombreAsesor(data.AnteproyectoContacto[0].ContactoEmpresa.nombre || '');
       setPuestoAsesor(data.AnteproyectoContacto[0].ContactoEmpresa.departamento || '');
       setTelefonoContacto(data.AnteproyectoContacto[0].ContactoEmpresa.telefono || '');
@@ -265,6 +269,9 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
       setNombreDepartamento(data.departamento || '');
       setTipoProyecto(data.tipo || '');
       setObservaciones(data.comentario || '');
+
+      const usuarioData = data.Estudiante.situacion_laboralUsuario;
+
       if(data.Proyecto.length === 0){
         setProyecto("empty")
       }
@@ -277,12 +284,15 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
         setCarnet(data.Estudiante.carnet || '');
 
         // Usuario anidado
-        if (data.Estudiante.Usuario) {
+        //console.log(usuarioData);
+        //console.log(data.Estudiante.id_usuario)
+        //console.log(data.Estudiante.Usuario)
+        if (usuarioData) {
           setUserId(data.Estudiante.id_usuario);
-          setNombre(data.Estudiante.Usuario.nombre || '');
-          setCorreo(data.Estudiante.Usuario.correo || '');
-          setTelefono(data.Estudiante.Usuario.telefono || '');
-          setSede(data.Estudiante.Usuario.sede || '');
+          setNombre(usuarioData.nombre || '');
+          setCorreo(usuarioData.correo || '');
+          setTelefono(usuarioData.telefono || '');
+          setSede(usuarioData.sede || '');
         }
       }
 
