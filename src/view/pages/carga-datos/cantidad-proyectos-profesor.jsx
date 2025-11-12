@@ -5,6 +5,7 @@
  */
 import React, { useCallback, useEffect, useState } from "react";
 import Profesor from "../../../controller/profesor";
+import Proyecto from "../../../controller/Proyecto";
 import { loadToast } from "../../components/toast";
 import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
@@ -14,6 +15,7 @@ const CantidadProyectosProfesor = () => {
   const [profesores, setProfesores] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [proyectossinProfesor, setProyectossinProfesor] = useState(0);
 
   useEffect(() => {
     console.log('CantidadProyectosProfesor: useEffect running');
@@ -21,6 +23,10 @@ const CantidadProyectosProfesor = () => {
       try {
         const data = await Profesor.obtenerTodos();
         setProfesores(data);
+        
+        // Obtener cantidad de proyectos sin profesor
+        const cantProyectos = await Proyecto.obtenerCantidadProyectossinProfesor();
+        setProyectossinProfesor(cantProyectos);
       } catch (err) {
         console.error('Error fetching professors:', err);
         setError(err.message);
@@ -33,6 +39,10 @@ const CantidadProyectosProfesor = () => {
 
   // Actualiza en tiempo real la propiedad "cantidadEstudiantes"
   const actualizarCantidad = useCallback((indice, evento) => {
+    if(profesores[indice].proyectosAsignados > Number(evento.target.value)) {
+      alert("La disponibilidad no puede ser menor a los proyectos ya asignados.");
+      return;
+    }
     profesores[indice].disponibilidad = Number(evento.target.value);
     console.log(profesores[indice].disponibilidad);
     setProfesores([...profesores]);
@@ -89,9 +99,19 @@ const CantidadProyectosProfesor = () => {
         <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 lg:p-8">
           {/* Enhanced responsive title section */}
           <div className="mb-6 space-y-2">
-            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-              Cantidad de Proyectos por Profesor
-            </h2>
+            <div className="relative">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
+                Cantidad de Proyectos por Profesor
+              </h2>
+              
+              {/* Badge flotante pequeño - esquina superior derecha */}
+              <div className="absolute -top-2 -right-2 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-lg shadow-md p-2 hover:shadow-lg transition-shadow duration-200 w-14 h-14 flex items-center justify-center">
+                <div className="text-center">
+                  <div className="text-lg font-bold leading-none">{proyectossinProfesor}</div>
+                  <div className="text-xs font-semibold leading-tight">sin asignar</div>
+                </div>
+              </div>
+            </div>
             <p className="text-sm sm:text-base text-gray-600">
               Ajuste la cantidad máxima de estudiantes que cada profesor puede supervisar.
             </p>
