@@ -76,6 +76,10 @@ const AsignacionDefensas = () => {
   // We'll store an array of "slot info" for the day
   const [dailySlots, setDailySlots] = useState([]); 
 
+  const [duracionMinutos, setDuracionMinutos] = useState(120); // REQ-35
+  const [horaInicioJornada, setHoraInicioJornada] = useState("07:30"); // REQ-36
+  const [horaFinJornada, setHoraFinJornada] = useState("19:30"); // REQ-36
+
   /* =============================
      1) On mount, fetch data
   ============================== */
@@ -257,88 +261,104 @@ const AsignacionDefensas = () => {
     }
     computeDailySlots();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDate, isCreatingNew, editCitaId, selectedProject, editLector1, editLector2]);
+  }, [selectedDate, isCreatingNew, editCitaId, selectedProject, editLector1, editLector2, duracionMinutos, horaInicioJornada, horaFinJornada]);
 
   // Build dailySlots => for each of the 6 time ranges, figure out if there's a conflict
-  async function computeDailySlots() {
-    const dayStr = format(selectedDate, "yyyy-MM-dd");
-    
-    // 1) fetch the chosen project => to get TUTOR
-    let tutorId = null;
-    if (selectedProject) {
-      const { data: proj } = await supabase
-        .from("Proyecto")
-        .select("profesor_id")
-        .eq("id", selectedProject)
-        .single();
-      tutorId = proj?.profesor_id || null;
-    }
 
-    // 2) find all Citas that day
-    //    We'll see which tutor/lector is in each
-    //    Then mark a conflict if it has the same slot 
-    const { data: dayCitas } = await supabase
-      .from("Cita")
-      .select(`
-        tutor,
-        lector1,
-        lector2,
-        disponibilidad:disponibilidad_id (
-          dia,
-          hora_inicio,
-          hora_fin
-        )
-      `);
+async function computeDailySlots() {
+  const dayStr = format(selectedDate, "yyyy-MM-dd");
 
-    // Filter to the same day
-    const sameDay = (dayCitas || []).filter((c) => c.disponibilidad?.dia === dayStr);
+  // 1) Obtener el tutor (si hay proyecto seleccionado)
+  let tutorId = null;
+  if (selectedProject) {
+    const { data: proj, error: projErr } = await supabase
+      .from("Proyecto")
+      .select("profesor_id")
+      .eq("id", selectedProject)
+      .single();
+    if (!projErr && proj) tutorId = proj.profesor_id;
+  }
 
-    // 3) For each of the 6 time slots,
-    //    see if the "tutor" or either lector is in "sameDay" 
-    //    at that slot => conflict
-    const newSlots = TIME_SLOTS.map((ts) => {
-      const slotObj = {
-        start: ts.start,
-        end: ts.end,
-        conflict: false,
-        conflictMsg: "",
-      };
+  // 2) Obtener citas del dia (traer disponibilidades relacionadas)
+  const { data: citasData, error: citasErr } = await supabase
+    .from("Cita")
+    .select(
+      `tutor, lector1, lector2, disponibilidad:disponibilidad_id ( dia, hora_inicio, hora_fin )`
+    );
 
-      // If we haven't chosen a project or lector1 or lector2 yet, we can't do a conflict check
-      // => allow them to select anything
-      if (!tutorId || !editLector1 || !editLector2) {
-        return slotObj;
-      }
+  if (citasErr) {
+    console.error("Error fetching citas for day:", citasErr);
+    setDailySlots([]);
+    return;
+  }
 
-      // find any cita that has the same [start, end], with day=dayStr
-      // and if its tutor or lector is TUTORID or LECTOR1 or LECTOR2
+  const sameDay = (citasData || []).filter(
+    (c) => c.disponibilidad?.dia === dayStr
+  );
+
+  // 3) Generar bloques dinámicamente según duración y jornada
+  if (!duracionMinutos || duracionMinutos < 10 || !horaInicioJornada || !horaFinJornada) {
+    setDailySlots([]);
+    return;
+  }
+
+  const duracionMs = duracionMinutos * 60 * 1000;
+
+  const [startH, startM] = horaInicioJornada.split(":").map(Number);
+  const [endH, endM] = horaFinJornada.split(":").map(Number);
+
+  // Use copies of selectedDate to avoid mutating state
+  const dayStart = new Date(selectedDate);
+  dayStart.setHours(startH, startM, 0, 0);
+
+  const jornadaEnd = new Date(selectedDate);
+  jornadaEnd.setHours(endH, endM, 0, 0);
+
+  const newSlots = [];
+  let currentSlotStart = new Date(dayStart);
+
+  while (currentSlotStart < jornadaEnd) {
+    const currentSlotEnd = new Date(currentSlotStart.getTime() + duracionMs);
+
+    // Si el slot termina después de la jornada, se detiene
+    if (currentSlotEnd > jornadaEnd) break;
+
+    const slotStartStr = format(currentSlotStart, "HH:mm:ss");
+    const slotEndStr = format(currentSlotEnd, "HH:mm:ss");
+
+    const slotObj = {
+      start: slotStartStr,
+      end: slotEndStr,
+      conflict: false,
+      conflictMsg: "",
+    };
+
+    // 4) Validar conflictos: tutor o lectores ya ocupados exactamente en ese horario
+    if (tutorId || editLector1 || editLector2) {
       const conflictCita = sameDay.find((cita) => {
-        return (
-          cita.disponibilidad?.hora_inicio === ts.start &&
-          cita.disponibilidad?.hora_fin === ts.end &&
-          (
-            cita.tutor === tutorId ||
-            cita.lector1 === tutorId ||
-            cita.lector2 === tutorId ||
-            cita.tutor === editLector1 ||
-            cita.lector1 === editLector1 ||
-            cita.lector2 === editLector1 ||
-            cita.tutor === editLector2 ||
-            cita.lector1 === editLector2 ||
-            cita.lector2 === editLector2
-          )
-        );
+        const citaStart = cita.disponibilidad?.hora_inicio;
+        const citaEnd = cita.disponibilidad?.hora_fin;
+
+        if (citaStart !== slotStartStr || citaEnd !== slotEndStr) return false;
+
+        const occupiedIds = [cita.tutor, cita.lector1, cita.lector2].filter(Boolean);
+        const checkIds = [tutorId, editLector1, editLector2].filter(Boolean);
+
+        return checkIds.some((id) => occupiedIds.includes(id));
       });
 
       if (conflictCita) {
         slotObj.conflict = true;
         slotObj.conflictMsg = "Conflicto con alguno de los profesores.";
       }
-      return slotObj;
-    });
+    }
 
-    setDailySlots(newSlots);
+    newSlots.push(slotObj);
+    currentSlotStart = currentSlotEnd;
   }
+
+  setDailySlots(newSlots);
+}
 
   // Opening the new Cita form
   function openNewCitaForm() {
@@ -779,6 +799,46 @@ const AsignacionDefensas = () => {
                     <p className="text-gray-800">
                       {format(selectedDate, "dd/MM/yyyy", { locale: es })}
                     </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Hora Inicio Jornada
+                      </label>
+                      <input 
+                        type="time"
+                        step="1800" // Pasos de 30 min
+                        className="w-full rounded-lg border-gray-200"
+                        value={horaInicioJornada}
+                        onChange={(e) => setHoraInicioJornada(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Hora Fin Jornada
+                      </label>
+                      <input 
+                        type="time"
+                        step="1800"
+                        className="w-full rounded-lg border-gray-200"
+                        value={horaFinJornada}
+                        onChange={(e) => setHoraFinJornada(e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Duración (minutos)
+                      </label>
+                      <input 
+                        type="number"
+                        step="5"
+                        min="10"
+                        className="w-full rounded-lg border-gray-200"
+                        value={duracionMinutos}
+                        onChange={(e) => setDuracionMinutos(parseInt(e.target.value, 10) || 60)}
+                      />
+                    </div>
                   </div>
 
                   {/* Time Slots */}
