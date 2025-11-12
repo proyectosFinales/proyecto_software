@@ -34,7 +34,9 @@ const CantidadProyectosProfesor = () => {
   // Actualiza en tiempo real la propiedad "cantidadEstudiantes"
   const actualizarCantidad = useCallback((indice, evento) => {
     profesores[indice].disponibilidad = Number(evento.target.value);
+    console.log(profesores[indice].disponibilidad);
     setProfesores([...profesores]);
+    guardarCambios();
   }, [profesores]);
 
   // Guarda cambios en BD (llama p.actualizarCantidadEstudiantes())
