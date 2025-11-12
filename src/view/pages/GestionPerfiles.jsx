@@ -7,6 +7,8 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
 import Modal from "../components/Modal";
+import { fetchEstudiantes, fetchProfesores } from "../../controller/GestionPerfilesController";
+import { descargarPerfiles } from "../../controller/DescargarPDF";
 
 /**
  * GestionPerfiles.jsx
@@ -141,6 +143,16 @@ const GestionPerfiles = () => {
   };
 
   /**
+   * Solicita la informacion para poder generar el pdf con la informacion.
+   */
+  const handleGenerarReporte = async () => {
+    //Pedimos la info a la BD
+    const { data: profesoresData, error: profesoresError } = await fetchProfesores();
+    const { data: estudiantesData, error: estudiantesError } = await fetchEstudiantes();
+    descargarPerfiles(profesoresData, estudiantesData);
+  }
+
+  /**
    * Al montar, obtener la lista de usuarios
    */
   useEffect(() => {
@@ -200,6 +212,13 @@ const GestionPerfiles = () => {
           </button>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
+            <button
+              onClick={handleGenerarReporte}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Generar Reporte
+            </button>
+
             <select
               value={filter}
               onChange={handleFilterChange}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {useRef} from 'react';
 import {
   ResponsiveContainer,
   LineChart, Line,
@@ -23,6 +24,8 @@ import HeaderCoordinador from '../../components/HeaderCoordinador';
 import Footer from '../../components/Footer';
 import supabase from '../../../model/supabase';
 
+import { getSemestresDeCalificaciones } from '../../../controller/Semestre';
+
 /** Import aggregator/controller functions */
 import {
   fetchAllCalificaciones,
@@ -35,12 +38,17 @@ import {
   fetchRecentComments
 } from '../../../controller/calificacionesController';
 
+import { generarPDFDashboardCalificaciones } from '../../../controller/DescargarPDF';
+
 const DetailedCalificacionesDashboard = () => {
   // -----------------------------------------
   // States for professor list / selection
   // -----------------------------------------
   const [professors, setProfessors] = useState([]);
   const [selectedProfessorId, setSelectedProfessorId] = useState(''); // empty => all
+
+  const [semestres, setSemestres] = useState([]);
+  const [selectedSemestre, setSelectedSemestre] = useState('');
 
   // Loading indicator
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +72,37 @@ const DetailedCalificacionesDashboard = () => {
 
   // Table search
   const [searchTerm, setSearchTerm] = useState('');
+
+  const dashboardRef = useRef(null);
+  const handlePrintDashboard = () => {
+    if (!dashboardRef.current) return;
+
+    // Ocultar todo excepto el dashboard
+    const originalContents = document.body.innerHTML;
+    const printContents = dashboardRef.current.innerHTML;
+    
+    document.body.innerHTML = printContents;
+    // Aplicar estilos para la impresion (CSS)
+    const style = document.createElement('style');
+    style.innerHTML = `
+      @media print {
+        body { margin: 20px; }
+        /* Forzar que los graficos se rendericen */
+        .recharts-responsive-container { width: 100% !important; height: 300px !important; }
+        /* Ocultar botones de accion en la impresion */
+        button, .sm\:justify-between { display: none !important; }
+      }
+  t `;
+    document.head.appendChild(style);
+
+    window.print(); // Abre el dialogo de impresion
+
+    // Restaurar la pagina
+    document.body.innerHTML = originalContents;
+    document.head.removeChild(style);
+    // Recargar la pagina para asegurar que los estilos de React se reapliquen
+    window.location.reload(); 
+  };
 
   // Add these utility functions
   const getColorForScore = (score) => {
@@ -123,6 +162,23 @@ const DetailedCalificacionesDashboard = () => {
   }, []);
 
   // -----------------------------------------
+  // 1.5) Load the list of all semesters once
+  // -----------------------------------------
+  useEffect(() => {
+    const loadSemestres = async () => {
+      try {
+        // Usamos la nueva funcion del controlador Semestre
+        const data = await getSemestresDeCalificaciones();
+        console.log('Loaded semestres:', data);
+        setSemestres(data || []);
+      } catch (err) {
+        console.error('Error loading semesters:', err.message);
+      }
+    };
+    loadSemestres();
+  }, []);
+
+  // -----------------------------------------
   // 2) Load aggregator data whenever professor changes
   //    (blank professor => 'All' stats & data)
   // -----------------------------------------
@@ -133,8 +189,14 @@ const DetailedCalificacionesDashboard = () => {
         // If no professor is selected => all
         const professorId = selectedProfessorId || undefined;
 
+        // Obtain the selected semester
+        const semestreId = selectedSemestre || 6;
+        const filterParams = { professorId, semestreId };
+        console.log('Loading data with params:', filterParams);
+        console.log('Selected semestre:', selectedSemestre);
+
         // 1) Basic stats
-        const s = await fetchDashboardStats({ professorId });
+        const s = await fetchDashboardStats(filterParams);
         setStats(s);
 
         // 2) Trend by semester
@@ -142,27 +204,27 @@ const DetailedCalificacionesDashboard = () => {
         setSemesterTrend(trend);
 
         // 3) Criteria breakdown
-        const crit = await fetchCriteriaBreakdown({ professorId });
+        const crit = await fetchCriteriaBreakdown(filterParams);
         setCriteriaBreakdown(crit);
 
         // 4) Pie data (1 => yes, else => no)
-        const pie = await fetchPieData({ professorId });
+        const pie = await fetchPieData(filterParams);
         setPieData(pie);
 
         // 5) Distribution of recomendacion (1..5)
-        const rDist = await fetchRecommendationDistribution({ professorId });
+        const rDist = await fetchRecommendationDistribution(filterParams);
         setRecDist(rDist);
 
         // 6) Distribution of star_rating (1..5)
-        const sDist = await fetchStarRatingDistribution({ professorId });
+        const sDist = await fetchStarRatingDistribution(filterParams);
         setStarDist(sDist);
 
         // 7) Recent comments
-        const comments = await fetchRecentComments({ professorId });
+        const comments = await fetchRecentComments(filterParams);
         setRecentComments(comments);
 
         // 8) All calificaciones (raw data)
-        const allCals = await fetchAllCalificaciones({ professorId });
+        const allCals = await fetchAllCalificaciones(filterParams);
         setCalificaciones(allCals || []);
 
         // 9) Additional analysis
@@ -176,7 +238,7 @@ const DetailedCalificacionesDashboard = () => {
     };
 
     loadData();
-  }, [selectedProfessorId]);
+  }, [selectedProfessorId, selectedSemestre]);
 
   // -----------------------------------------
   // Helper: group calificaciones by (YYYY-MM),
@@ -428,7 +490,7 @@ const DetailedCalificacionesDashboard = () => {
     <div className="min-h-screen bg-gray-100">
       <HeaderCoordinador title="Dashboard de Calificaciones" />
 
-      <main className="p-4 sm:p-6 lg:p-8 max-w-8xl mx-auto space-y-6">
+      <main className="p-4 sm:p-6 lg:p-8 max-w-8xl mx-auto space-y-6" ref={dashboardRef}>
         {/* Title + Professor Selector */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -449,6 +511,23 @@ const DetailedCalificacionesDashboard = () => {
               {professors.map((p) => (
                 <option key={p.profesor_id} value={p.profesor_id}>
                   {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="w-full sm:w-auto max-w-md">
+            <select
+              className="w-full px-4 py-2 rounded-lg border-gray-300 shadow-sm
+                       focus:border-blue-500 focus:ring-blue-500 
+                       bg-white transition-colors duration-200"
+              value={selectedSemestre}
+              onChange={(e) => setSelectedSemestre(e.target.value)}
+            >
+              <option value="">(Todos los Semestres)</option>
+              {semestres.map((sem) => (
+                <option key={sem} value={sem}>
+                  {sem}
                 </option>
               ))}
             </select>
@@ -801,6 +880,15 @@ const DetailedCalificacionesDashboard = () => {
                     />
                     <Search className="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
                   </div>
+                    <button
+                      onClick={handlePrintDashboard}
+                      className="flex items-center justify-center px-4 py-2 bg-red-500 text-white
+                              rounded-lg hover:bg-red-600 transition-colors duration-200"
+                    >
+                      <Download className="w-5 h-5 mr-2" />
+                      Imprimir Gráficos
+                    </button>
+                
 
                   <button
                     onClick={handleExportCSV}

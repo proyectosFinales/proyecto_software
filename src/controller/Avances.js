@@ -192,3 +192,47 @@ const reprobarEstudiante = async (proyecto_id) => {
     throw err;
   });
 }
+
+export const getDetallesAvancesParaReporte = async () => {
+  try {
+    // REQ-31 pide detalles. Asumimos que los avances son Actas
+    const { data, error } = await supabase
+      .from('Acta')
+      .select(`
+        id,
+        fecha_creacion,
+        titulo,
+        semestre,
+        Estudiante (
+          Usuario ( nombre )
+        ),
+        Profesor (
+          Usuario ( nombre )
+        ),
+        datos
+      `)
+      // Se filtran solo los titulos que correspondan a avances
+      .in('titulo', ['Avance I', 'Avance II', 'Avance III', 'Informe Preliminar', 'Informe Final']);
+
+    if (error) {
+      throw new Error(`Error al obtener detalles de avances: ${error.message}`);
+    }
+
+    // Mapear los datos a un formato plano para el CSV
+    const reportData = data.map(item => ({
+      estudiante: item.Estudiante?.Usuario?.nombre || 'N/A',
+      profesor: item.Profesor?.Usuario?.nombre || 'N/A',
+      titulo: item.titulo,
+      semestre: `${item.semestre}-${new Date(item.fecha_creacion).getFullYear()}`,
+      fecha: new Date(item.fecha_creacion).toLocaleDateString(),
+      // Se asume que los datos de avance (Pasa/No Pasa) estan en 'datos'
+      estado: item.datos?.estado || 'Pendiente'
+    }));
+
+    return reportData;
+
+  } catch (error) {
+    console.error(error.message);
+    return [];
+  }
+};

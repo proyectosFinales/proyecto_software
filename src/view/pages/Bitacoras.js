@@ -7,6 +7,8 @@ import supabase from '../../model/supabase';
 import Modal from 'react-modal';
 import '../styles/Bitacoras.css';
 import { useNavigate } from 'react-router-dom';
+import { fetchEntradasBitacora, fetchBitacoras, crearReporteBitacoras } from '../../controller/BitacorasController';
+import { descargarBitacoras } from '../../controller/DescargarPDF';
 
 // Configuración de React Modal
 Modal.setAppElement('#root');
@@ -18,6 +20,8 @@ const Bitacoras = () => {
   const [entradas, setEntradas] = useState([]);
   const [rol, setRol] = useState(0);
   const [entradaBitacoraId, setEntradaBitacoraId] = useState(0);
+  const [botonDeshabilitado, setBotonDeshabilitado] = useState(false);
+	const [bitacorasReporte, setBitacorasReporte] = useState([]);
 
   useEffect(() => {
     const fetchBitacoras = async () => {
@@ -115,6 +119,7 @@ const Bitacoras = () => {
           }
 
           bitacorasData = data;
+          console.log("Bitacoras cargadas: ", bitacorasData);
         }
 
         setBitacoras(bitacorasData);
@@ -125,6 +130,33 @@ const Bitacoras = () => {
 
     fetchBitacoras();
   }, [usuarioId]);
+
+
+	const cargarTodasLasEntradas = async () => {
+		try {
+			if (bitacoras.length > 0) {
+	
+				const nuevasBitacoras = await Promise.all(
+	
+					bitacoras.map(async (b) => {
+						const { data, error } = await fetchEntradasBitacora(b.id);
+	
+						return {
+							...b,
+							entradas: data || [],
+							errorEntradas: error || null,
+						};
+					})
+				);
+	
+				setBitacorasReporte(nuevasBitacoras);
+			}
+			console.log("cargadas las entradas junto con las bitacoras: ", bitacorasReporte);
+
+		} catch (e) {
+			console.log("Error al cargar todas las entradas: ", e);
+		}
+	};	
 
   const fetchEntradas = async (idBitacora) => {
     try {
@@ -142,7 +174,18 @@ const Bitacoras = () => {
 
       if (error) throw error;
       setEntradas(data);
+      console.log("Entradas cargadas: ", data);
+      const cont = JSON.parse(data[0].contenido || "{}");
+      console.log("Contenido de la entrada: ", cont[0]);
+
+      // Si la lista tiene elementos, mantener el botón desactivado
+      if (data.length > 0) {
+        setBotonDeshabilitado(true);
+      } else {
+        setBotonDeshabilitado(false);
+      }
     } catch (error) {
+      setBotonDeshabilitado(false);
       console.error('Error fetching entradas data:', error);
     }
   };
@@ -208,6 +251,11 @@ const Bitacoras = () => {
     window.location.href = `/agregarEntrada?id=${entradaBitacoraId}`;
   };
   
+  const handleGenerarReporte = async () => {
+		await cargarTodasLasEntradas();
+		descargarBitacoras(bitacorasReporte, rol === 3 ? false : true);
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       {rol === 2 ? <HeaderProfesor title="Bitácoras del Profesor" /> :
@@ -218,12 +266,20 @@ const Bitacoras = () => {
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800">
             Bitácoras del {rol === 2 ? 'Profesor' : 'Estudiante'}
           </h2>
-          <button
-            className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xl shadow-md transition-colors duration-200"
-            onClick={handleAgregarBitacora}
-          >
-            +
-          </button>
+          <div className="flex items-center gap-6"> 
+            <button
+              onClick={handleGenerarReporte}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+            >
+              Generar Reporte
+            </button>
+            <button
+              className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full w-10 h-10 flex items-center justify-center text-xl shadow-md transition-colors duration-200"
+              onClick={handleAgregarBitacora}
+            >
+              +
+            </button>
+          </div>
         </div>
 
         {/* Contenedor con scroll horizontal para tablas responsivas */}
@@ -294,12 +350,14 @@ const Bitacoras = () => {
             {/* Encabezado del modal */}
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Entradas de la Bitácora</h2>
-              {/* <button
+              <button
+                disabled={botonDeshabilitado}
+                hidden={botonDeshabilitado}
                 className="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full w-8 h-8 flex items-center justify-center text-xl shadow transition-colors duration-200"
                 onClick={handleAgregarEntrada}
               >
                 +
-              </button> */}
+              </button>
             </div>
 
             {/* Contenido del modal con scroll */}

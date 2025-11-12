@@ -539,4 +539,60 @@ const calificacionesController = {
   fetchProfessorRanking,
 };
 
+
+// Obtener calificaciones filtradas por semestre
+export const getCalificacionesPorSemestre = async (semestreCompleto) => {
+  try {
+    // Valida que el semestre no este vacio
+    if (!semestreCompleto) {
+      // Si no hay filtro, devuelve todo (o se puede cambiar a error)
+      return []; 
+    }
+
+    // Separar el string, ej "I-2025"
+    const parts = semestreCompleto.split('-');
+    if (parts.length !== 2) {
+      throw new Error("Formato de semestre invalido. Se esperaba 'SEMESTRE-AÑO'");
+    }
+    
+    const semestre = parts[0]; // "I" o "II"
+    const year = parseInt(parts[1], 10); // 2025
+
+    if (!semestre || isNaN(year)) {
+       throw new Error("Datos de semestre invalidos.");
+    }
+
+    // Construir la consulta filtrando por ambas columnas
+    let query = supabase
+      .from('Acta')
+      .select(`
+        id,
+        fecha_creacion,
+        titulo,
+        datos,
+        semestre,
+        Profesor (
+          Usuario ( nombre )
+        ),
+        Estudiante (
+          Usuario ( nombre )
+        )
+      `)
+      .eq('semestre', semestre) // Filtra "I" o "II"
+      .gte('fecha_creacion', `${year}-01-01T00:00:00Z`) // Inicio del año
+      .lt('fecha_creacion', `${year + 1}-01-01T00:00:00Z`); // Inicio del proximo año
+
+    const { data, error } = await query;
+
+    if (error) {
+      throw new Error(`Error al obtener calificaciones por semestre: ${error.message}`);
+    }
+
+    return data;
+
+  } catch (error) {
+    console.error(error.message);
+    return [];
+  }
+};
 export default calificacionesController;
