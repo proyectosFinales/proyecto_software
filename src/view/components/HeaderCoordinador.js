@@ -17,6 +17,13 @@ const HeaderCoordinador = ({ title }) => {
           >
             &#9776;
           </button>
+          {/* Tipo de usuario */}
+          <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
+            Coordinador
+          </span>
+        </div>
+        <h1 className="text-lg md:text-2xl font-bold">{title}</h1>
+        <div className="flex items-center absolute right-5 gap-3">
           {/* Semestre y año actual */}
           <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
             {(() => {
@@ -26,13 +33,6 @@ const HeaderCoordinador = ({ title }) => {
               const semestreActual = mes <= 7 ? 1 : 2;
               return `Semestre ${semestreActual} - ${anoActual}`;
             })()}
-          </span>
-        </div>
-        <h1 className="text-lg md:text-2xl font-bold">{title}</h1>
-        <div className="flex items-center absolute right-5 gap-3">
-          {/* Tipo de usuario */}
-          <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
-            Coordinador
           </span>
           <button
             className="text-xl"
