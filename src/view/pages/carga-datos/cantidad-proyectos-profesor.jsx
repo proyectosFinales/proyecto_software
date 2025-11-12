@@ -14,7 +14,7 @@ const CantidadProyectosProfesor = () => {
   console.log('CantidadProyectosProfesor: Component rendering');
   const [profesores, setProfesores] = useState([]);
   const [filtroSemestre, setFiltroSemestre] = useState("");
-  const [filtroAno, setFiltroAno] = useState("");
+  const [filtroAno, setFiltroAno] = useState(() => String(new Date().getFullYear()));
   const [profesoresFiltrados, setProfesoresFiltrados] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -142,7 +142,6 @@ const CantidadProyectosProfesor = () => {
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                 Cantidad de Proyectos por Profesor
               </h2>
-              
               {/* Badge flotante pequeño - esquina superior derecha */}
               <div className="absolute -top-2 -right-2 bg-gradient-to-br from-amber-400 to-amber-500 text-white rounded-lg shadow-md p-2 hover:shadow-lg transition-shadow duration-200 w-44 h-14 flex items-center justify-center">
                 <div className="flex flex-col items-center w-full">

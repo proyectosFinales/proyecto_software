@@ -218,6 +218,26 @@ const InicioCargaDatos = () => {
 
           {/* Main Menu Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            {/* Project Quantity Card */}
+            <Link 
+              to="/carga-datos/cantidad-proyectos"
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 md:col-span-2"
+            >
+              <div className="p-6 h-full">
+                <div className="flex flex-col items-center">
+                  <div className="bg-green-100 p-4 rounded-full mb-4">
+                    <i className="fas fa-tasks text-3xl text-green-600"></i>
+                  </div>
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                    Cantidad de Proyectos
+                  </h3>
+                  <p className="text-gray-600 text-center">
+                    Gestionar límites de proyectos por profesor
+                  </p>
+                </div>
+              </div>
+            </Link>
+            
             {/* Reset Database Card */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <button
@@ -258,25 +278,7 @@ const InicioCargaDatos = () => {
               </div>
             </Link>
 
-            {/* Project Quantity Card */}
-            <Link 
-              to="/carga-datos/cantidad-proyectos"
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300 md:col-span-2"
-            >
-              <div className="p-6 h-full">
-                <div className="flex flex-col items-center">
-                  <div className="bg-green-100 p-4 rounded-full mb-4">
-                    <i className="fas fa-tasks text-3xl text-green-600"></i>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    Cantidad de Proyectos
-                  </h3>
-                  <p className="text-gray-600 text-center">
-                    Gestionar límites de proyectos por profesor
-                  </p>
-                </div>
-              </div>
-            </Link>
+            
           </div>
 
           {/* Footer Text */}
