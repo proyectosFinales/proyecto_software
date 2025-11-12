@@ -12,10 +12,22 @@ class Profesor extends Usuario {
   profesor_id;
 
   /**
-   * Cantidad de estudiantes que tiene asignados
+   * Disponibilidad de espacios (de AsignacionesProfesor.disponibilidad)
    * @type {number}
    */
-  cantidadEstudiantes;
+  disponibilidad;
+
+  /**
+   * Proyectos asignados (de AsignacionesProfesor.asignados)
+   * @type {number}
+   */
+  proyectosAsignados;
+
+  /**
+   * Categoría del profesor
+   * @type {string}
+   */
+  categoria;
 
   /**
    * Anteproyectos asociados (opcional, se puede obtener vía joins)
@@ -29,45 +41,46 @@ class Profesor extends Usuario {
   original = {};
 
   /**
-   * 
+   * Constructor del Profesor
    * @param {string} profesor_id        - PK en la tabla Profesor
    * @param {string} id_usuario         - ID de la tabla Usuario
-   * @param {string} nombre             - Nombre del profesor (normalmente en Usuario.nombre)
+   * @param {string} nombre             - Nombre del profesor
    * @param {string} sede               - Sede proveniente de Usuario.sede
-   * @param {number} cantidadEstudiantes - Valor de la columna "cantidad_estudiantes" en la tabla Profesor
+   * @param {number} disponibilidad     - Disponibilidad de AsignacionesProfesor
+   * @param {number} proyectosAsignados - Proyectos asignados de AsignacionesProfesor
+   * @param {string} categoria          - Categoría del profesor
    * @param {Anteproyecto[]} anteproyectos - Lista de anteproyectos asociados (opcional)
    */
-  constructor(profesor_id, id_usuario, nombre, sede, cantidadEstudiantes, estudiantesLibres, categoria, anteproyectos = []) {
-    super(id_usuario, nombre, sede); // Constructor base de Usuario
+  constructor(profesor_id, id_usuario, nombre, sede, disponibilidad, proyectosAsignados, categoria, anteproyectos = []) {
+    super(id_usuario, nombre, sede);
     this.profesor_id = profesor_id;
-    this.cantidadEstudiantes = cantidadEstudiantes ?? 0;
-    this.anteproyectos = anteproyectos;
-    this.original.cantidadEstudiantes = this.cantidadEstudiantes;
-    this.original.estudiantesLibres = estudiantesLibres;
+    this.disponibilidad = disponibilidad ?? 0;
+    this.proyectosAsignados = proyectosAsignados ?? 0;
     this.categoria = categoria;
+    this.anteproyectos = anteproyectos;
+    this.original.disponibilidad = this.disponibilidad;
+    this.original.proyectosAsignados = this.proyectosAsignados;
   }
 
   /**
    * Crea una instancia de Profesor a partir de un objeto
-   * proveniente de Supabase (join con Usuario).
+   * proveniente de Supabase (JOIN con AsignacionesProfesor y Usuario).
    * @param {Object} obj
    * Ejemplo:
    * {
    *   profesor_id: "...",
-   *   cantidad_estudiantes: 5,
-   *   Usuario: {
-   *     id: "...",
-   *     nombre: "...",
-   *     sede: "...",
-   *     correo: "..."
-   *   },
-   *   anteproyectos: [ ... ] // si el SELECT anida anteproyectos
+   *   disponibilidad: 5,
+   *   asignados: 2,
+   *   categoria_id: "...",
+   *   id: "...",
+   *   nombre: "...",
+   *   sede: "...",
+   *   correo: "..."
    * }
    * @returns {Profesor}
    */
   static from(obj) {
     if (!obj) return null;
-    const usuario = obj.Usuario || obj.usuario;
 
     // Si traes anteproyectos anidados
     let antepros = [];
@@ -77,74 +90,154 @@ class Profesor extends Usuario {
 
     return new Profesor(
       obj.profesor_id,
-      usuario?.id,
-      usuario?.nombre || "",
-      usuario?.sede || "",
-      obj.cantidad_estudiantes ?? 0,
-      obj.estudiantes_libres,
-      obj.Categoria ? obj.Categoria.nombre : null,
+      obj.id,
+      obj.nombre || "",
+      obj.sede || "",
+      obj.disponibilidad ?? 0,
+      obj.asignados ?? 0,
+      obj.categoria_nombre || null,
       antepros
     );
   }
 
   /**
-   * Ejemplo de función estática para obtener un profesor
-   * según su PK (profesor_id) y hacer un join con la tabla Usuario.
+   * Obtiene un profesor específico con todos sus datos incluyendo disponibilidad y asignados
    * @param {string} profesor_id 
    * @returns {Profesor | null}
    */
   static async fromID(profesor_id) {
-    const { data, error } = await supabase
-      .from("Profesor")
-      .select(`
-        profesor_id,
-        cantidad_estudiantes,
-        estudiantes_libres,
-        Usuario:id_usuario (
-          id,
-          nombre,
-          sede,
-          correo,
-          telefono
-        )
-      `)
-      .eq("profesor_id", profesor_id)
-      .single();
+    try {
+      // Query 1: Obtenemos el profesor con usuario y categoría
+      const { data: profesorData, error: errorProfesor } = await supabase
+        .from("Profesor")
+        .select(`
+          profesor_id,
+          categoria_id,
+          Usuario:id_usuario (
+            id,
+            nombre,
+            sede,
+            correo
+          ),
+          Categoria:categoria_id (
+            nombre
+          )
+        `)
+        .eq("profesor_id", profesor_id)
+        .single();
 
-    if (error || !data) {
-      console.error("Error recuperando profesor:", error);
+      if (errorProfesor || !profesorData) {
+        console.error("Error recuperando profesor:", errorProfesor);
+        return null;
+      }
+
+      // Query 2: Obtenemos los datos de asignación
+      const { data: asignacionData, error: errorAsignacion } = await supabase
+        .from("AsignacionesProfesor")
+        .select("disponibilidad, asignados")
+        .eq("idProfesor", profesor_id)
+        .single();
+
+      if (errorAsignacion) {
+        console.warn("No se encontraron asignaciones para el profesor:", profesor_id);
+      }
+
+      // Combinamos los datos
+      const disponibilidad = asignacionData?.disponibilidad ?? 0;
+      const asignados = asignacionData?.asignados ?? 0;
+
+      return new Profesor(
+        profesorData.profesor_id,
+        profesorData.Usuario?.id,
+        profesorData.Usuario?.nombre || "",
+        profesorData.Usuario?.sede || "",
+        disponibilidad,
+        asignados,
+        profesorData.Categoria?.nombre || null
+      );
+    } catch (error) {
+      console.error("Error en fromID:", error);
       return null;
     }
-    return Profesor.from(data);
   }
 
   /**
-   * Obtiene todos los profesores básicos sin anidar anteproyectos.
+   * Obtiene TODOS los profesores con sus datos de disponibilidad y proyectos asignados.
+   * Ejecuta el SQL equivalente a:
+   * SELECT p.profesor_id, ap.disponibilidad, ap.asignados, p.categoria_id, u.id, u.nombre, u.sede, u.correo
+   * FROM "Profesor" p
+   * JOIN "AsignacionesProfesor" ap ON p.profesor_id = ap."idProfesor"
+   * JOIN "Usuario" u ON u.id = p.id_usuario
+   *
    * @returns {Promise<Profesor[]>}
    */
   static async obtenerTodos() {
-    const { data, error } = await supabase
-      .from("Profesor")
-      .select(`
-        profesor_id,
-        cantidad_estudiantes,
-        estudiantes_libres,
-        categoria_id,
-        Usuario:id_usuario (
-          id,
-          nombre,
-          sede,
-          correo
-        ),
-        Categoria:categoria_id (
-          nombre
-        )
-      `);
-    
-    if (error) {
-      throw error; 
+    try {
+      // Query 1: Obtenemos todos los profesores con usuario y categoría
+      const { data: profesores, error: errorProfesores } = await supabase
+        .from("Profesor")
+        .select(`
+          profesor_id,
+          categoria_id,
+          Usuario:id_usuario (
+            id,
+            nombre,
+            sede,
+            correo
+          ),
+          Categoria:categoria_id (
+            nombre
+          )
+        `);
+
+      if (errorProfesores) {
+        console.error("Error obteniendo profesores:", errorProfesores);
+        throw errorProfesores;
+      }
+
+      if (!profesores || profesores.length === 0) {
+        return [];
+      }
+
+      // Query 2: Obtenemos TODAS las asignaciones
+      const { data: asignaciones, error: errorAsignaciones } = await supabase
+        .from("AsignacionesProfesor")
+        .select("idProfesor, disponibilidad, asignados");
+
+      if (errorAsignaciones) {
+        console.error("Error obteniendo asignaciones:", errorAsignaciones);
+        throw errorAsignaciones;
+      }
+
+      // Creamos un mapa para búsqueda rápida: idProfesor -> {disponibilidad, asignados}
+      const mapaAsignaciones = new Map();
+      if (asignaciones && asignaciones.length > 0) {
+        asignaciones.forEach(asignacion => {
+          mapaAsignaciones.set(asignacion.idProfesor, {
+            disponibilidad: asignacion.disponibilidad,
+            asignados: asignacion.asignados
+          });
+        });
+      }
+
+      // Combinamos los datos: profesores + asignaciones
+      return profesores.map(profesor => {
+        const asignacion = mapaAsignaciones.get(profesor.profesor_id) || { disponibilidad: 0, asignados: 0 };
+
+        return new Profesor(
+          profesor.profesor_id,
+          profesor.Usuario?.id,
+          profesor.Usuario?.nombre || "",
+          profesor.Usuario?.sede || "",
+          asignacion.disponibilidad,
+          asignacion.asignados,
+          profesor.Categoria?.nombre || null
+        );
+      });
+    } catch (error) {
+      console.error("Error en obtenerTodos:", error);
+      throw error;
     }
-    return data.map(p => Profesor.from(p));
   }
 
   static async obtenerEncargados() {
@@ -152,50 +245,71 @@ class Profesor extends Usuario {
   }
 
   /**
-   * Actualiza "cantidad_estudiantes" en la BD
-   * si ha cambiado respecto a la original.
+   * Actualiza la disponibilidad en la tabla AsignacionesProfesor
+   * (antes actualizaba cantidad_estudiantes, ahora actualiza disponibilidad)
    */
   async actualizarCantidadEstudiantes() {
-    const nuevosEstudiantesLibres = this.cantidadEstudiantes - (this.original.cantidadEstudiantes - this.original.estudiantesLibres);
-
-    if (nuevosEstudiantesLibres < 0) {
-      return Promise.reject("No se puede reducir la cantidad de estudiantes asignados por debajo del número actual.");
+    console.log(this.disponibilidad)
+    if (this.original.disponibilidad === this.disponibilidad) {
+      return Promise.resolve();
     }
 
-    if (this.original.cantidadEstudiantes !== this.cantidadEstudiantes) {
+    if (this.disponibilidad < this.proyectosAsignados) {
+      this.disponibilidad = this.disponibilidad +1;
+      return Promise.resolve();
+    }
+
+    try {
       const { error } = await supabase
-        .from("Profesor")
-        .update({
-          cantidad_estudiantes: this.cantidadEstudiantes,
-          estudiantes_libres: nuevosEstudiantesLibres
-        })
-        .eq("profesor_id", this.profesor_id);
+        .from("AsignacionesProfesor")
+        .update({ disponibilidad: this.disponibilidad })
+        .eq("idProfesor", this.profesor_id);
 
       if (error) {
         return Promise.reject(error.message);
       }
-      this.original.cantidadEstudiantes = this.cantidadEstudiantes;
-      this.original.estudiantesLibres = nuevosEstudiantesLibres;
+
+      this.original.disponibilidad = this.disponibilidad;
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error.message);
     }
-    return Promise.resolve();
   }
 
   /**
-   * Obtiene los profesor_id de todos los profesores que tienen estudiantes_libres > 0
-   * @returns {Promise<number[]>}
+   * Obtiene los profesores que tienen espacios disponibles
+   * Es decir: donde disponibilidad > proyectosAsignados
+   * Los datos se obtienen de la tabla AsignacionesProfesor
+   * @returns {Promise<Array>}
    */
   static async obtenerProfesoresConEstudiantesLibres() {
-    const { data, error } = await supabase
-      .from("Profesor")
-      .select(`profesor_id,
-        estudiantes_libres`)
-      .gt("estudiantes_libres", 0);
+    try {
+      // Obtenemos TODAS las asignaciones
+      const { data: asignaciones, error } = await supabase
+        .from("AsignacionesProfesor")
+        .select("idProfesor, disponibilidad, asignados");
 
-    if (error) {
+      if (error) {
+        throw error;
+      }
+
+      if (!asignaciones || asignaciones.length === 0) {
+        return [];
+      }
+
+      // Filtramos: disponibilidad > asignados
+      return asignaciones
+        .filter(a => a.disponibilidad > a.asignados)
+        .map(a => ({
+          profesor_id: a.idProfesor,
+          disponibilidad: a.disponibilidad,
+          proyectosAsignados: a.asignados,
+          espaciosLibres: a.disponibilidad - a.asignados
+        }));
+    } catch (error) {
+      console.error("Error en obtenerProfesoresConEstudiantesLibres:", error);
       throw error;
     }
-
-    return data;
   }
 }
 

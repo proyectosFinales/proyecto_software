@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AsignacionesProfesor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .button-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        button {
+            padding: 14px 32px;
+            border: none;
+            border-radius: 6px;
+            background: #10b981;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+        
+        button:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .console {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 20px;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            min-height: 400px;
+            max-height: 700px;
+            overflow-y: auto;
+            border: 2px solid #333;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        
+        .log-info { color: #00ff00; }
+        .log-error { color: #ff4444; }
+        .log-warn { color: #ffaa00; }
+        .log-success { color: #44ff44; }
+        
+        .info-box {
+            background: #f0f9ff;
+            border-left: 4px solid #0ea5e9;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #0c4a6e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Test AsignacionesProfesor</h1>
+        <p class="subtitle">Visualiza todos los datos de la tabla AsignacionesProfesor</p>
+        
+        <div class="info-box">
+            📌 <strong>Qué hace:</strong> Ejecuta un SELECT * a la tabla AsignacionesProfesor 
+            y muestra todos los registros, columnas y datos.
+        </div>
+
+        <div class="button-section">
+            <button onclick="executeTest()">▶️ EJECUTAR TEST</button>
+        </div>
+
+        <div class="console" id="console">
+            <span class="log-info">💾 Consola lista. Haz clic en el botón para ejecutar...</span>
+        </div>
+    </div>
+
+    <script type="module">
+        // Importar el test
+        import { testAsignaciones } from './testAsignaciones.js';
+
+        // Capturar todos los console.log y mostrarlos en la página
+        const consoleElement = document.getElementById('console');
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalTable = console.table;
+
+        function appendToConsole(text, className = 'log-info') {
+            const span = document.createElement('span');
+            span.className = className;
+            span.textContent = text + '\n';
+            consoleElement.appendChild(span);
+            consoleElement.scrollTop = consoleElement.scrollHeight;
+        }
+
+        console.log = function(...args) {
+            originalLog(...args);
+            appendToConsole(args.join(' '), 'log-info');
+        };
+
+        console.error = function(...args) {
+            originalError(...args);
+            appendToConsole(args.join(' '), 'log-error');
+        };
+
+        console.table = function(data) {
+            originalTable(data);
+            if (Array.isArray(data)) {
+                appendToConsole('\n📊 TABLA:\n' + JSON.stringify(data, null, 2), 'log-success');
+            }
+        };
+
+        // Función para ejecutar el test
+        window.executeTest = async function() {
+            consoleElement.innerHTML = '';
+            appendToConsole('════════════════════════════════════════', 'log-warn');
+            appendToConsole('INICIANDO TEST: SELECT * FROM AsignacionesProfesor', 'log-warn');
+            appendToConsole('════════════════════════════════════════\n', 'log-warn');
+            
+            try {
+                await testAsignaciones();
+            } catch (error) {
+                appendToConsole('❌ Error: ' + error.message, 'log-error');
+                appendToConsole(error.stack, 'log-error');
+            }
+        };
+
+        // Mensaje inicial
+        console.log('%c✅ Página cargada correctamente', 'font-size: 14px; color: #10b981; font-weight: bold');
+    </script>
+</body>
+</html>

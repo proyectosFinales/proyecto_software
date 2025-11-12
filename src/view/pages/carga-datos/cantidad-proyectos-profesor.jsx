@@ -33,7 +33,7 @@ const CantidadProyectosProfesor = () => {
 
   // Actualiza en tiempo real la propiedad "cantidadEstudiantes"
   const actualizarCantidad = useCallback((indice, evento) => {
-    profesores[indice].cantidadEstudiantes = Number(evento.target.value);
+    profesores[indice].disponibilidad = Number(evento.target.value);
     setProfesores([...profesores]);
   }, [profesores]);
 
@@ -105,7 +105,10 @@ const CantidadProyectosProfesor = () => {
                       Profesor
                     </th>
                     <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
-                      Cantidad Estudiantes
+                      Disponibilidad
+                    </th>
+                    <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
+                      Proyectos Asignados
                     </th>
                   </tr>
                 </thead>
@@ -124,11 +127,14 @@ const CantidadProyectosProfesor = () => {
                           className="w-16 sm:w-20 px-2 sm:px-3 py-1 sm:py-2 border rounded-md 
                                    focus:outline-none focus:ring-2 focus:ring-blue-500 
                                    text-xs sm:text-sm"
-                          value={profesor.cantidadEstudiantes}
+                          value={profesor.disponibilidad}
                           onChange={(e) => actualizarCantidad(i, e)}
                           min="0"
                           max="20"
                         />
+                      </td>
+                      <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                        {profesor.proyectosAsignados}
                       </td>
                     </tr>
                   ))}
