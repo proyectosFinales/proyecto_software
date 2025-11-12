@@ -104,38 +104,48 @@ function EdicionAsignacionProyectos() {
    * @param {string} profesorId
    */
   const handleAssign = async (proyectoId, profesorId, estudianteId) => {
-    if(!profesorId) return;
+    if (!profesorId) return;
     try {
       const profesorAnteriorId = proyectos.find(proj => proj.id === proyectoId).profesor_id;
 
+      // Obtener datos actuales de asignaciones del profesor
+      const profActual = profesores.find(p => p.profesor_id === profesorId);
+      const asignados = profActual?.original?.proyectosAsignados ?? 0;
+      const disponibilidad = profActual?.original?.disponibilidad ?? 0;
+      if (asignados + 1 > disponibilidad) {
+        errorToast("No se puede asignar: el profesor ya alcanzó su disponibilidad máxima.");
+        return;
+      }
+
+      // Actualizar el proyecto con el nuevo profesor
       const { proyectoError } = await supabase
         .from("Proyecto")
         .update({ profesor_id: profesorId })
         .eq("id", proyectoId);
-
       if (proyectoError) throw proyectoError;
 
+      // Actualizar el estudiante con el nuevo asesor
       const { estudianteError } = await supabase
         .from("Estudiante")
         .update({ asesor: profesorId })
         .eq("estudiante_id", estudianteId);
-      
       if (estudianteError) throw estudianteError;
 
-      const { profesorError } = await supabase
-        .from("Profesor")
-        .update({ estudiantes_libres: profesores.find(p => p.profesor_id === profesorId).original.estudiantesLibres - 1 })
-        .eq("profesor_id", profesorId);
-      
-      if (profesorError) throw profesorError;
+      // Sumar 1 a asignados en AsignacionesProfesor para el nuevo profesor
+      const { error: asignacionError } = await supabase
+        .from("AsignacionesProfesor")
+        .update({ asignados: asignados + 1 })
+        .eq("idProfesor", profesorId);
+      if (asignacionError) throw asignacionError;
 
+      // Si había un profesor anterior, restar 1 a asignados en AsignacionesProfesor
       if (profesorAnteriorId) {
-        const { error: profesorAnteriorError } = await supabase
-          .from("Profesor")
-          .update({ estudiantes_libres: profesores.find(p => p.profesor_id === profesorAnteriorId).original.estudiantesLibres + 1 })
-          .eq("profesor_id", profesorAnteriorId);
-
-        if (profesorAnteriorError) throw profesorAnteriorError;
+        const profAnterior = profesores.find(p => p.profesor_id === profesorAnteriorId);
+        const asignadosAnterior = profAnterior?.original?.proyectosAsignados ?? 0;
+        await supabase
+          .from("AsignacionesProfesor")
+          .update({ asignados: Math.max(0, asignadosAnterior - 1) })
+          .eq("idProfesor", profesorAnteriorId);
       }
 
       setProyectos((prevProyectos) =>
@@ -145,22 +155,21 @@ function EdicionAsignacionProyectos() {
       );
 
       setProfesores((prevProfesores) =>
-      prevProfesores.map((prof) => {
-        if (prof.profesor_id === profesorId) {
-          return { ...prof, original: { ...prof.original, estudiantesLibres: prof.original.estudiantesLibres - 1 } };
-        } else if (prof.profesor_id === profesorAnteriorId) {
-          return { ...prof, original: { ...prof.original, estudiantesLibres: prof.original.estudiantesLibres + 1 } };
-        } else {
-          return prof;
-        }
-      })
-    );
-
-
+        prevProfesores.map((prof) => {
+          if (prof.profesor_id === profesorId) {
+            return { ...prof, original: { ...prof.original, proyectosAsignados: asignados + 1 } };
+          } else if (prof.profesor_id === profesorAnteriorId) {
+            return { ...prof, original: { ...prof.original, proyectosAsignados: Math.max(0, (prof.original.proyectosAsignados ?? 0) - 1) } };
+          } else {
+            return prof;
+          }
+        })
+      );
 
       alert("Proyecto asignado exitosamente");
     } catch (err) {
       console.error("handleAssign error:", err);
+      errorToast("Error al asignar el proyecto");
     }
   };
 
@@ -170,26 +179,28 @@ function EdicionAsignacionProyectos() {
    */
   const handleUnassign = async (proyectoId, estudianteId, profesorId) => {
     try {
-      const { error : proyectoError } = await supabase
+      // Obtener datos actuales de asignaciones del profesor
+      const profActual = profesores.find(p => p.profesor_id === profesorId);
+      const asignados = profActual?.original?.proyectosAsignados ?? 0;
+
+      const { error: proyectoError } = await supabase
         .from("Proyecto")
         .update({ profesor_id: null })
         .eq("id", proyectoId);
-
       if (proyectoError) throw proyectoError;
 
       const { estudianteError } = await supabase
         .from("Estudiante")
-        .update({ asesor: null }) 
+        .update({ asesor: null })
         .eq("estudiante_id", estudianteId);
-      
       if (estudianteError) throw estudianteError;
 
-      const { profesorError } = await supabase
-        .from("Profesor")
-        .update({ estudiantes_libres: profesores.find(p => p.profesor_id === profesorId).original.estudiantesLibres + 1 })
-        .eq("profesor_id", profesorId);
-      
-      if (profesorError) throw profesorError;
+      // Restar 1 a asignados en AsignacionesProfesor para el profesor
+      const { error: asignacionError } = await supabase
+        .from("AsignacionesProfesor")
+        .update({ asignados: Math.max(0, asignados - 1) })
+        .eq("idProfesor", profesorId);
+      if (asignacionError) throw asignacionError;
 
       setProyectos((prevProyectos) =>
         prevProyectos.map((proj) =>
@@ -199,10 +210,12 @@ function EdicionAsignacionProyectos() {
 
       setProfesores((prevProfesores) =>
         prevProfesores.map((prof) =>
-          prof.profesor_id === profesorId ?  { ...prof, original: {...prof.original, estudiantesLibres: prof.original.estudiantesLibres - 1} } : prof
+          prof.profesor_id === profesorId
+            ? { ...prof, original: { ...prof.original, proyectosAsignados: Math.max(0, (prof.original.proyectosAsignados ?? 0) - 1) } }
+            : prof
         )
       );
-      
+
       alert("Proyecto desasignado exitosamente");
     } catch (err) {
       console.error("handleUnassign error:", err);
