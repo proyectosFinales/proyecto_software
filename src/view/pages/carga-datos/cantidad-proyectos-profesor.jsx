@@ -16,6 +16,7 @@ const CantidadProyectosProfesor = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [proyectossinProfesor, setProyectossinProfesor] = useState(0);
+  const [mostrarAlerta, setMostrarAlerta] = useState(false);
 
   useEffect(() => {
     console.log('CantidadProyectosProfesor: useEffect running');
@@ -46,7 +47,6 @@ const CantidadProyectosProfesor = () => {
     profesores[indice].disponibilidad = Number(evento.target.value);
     console.log(profesores[indice].disponibilidad);
     setProfesores([...profesores]);
-    guardarCambios();
   }, [profesores]);
 
   // Guarda cambios en BD (llama p.actualizarCantidadEstudiantes())
@@ -60,6 +60,13 @@ const CantidadProyectosProfesor = () => {
       "Cambios guardados.",
       "Error en guardado de cambios"
     );
+    
+    // Mostrar alerta visual
+    setMostrarAlerta(true);
+    // Ocultar alerta después de 5 segundos
+    setTimeout(() => {
+      setMostrarAlerta(false);
+    }, 5000);
   }, [profesores]);
 
   if (isLoading) {
@@ -93,6 +100,24 @@ const CantidadProyectosProfesor = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
+      {/* Alerta de guardado */}
+      {mostrarAlerta && (
+        <div className="fixed top-4 right-4 z-50 animate-in slide-in-from-top-2 duration-300">
+          <div className="bg-green-50 border border-green-200 rounded-lg shadow-lg p-4 flex items-center space-x-3 max-w-sm">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-green-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-green-800">
+                ✓ Cambios guardados
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <Header title="Cantidad de Proyectos por Profesor" />
 
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
