@@ -87,3 +87,35 @@ const getNombreSemestre = (fechaInicio) => {
     return `Semestre II ${year}`;
   }
 }
+
+/**
+ * Hace la consulta a la BD para obtener los tipos de eventos.
+ * @returns los nombres de los tipos de eventos.
+ */
+export const getTipoEventos = async () => {
+  const { data, error } = await supabase
+    .from('TipoEvento')
+    .select('nombre');
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return data;
+};
+
+/**
+ * Inserta un nuevo tipo de evento en la BD.
+ * @param {*} evento El nuevo evento.
+ * @returns La data del select.
+ */
+export const addTipoEvento = async (evento) => {
+  const { data, error } = await supabase
+    .from('TipoEvento')
+    .insert([evento])
+    .select('nombre');
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};

@@ -3,27 +3,16 @@ import {useState, useEffect} from "react";
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
-import { getEventos, addEvento, deleteEvento, updateEvento } from '../../controller/Calendario';
+import { getEventos, addEvento, deleteEvento, updateEvento, getTipoEventos, addTipoEvento } from '../../controller/Calendario';
+import { generarPDFCalendario } from '../../controller/DescargarPDF';
 
 const Calendario = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const eventOptions = [
-    { value: '', label: 'Seleccione un evento' },
-    { value: 'Entrega Avance 1', label: 'Entrega Avance 1' },
-    { value: 'Entrega Avance 2', label: 'Entrega Avance 2' },
-    { value: 'Entrega Avance 3', label: 'Entrega Avance 3' },
-    { value: 'Plazo para establecer disponibilidad', label: 'Plazo para establecer disponibilidad' },
-    { value: 'Defensas', label: 'Defensas' },
-    { value: 'Actas', label: 'Actas' },
-    { value: 'Semestre', label: 'Semestre' },
-    { value: 'Informe Final', label: 'Informe Final' },
-    { value: 'Informe Preliminar', label: 'Informe Preliminar' },
-    { value: 'Informe a Coordinación', label: 'Informe a Coordinación' },
-    { value: 'Informe Completo para Actas', label: 'Informe Completo para Actas' }
-  ]
   const [events, setEvents] = useState([]);
   const [editableEvent, setEditableEvent] = useState(null);
   const [newEvent, setNewEvent] = useState({ nombre: '', fechaInicio: '', fechaFin: '' });
+  const [eventOptions2, setEventOptions2] = useState([]);
+  const [createEvent, setCreateEvent] = useState({ nombre: '' });
 
   useEffect(() => {
     const fetchEventos = async () => {
@@ -40,7 +29,17 @@ const Calendario = () => {
       }
     };
 
+    //Llenamos los tipos de eventos para el combobo
+    const pedirEventos = async () => {
+      const tipos = await getTipoEventos();
+      setEventOptions2(tipos.map(event => ({
+        value: event.nombre,
+        label: event.nombre
+      })));
+    }
+
     fetchEventos();
+    pedirEventos();
   }, []);
   
   const handleInputChange = (field, value) => {
@@ -121,11 +120,99 @@ const Calendario = () => {
     }
   };
 
+  const handleCreateEvent = async () => {
+    try {
+      if(createEvent.nombre === '' || createEvent.nombre === ' ') {
+        alert("El nombre no puede estar vacio.");
+        return;
+      }
+      const data = await addTipoEvento({ nombre:createEvent.nombre });
+      alert("Evento creado con exito.");
+      window.location.reload();
+    } catch (error) {
+      alert(`Error al crear tipo de evento: ${error.message}`);
+    }
+  };
+
+  const handleCreateEventChange = (field, value) => {
+    if(field === 'nombreNuevoEvento'){
+      setCreateEvent({ nombre: value});
+      console.log("Cambio el input: ", value);
+    }
+  };
+
+  const handleReporteCalendario = () => {
+    generarPDFCalendario(events);
+  }
+
   return (
     <div>
       <Header title="Calendario" />
       <SettingsCoordinador show={isMenuOpen} />
       <div className="content-container">
+
+        <div className="form-container">
+          <h3>Crear Evento</h3>
+          <div className="input-row">
+            <div>
+              <label htmlFor="nombreNuevoEvento">Nombre del evento</label>
+              <input
+                name="nombreNuevoEvento"
+                type="text"
+                className="input-field-text"
+                placeholder="Digite el nuevo evento"
+                onChange={(e) => handleCreateEventChange('nombreNuevoEvento', e.target.value)}
+              />
+            </div>
+            <button className="btn-create-event" onClick={handleCreateEvent}>Crear evento</button>
+          </div>
+          <h3>Agregar Nuevo Evento</h3>
+          <div className="input-container-gestion">
+            <select
+              name="nombre"
+              className="input-field-gestion"
+              value={newEvent.nombre}
+              onChange={(e) => handleNewEventChange('nombre', e.target.value)}
+            >
+              <option value="">Seleccione un evento</option>
+              {eventOptions2.map(option => (
+                <option key={option.value} value={option.value}>{option.label}</option>
+              ))}
+            </select>
+          </div>
+          <div className="input-row">
+            <div>
+              <label htmlFor="fechaInicio">Fecha Inicio</label>
+              <input
+                type="date"
+                name="fechaInicio"
+                className="input-field-fechas"
+                value={newEvent.fechaInicio}
+                onChange={(e) => handleNewEventChange('fechaInicio', e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="fechaFin">Fecha Fin</label>
+              <input
+                type="date"
+                name="fechaFin"
+                className="input-field-fechas"
+                value={newEvent.fechaFin}
+                min={newEvent.fechaInicio}
+                onChange={(e) => handleNewEventChange('fechaFin', e.target.value)}
+              />
+            </div>
+            <button className="btn-add-event" onClick={handleAddEvent}>Agregar Evento</button>
+            <button
+              className="btn-add-event bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              onClick={handleReporteCalendario}
+            >
+              Generar Reporte
+            </button>
+          </div>
+        </div>
+
+
         <div className="table-container">
           <table className="calendario-table">
             <thead>
@@ -145,7 +232,7 @@ const Calendario = () => {
                         value={editableEvent.nombre}
                         onChange={(e) => handleInputChange('nombre', e.target.value)}
                       >
-                        {eventOptions.map(option => (
+                        {eventOptions2.map(option => (
                           <option key={option.value} value={option.value}>{option.label}</option>
                         ))}
                       </select>
@@ -195,46 +282,8 @@ const Calendario = () => {
             </tbody>
           </table>
         </div>
-        <div className="form-container">
-          <h3>Agregar Nuevo Evento</h3>
-          <div className="input-container-gestion">
-            <select
-              name="nombre"
-              className="input-field-gestion"
-              value={newEvent.nombre}
-              onChange={(e) => handleNewEventChange('nombre', e.target.value)}
-            >
-              <option value="">Seleccione un evento</option>
-              {eventOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-          </div>
-          <div className="input-row">
-            <div className="input-container-gestion">
-              <label htmlFor="fechaInicio">Fecha Inicio</label>
-              <input
-                type="date"
-                name="fechaInicio"
-                className="input-field-gestion"
-                value={newEvent.fechaInicio}
-                onChange={(e) => handleNewEventChange('fechaInicio', e.target.value)}
-              />
-            </div>
-            <div className="input-container-gestion">
-              <label htmlFor="fechaFin">Fecha Fin</label>
-              <input
-                type="date"
-                name="fechaFin"
-                className="input-field-gestion"
-                value={newEvent.fechaFin}
-                min={newEvent.fechaInicio}
-                onChange={(e) => handleNewEventChange('fechaFin', e.target.value)}
-              />
-            </div>
-          </div>
-          <button className="btn-add-event" onClick={handleAddEvent}>Agregar Evento</button>
-        </div>
+        
+
       </div>
       <Footer />
     </div>
