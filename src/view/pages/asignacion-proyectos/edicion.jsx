@@ -33,9 +33,10 @@ function EdicionAsignacionProyectos() {
   const [profesores, setProfesores] = useState([]);
   const [filteredProfesores, setFilteredProfesores] = useState([]);
   const [loading, setLoading] = useState(true);
-  // Filtros de semestre y año
+  // Filtros de semestre, año y estado
   const [filtroSemestre, setFiltroSemestre] = useState(semestreActual);
   const [filtroAno, setFiltroAno] = useState(anoActual);
+  const [filtroEstado, setFiltroEstado] = useState('Todos');
 
   // Estado para ordenamiento de columnas
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -281,11 +282,12 @@ function EdicionAsignacionProyectos() {
     );
   }
 
-  // Filtros de semestre y año sobre los proyectos
+  // Filtros de semestre, año y estado sobre los proyectos
   let proyectosFiltrados = proyectos.filter(
     (proy) =>
       (filtroSemestre === 'Todos' || proy.semestre === Number(filtroSemestre)) &&
-      (filtroAno === 'Todos' || proy.año === Number(filtroAno))
+      (filtroAno === 'Todos' || proy.año === Number(filtroAno)) &&
+      (filtroEstado === 'Todos' || proy.estado === filtroEstado)
   );
 
   // Ordenar proyectos según sortConfig
@@ -330,7 +332,7 @@ function EdicionAsignacionProyectos() {
       <HeaderCoordinador title="Asignación de Proyectos a Profesores" />
       <main className="flex-grow p-4 sm:p-8">
         <h1 className="text-2xl font-semibold mb-4">Lista de Proyectos</h1>
-        {/* Filtros de semestre y año */}
+        {/* Filtros de semestre, año y estado */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">Semestre</label>
@@ -354,6 +356,20 @@ function EdicionAsignacionProyectos() {
               {listaAnios.map((anio) => (
                 <option key={anio} value={anio}>{anio === 'Todos' ? 'Todos' : anio}</option>
               ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Estado</label>
+            <select
+              className="border rounded px-2 py-1 min-w-[120px]"
+              value={filtroEstado}
+              onChange={(e) => setFiltroEstado(e.target.value)}
+            >
+              <option value="Todos">Todos</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Suspendido">Suspendido</option>
+              <option value="Aprobado">Aprobado</option>
+              <option value="Reprobado">Reprobado</option>
             </select>
           </div>
         </div>
@@ -487,12 +503,12 @@ function EdicionAsignacionProyectos() {
                               Aprobar
                             </button>
                             <button
-                              onClick={() => handleEstadoChange(proyecto.id, 'Reprobado', proyecto.estudiante_id)}
+                              onClick={() => handleEstadoChange(proyecto.id, 'Suspendido', proyecto.estudiante_id)}
                               className="px-2 py-1 bg-red-500 text-white rounded"
                               disabled={!esPeriodoActual}
                               style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
                             >
-                              Reprobar
+                              Suspender
                             </button>
                             <select
                               className="border rounded px-2 py-1"
