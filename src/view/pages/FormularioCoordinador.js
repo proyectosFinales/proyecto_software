@@ -59,6 +59,7 @@ const FormularioCoordinador = () => {
   const [proyecto, setProyecto] = useState('');
   const [estado, setEstado] = useState('');
   const [categoria, setCategoria] = useState('');
+  const [cantonEstudiante, setCantonEstudiante] = useState('');
 
 
   const [semestre, setSemestre] = useState('');
@@ -190,11 +191,12 @@ const FormularioCoordinador = () => {
       }
       // Rellenar campos de estudiante (read-only)
       if (data.Estudiante?.Usuario) {
-        setCarnet(data.Estudiante.carnet || '');
-        setNombre(data.Estudiante.Usuario.nombre || '');
-        setCorreo(data.Estudiante.Usuario.correo || '');
-        setTelefono(data.Estudiante.Usuario.telefono || '');
-        setSede(data.Estudiante.Usuario.sede || '');
+  setCarnet(data.Estudiante.carnet || '');
+  setNombre(data.Estudiante.Usuario.nombre || '');
+  setCorreo(data.Estudiante.Usuario.correo || '');
+  setTelefono(data.Estudiante.Usuario.telefono || '');
+  setSede(data.Estudiante.Usuario.sede || '');
+  setCantonEstudiante(data.Estudiante.Usuario.canton || '');
       }
 
       // (nuevo)
@@ -266,10 +268,11 @@ const FormularioCoordinador = () => {
 
       // 2. Si no hay por categoría, filtrar por cantón del estudiante (Usuario)
       if (candidatos.length === 0) {
-        // Obtener cantón del estudiante desde Usuario
-        const cantonEstudiante = data.Estudiante?.Usuario?.canton || '';
+        // Usar el estado cantonEstudiante guardado al consultar el anteproyecto
         candidatos = profesoresDisponibles.filter(p => {
           // El cantón del profesor está en p.Usuario.canton
+          console.log("Filtrando por cantón:", cantonEstudiante);
+          console.log("Profesor:", p.Usuario ? p.Usuario.canton : "Sin usuario"); 
           return p.Usuario && p.Usuario.canton && p.Usuario.canton === cantonEstudiante;
         });
       }
