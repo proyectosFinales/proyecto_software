@@ -33,6 +33,9 @@ function EdicionAsignacionProyectos() {
   const [profesores, setProfesores] = useState([]);
   const [filteredProfesores, setFilteredProfesores] = useState([]);
   const [loading, setLoading] = useState(true);
+  // Filtros de semestre y año
+  const [filtroSemestre, setFiltroSemestre] = useState(semestreActual);
+  const [filtroAno, setFiltroAno] = useState(anoActual);
 
   /**
    * Carga la lista de proyectos y profesores.
@@ -50,6 +53,8 @@ function EdicionAsignacionProyectos() {
             estado,
             fecha_inicio,
             fecha_fin,
+            semestre,
+            año,
             Estudiante:estudiante_id (
               estudiante_id,
               carnet,
@@ -273,12 +278,51 @@ function EdicionAsignacionProyectos() {
     );
   }
 
+  // Filtros de semestre y año sobre los proyectos
+  const proyectosFiltrados = proyectos.filter(
+    (proy) =>
+      (filtroSemestre ? proy.semestre === Number(filtroSemestre) : true) &&
+      (filtroAno ? proy.año === Number(filtroAno) : true)
+  );
+
+  // Filtro de semestre: solo 1 y 2
+  const listaSemestres = [1, 2];
+  // Filtro de año: últimos 10 años incluyendo el actual
+  const listaAnios = Array.from({ length: 10 }, (_, i) => anoActual - i);
+
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
       <HeaderCoordinador title="Asignación de Proyectos a Profesores" />
       <main className="flex-grow p-4 sm:p-8">
         <h1 className="text-2xl font-semibold mb-4">Lista de Proyectos</h1>
-        {proyectos.length === 0 ? (
+        {/* Filtros de semestre y año */}
+        <div className="flex flex-wrap gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Semestre</label>
+            <select
+              className="border rounded px-2 py-1 min-w-[100px]"
+              value={filtroSemestre}
+              onChange={(e) => setFiltroSemestre(e.target.value)}
+            >
+              {listaSemestres.map((sem) => (
+                <option key={sem} value={sem}>{sem}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Año</label>
+            <select
+              className="border rounded px-2 py-1 min-w-[100px]"
+              value={filtroAno}
+              onChange={(e) => setFiltroAno(e.target.value)}
+            >
+              {listaAnios.map((anio) => (
+                <option key={anio} value={anio}>{anio}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+        {proyectosFiltrados.length === 0 ? (
           <p className="bg-white p-4 shadow rounded">No existen proyectos.</p>
         ) : (
           <div className="overflow-x-auto">
@@ -290,6 +334,8 @@ function EdicionAsignacionProyectos() {
                   <th className="p-3 text-left">Empresa</th>
                   <th className="p-3 text-left">Departamento</th>
                   <th className="p-3 text-left">Categoría de anteproyecto</th>
+                  <th className="p-3 text-left">Semestre</th>
+                  <th className="p-3 text-left">Año</th>
                   <th className="p-3 text-left">Estado de proyecto</th>
                   <th className="p-3 text-left">Profesor</th>
                   <th className="p-3 text-left">Categoría de profesor</th>
@@ -297,7 +343,7 @@ function EdicionAsignacionProyectos() {
                 </tr>
               </thead>
               <tbody>
-                {proyectos.map((proyecto) => {
+                {proyectosFiltrados.map((proyecto) => {
                   const assignedProf = profesores.find(
                     (prof) => prof.profesor_id === proyecto.profesor_id
                   );
@@ -317,6 +363,12 @@ function EdicionAsignacionProyectos() {
                       </td>
                       <td className="p-3 text-sm text-gray-700">
                         {proyecto.Anteproyecto.Categoria?.nombre ?? "N/A"}
+                      </td>
+                      <td className="p-3 text-sm text-gray-700">
+                        {proyecto.semestre}
+                      </td>
+                      <td className="p-3 text-sm text-gray-700">
+                        {proyecto.año}
                       </td>
                       <td className="p-3 text-sm text-gray-700">
                         {proyecto.estado}
