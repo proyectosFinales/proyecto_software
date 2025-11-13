@@ -13,7 +13,10 @@ import Footer from "../../components/Footer";
 const CantidadProyectosProfesor = () => {
   console.log('CantidadProyectosProfesor: Component rendering');
   const [profesores, setProfesores] = useState([]);
-  const [filtroSemestre, setFiltroSemestre] = useState("");
+  const [filtroSemestre, setFiltroSemestre] = useState(() => {
+    const mes = new Date().getMonth() + 1;
+    return mes <= 7 ? "1" : "2";
+  });
   const [filtroAno, setFiltroAno] = useState(() => String(new Date().getFullYear()));
   const [profesoresFiltrados, setProfesoresFiltrados] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -156,13 +159,14 @@ const CantidadProyectosProfesor = () => {
           </div>
 
           {/* Filtros */}
-          <div className="mb-2 flex flex-wrap gap-4">
+          <div className="mb-2 flex flex-wrap gap-4 items-end">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
+              <label className="block text-base font-medium text-gray-700 mb-1">Semestre</label>
               <select
                 value={filtroSemestre}
                 onChange={e => setFiltroSemestre(e.target.value)}
-                className="px-3 py-2 border rounded-lg"
+                className="px-3 py-2 border rounded-lg text-base min-w-[90px] text-center"
+                style={{ fontSize: '1.05rem', height: '42px', maxWidth: '120px' }}
               >
                 <option value="">Todos</option>
                 <option value="1">1</option>
@@ -170,11 +174,12 @@ const CantidadProyectosProfesor = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Año</label>
+              <label className="block text-base font-medium text-gray-700 mb-1">Año</label>
               <select
                 value={filtroAno}
                 onChange={e => setFiltroAno(e.target.value)}
-                className="px-3 py-2 border rounded-lg"
+                className="px-3 py-2 border rounded-lg text-base min-w-[100px] text-center"
+                style={{ fontSize: '1.05rem', height: '42px', maxWidth: '130px' }}
               >
                 <option value="">Todos</option>
                 {Array.from({length: 10}, (_, i) => new Date().getFullYear() - i).map(ano => (
@@ -182,8 +187,41 @@ const CantidadProyectosProfesor = () => {
                 ))}
               </select>
             </div>
+            <button
+              className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+              style={{ minHeight: '42px' }}
+              onClick={() => {
+                if (profesoresFiltrados.length === 0) return;
+                const encabezados = [
+                  'ID Profesor', 'Profesor', 'Disponibilidad', 'Proyectos Asignados', 'Semestre', 'Año'
+                ];
+                const filas = profesoresFiltrados.map(p => [
+                  p.profesor_id,
+                  p.nombre,
+                  p.disponibilidad,
+                  p.proyectosAsignados,
+                  p.semestre,
+                  p.año
+                ]);
+                const csvContent = [
+                  encabezados.join(','),
+                  ...filas.map(fila => fila.map(valor => `"${String(valor).replace(/"/g, '""')}` + '"').join(','))
+                ].join('\r\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', 'reporte_cantidad_proyectos_profesor.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+              }}
+              disabled={profesoresFiltrados.length === 0}
+            >
+              Descargar reporte CSV
+            </button>
           </div>
-
           {/* Mensaje de advertencia si el filtro no es el año y semestre actual */}
           {(() => {
             const fecha = new Date();

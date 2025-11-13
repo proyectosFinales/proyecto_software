@@ -377,7 +377,7 @@ function EdicionAsignacionProyectos() {
       <main className="flex-grow p-4 sm:p-8">
         <h1 className="text-2xl font-semibold mb-4">Lista de Proyectos</h1>
         {/* Filtros de semestre, año y estado */}
-        <div className="flex flex-wrap gap-4 mb-4">
+  <div className="flex flex-wrap gap-4 mb-4 items-end">
           <div>
             <label className="block text-sm font-medium text-gray-700">Semestre</label>
             <select
@@ -416,8 +416,6 @@ function EdicionAsignacionProyectos() {
               <option value="Reprobado">Reprobado</option>
             </select>
           </div>
-        </div>
-        <div className="flex flex-wrap gap-4 mb-4">
           <button
             className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
             onClick={descargarCSV}
@@ -483,7 +481,7 @@ function EdicionAsignacionProyectos() {
                     </span>
                   </th>
                   <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('estado')}>
-                    Estado de proyecto&nbsp;
+                    Estatus del proyecto&nbsp;
                     <span style={{fontSize: '0.9em'}}>
                       <span style={{color: sortConfig.key === 'estado' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'estado' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
                       <span style={{color: sortConfig.key === 'estado' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'estado' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>

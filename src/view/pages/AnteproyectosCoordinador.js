@@ -5,7 +5,7 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { descargarAnteproyecto } from '../../controller/DescargarPDF';
 import { errorToast } from '../components/toast';
-import * as XLSX from 'xlsx';
+
 
 
 const AnteproyectosCoordinador = () => {
@@ -58,46 +58,83 @@ const AnteproyectosCoordinador = () => {
   };
 
   const handleGenerateReport = () => {
-    if (anteproyectos.length === 0) {
+    if (sortedAnteproyectos.length === 0) {
       alert('No hay anteproyectos para generar el reporte');
       return;
     }
-
-    const dataToExport = anteproyectos.map((p) => ({
-      // El orden nuevo solicitado
-      ID: p.id,
-      'Estatus del proyecto': p.estado,
-      'Sede': p.Estudiante.Usuario.sede,
-      'Nombre del estudiante': p.Estudiante?.Usuario?.nombre || 'N/A',
-      'Carnet': p.Estudiante.carnet,
-      'Teléfono del estudiante': p.Estudiante.Usuario.telefono,
-      'Correo del estudiante': p.Estudiante.Usuario.correo,
-      'Nombre de la empresa': p.Empresa.nombre,
-      'Tipo de empresa': p.Empresa.tipo,
-      'Actividad de la empresa': p.Empresa.actividad,
-      'Ubicación de la empresa (provincia)': p.Empresa.provincia,
-      'Ubicación de la empresa (cantón)': p.Empresa.canton,
-      'Ubicación de la empresa (distrito)': p.Empresa.distrito,
-      'Nombre del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.nombre,
-      'Puesto que desempeña el asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.departamento,
-      'Teléfono del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.telefono,
-      'Correo del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.correo,
-      'Nombre del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.nombre,
-      'Teléfono del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.telefono,
-      'Correo del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.correo,
-      'Contexto': p.contexto,
-      'Justificación': p.justificacion,
-      'Síntomas': p.sintomas,
-      'Efectos o impactos': p.impacto,
-      'Departamento donde realizará el proyecto': p.departamento,
-      'Tipo de proyecto': p.tipo,
-      'Categoría del proyecto': p.Categoria.nombre,
-      'Observaciones': p.observaciones,
-    })); 
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Anteproyectos');
-    XLSX.writeFile(workbook, 'Reporte_Anteproyectos.xlsx');
+    const encabezados = [
+      'ID',
+      'Estatus del proyecto',
+      'Sede',
+      'Nombre del estudiante',
+      'Carnet',
+      'Teléfono del estudiante',
+      'Correo del estudiante',
+      'Nombre de la empresa',
+      'Tipo de empresa',
+      'Actividad de la empresa',
+      'Ubicación de la empresa (provincia)',
+      'Ubicación de la empresa (cantón)',
+      'Ubicación de la empresa (distrito)',
+      'Nombre del asesor industrial',
+      'Puesto que desempeña el asesor industrial',
+      'Teléfono del asesor industrial',
+      'Correo del asesor industrial',
+      'Nombre del contacto de recursos humanos',
+      'Teléfono del contacto de recursos humanos',
+      'Correo del contacto de recursos humanos',
+      'Contexto',
+      'Justificación',
+      'Síntomas',
+      'Efectos o impactos',
+      'Departamento donde realizará el proyecto',
+      'Tipo de proyecto',
+      'Categoría del proyecto',
+      'Observaciones',
+    ];
+    const filas = sortedAnteproyectos.map((p) => [
+      p.id,
+      p.estado,
+      p.Estudiante?.Usuario?.sede || '',
+      p.Estudiante?.Usuario?.nombre || '',
+      p.Estudiante?.carnet || '',
+      p.Estudiante?.Usuario?.telefono || '',
+      p.Estudiante?.Usuario?.correo || '',
+      p.Empresa?.nombre || '',
+      p.Empresa?.tipo || '',
+      p.Empresa?.actividad || '',
+      p.Empresa?.provincia || '',
+      p.Empresa?.canton || '',
+      p.Empresa?.distrito || '',
+      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.nombre || '',
+      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.departamento || '',
+      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.telefono || '',
+      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.correo || '',
+      p.AnteproyectoContacto?.[0]?.RRHH?.nombre || '',
+      p.AnteproyectoContacto?.[0]?.RRHH?.telefono || '',
+      p.AnteproyectoContacto?.[0]?.RRHH?.correo || '',
+      p.contexto || '',
+      p.justificacion || '',
+      p.sintomas || '',
+      p.impacto || '',
+      p.departamento || '',
+      p.tipo || '',
+      p.Categoria?.nombre || '',
+      p.observaciones || '',
+    ]);
+    const csvContent = [
+      encabezados.join(','),
+      ...filas.map(fila => fila.map(valor => `"${String(valor).replace(/"/g, '""')}` + '"').join(','))
+    ].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'Reporte_Anteproyectos.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -315,7 +352,8 @@ const AnteproyectosCoordinador = () => {
       <Header title="Anteproyectos" />
 
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
-        {/* Search & Report */}
+
+        {/* Search */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
           <input
             type="text"
@@ -324,15 +362,9 @@ const AnteproyectosCoordinador = () => {
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <button
-            onClick={handleGenerateReport}
-            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
-          >
-            Generar Reporte
-          </button>
         </div>
 
-        {/* Filtros */}
+        {/* Filtros y botón de reporte */}
         <div className="flex flex-wrap gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium mb-1">Semestre:</label>
@@ -370,6 +402,15 @@ const AnteproyectosCoordinador = () => {
               <option value="Pendiente">Pendiente</option>
               <option value="Correccion">Correccion</option>
             </select>
+          </div>
+          <div className="flex items-end">
+            <button
+              onClick={handleGenerateReport}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+              style={{height: '48px'}}
+            >
+              Descargar reporte CSV
+            </button>
           </div>
         </div>
         {/* Table */}
