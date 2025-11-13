@@ -16,6 +16,7 @@ const AnteproyectosCoordinador = () => {
     return mes <= 7 ? 1 : 2;
   });
   const [filtroAnio, setFiltroAnio] = useState(() => new Date().getFullYear());
+  const [filtroEstado, setFiltroEstado] = useState("");
   const navigate = useNavigate();
 
   //Para ordenar alfabéticamente
@@ -25,11 +26,31 @@ const AnteproyectosCoordinador = () => {
   const anioActual = new Date().getFullYear();
   const listaAnios = Array.from({length: 10}, (_, i) => anioActual - i);
 
+  // Filtrar anteproyectos por semestre, año y estado
   // Filtrar anteproyectos por semestre y año
   const anteproyectosFiltrados = anteproyectos.filter(a => {
     const semestre = a.semestre ?? a.semestre_id;
     const anio = a.año ?? a.anio;
     return String(semestre) === String(filtroSemestre) && String(anio) === String(filtroAnio);
+  });
+
+  // Filtrar por búsqueda
+  const filteredAnteproyectos = anteproyectosFiltrados.filter((anteproyecto) => {
+    const lowerSearchText = searchText.toLowerCase();
+    const estudianteNombre = anteproyecto.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
+    const estado = anteproyecto.estado?.toLowerCase() || '';
+    const empresaNombre = anteproyecto.Empresa?.nombre?.toLowerCase() || '';
+    return (
+      estudianteNombre.includes(lowerSearchText) ||
+      estado.includes(lowerSearchText) ||
+      empresaNombre.includes(lowerSearchText)
+    );
+  });
+
+  // Filtrar por estado
+  const finalAnteproyectos = filteredAnteproyectos.filter((a) => {
+    if (!filtroEstado) return true;
+    return (a.estado?.toLowerCase() || '') === filtroEstado.toLowerCase();
   });
 
   const handleRevisar = (id) => {
@@ -254,27 +275,12 @@ const AnteproyectosCoordinador = () => {
 };
 
 
-  const filteredAnteproyectos = anteproyectos.filter((anteproyecto) => {
-    // Convertimos el texto de búsqueda a minúsculas para hacer una comparación case-insensitive
-    const lowerSearchText = searchText.toLowerCase();
-  
-    // Obtenemos los valores relevantes del anteproyecto
-    const estudianteNombre = anteproyecto.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
-    const estado = anteproyecto.estado?.toLowerCase() || '';
-    const empresaNombre = anteproyecto.Empresa?.nombre?.toLowerCase() || '';
-  
-    // Comprobamos si alguno de estos valores incluye el texto de búsqueda
-    return (
-      estudianteNombre.includes(lowerSearchText) ||
-      estado.includes(lowerSearchText) ||
-      empresaNombre.includes(lowerSearchText)
-    );
-  });
+  // (Eliminado: filtrado duplicado de filteredAnteproyectos)
   
   // Ordenamiento alfabético
   const sortedAnteproyectos = React.useMemo(() => {
-    if (!sortField) return filteredAnteproyectos; // Sin orden
-    return [...filteredAnteproyectos].sort((a, b) => {
+    if (!sortField) return finalAnteproyectos; // Sin orden
+    return [...finalAnteproyectos].sort((a, b) => {
       let aValue = '', bValue = '';
       if (sortField === 'nombre') {
         aValue = a.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
@@ -349,6 +355,20 @@ const AnteproyectosCoordinador = () => {
               {listaAnios.map(anio => (
                 <option key={anio} value={anio}>{anio}</option>
               ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Estado:</label>
+            <select
+              className="border rounded px-4 py-2 text-base min-w-[120px] h-12"
+              value={filtroEstado}
+              onChange={e => setFiltroEstado(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="Aprobado">Aprobado</option>
+              <option value="Reprobado">Reprobado</option>
+              <option value="Pendiente">Pendiente</option>
+              <option value="Correccion">Correccion</option>
             </select>
           </div>
         </div>

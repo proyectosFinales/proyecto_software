@@ -57,6 +57,7 @@ const FormularioCoordinador = () => {
   const [correccionS, setCorrecionS] = useState('');
   const [correccionE, setCorrecionE] = useState('');
   const [proyecto, setProyecto] = useState('');
+  const [estado, setEstado] = useState('');
   const [categoria, setCategoria] = useState('');
 
 
@@ -114,6 +115,7 @@ const FormularioCoordinador = () => {
                 categoria_id,
                 semestre,
                 año,
+                estado,
                 Estudiante:estudiante_id (
                   carnet,
                   id_usuario,
@@ -179,6 +181,7 @@ const FormularioCoordinador = () => {
       setTipoProyecto(data.tipo || '');
       setCategoria(data.Categoria?.nombre || '');
       setObservaciones(data.comentario || '');
+      setEstado(data.estado || '');
       if(data.Proyecto.length === 0){
         setProyecto("empty");
       }
@@ -225,6 +228,7 @@ const FormularioCoordinador = () => {
    */
   async function aprobarAnteproyecto(e) {
     e.preventDefault();
+    if (estado === "Aprobado") return; // Protección extra
     const confirmAprobar = window.confirm("¿Está seguro de APROBAR el anteproyecto?");
     if (!confirmAprobar) return;
 
@@ -234,6 +238,19 @@ const FormularioCoordinador = () => {
       const anoActual = fecha.getFullYear();
       const mes = fecha.getMonth() + 1;
       const semestreActual = mes <= 7 ? 1 : 2;
+
+      // Verificar si ya existe un proyecto para este anteproyecto en el semestre y año actual
+      const { data: proyectosExistentes, error: errorProyectoExistente } = await supabase
+        .from('Proyecto')
+        .select('id')
+        .eq('anteproyecto_id', idAnteproyecto)
+        .eq('semestre', semestreActual)
+        .eq('año', anoActual);
+      if (errorProyectoExistente) throw errorProyectoExistente;
+      if (proyectosExistentes && proyectosExistentes.length > 0) {
+        alert('Ya existe un proyecto para este anteproyecto en el semestre y año actual. No se puede aprobar de nuevo.');
+        return;
+      }
 
       // Obtener profesores con espacios disponibles en semestre y año actual
       const profesoresDisponibles = (await Profesor.obtenerTodos()).filter(
@@ -284,7 +301,6 @@ const FormularioCoordinador = () => {
         .from('AsignacionesProfesor')
         .update({ asignados: profesor.proyectosAsignados + 1 })
         .eq('idProfesor', profesor.profesor_id);
-        console.log(profesor);
       if (updateAsignadosError) throw updateAsignadosError;
 
       for (let i = 0; i < 3; i++)
@@ -928,6 +944,8 @@ const FormularioCoordinador = () => {
           <button
             type="submit"
             className={`${styles.button} ${styles.aprobar}`}
+            disabled={estado === "Aprobado"}
+            style={estado === "Aprobado" ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
           >
             Aprobar
           </button>
@@ -943,6 +961,8 @@ const FormularioCoordinador = () => {
           <button
             className={`${styles.button} ${styles.aprobar}`}
             onClick={paraCorregirAnteproyecto}
+            disabled={estado === "Aprobado"}
+            style={estado === "Aprobado" ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
           >
             Para Corregir
           </button>
@@ -950,6 +970,8 @@ const FormularioCoordinador = () => {
             type="submit"
             className={`${styles.button} ${styles.reprobar}`}
             onClick={reprobarAnteproyecto}
+            disabled={estado === "Aprobado"}
+            style={estado === "Aprobado" ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
           >
             Reprobar
           </button>

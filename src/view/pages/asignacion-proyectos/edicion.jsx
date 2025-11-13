@@ -37,6 +37,9 @@ function EdicionAsignacionProyectos() {
   const [filtroSemestre, setFiltroSemestre] = useState(semestreActual);
   const [filtroAno, setFiltroAno] = useState(anoActual);
 
+  // Estado para ordenamiento de columnas
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
   /**
    * Carga la lista de proyectos y profesores.
    */
@@ -279,16 +282,48 @@ function EdicionAsignacionProyectos() {
   }
 
   // Filtros de semestre y año sobre los proyectos
-  const proyectosFiltrados = proyectos.filter(
+  let proyectosFiltrados = proyectos.filter(
     (proy) =>
-      (filtroSemestre ? proy.semestre === Number(filtroSemestre) : true) &&
-      (filtroAno ? proy.año === Number(filtroAno) : true)
+      (filtroSemestre === 'Todos' || proy.semestre === Number(filtroSemestre)) &&
+      (filtroAno === 'Todos' || proy.año === Number(filtroAno))
   );
 
+  // Ordenar proyectos según sortConfig
+  if (sortConfig.key) {
+    proyectosFiltrados = [...proyectosFiltrados].sort((a, b) => {
+      let aValue = a;
+      let bValue = b;
+      // Soporte para campos anidados
+      for (const part of sortConfig.key.split('.')) {
+        aValue = aValue?.[part];
+        bValue = bValue?.[part];
+      }
+      // Si es null o undefined, convertir a string vacío para evitar errores
+      if (aValue === undefined || aValue === null) aValue = '';
+      if (bValue === undefined || bValue === null) bValue = '';
+      if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+      if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    });
+  }
+
   // Filtro de semestre: solo 1 y 2
-  const listaSemestres = [1, 2];
+  const listaSemestres = ['Todos', 1, 2];
   // Filtro de año: últimos 10 años incluyendo el actual
-  const listaAnios = Array.from({ length: 10 }, (_, i) => anoActual - i);
+  const listaAnios = ['Todos', ...Array.from({ length: 10 }, (_, i) => anoActual - i)];
+
+  // Función para manejar el ordenamiento
+  function handleSort(key) {
+    setSortConfig((prev) => {
+      if (prev.key === key) {
+        // Alternar dirección
+        return { key, direction: prev.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-100">
@@ -305,7 +340,7 @@ function EdicionAsignacionProyectos() {
               onChange={(e) => setFiltroSemestre(e.target.value)}
             >
               {listaSemestres.map((sem) => (
-                <option key={sem} value={sem}>{sem}</option>
+                <option key={sem} value={sem}>{sem === 'Todos' ? 'Todos' : sem}</option>
               ))}
             </select>
           </div>
@@ -317,7 +352,7 @@ function EdicionAsignacionProyectos() {
               onChange={(e) => setFiltroAno(e.target.value)}
             >
               {listaAnios.map((anio) => (
-                <option key={anio} value={anio}>{anio}</option>
+                <option key={anio} value={anio}>{anio === 'Todos' ? 'Todos' : anio}</option>
               ))}
             </select>
           </div>
@@ -329,16 +364,76 @@ function EdicionAsignacionProyectos() {
             <table className="min-w-full bg-white shadow rounded">
               <thead className="bg-gray-200 text-gray-700">
                 <tr>
-                  <th className="p-3 text-left">Estudiante</th>
-                  <th className="p-3 text-left">Carnet</th>
-                  <th className="p-3 text-left">Empresa</th>
-                  <th className="p-3 text-left">Departamento</th>
-                  <th className="p-3 text-left">Categoría de anteproyecto</th>
-                  <th className="p-3 text-left">Semestre</th>
-                  <th className="p-3 text-left">Año</th>
-                  <th className="p-3 text-left">Estado de proyecto</th>
-                  <th className="p-3 text-left">Profesor</th>
-                  <th className="p-3 text-left">Categoría de profesor</th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('Estudiante.Usuario.nombre')}>
+                    Estudiante&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'Estudiante.Usuario.nombre' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Estudiante.Usuario.nombre' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'Estudiante.Usuario.nombre' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Estudiante.Usuario.nombre' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('Estudiante.carnet')}>
+                    Carnet&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'Estudiante.carnet' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Estudiante.carnet' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'Estudiante.carnet' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Estudiante.carnet' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('Anteproyecto.Empresa.nombre')}>
+                    Empresa&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'Anteproyecto.Empresa.nombre' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Anteproyecto.Empresa.nombre' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'Anteproyecto.Empresa.nombre' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Anteproyecto.Empresa.nombre' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('Anteproyecto.departamento')}>
+                    Departamento&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'Anteproyecto.departamento' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Anteproyecto.departamento' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'Anteproyecto.departamento' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Anteproyecto.departamento' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('Anteproyecto.Categoria.nombre')}>
+                    Categoría de anteproyecto&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'Anteproyecto.Categoria.nombre' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Anteproyecto.Categoria.nombre' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'Anteproyecto.Categoria.nombre' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Anteproyecto.Categoria.nombre' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('semestre')}>
+                    Semestre&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'semestre' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'semestre' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'semestre' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'semestre' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('año')}>
+                    Año&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'año' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'año' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'año' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'año' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('estado')}>
+                    Estado de proyecto&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'estado' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'estado' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'estado' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'estado' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('profesor_id')}>
+                    Profesor&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'profesor_id' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'profesor_id' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'profesor_id' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'profesor_id' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('profesor_categoria')}>
+                    Categoría de profesor&nbsp;
+                    <span style={{fontSize: '0.9em'}}>
+                      <span style={{color: sortConfig.key === 'profesor_categoria' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'profesor_categoria' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
+                      <span style={{color: sortConfig.key === 'profesor_categoria' && sortConfig.direction === 'desc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'profesor_categoria' && sortConfig.direction === 'desc' ? 'bold' : 'normal'}}>▼</span>
+                    </span>
+                  </th>
                   <th className="p-3 text-left">Acciones</th>
                 </tr>
               </thead>
