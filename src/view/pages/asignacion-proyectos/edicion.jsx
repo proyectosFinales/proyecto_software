@@ -24,6 +24,50 @@ import { fetchSemestreActual } from "../../../controller/Semestre";
  * @returns JSX
  */
 function EdicionAsignacionProyectos() {
+  // Descarga CSV de los proyectos filtrados
+  function descargarCSV() {
+    if (!proyectosFiltrados.length) return;
+    const encabezados = [
+      'Estudiante',
+      'Carnet',
+      'Empresa',
+      'Departamento',
+      'Categoría de anteproyecto',
+      'Semestre',
+      'Año',
+      'Estado',
+      'Profesor',
+      'Categoría de profesor'
+    ];
+    const filas = proyectosFiltrados.map((proyecto) => {
+      const assignedProf = profesores.find((prof) => prof.profesor_id === proyecto.profesor_id);
+      return [
+        proyecto.Estudiante?.Usuario?.nombre ?? '',
+        proyecto.Estudiante?.carnet ?? '',
+        proyecto.Anteproyecto?.Empresa?.nombre ?? '',
+        proyecto.Anteproyecto?.departamento ?? '',
+        proyecto.Anteproyecto?.Categoria?.nombre ?? '',
+        proyecto.semestre ?? '',
+        proyecto.año ?? '',
+        proyecto.estado ?? '',
+        assignedProf ? assignedProf.nombre : '',
+        assignedProf ? (assignedProf.categoria ?? '') : ''
+      ];
+    });
+    const csvContent = [
+      encabezados.join(','),
+      ...filas.map(fila => fila.map(valor => `"${String(valor).replace(/"/g, '""')}` + '"').join(','))
+    ].join('\r\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'reporte_proyectos.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
   // Obtener semestre y año actual igual que en HeaderCoordinador
   const fecha = new Date();
   const anoActual = fecha.getFullYear();
@@ -372,6 +416,15 @@ function EdicionAsignacionProyectos() {
               <option value="Reprobado">Reprobado</option>
             </select>
           </div>
+        </div>
+        <div className="flex flex-wrap gap-4 mb-4">
+          <button
+            className="px-4 py-2 bg-blue-600 text-white rounded shadow hover:bg-blue-700"
+            onClick={descargarCSV}
+            disabled={proyectosFiltrados.length === 0}
+          >
+            Descargar reporte CSV
+          </button>
         </div>
         {proyectosFiltrados.length === 0 ? (
           <p className="bg-white p-4 shadow rounded">No existen proyectos.</p>

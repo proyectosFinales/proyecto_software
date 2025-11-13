@@ -191,17 +191,17 @@ const FormularioCoordinador = () => {
       }
       // Rellenar campos de estudiante (read-only)
       if (data.Estudiante?.Usuario) {
-  setCarnet(data.Estudiante.carnet || '');
-  setNombre(data.Estudiante.Usuario.nombre || '');
-  setCorreo(data.Estudiante.Usuario.correo || '');
-  setTelefono(data.Estudiante.Usuario.telefono || '');
-  setSede(data.Estudiante.Usuario.sede || '');
-  setCantonEstudiante(data.Estudiante.Usuario.canton || '');
+      setCarnet(data.Estudiante.carnet || '');
+      setNombre(data.Estudiante.Usuario.nombre || '');
+      setCorreo(data.Estudiante.Usuario.correo || '');
+      setTelefono(data.Estudiante.Usuario.telefono || '');
+      setSede(data.Estudiante.Usuario.sede || '');
+      setCantonEstudiante(data.Estudiante.Usuario.canton || '');
       }
 
       // (nuevo)
-  setSemestre(data.semestre || 'No especificado');
-  setAnio(data.año || 'No especificado');
+      setSemestre(data.semestre || 'No especificado');
+      setAnio(data.año || 'No especificado');
       setSituacionLaboral(data.Estudiante.situacion_laboral || 'No especificado');
 
       const { data: historial, error: historialError } = await supabase
