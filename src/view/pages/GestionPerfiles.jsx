@@ -2,7 +2,7 @@
 
 import { React, useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaFileAlt, FaMapMarked, FaSearch } from 'react-icons/fa';
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaFileAlt, FaMapMarked, FaMapPin, FaSearch } from 'react-icons/fa';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
@@ -45,7 +45,10 @@ const GestionPerfiles = () => {
         ...(data.rol === 3 && data.estudiante && data.estudiante.length > 0 && {
           carnet: data.estudiante[0].carnet,
           estado: data.estudiante[0].estado
-        })
+        }),
+        provincia: data.provincia,
+        canton: data.canton,
+        distrito: data.distrito
       });
     } catch (error) {
       alert(
@@ -341,7 +344,50 @@ const GestionPerfiles = () => {
                     </select>
                   </div>
                 </label>
+
+                <label className="block">
+                  Provincia:
+                  <div className="relative mt-1">
+                    <FaMapPin className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="provincia"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.provincia || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Cantón:
+                  <div className="relative mt-1">
+                    <FaMapPin className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="canton"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.canton || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Distrito:
+                  <div className="relative mt-1">
+                    <FaMapPin className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="distrito"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.distrito || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
               </div>
+              
             )}
 
             {/* Estudiante (rol=3) */}
@@ -420,6 +466,48 @@ const GestionPerfiles = () => {
                       <option value="Limón">Centro Académico de Limón</option>
                       <option value="Alajuela">Centro Académico de Alajuela</option>
                     </select>
+                  </div>
+                </label>
+
+                <label className="block">
+                  Provincia:
+                  <div className="relative mt-1">
+                    <FaMapPin className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="provincia"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.provincia || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Cantón:
+                  <div className="relative mt-1">
+                    <FaMapPin className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="canton"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.canton || ''}
+                      onChange={handleInputChange}
+                    />
+                  </div>
+                </label>
+
+                <label className="block">
+                  Distrito:
+                  <div className="relative mt-1">
+                    <FaMapPin className="absolute top-2.5 left-2 text-gray-400" />
+                    <input
+                      type="text"
+                      name="distrito"
+                      className="pl-8 pr-3 py-2 border rounded w-full focus:outline-none"
+                      value={editableUser.distrito || ''}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </label>
 

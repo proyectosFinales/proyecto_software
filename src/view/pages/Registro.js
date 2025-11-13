@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked } from 'react-icons/fa';
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked, FaMapPin } from 'react-icons/fa';
 import { signUpNewUser } from '../../controller/Signup';
 import { useNavigate } from 'react-router-dom';
 
@@ -17,6 +17,9 @@ const Registro = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [sede, setSede] = useState('');
+  const [provincia, setProvincia] = useState('');
+  const [canton, setCanton] = useState('');
+  const [distrito, setDistrito] = useState('');
 
   const navigate = useNavigate();
 
@@ -27,7 +30,7 @@ const Registro = () => {
       // signUpNewUser(fullName, carnet, "", number, email, password, sede)
       // si tu DB la requiere. 
       // De momento, asumimos la firma actual: signUpNewUser(fullName, carnet, number, email, password, sede)
-      await signUpNewUser(fullName, carnet, number, email, password, sede);
+      await signUpNewUser(fullName, carnet, number, email, password, sede, provincia, canton, distrito);
 
       alert('Usuario registrado con éxito.');
       navigate('/');
@@ -113,6 +116,39 @@ const Registro = () => {
             <option value="Limón">Centro Académico de Limón</option>
             <option value="Alajuela">Centro Académico de Alajuela</option>
           </select>
+        </div>
+        
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaMapPin className="text-gray-500 mx-2" />
+          <input
+            type="text"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+            placeholder="Provincia donde reside"
+            value={provincia}
+            onChange={(e) => setProvincia(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaMapPin className="text-gray-500 mx-2" />
+          <input
+            type="text"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+            placeholder="Cantón donde reside"
+            value={canton}
+            onChange={(e) => setCanton(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaMapPin className="text-gray-500 mx-2" />
+          <input
+            type="text"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+            placeholder="Distrito donde reside"
+            value={distrito}
+            onChange={(e) => setDistrito(e.target.value)}
+          />
         </div>
 
         <button
