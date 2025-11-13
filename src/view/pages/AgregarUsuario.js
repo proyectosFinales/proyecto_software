@@ -71,9 +71,9 @@ const AgregarUsuario = () => {
   const handleAgregarUsuario = async () => {
     try {
       // Validaciones
-      // if (!validarCorreo(usuario.correo)) {
-      //   throw new Error("El correo ingresado no es válido. Ej: usuario@ejemplo.com");
-      // }
+      if (!validarCorreo(usuario.correo)) {
+        throw new Error("El correo ingresado no es válido. Ej: usuario@ejemplo.com");
+      }
       if (!validarTelefono(usuario.numero)) {
         throw new Error("El número de teléfono no es válido. Debe ser 8 dígitos o +506XXXXXXXX.");
       }
