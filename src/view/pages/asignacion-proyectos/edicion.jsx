@@ -380,51 +380,63 @@ function EdicionAsignacionProyectos() {
                         {assignedProf ? assignedProf.categoria ?? "N/A" : "N/A"}
                       </td>
                       <td className="flex p-3 text-sm text-gray-700 space-x-2">
-                        <button
-                          onClick={() => handleEstadoChange(proyecto.id, 'Aprobado', proyecto.estudiante_id)}
-                          className="px-2 py-1 bg-green-500 text-white rounded mr-2"
-                        >
-                          Aprobar
-                        </button>
-                        <button
-                          onClick={() => handleEstadoChange(proyecto.id, 'Reprobado', proyecto.estudiante_id)}
-                          className="px-2 py-1 bg-red-500 text-white rounded"
-                        >
-                          Reprobar
-                        </button>
-                        <select
-                          className="border rounded px-2 py-1"
-                          value={proyecto.profesor_id || ""}
-                          onChange={(e) => handleAssign(proyecto.id, e.target.value, proyecto.estudiante_id)}
-                        >
-                          <option value="">-- Asignar profesor --</option>
-                          {assignedProf && (
-                            <option key={assignedProf.profesor_id} value={assignedProf.profesor_id}>
-                              {assignedProf.nombre}
-                            </option>
-                          )}
-                          {filteredProfesores
-                            .filter((prof) => {
-                              // Filtrar por semestre y año actual
-                              return (
-                                prof.año === anoActual &&
-                                prof.semestre === semestreActual &&
-                                prof.profesor_id !== proyecto.profesor_id
-                              );
-                            })
-                            .map((prof) => (
-                              <option key={prof.profesor_id} value={prof.profesor_id}>
-                                {prof.nombre}
-                              </option>
-                            ))}
-                        </select>
-                        <button
-                          onClick={() => handleUnassign(proyecto.id, proyecto.estudiante_id, proyecto.profesor_id)}
-                          disabled={!proyecto.profesor_id}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
-                        >
-                          Desasignar
-                        </button>
+                        {(() => {
+                          const esPeriodoActual = proyecto.semestre === semestreActual && proyecto.año === anoActual;
+                          return <>
+                            <button
+                              onClick={() => handleEstadoChange(proyecto.id, 'Aprobado', proyecto.estudiante_id)}
+                              className="px-2 py-1 bg-green-500 text-white rounded mr-2"
+                              disabled={!esPeriodoActual}
+                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                            >
+                              Aprobar
+                            </button>
+                            <button
+                              onClick={() => handleEstadoChange(proyecto.id, 'Reprobado', proyecto.estudiante_id)}
+                              className="px-2 py-1 bg-red-500 text-white rounded"
+                              disabled={!esPeriodoActual}
+                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                            >
+                              Reprobar
+                            </button>
+                            <select
+                              className="border rounded px-2 py-1"
+                              value={proyecto.profesor_id || ""}
+                              onChange={(e) => handleAssign(proyecto.id, e.target.value, proyecto.estudiante_id)}
+                              disabled={!esPeriodoActual}
+                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                            >
+                              <option value="">-- Asignar profesor --</option>
+                              {assignedProf && (
+                                <option key={assignedProf.profesor_id} value={assignedProf.profesor_id}>
+                                  {assignedProf.nombre}
+                                </option>
+                              )}
+                              {filteredProfesores
+                                .filter((prof) => {
+                                  // Filtrar por semestre y año actual
+                                  return (
+                                    prof.año === anoActual &&
+                                    prof.semestre === semestreActual &&
+                                    prof.profesor_id !== proyecto.profesor_id
+                                  );
+                                })
+                                .map((prof) => (
+                                  <option key={prof.profesor_id} value={prof.profesor_id}>
+                                    {prof.nombre}
+                                  </option>
+                                ))}
+                            </select>
+                            <button
+                              onClick={() => handleUnassign(proyecto.id, proyecto.estudiante_id, proyecto.profesor_id)}
+                              disabled={!esPeriodoActual}
+                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                              className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
+                            >
+                              Desasignar
+                            </button>
+                          </>;
+                        })()}
                       </td>
                     </tr>
                   );
