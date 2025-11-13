@@ -1,4 +1,4 @@
-/**app.jsx */
+import VerProyecto from './view/pages/VerProyecto.js';
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import './index.css';
@@ -164,6 +164,10 @@ function App() {
         <Route
           path="/formulario-coordinador"
           element={<RutaProtegida element={<FormularioCoordinador />} requiredRoles={["1"]} />}
+        />
+        <Route
+          path="/verProyecto"
+          element={<RutaProtegida element={<VerProyecto />} requiredRoles={["1"]} />}
         />
         <Route
           path="/editarFormulario"

@@ -1,3 +1,4 @@
+import { useNavigate } from "react-router-dom";
 /**
  * EdicionAsignacionProyectos.jsx
  * Ventana para asignar manualmente Anteproyectos a profesores,
@@ -24,6 +25,7 @@ import { fetchSemestreActual } from "../../../controller/Semestre";
  * @returns JSX
  */
 function EdicionAsignacionProyectos() {
+  const navigate = useNavigate();
   // Descarga CSV de los proyectos filtrados
   function descargarCSV() {
     if (!proyectosFiltrados.length) return;
@@ -542,6 +544,13 @@ function EdicionAsignacionProyectos() {
                         {assignedProf ? assignedProf.categoria ?? "N/A" : "N/A"}
                       </td>
                       <td className="flex p-3 text-sm text-gray-700 space-x-2">
+                        <button
+                          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-2 rounded mr-2"
+                          onClick={() => navigate(`/verProyecto?id=${proyecto.id}`)}
+                          title="Ver datos del proyecto"
+                        >
+                          Ver
+                        </button>
                         {(() => {
                           const esPeriodoActual = proyecto.semestre === semestreActual && proyecto.año === anoActual;
                           return <>

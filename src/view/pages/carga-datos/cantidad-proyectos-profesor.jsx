@@ -4,6 +4,7 @@
  * que cada profesor puede manejar. Llama a profesor.actualizarCantidadEstudiantes().
  */
 import React, { useCallback, useEffect, useState } from "react";
+import { obtenerProyectosDetalladosProfesor } from '../../../controller/obtenerProyectosDetalladosProfesor';
 import Profesor from "../../../controller/profesor";
 import Proyecto from "../../../controller/Proyecto";
 import { loadToast } from "../../components/toast";
@@ -11,6 +12,8 @@ import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 
 const CantidadProyectosProfesor = () => {
+  const [profesorExpandido, setProfesorExpandido] = useState(null); // profesor_id
+  const [proyectosExpandido, setProyectosExpandido] = useState([]); // proyectos del profesor expandido
   console.log('CantidadProyectosProfesor: Component rendering');
   const [profesores, setProfesores] = useState([]);
   const [filtroSemestre, setFiltroSemestre] = useState(() => {
@@ -275,43 +278,94 @@ const CantidadProyectosProfesor = () => {
                     const semestreActual = mes <= 7 ? 1 : 2;
                     const esEditable = Number(profesor.año) === anoActual && Number(profesor.semestre) === semestreActual;
                     return (
-                      <tr 
-                        key={profesor.profesor_id} 
-                        className="hover:bg-gray-50 transition-colors duration-150"
-                      >
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
-                          {profesor.nombre}
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
-                          <input
-                            type="number"
-                            className="w-16 sm:w-20 px-2 sm:px-3 py-1 sm:py-2 border rounded-md 
-                                     focus:outline-none focus:ring-2 focus:ring-blue-500 
-                                     text-xs sm:text-sm"
-                            value={profesor.disponibilidad}
-                            onChange={e => esEditable && actualizarCantidad(i, e)}
-                            min="0"
-                            max="20"
-                            disabled={!esEditable}
-                            style={!esEditable ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
-                          />
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
-                          {profesor.proyectosAsignados}
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
-                          {profesor.semestre}
-                        </td>
-                        <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
-                          {profesor.año}
-                        </td>
-                      </tr>
+                      <React.Fragment key={profesor.profesor_id}>
+                        <tr 
+                          className="hover:bg-gray-50 transition-colors duration-150"
+                        >
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
+                            {profesor.nombre}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
+                            <input
+                              type="number"
+                              className="w-16 sm:w-20 px-2 sm:px-3 py-1 sm:py-2 border rounded-md 
+                                       focus:outline-none focus:ring-2 focus:ring-blue-500 
+                                       text-xs sm:text-sm"
+                              value={profesor.disponibilidad}
+                              onChange={e => esEditable && actualizarCantidad(i, e)}
+                              min="0"
+                              max="20"
+                              disabled={!esEditable}
+                              style={!esEditable ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
+                            />
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
+                            {profesor.proyectosAsignados}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
+                            {profesor.semestre}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center text-xs sm:text-sm font-medium text-gray-900">
+                            {profesor.año}
+                          </td>
+                          <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
+                            <button
+                              className={`px-3 py-1 rounded text-xs font-semibold ${profesor.proyectosAsignados === 0 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                              disabled={profesor.proyectosAsignados === 0}
+                              onClick={async () => {
+                                if (profesor.proyectosAsignados === 0) return;
+                                if (profesorExpandido === profesor.profesor_id) {
+                                  setProfesorExpandido(null);
+                                  setProyectosExpandido([]);
+                                } else {
+                                  setProfesorExpandido(profesor.profesor_id);
+                                  try {
+                                    const proyectos = await obtenerProyectosDetalladosProfesor(profesor.profesor_id);
+                                    setProyectosExpandido(proyectos);
+                                  } catch (e) {
+                                    setProyectosExpandido([]);
+                                  }
+                                }
+                              }}
+                            >
+                              Ver proyectos
+                            </button>
+                          </td>
+                        </tr>
+                        {/* Fila expandida para proyectos asignados */}
+                        {profesorExpandido === profesor.profesor_id && proyectosExpandido.length > 0 && (
+                          <tr key={profesor.profesor_id + "-expandido"}>
+                            <td colSpan={6} className="bg-blue-50 px-6 py-2">
+                              <div className="font-bold text-blue-900 mb-2">Proyectos asignados</div>
+                              <div className="space-y-2">
+                                {proyectosExpandido.map((proy) => (
+                                  <div key={proy.id} className="flex flex-wrap items-center justify-between border-b border-blue-200 py-1">
+                                    <div className="flex-1 min-w-[120px] font-medium text-blue-900">
+                                      Estudiante: {proy.estudiante?.nombre || 'Sin nombre'}
+                                    </div>
+                                    <div className="flex-1 min-w-[120px] text-blue-800">
+                                      Empresa: {proy.empresa?.nombre || 'Sin empresa'}
+                                    </div>
+                                    <button
+                                      className="ml-2 px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs font-semibold"
+                                      onClick={() => window.location.href = `/verProyecto?id=${proy.id}`}
+                                    >
+                                      Ver
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
               </table>
             </div>
           </div>
+
 
           {/* Enhanced responsive action buttons */}
           <div className="mt-6 flex justify-end">
