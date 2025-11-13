@@ -252,6 +252,7 @@ const FormularioCoordinador = () => {
         return;
       }
 
+
       // Obtener profesores con espacios disponibles en semestre y año actual
       const profesoresDisponibles = (await Profesor.obtenerTodos()).filter(
         p => p.disponibilidad > p.proyectosAsignados && p.año === anoActual && p.semestre === semestreActual
@@ -260,8 +261,26 @@ const FormularioCoordinador = () => {
         throw new Error("No hay profesores disponibles con espacios en el semestre y año actual.");
       }
 
-      // Seleccionar profesor aleatorio
-      const profesor = profesoresDisponibles[Math.floor(Math.random() * profesoresDisponibles.length)];
+      // 1. Filtrar por categoría
+      let candidatos = profesoresDisponibles.filter(p => p.categoria && p.categoria === categoria);
+
+      // 2. Si no hay por categoría, filtrar por cantón del estudiante (Usuario)
+      if (candidatos.length === 0) {
+        // Obtener cantón del estudiante desde Usuario
+        const cantonEstudiante = data.Estudiante?.Usuario?.canton || '';
+        candidatos = profesoresDisponibles.filter(p => {
+          // El cantón del profesor está en p.Usuario.canton
+          return p.Usuario && p.Usuario.canton && p.Usuario.canton === cantonEstudiante;
+        });
+      }
+
+      // 3. Si no hay por cantón, usar todos los disponibles
+      if (candidatos.length === 0) {
+        candidatos = profesoresDisponibles;
+      }
+
+      // Seleccionar profesor aleatorio del subconjunto
+      const profesor = candidatos[Math.floor(Math.random() * candidatos.length)];
 
       // Actualizar estado del anteproyecto
       const { data, error } = await supabase
