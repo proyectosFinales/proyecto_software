@@ -7,14 +7,30 @@ import { descargarAnteproyecto } from '../../controller/DescargarPDF';
 import { errorToast } from '../components/toast';
 import * as XLSX from 'xlsx';
 
+
 const AnteproyectosCoordinador = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
   const [searchText, setSearchText] = useState('');
+  const [filtroSemestre, setFiltroSemestre] = useState(() => {
+    const mes = new Date().getMonth() + 1;
+    return mes <= 7 ? 1 : 2;
+  });
+  const [filtroAnio, setFiltroAnio] = useState(() => new Date().getFullYear());
   const navigate = useNavigate();
 
   //Para ordenar alfabéticamente
   const [sortField, setSortField] = useState(null);
   const [sortAsc, setSortAsc] = useState(true);
+  // Generar lista de años (últimos 10)
+  const anioActual = new Date().getFullYear();
+  const listaAnios = Array.from({length: 10}, (_, i) => anioActual - i);
+
+  // Filtrar anteproyectos por semestre y año
+  const anteproyectosFiltrados = anteproyectos.filter(a => {
+    const semestre = a.semestre ?? a.semestre_id;
+    const anio = a.año ?? a.anio;
+    return String(semestre) === String(filtroSemestre) && String(anio) === String(filtroAnio);
+  });
 
   const handleRevisar = (id) => {
     navigate('/formulario-coordinador?id=' + id);
@@ -66,16 +82,6 @@ const AnteproyectosCoordinador = () => {
   useEffect(() => {
     const fetchAnteproyectos = async () => {
       const { data, error } = await supabase
-      //Para que el cambio sea efectivo, haria falta:
-      //1. en esta solicitud, el atributo tipo agregarle _id
-      //2. agregar TipoProyecto:tipo_id(
-      //            nombre
-      //          ),
-      //3. en la BD, el atributo de Anteproyecto tipo, ponerlo como tipo_id
-      //4. ese mismo atributo ponerle una foreign key a la tabla TipoProyecto
-      //5. a todas las filas de Anteproyecto, en el atributo tipo, ponerle el id del tipo de proyecto correspondiente
-      //o dejarlo asi, las dos tablas no se relacionan internamente, pero en la interfaz si para guardar la info que
-      //existe en TipoProyecto
         .from('Anteproyecto')
         .select(`
           id,
@@ -92,6 +98,8 @@ const AnteproyectosCoordinador = () => {
           departamento,
           comentario,
           categoria_id,
+          semestre,
+          año,
           Categoria:categoria_id (
             nombre
           ),
@@ -318,6 +326,32 @@ const AnteproyectosCoordinador = () => {
           </button>
         </div>
 
+        {/* Filtros */}
+        <div className="flex flex-wrap gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Semestre:</label>
+            <select
+              className="border rounded px-4 py-2 text-base min-w-[120px] h-12"
+              value={filtroSemestre}
+              onChange={e => setFiltroSemestre(Number(e.target.value))}
+            >
+              <option value={1}>1</option>
+              <option value={2}>2</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Año:</label>
+            <select
+              className="border rounded px-4 py-2 text-base min-w-[120px] h-12"
+              value={filtroAnio}
+              onChange={e => setFiltroAnio(Number(e.target.value))}
+            >
+              {listaAnios.map(anio => (
+                <option key={anio} value={anio}>{anio}</option>
+              ))}
+            </select>
+          </div>
+        </div>
         {/* Table */}
         <div className="overflow-x-auto">
           <table className="table-auto w-full border border-gray-300">
@@ -362,11 +396,19 @@ const AnteproyectosCoordinador = () => {
                           fontWeight: sortField === 'empresa' && !sortAsc ? 'bold' : 'normal'
                         }}>▼</span>
                       </span></th>
+                <th className="px-3 py-2 text-left border-b border-gray-300">Semestre</th>
+                <th className="px-3 py-2 text-left border-b border-gray-300">Año</th>
                 <th className="px-3 py-2 text-left border-b border-gray-300">Acciones</th>
               </tr>
             </thead>
             <tbody>
-              {sortedAnteproyectos.map((anteproyecto) => (
+              {sortedAnteproyectos
+                .filter(a => {
+                  const semestre = a.semestre ?? a.semestre_id;
+                  const anio = a.año ?? a.anio;
+                  return String(semestre) === String(filtroSemestre) && String(anio) === String(filtroAnio);
+                })
+                .map((anteproyecto) => (
                 <tr key={anteproyecto.id} className="border-b border-gray-200">
                   <td className="px-3 py-2">
                     {anteproyecto.Estudiante?.Usuario?.nombre || "Sin nombre"}
@@ -377,6 +419,8 @@ const AnteproyectosCoordinador = () => {
                   <td className="px-3 py-2">
                     {anteproyecto.Empresa?.nombre || "Sin empresa"}
                   </td>
+                  <td className="px-3 py-2">{anteproyecto.semestre ?? anteproyecto.semestre_id ?? ''}</td>
+                  <td className="px-3 py-2">{anteproyecto.año ?? anteproyecto.anio ?? ''}</td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap items-center gap-2">
                     {(anteproyecto.estado !== "Correccion") && (

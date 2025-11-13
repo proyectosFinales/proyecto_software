@@ -60,7 +60,8 @@ const FormularioCoordinador = () => {
   const [categoria, setCategoria] = useState('');
 
 
-  const [semestrePropuesto, setSemestrePropuesto] = useState('');
+  const [semestre, setSemestre] = useState('');
+  const [anio, setAnio] = useState('');
   const [situacionLaboral, setSituacionLaboral] = useState('');
   const [haPerdido, setHaPerdido] = useState(false);
   const [historialReprobacion, setHistorialReprobacion] = useState([]);
@@ -111,7 +112,8 @@ const FormularioCoordinador = () => {
                 actividad,
                 departamento,
                 categoria_id,
-                semestre_propuesto,
+                semestre,
+                año,
                 Estudiante:estudiante_id (
                   carnet,
                   id_usuario,
@@ -193,7 +195,8 @@ const FormularioCoordinador = () => {
       }
 
       // (nuevo)
-      setSemestrePropuesto(data.semestre_propuesto || 'No especificado');
+  setSemestre(data.semestre || 'No especificado');
+  setAnio(data.año || 'No especificado');
       setSituacionLaboral(data.Estudiante.situacion_laboral || 'No especificado');
 
       const { data: historial, error: historialError } = await supabase
@@ -226,23 +229,23 @@ const FormularioCoordinador = () => {
     if (!confirmAprobar) return;
 
     try {
-      // Obtener profesores con estudiantes libres
-      const profesoresConEstudiantesLibres = await Profesor.obtenerProfesoresConEstudiantesLibres(); // Asegurarse de si realmente hace falta validar que hayan profesores
-      if (profesoresConEstudiantesLibres.length === 0) {                                             // disponibles con estudiantes libres. Y solamente aceptarlos.
-        throw new Error("No hay profesores disponibles con estudiantes libres.");
+      // Obtener semestre y año actual igual que en el header
+      const fecha = new Date();
+      const anoActual = fecha.getFullYear();
+      const mes = fecha.getMonth() + 1;
+      const semestreActual = mes <= 7 ? 1 : 2;
+
+      // Obtener profesores con espacios disponibles en semestre y año actual
+      const profesoresDisponibles = (await Profesor.obtenerTodos()).filter(
+        p => p.disponibilidad > p.proyectosAsignados && p.año === anoActual && p.semestre === semestreActual
+      );
+      if (profesoresDisponibles.length === 0) {
+        throw new Error("No hay profesores disponibles con espacios en el semestre y año actual.");
       }
 
-      // Obtener semestre
-      const { data: semestreData, error: semestreError } = await supabase
-        .from('Semestre')
-        .select('semestre_id')
-        .select();
-      if (semestreError) throw semestreError;
+      // Seleccionar profesor aleatorio
+      const profesor = profesoresDisponibles[Math.floor(Math.random() * profesoresDisponibles.length)];
 
-      // Seleccionar un profesor aleatorio
-      const profesor = profesoresConEstudiantesLibres[Math.floor(Math.random() * profesoresConEstudiantesLibres.length)];
-      const lastIndex = semestreData.length-1;
-      const semestreDataSingle = semestreData[lastIndex];
       // Actualizar estado del anteproyecto
       const { data, error } = await supabase
         .from('Anteproyecto')
@@ -262,7 +265,8 @@ const FormularioCoordinador = () => {
           estudiante_id: data[0].estudiante_id, // Asegúrate de tener el estudianteId disponible
           anteproyecto_id: idAnteproyecto,
           estado: "Pendiente",
-          semestre_id: semestreDataSingle.semestre_id,
+          semestre: semestreActual,
+          año: anoActual,
           fecha_inicio: new Date().toISOString()
         })
         .select('*');
@@ -275,12 +279,13 @@ const FormularioCoordinador = () => {
         .eq('estudiante_id', data[0].estudiante_id); // Asegúrate de tener el estudianteId disponible
       if (updateEstudianteError) throw updateEstudianteError;
 
-      // Actualizar estudiantes_libres del profesor seleccionado
-      const { error: updateProfesorError } = await supabase
-        .from('Profesor')
-        .update({ estudiantes_libres: profesor.estudiantes_libres - 1})
-        .eq('profesor_id', profesor.profesor_id);
-      if (updateProfesorError) throw updateProfesorError;
+      // Sumar 1 a asignados en AsignacionesProfesor
+      const { error: updateAsignadosError } = await supabase
+        .from('AsignacionesProfesor')
+        .update({ asignados: profesor.proyectosAsignados + 1 })
+        .eq('idProfesor', profesor.profesor_id);
+        console.log(profesor);
+      if (updateAsignadosError) throw updateAsignadosError;
 
       for (let i = 0; i < 3; i++)
         await addAvance("Pendiente", insertProyecto[0].id);
@@ -869,8 +874,8 @@ const FormularioCoordinador = () => {
                 {historialReprobacion.map((item, index) => (
                   <tr key={index}>
                     <td>{item.causa}</td>
-                    <td>{item.semestre}</td>
-                    <td>{item.anio}</td>
+                    <td>{item.semestre ?? item.semestre_id ?? ''}</td>
+                    <td>{item.año ?? item.anio ?? ''}</td>
                   </tr>
                 ))}
               </tbody>
@@ -884,12 +889,22 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>28. Semestre propuesto:</label>
+          <label>28. Semestre:</label>
           <input
             type="text"
-            value={semestrePropuesto}
+            value={semestre}
+              readOnly
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label>29. Año:</label>
+          <input
+            type="text"
+            className={styles.input}
+            value={anio}
             readOnly
           />
+
         </div>
 
         <div className={styles.formGroup}>
