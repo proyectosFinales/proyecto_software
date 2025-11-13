@@ -247,24 +247,20 @@ class Profesor extends Usuario {
       // Combinamos los datos: profesores + asignaciones
       return profesores.map(profesor => {
         const asignacion = mapaAsignaciones.get(profesor.profesor_id) || { disponibilidad: 0, asignados: 0, semestre: null, año: null };
-        // Attach canton to Usuario for filtering
-        if (profesor.Usuario && profesor.Usuario.canton) {
-          profesor.Usuario.canton = profesor.Usuario.canton;
-        }
-        return {
-          ...new Profesor(
-            profesor.profesor_id,
-            profesor.Usuario?.id,
-            profesor.Usuario?.nombre || "",
-            profesor.Usuario?.sede || "",
-            asignacion.disponibilidad,
-            asignacion.asignados,
-            profesor.Categoria?.nombre || null,
-            asignacion.semestre,
-            asignacion.año
-          ),
-          Usuario: profesor.Usuario // preserve Usuario with canton
-        };
+        const instancia = new Profesor(
+          profesor.profesor_id,
+          profesor.Usuario?.id,
+          profesor.Usuario?.nombre || "",
+          profesor.Usuario?.sede || "",
+          asignacion.disponibilidad,
+          asignacion.asignados,
+          profesor.Categoria?.nombre || null,
+          asignacion.semestre,
+          asignacion.año
+        );
+        // Attach Usuario as a property for filtering (if needed)
+        instancia.Usuario = profesor.Usuario;
+        return instancia;
       });
     } catch (error) {
       console.error("Error en obtenerTodos:", error);
