@@ -82,8 +82,8 @@ function EdicionAsignacionProyectos() {
   const [filteredProfesores, setFilteredProfesores] = useState([]);
   const [loading, setLoading] = useState(true);
   // Filtros de semestre, año y estado
-  const [filtroSemestre, setFiltroSemestre] = useState(semestreActual);
-  const [filtroAno, setFiltroAno] = useState(anoActual);
+  const [filtroSemestre, setFiltroSemestre] = useState(String(semestreActual));
+  const [filtroAno, setFiltroAno] = useState(String(anoActual));
   const [filtroEstado, setFiltroEstado] = useState('Todos');
 
   // Estado para ordenamiento de columnas
@@ -179,10 +179,10 @@ function EdicionAsignacionProyectos() {
         return;
       }
 
-      // Actualizar el proyecto con el nuevo profesor
+      // Actualizar el proyecto con el nuevo profesor y estado Asignado
       const { proyectoError } = await supabase
         .from("Proyecto")
-        .update({ profesor_id: profesorId })
+        .update({ profesor_id: profesorId, estado: "Asignado" })
         .eq("id", proyectoId);
       if (proyectoError) throw proyectoError;
 
@@ -212,7 +212,7 @@ function EdicionAsignacionProyectos() {
 
       setProyectos((prevProyectos) =>
         prevProyectos.map((proj) =>
-          proj.id === proyectoId ? { ...proj, profesor_id: profesorId } : proj
+          proj.id === proyectoId ? { ...proj, profesor_id: profesorId, estado: "Asignado" } : proj
         )
       );
 
@@ -247,7 +247,7 @@ function EdicionAsignacionProyectos() {
 
       const { error: proyectoError } = await supabase
         .from("Proyecto")
-        .update({ profesor_id: null })
+        .update({ profesor_id: null, estado: "Pendiente" })
         .eq("id", proyectoId);
       if (proyectoError) throw proyectoError;
 
@@ -266,7 +266,7 @@ function EdicionAsignacionProyectos() {
 
       setProyectos((prevProyectos) =>
         prevProyectos.map((proj) =>
-          proj.id === proyectoId ? { ...proj, profesor_id: null } : proj
+          proj.id === proyectoId ? { ...proj, profesor_id: null, estado: "Pendiente" } : proj
         )
       );
 
@@ -363,8 +363,11 @@ function EdicionAsignacionProyectos() {
 
   // Filtro de semestre: solo 1 y 2
   const listaSemestres = ['Todos', 1, 2];
-  // Filtro de año: últimos 10 años incluyendo el actual
-  const listaAnios = ['Todos', ...Array.from({ length: 10 }, (_, i) => anoActual - i)];
+  // Filtro de año: año siguiente, año actual y 5 años anteriores
+  const listaAnios = ['Todos'];
+  for (let i = 1; i >= -5; i--) {
+    listaAnios.push(anoActual + i);
+  }
 
   // Función para manejar el ordenamiento
   function handleSort(key) {
@@ -441,6 +444,7 @@ function EdicionAsignacionProyectos() {
             >
               <option value="Todos">Todos</option>
               <option value="Pendiente">Pendiente</option>
+              <option value="Asignado">Asignado</option>
               <option value="Suspendido">Suspendido</option>
               <option value="Aprobado">Aprobado</option>
               <option value="Reprobado">Reprobado</option>
@@ -580,21 +584,35 @@ function EdicionAsignacionProyectos() {
                           Ver
                         </button>
                         {(() => {
-                          const esPeriodoActual = proyecto.semestre === semestreActual && proyecto.año === anoActual;
+                          // Calcular el siguiente semestre y año
+                          let semestreSiguiente, anoSiguiente;
+                          if (semestreActual === 1) {
+                            semestreSiguiente = 2;
+                            anoSiguiente = anoActual;
+                          } else {
+                            semestreSiguiente = 1;
+                            anoSiguiente = anoActual + 1;
+                          }
+                          
+                          // Permitir editar si es el semestre actual o el siguiente
+                          const esPeriodoEditable = 
+                            (proyecto.semestre === semestreActual && proyecto.año === anoActual) ||
+                            (proyecto.semestre === semestreSiguiente && proyecto.año === anoSiguiente);
+                          
                           return <>
                             <button
                               onClick={() => handleEstadoChange(proyecto.id, 'Aprobado', proyecto.estudiante_id)}
                               className="px-2 py-1 bg-green-500 text-white rounded mr-2"
-                              disabled={!esPeriodoActual}
-                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                              disabled={!esPeriodoEditable}
+                              style={!esPeriodoEditable ? { backgroundColor: '#e5e7eb', color: '#9ca3af', cursor: 'not-allowed' } : {}}
                             >
                               Aprobar
                             </button>
                             <button
                               onClick={() => handleEstadoChange(proyecto.id, 'Suspendido', proyecto.estudiante_id)}
                               className="px-2 py-1 bg-red-500 text-white rounded"
-                              disabled={!esPeriodoActual}
-                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                              disabled={!esPeriodoEditable}
+                              style={!esPeriodoEditable ? { backgroundColor: '#e5e7eb', color: '#9ca3af', cursor: 'not-allowed' } : {}}
                             >
                               Suspender
                             </button>
@@ -602,8 +620,8 @@ function EdicionAsignacionProyectos() {
                               className="border rounded px-2 py-1"
                               value={proyecto.profesor_id || ""}
                               onChange={(e) => handleAssign(proyecto.id, e.target.value, proyecto.estudiante_id)}
-                              disabled={!esPeriodoActual}
-                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                              disabled={!esPeriodoEditable}
+                              style={!esPeriodoEditable ? { backgroundColor: '#e5e7eb', color: '#9ca3af', cursor: 'not-allowed' } : {}}
                             >
                               <option value="">-- Asignar profesor --</option>
                               {assignedProf && (
@@ -613,10 +631,10 @@ function EdicionAsignacionProyectos() {
                               )}
                               {filteredProfesores
                                 .filter((prof) => {
-                                  // Filtrar por semestre y año actual
+                                  // Filtrar por semestre y año del proyecto
                                   return (
-                                    prof.año === anoActual &&
-                                    prof.semestre === semestreActual &&
+                                    prof.año === proyecto.año &&
+                                    prof.semestre === proyecto.semestre &&
                                     prof.profesor_id !== proyecto.profesor_id
                                   );
                                 })
@@ -628,8 +646,8 @@ function EdicionAsignacionProyectos() {
                             </select>
                             <button
                               onClick={() => handleUnassign(proyecto.id, proyecto.estudiante_id, proyecto.profesor_id)}
-                              disabled={!esPeriodoActual}
-                              style={!esPeriodoActual ? { backgroundColor: '#e5e7eb', color: '#9ca3af' } : {}}
+                              disabled={!esPeriodoEditable}
+                              style={!esPeriodoEditable ? { backgroundColor: '#e5e7eb', color: '#9ca3af', cursor: 'not-allowed' } : {}}
                               className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                             >
                               Desasignar

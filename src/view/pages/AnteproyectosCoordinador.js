@@ -13,25 +13,30 @@ const AnteproyectosCoordinador = () => {
   const [searchText, setSearchText] = useState('');
   const [filtroSemestre, setFiltroSemestre] = useState(() => {
     const mes = new Date().getMonth() + 1;
-    return mes <= 7 ? 1 : 2;
+    return mes <= 7 ? "1" : "2";
   });
-  const [filtroAnio, setFiltroAnio] = useState(() => new Date().getFullYear());
+  const [filtroAnio, setFiltroAnio] = useState(() => String(new Date().getFullYear()));
   const [filtroEstado, setFiltroEstado] = useState("");
   const navigate = useNavigate();
 
   //Para ordenar alfabéticamente
   const [sortField, setSortField] = useState(null);
   const [sortAsc, setSortAsc] = useState(true);
-  // Generar lista de años (últimos 10)
+  // Generar lista de años: año siguiente, año actual y 5 años anteriores (total 7 años)
   const anioActual = new Date().getFullYear();
-  const listaAnios = Array.from({length: 10}, (_, i) => anioActual - i);
+  const listaAnios = [];
+  for (let i = 1; i >= -5; i--) {
+    listaAnios.push(anioActual + i);
+  }
 
   // Filtrar anteproyectos por semestre, año y estado
   // Filtrar anteproyectos por semestre y año
   const anteproyectosFiltrados = anteproyectos.filter(a => {
     const semestre = a.semestre ?? a.semestre_id;
     const anio = a.año ?? a.anio;
-    return String(semestre) === String(filtroSemestre) && String(anio) === String(filtroAnio);
+    const cumpleSemestre = !filtroSemestre || String(semestre) === String(filtroSemestre);
+    const cumpleAnio = !filtroAnio || String(anio) === String(filtroAnio);
+    return cumpleSemestre && cumpleAnio;
   });
 
   // Filtrar por búsqueda
@@ -371,8 +376,9 @@ const AnteproyectosCoordinador = () => {
             <select
               className="border rounded px-4 py-2 text-base min-w-[120px] h-12"
               value={filtroSemestre}
-              onChange={e => setFiltroSemestre(Number(e.target.value))}
+              onChange={e => setFiltroSemestre(e.target.value)}
             >
+              <option value="">Todos</option>
               <option value={1}>1</option>
               <option value={2}>2</option>
             </select>
@@ -382,8 +388,9 @@ const AnteproyectosCoordinador = () => {
             <select
               className="border rounded px-4 py-2 text-base min-w-[120px] h-12"
               value={filtroAnio}
-              onChange={e => setFiltroAnio(Number(e.target.value))}
+              onChange={e => setFiltroAnio(e.target.value)}
             >
+              <option value="">Todos</option>
               {listaAnios.map(anio => (
                 <option key={anio} value={anio}>{anio}</option>
               ))}
@@ -400,7 +407,8 @@ const AnteproyectosCoordinador = () => {
               <option value="Aprobado">Aprobado</option>
               <option value="Reprobado">Reprobado</option>
               <option value="Pendiente">Pendiente</option>
-              <option value="Correccion">Correccion</option>
+              <option value="Correccion">Para Corregir</option>
+              <option value="Corregido">Corregido</option>
             </select>
           </div>
           <div className="flex items-end">
@@ -463,13 +471,7 @@ const AnteproyectosCoordinador = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedAnteproyectos
-                .filter(a => {
-                  const semestre = a.semestre ?? a.semestre_id;
-                  const anio = a.año ?? a.anio;
-                  return String(semestre) === String(filtroSemestre) && String(anio) === String(filtroAnio);
-                })
-                .map((anteproyecto) => (
+              {sortedAnteproyectos.map((anteproyecto) => (
                 <tr key={anteproyecto.id} className="border-b border-gray-200">
                   <td className="px-3 py-2">
                     {anteproyecto.Estudiante?.Usuario?.nombre || "Sin nombre"}
@@ -483,7 +485,7 @@ const AnteproyectosCoordinador = () => {
                   <td className="px-3 py-2">{anteproyecto.semestre ?? anteproyecto.semestre_id ?? ''}</td>
                   <td className="px-3 py-2">{anteproyecto.año ?? anteproyecto.anio ?? ''}</td>
                   <td className="px-3 py-2">
-                    <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-nowrap items-center gap-2">
                     {(anteproyecto.estado !== "Correccion") && (
                       <button
                         onClick={() => handleRevisar(anteproyecto.id)}
@@ -498,7 +500,7 @@ const AnteproyectosCoordinador = () => {
                       >
                         Descargar
                       </button>
-                      {(anteproyecto.estado !== "Pendiente" && anteproyecto.estado !== "Correccion") && (
+                      {false && (anteproyecto.estado !== "Pendiente" && anteproyecto.estado !== "Correccion") && (
                         <button
                           onClick={() => cambiarEstado(anteproyecto)}
                           className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"

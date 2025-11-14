@@ -185,9 +185,16 @@ const CantidadProyectosProfesor = () => {
                 style={{ fontSize: '1.05rem', height: '42px', maxWidth: '130px' }}
               >
                 <option value="">Todos</option>
-                {Array.from({length: 10}, (_, i) => new Date().getFullYear() - i).map(ano => (
-                  <option key={ano} value={ano}>{ano}</option>
-                ))}
+                {(() => {
+                  const anioActual = new Date().getFullYear();
+                  const listaAnios = [];
+                  for (let i = 1; i >= -5; i--) {
+                    listaAnios.push(anioActual + i);
+                  }
+                  return listaAnios.map(ano => (
+                    <option key={ano} value={ano}>{ano}</option>
+                  ));
+                })()}
               </select>
             </div>
             <button
@@ -225,19 +232,31 @@ const CantidadProyectosProfesor = () => {
               Descargar reporte CSV
             </button>
           </div>
-          {/* Mensaje de advertencia si el filtro no es el año y semestre actual */}
+          {/* Mensaje de advertencia si el filtro no es editable */}
           {(() => {
             const fecha = new Date();
             const anoActual = fecha.getFullYear();
             const mes = fecha.getMonth() + 1;
             const semestreActual = mes <= 7 ? 1 : 2;
-            if (
-              (filtroAno && Number(filtroAno) !== anoActual) ||
-              (filtroSemestre && Number(filtroSemestre) !== semestreActual)
-            ) {
+            
+            // Calcular el siguiente semestre y año
+            let semestreSiguiente, anoSiguiente;
+            if (semestreActual === 1) {
+              semestreSiguiente = 2;
+              anoSiguiente = anoActual;
+            } else {
+              semestreSiguiente = 1;
+              anoSiguiente = anoActual + 1;
+            }
+            
+            const esEditable = 
+              (Number(filtroSemestre) === semestreActual && Number(filtroAno) === anoActual) ||
+              (Number(filtroSemestre) === semestreSiguiente && Number(filtroAno) === anoSiguiente);
+            
+            if (filtroSemestre && filtroAno && !esEditable) {
               return (
                 <div className="mb-4 text-xs text-red-600">
-                  Solo se puede editar la disponibilidad en el año y semestre actual.
+                  Solo se puede editar la disponibilidad en el semestre actual ({semestreActual}/{anoActual}) y el siguiente ({semestreSiguiente}/{anoSiguiente}).
                 </div>
               );
             }
@@ -271,12 +290,27 @@ const CantidadProyectosProfesor = () => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {profesoresFiltrados.map((profesor, i) => {
-                    // Determinar semestre y año actual
+                    // Determinar semestre y año actual y siguiente
                     const fecha = new Date();
                     const anoActual = fecha.getFullYear();
                     const mes = fecha.getMonth() + 1; // Enero = 1
                     const semestreActual = mes <= 7 ? 1 : 2;
-                    const esEditable = Number(profesor.año) === anoActual && Number(profesor.semestre) === semestreActual;
+                    
+                    // Calcular el siguiente semestre y año
+                    let semestreSiguiente, anoSiguiente;
+                    if (semestreActual === 1) {
+                      semestreSiguiente = 2;
+                      anoSiguiente = anoActual;
+                    } else {
+                      semestreSiguiente = 1;
+                      anoSiguiente = anoActual + 1;
+                    }
+                    
+                    // Permitir editar si es el semestre actual o el siguiente
+                    const esEditable = 
+                      (Number(profesor.año) === anoActual && Number(profesor.semestre) === semestreActual) ||
+                      (Number(profesor.año) === anoSiguiente && Number(profesor.semestre) === semestreSiguiente);
+                    
                     return (
                       <React.Fragment key={profesor.profesor_id}>
                         <tr 

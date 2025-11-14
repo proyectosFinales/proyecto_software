@@ -235,55 +235,56 @@ const FormularioCoordinador = () => {
     if (!confirmAprobar) return;
 
     try {
-      // Obtener semestre y año actual igual que en el header
-      const fecha = new Date();
-      const anoActual = fecha.getFullYear();
-      const mes = fecha.getMonth() + 1;
-      const semestreActual = mes <= 7 ? 1 : 2;
+      // Usar el semestre y año del anteproyecto (no el actual)
+      const semestreAnteproyecto = semestre;
+      const anoAnteproyecto = anio;
 
-      // Verificar si ya existe un proyecto para este anteproyecto en el semestre y año actual
+      // Verificar si ya existe un proyecto para este anteproyecto en el semestre y año del anteproyecto
       const { data: proyectosExistentes, error: errorProyectoExistente } = await supabase
         .from('Proyecto')
         .select('id')
         .eq('anteproyecto_id', idAnteproyecto)
-        .eq('semestre', semestreActual)
-        .eq('año', anoActual);
+        .eq('semestre', semestreAnteproyecto)
+        .eq('año', anoAnteproyecto);
       if (errorProyectoExistente) throw errorProyectoExistente;
       if (proyectosExistentes && proyectosExistentes.length > 0) {
-        alert('Ya existe un proyecto para este anteproyecto en el semestre y año actual. No se puede aprobar de nuevo.');
+        alert('Ya existe un proyecto para este anteproyecto en el semestre y año especificado. No se puede aprobar de nuevo.');
         return;
       }
 
 
-      // Obtener profesores con espacios disponibles en semestre y año actual
+      // Obtener profesores con espacios disponibles en el semestre y año del anteproyecto
       const profesoresDisponibles = (await Profesor.obtenerTodos()).filter(
-        p => p.disponibilidad > p.proyectosAsignados && p.año === anoActual && p.semestre === semestreActual
+        p => p.disponibilidad > p.proyectosAsignados && p.año === anoAnteproyecto && p.semestre === semestreAnteproyecto
       );
-      if (profesoresDisponibles.length === 0) {
-        throw new Error("No hay profesores disponibles con espacios en el semestre y año actual.");
+      
+      let profesor = null;
+      let hayProfesorAsignado = false;
+
+      if (profesoresDisponibles.length > 0) {
+        // 1. Filtrar por categoría
+        let candidatos = profesoresDisponibles.filter(p => p.categoria && p.categoria === categoria);
+
+        // 2. Si no hay por categoría, filtrar por cantón del estudiante (Usuario)
+        if (candidatos.length === 0) {
+          // Usar el estado cantonEstudiante guardado al consultar el anteproyecto
+          candidatos = profesoresDisponibles.filter(p => {
+            // El cantón del profesor está en p.Usuario.canton
+            console.log("Filtrando por cantón:", cantonEstudiante);
+            console.log("Profesor:", p.Usuario ? p.Usuario.canton : "Sin usuario"); 
+            return p.Usuario && p.Usuario.canton && p.Usuario.canton === cantonEstudiante;
+          });
+        }
+
+        // 3. Si no hay por cantón, usar todos los disponibles
+        if (candidatos.length === 0) {
+          candidatos = profesoresDisponibles;
+        }
+
+        // Seleccionar profesor aleatorio del subconjunto
+        profesor = candidatos[Math.floor(Math.random() * candidatos.length)];
+        hayProfesorAsignado = true;
       }
-
-      // 1. Filtrar por categoría
-      let candidatos = profesoresDisponibles.filter(p => p.categoria && p.categoria === categoria);
-
-      // 2. Si no hay por categoría, filtrar por cantón del estudiante (Usuario)
-      if (candidatos.length === 0) {
-        // Usar el estado cantonEstudiante guardado al consultar el anteproyecto
-        candidatos = profesoresDisponibles.filter(p => {
-          // El cantón del profesor está en p.Usuario.canton
-          console.log("Filtrando por cantón:", cantonEstudiante);
-          console.log("Profesor:", p.Usuario ? p.Usuario.canton : "Sin usuario"); 
-          return p.Usuario && p.Usuario.canton && p.Usuario.canton === cantonEstudiante;
-        });
-      }
-
-      // 3. Si no hay por cantón, usar todos los disponibles
-      if (candidatos.length === 0) {
-        candidatos = profesoresDisponibles;
-      }
-
-      // Seleccionar profesor aleatorio del subconjunto
-      const profesor = candidatos[Math.floor(Math.random() * candidatos.length)];
 
       // Actualizar estado del anteproyecto
       const { data, error } = await supabase
@@ -300,30 +301,32 @@ const FormularioCoordinador = () => {
       const { data: insertProyecto, error: insertProyectoError } = await supabase
         .from('Proyecto')
         .insert({
-          profesor_id: profesor.profesor_id,
-          estudiante_id: data[0].estudiante_id, // Asegúrate de tener el estudianteId disponible
+          profesor_id: hayProfesorAsignado ? profesor.profesor_id : null,
+          estudiante_id: data[0].estudiante_id,
           anteproyecto_id: idAnteproyecto,
-          estado: "Pendiente",
-          semestre: semestreActual,
-          año: anoActual,
+          estado: hayProfesorAsignado ? "Asignado" : "Pendiente",
+          semestre: semestreAnteproyecto,
+          año: anoAnteproyecto,
           fecha_inicio: new Date().toISOString()
         })
         .select('*');
       if (insertProyectoError) throw insertProyectoError;
 
-      // Actualizar campo asesor en la tabla Estudiante
-      const { error: updateEstudianteError } = await supabase
-        .from('Estudiante')
-        .update({ asesor: profesor.profesor_id })
-        .eq('estudiante_id', data[0].estudiante_id); // Asegúrate de tener el estudianteId disponible
-      if (updateEstudianteError) throw updateEstudianteError;
+      // Actualizar campo asesor en la tabla Estudiante solo si hay profesor asignado
+      if (hayProfesorAsignado) {
+        const { error: updateEstudianteError } = await supabase
+          .from('Estudiante')
+          .update({ asesor: profesor.profesor_id })
+          .eq('estudiante_id', data[0].estudiante_id);
+        if (updateEstudianteError) throw updateEstudianteError;
 
-      // Sumar 1 a asignados en AsignacionesProfesor
-      const { error: updateAsignadosError } = await supabase
-        .from('AsignacionesProfesor')
-        .update({ asignados: profesor.proyectosAsignados + 1 })
-        .eq('idProfesor', profesor.profesor_id);
-      if (updateAsignadosError) throw updateAsignadosError;
+        // Sumar 1 a asignados en AsignacionesProfesor
+        const { error: updateAsignadosError } = await supabase
+          .from('AsignacionesProfesor')
+          .update({ asignados: profesor.proyectosAsignados + 1 })
+          .eq('idProfesor', profesor.profesor_id);
+        if (updateAsignadosError) throw updateAsignadosError;
+      }
 
       for (let i = 0; i < 3; i++)
         await addAvance("Pendiente", insertProyecto[0].id);
@@ -336,7 +339,11 @@ const FormularioCoordinador = () => {
         "Escuela de Producción Industrial.";
       sendMail(correo, "Anteproyecto Aprobado", mensaje);
 
-      alert('Anteproyecto actualizado exitosamente (Aprobado).');
+      if (hayProfesorAsignado) {
+        alert('Anteproyecto actualizado exitosamente (Aprobado) y proyecto creado con profesor asignado.');
+      } else {
+        alert('Anteproyecto actualizado exitosamente (Aprobado). NOTA: No hay profesores disponibles, el proyecto fue creado sin profesor asignado (estado Pendiente).');
+      }
       navigate('/anteproyectosCoordinador');
     } catch (error) {
       alert('Error al actualizar anteproyecto: ' + error.message);
@@ -966,8 +973,8 @@ const FormularioCoordinador = () => {
           <button
             type="submit"
             className={`${styles.button} ${styles.aprobar}`}
-            disabled={estado === "Aprobado"}
-            style={estado === "Aprobado" ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
+            disabled={estado === "Aprobado" || estado === "Correccion" || estado === "Reprobado"}
+            style={(estado === "Aprobado" || estado === "Correccion" || estado === "Reprobado") ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
           >
             Aprobar
           </button>
@@ -983,8 +990,8 @@ const FormularioCoordinador = () => {
           <button
             className={`${styles.button} ${styles.aprobar}`}
             onClick={paraCorregirAnteproyecto}
-            disabled={estado === "Aprobado"}
-            style={estado === "Aprobado" ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
+            disabled={estado === "Aprobado" || estado === "Correccion" || estado === "Reprobado"}
+            style={(estado === "Aprobado" || estado === "Correccion" || estado === "Reprobado") ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
           >
             Para Corregir
           </button>
@@ -992,8 +999,8 @@ const FormularioCoordinador = () => {
             type="submit"
             className={`${styles.button} ${styles.reprobar}`}
             onClick={reprobarAnteproyecto}
-            disabled={estado === "Aprobado"}
-            style={estado === "Aprobado" ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
+            disabled={estado === "Aprobado" || estado === "Correccion" || estado === "Reprobado"}
+            style={(estado === "Aprobado" || estado === "Correccion" || estado === "Reprobado") ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
           >
             Reprobar
           </button>

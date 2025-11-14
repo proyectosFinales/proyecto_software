@@ -167,8 +167,10 @@ const AnteproyectosEstudiante = () => {
                     <button
                       onClick={() => editarAnteproyecto(anteproyecto.id)}
                       className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                      disabled={anteproyecto.estado === "Aprobado"}
+                      style={anteproyecto.estado === "Aprobado" ? { backgroundColor: '#d1d5db', color: '#888', cursor: 'not-allowed' } : {}}
                     >
-                      Editar
+                      {anteproyecto.estado === "Correccion" ? "Corregir" : "Editar"}
                     </button>
                     <button
                       onClick={() => descargarAnteproyecto(anteproyecto)}

@@ -30,6 +30,7 @@ const EstudianteForm = () => {
 
   // Datos académicos del estudiante
   const [semestrePropuesto, setSemestrePropuesto] = useState(null);
+  const [anioPropuesto, setAnioPropuesto] = useState(null);
   const [situacionLaboral, setSituacionLaboral] = useState(null);
   const [haPerdido, setHaPerdido] = useState(false);
   const [historialReprobacion, setHistorialReprobacion] = useState([]); // Array para la lista de reprobaciones
@@ -97,8 +98,15 @@ const EstudianteForm = () => {
 
 // ENUMs de la Base de Datos. Si, no es muy practico, pero funciona por ahora.
 const opcionesSemestre = [
-  { value: 'I', label: 'I Semestre' },
-  { value: 'II', label: 'II Semestre' }
+  { value: '1', label: '1' },
+  { value: '2', label: '2' }
+];
+
+// Opciones de año: año actual y siguiente
+const currentYear = new Date().getFullYear();
+const opcionesAnio = [
+  { value: currentYear, label: currentYear.toString() },
+  { value: currentYear + 1, label: (currentYear + 1).toString() }
 ];
 
 const opcionesSituacionLaboral = [
@@ -352,7 +360,8 @@ const opcionesCausasPerdida = [
           departamento: nombreDepartamento,
           estado: 'Pendiente',
           categoria_id: selectedCategoria.value,
-          semestre_propuesto: semestrePropuesto.value,
+          semestre: semestrePropuesto.value,
+          año: anioPropuesto.value,
         })
         .select();
       
@@ -1036,10 +1045,24 @@ const opcionesCausasPerdida = [
             </label>
         </div>
 
+        <div>
+            <label>
+              28. Año propuesto: *
+              <Select
+                value={anioPropuesto}
+                onChange={setAnioPropuesto}
+                options={opcionesAnio}
+                placeholder="Seleccione el año"
+                className="mt-2"
+                required
+              />
+            </label>
+        </div>
+
         
         <div className={`${styles.formGroup} ${styles.toggle}`}>
           <label htmlFor="haPerdidoCheck">
-            28- ¿Ha perdido el proyecto de graduación anteriormente?
+            29- ¿Ha perdido el proyecto de graduación anteriormente?
           </label>
           <input
             id="haPerdidoCheck"
