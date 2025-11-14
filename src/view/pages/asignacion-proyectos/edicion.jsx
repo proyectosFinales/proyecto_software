@@ -15,6 +15,8 @@ import HeaderCoordinador from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 import Profesor from "../../../controller/profesor.js";
 import { fetchSemestreActual } from "../../../controller/Semestre";
+import sendMail from "../../../controller/Email";
+import { obtenerEstudiante } from "../../../controller/edicionController.js";
 
 /**
  * EdicionAsignacionProyectos
@@ -308,8 +310,10 @@ function EdicionAsignacionProyectos() {
           proj.id === proyectoId ? { ...proj, estado: nuevoEstado } : proj
         )
       );
-
+      //Enviar correo de comprobación al estudiante
+      await enviarCorreo(estudianteId, nuevoEstado);
       alert("Estado actualizado exitosamente");
+
     } catch (err) {
       console.error("handleEstadoChange error:", err);
       alert("Error al actualizar el estado del proyecto");
@@ -371,6 +375,30 @@ function EdicionAsignacionProyectos() {
       }
       return { key, direction: 'asc' };
     });
+  }
+
+  const enviarCorreo = async (estID, estado) => {
+    const estudiante = await obtenerEstudiante(estID);
+    console.log("El estudiante:", estudiante);
+    //Mensajes a enviar por correo segun si se aprueba o no un proyecto
+    const mensajeAprobado = `Buenas,\n` +
+      `Se le comunica que el proyecto final de graduación presentado por ${estudiante[0].Usuario.nombre}, carnet ${estudiante[0].carnet}, ` +
+      `correo ${estudiante[0].Usuario.correo}, ha sido APROBADO por el coordinador.\n` +
+      `\nInstituto Tecnológico de Costar Rica,\n` +
+      `Escuela de Producción Industrial.`;
+    const mensajeSuspendido = `Buenas,\n` +
+      `Se le comunica que el proyecto final de graduación presentado por ${estudiante[0].Usuario.nombre}, carnet ${estudiante[0].carnet}, ` +
+      `correo ${estudiante[0].Usuario.correo}, ha sido APROBADO por el coordinador.\n` +
+      `\nDe tener alguna consulta por favor comunpíquese con la coordinación.\n` +
+      `\nInstituto Tecnológico de Costar Rica,\n` +
+      `Escuela de Producción Industrial.`;
+
+    //Se le comunica al estudiante
+    if (estado === "Aprobado") {
+      sendMail(estudiante[0].Usuario.correo, 'Proyecto Aprobado', mensajeAprobado);
+    }else {
+      sendMail(estudiante[0].Usuario.correo, 'Proyecto Suspendido', mensajeSuspendido);
+    }
   }
 
   return (
