@@ -348,11 +348,13 @@ const FormularioCoordinador = () => {
           .eq('estudiante_id', data[0].estudiante_id);
         if (updateEstudianteError) throw updateEstudianteError;
 
-        // Sumar 1 a asignados en AsignacionesProfesor
+        // Sumar 1 a asignados en AsignacionesProfesor para el semestre y año específico
         const { error: updateAsignadosError } = await supabase
           .from('AsignacionesProfesor')
           .update({ asignados: profesor.proyectosAsignados + 1 })
-          .eq('idProfesor', profesor.profesor_id);
+          .eq('idProfesor', profesor.profesor_id)
+          .eq('semestre', semestreAnteproyecto)
+          .eq('año', anoAnteproyecto);
         if (updateAsignadosError) throw updateAsignadosError;
       }
 

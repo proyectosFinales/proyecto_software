@@ -26,6 +26,7 @@ const CantidadProyectosProfesor = () => {
   const [error, setError] = useState(null);
   const [proyectossinProfesor, setProyectossinProfesor] = useState(0);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
+  const [ordenamiento, setOrdenamiento] = useState({ campo: null, direccion: 'asc' });
 
   useEffect(() => {
     console.log('CantidadProyectosProfesor: useEffect running');
@@ -55,8 +56,27 @@ const CantidadProyectosProfesor = () => {
     if (filtroAno) {
       filtrados = filtrados.filter(p => String(p.año) === String(filtroAno));
     }
+    
+    // Aplicar ordenamiento
+    if (ordenamiento.campo) {
+      filtrados = [...filtrados].sort((a, b) => {
+        let valorA = a[ordenamiento.campo];
+        let valorB = b[ordenamiento.campo];
+        
+        // Convertir a string para comparación alfabética si es texto
+        if (ordenamiento.campo === 'nombre') {
+          valorA = String(valorA).toLowerCase();
+          valorB = String(valorB).toLowerCase();
+        }
+        
+        if (valorA < valorB) return ordenamiento.direccion === 'asc' ? -1 : 1;
+        if (valorA > valorB) return ordenamiento.direccion === 'asc' ? 1 : -1;
+        return 0;
+      });
+    }
+    
     setProfesoresFiltrados(filtrados);
-  }, [filtroSemestre, filtroAno, profesores]);
+  }, [filtroSemestre, filtroAno, profesores, ordenamiento]);
 
   // Actualiza en tiempo real la propiedad "cantidadEstudiantes"
   const actualizarCantidad = useCallback((indice, evento) => {
@@ -88,6 +108,34 @@ const CantidadProyectosProfesor = () => {
       setMostrarAlerta(false);
     }, 5000);
   }, [profesores]);
+
+  // Manejar ordenamiento de columnas
+  const handleOrdenar = (campo) => {
+    setOrdenamiento(prev => ({
+      campo,
+      direccion: prev.campo === campo && prev.direccion === 'asc' ? 'desc' : 'asc'
+    }));
+  };
+
+  // Renderizar ícono de ordenamiento
+  const renderIconoOrdenamiento = (campo) => {
+    if (ordenamiento.campo !== campo) {
+      return (
+        <svg className="inline-block w-4 h-4 ml-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+      );
+    }
+    return ordenamiento.direccion === 'asc' ? (
+      <svg className="inline-block w-4 h-4 ml-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+      </svg>
+    ) : (
+      <svg className="inline-block w-4 h-4 ml-1 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    );
+  };
 
   if (isLoading) {
     return (
@@ -269,21 +317,36 @@ const CantidadProyectosProfesor = () => {
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
-                      Profesor
+                    <th 
+                      className="px-3 sm:px-6 py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleOrdenar('nombre')}
+                    >
+                      Profesor {renderIconoOrdenamiento('nombre')}
                     </th>
                     
-                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
-                      Disponibilidad
+                    <th 
+                      className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleOrdenar('disponibilidad')}
+                    >
+                      Disponibilidad {renderIconoOrdenamiento('disponibilidad')}
                     </th>
-                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
-                      Proyectos Asignados
+                    <th 
+                      className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleOrdenar('proyectosAsignados')}
+                    >
+                      Proyectos Asignados {renderIconoOrdenamiento('proyectosAsignados')}
                     </th>
-                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
-                      Semestre
+                    <th 
+                      className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleOrdenar('semestre')}
+                    >
+                      Semestre {renderIconoOrdenamiento('semestre')}
                     </th>
-                    <th className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">
-                      Año
+                    <th 
+                      className="px-3 sm:px-6 py-3 text-center text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100 transition-colors"
+                      onClick={() => handleOrdenar('año')}
+                    >
+                      Año {renderIconoOrdenamiento('año')}
                     </th>
 
                   </tr>
@@ -311,8 +374,11 @@ const CantidadProyectosProfesor = () => {
                       (Number(profesor.año) === anoActual && Number(profesor.semestre) === semestreActual) ||
                       (Number(profesor.año) === anoSiguiente && Number(profesor.semestre) === semestreSiguiente);
                     
+                    // Crear clave única combinando profesor_id + semestre + año
+                    const claveUnica = `${profesor.profesor_id}-${profesor.semestre}-${profesor.año}`;
+                    
                     return (
-                      <React.Fragment key={profesor.profesor_id}>
+                      <React.Fragment key={claveUnica}>
                         <tr 
                           className="hover:bg-gray-50 transition-colors duration-150"
                         >
@@ -348,11 +414,11 @@ const CantidadProyectosProfesor = () => {
                               disabled={profesor.proyectosAsignados === 0}
                               onClick={async () => {
                                 if (profesor.proyectosAsignados === 0) return;
-                                if (profesorExpandido === profesor.profesor_id) {
+                                if (profesorExpandido === claveUnica) {
                                   setProfesorExpandido(null);
                                   setProyectosExpandido([]);
                                 } else {
-                                  setProfesorExpandido(profesor.profesor_id);
+                                  setProfesorExpandido(claveUnica);
                                   try {
                                     const proyectos = await obtenerProyectosDetalladosProfesor(profesor.profesor_id);
                                     setProyectosExpandido(proyectos);
@@ -367,8 +433,8 @@ const CantidadProyectosProfesor = () => {
                           </td>
                         </tr>
                         {/* Fila expandida para proyectos asignados */}
-                        {profesorExpandido === profesor.profesor_id && proyectosExpandido.length > 0 && (
-                          <tr key={profesor.profesor_id + "-expandido"}>
+                        {profesorExpandido === claveUnica && proyectosExpandido.length > 0 && (
+                          <tr key={claveUnica + "-expandido"}>
                             <td colSpan={6} className="bg-blue-50 px-6 py-2">
                               <div className="font-bold text-blue-900 mb-2">Proyectos asignados</div>
                               <div className="space-y-2">

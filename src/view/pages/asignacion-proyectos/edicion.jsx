@@ -151,13 +151,10 @@ function EdicionAsignacionProyectos() {
 
     useEffect(() => {
       // Filtra profesores que tienen disponibilidad mayor a asignados
-      const filtrados = profesores.filter((prof) => {
-        const disponibilidad = prof.original.disponibilidad ?? 0;
-        const asignados = prof.original.proyectosAsignados ?? 0;
-        return disponibilidad > asignados;
-      });
-      setFilteredProfesores(filtrados);
-      console.log("Filtered Profesores: ", filtrados);
+      // Ya no es necesario filtrar aquí porque el filtrado se hace por proyecto
+      // en el render del select
+      setFilteredProfesores(profesores);
+      console.log("Profesores disponibles: ", profesores);
     }, [profesores]);
 
   /**
@@ -168,10 +165,21 @@ function EdicionAsignacionProyectos() {
   const handleAssign = async (proyectoId, profesorId, estudianteId) => {
     if (!profesorId) return;
     try {
-      const profesorAnteriorId = proyectos.find(proj => proj.id === proyectoId).profesor_id;
+      const proyecto = proyectos.find(proj => proj.id === proyectoId);
+      const profesorAnteriorId = proyecto.profesor_id;
 
-      // Obtener datos actuales de asignaciones del profesor
-      const profActual = profesores.find(p => p.profesor_id === profesorId);
+      // Obtener datos actuales de asignaciones del profesor para el semestre/año del proyecto
+      const profActual = profesores.find(p => 
+        p.profesor_id === profesorId && 
+        p.semestre === proyecto.semestre && 
+        p.año === proyecto.año
+      );
+      
+      if (!profActual) {
+        errorToast("El profesor no tiene asignación para este semestre/año.");
+        return;
+      }
+      
       const asignados = profActual?.original?.proyectosAsignados ?? 0;
       const disponibilidad = profActual?.original?.disponibilidad ?? 0;
       if (asignados + 1 > disponibilidad) {
@@ -193,21 +201,29 @@ function EdicionAsignacionProyectos() {
         .eq("estudiante_id", estudianteId);
       if (estudianteError) throw estudianteError;
 
-      // Sumar 1 a asignados en AsignacionesProfesor para el nuevo profesor
+      // Sumar 1 a asignados en AsignacionesProfesor para el nuevo profesor en el semestre/año específico
       const { error: asignacionError } = await supabase
         .from("AsignacionesProfesor")
         .update({ asignados: asignados + 1 })
-        .eq("idProfesor", profesorId);
+        .eq("idProfesor", profesorId)
+        .eq("semestre", proyecto.semestre)
+        .eq("año", proyecto.año);
       if (asignacionError) throw asignacionError;
 
       // Si había un profesor anterior, restar 1 a asignados en AsignacionesProfesor
       if (profesorAnteriorId) {
-        const profAnterior = profesores.find(p => p.profesor_id === profesorAnteriorId);
+        const profAnterior = profesores.find(p => 
+          p.profesor_id === profesorAnteriorId && 
+          p.semestre === proyecto.semestre && 
+          p.año === proyecto.año
+        );
         const asignadosAnterior = profAnterior?.original?.proyectosAsignados ?? 0;
         await supabase
           .from("AsignacionesProfesor")
           .update({ asignados: Math.max(0, asignadosAnterior - 1) })
-          .eq("idProfesor", profesorAnteriorId);
+          .eq("idProfesor", profesorAnteriorId)
+          .eq("semestre", proyecto.semestre)
+          .eq("año", proyecto.año);
       }
 
       setProyectos((prevProyectos) =>
@@ -218,10 +234,10 @@ function EdicionAsignacionProyectos() {
 
       setProfesores((prevProfesores) =>
         prevProfesores.map((prof) => {
-          if (prof.profesor_id === profesorId) {
-            return { ...prof, original: { ...prof.original, proyectosAsignados: asignados + 1 } };
-          } else if (prof.profesor_id === profesorAnteriorId) {
-            return { ...prof, original: { ...prof.original, proyectosAsignados: Math.max(0, (prof.original.proyectosAsignados ?? 0) - 1) } };
+          if (prof.profesor_id === profesorId && prof.semestre === proyecto.semestre && prof.año === proyecto.año) {
+            return { ...prof, original: { ...prof.original, proyectosAsignados: asignados + 1 }, proyectosAsignados: asignados + 1 };
+          } else if (prof.profesor_id === profesorAnteriorId && prof.semestre === proyecto.semestre && prof.año === proyecto.año) {
+            return { ...prof, original: { ...prof.original, proyectosAsignados: Math.max(0, (prof.original.proyectosAsignados ?? 0) - 1) }, proyectosAsignados: Math.max(0, (prof.proyectosAsignados ?? 0) - 1) };
           } else {
             return prof;
           }
@@ -241,8 +257,14 @@ function EdicionAsignacionProyectos() {
    */
   const handleUnassign = async (proyectoId, estudianteId, profesorId) => {
     try {
-      // Obtener datos actuales de asignaciones del profesor
-      const profActual = profesores.find(p => p.profesor_id === profesorId);
+      const proyecto = proyectos.find(proj => proj.id === proyectoId);
+      
+      // Obtener datos actuales de asignaciones del profesor para el semestre/año del proyecto
+      const profActual = profesores.find(p => 
+        p.profesor_id === profesorId && 
+        p.semestre === proyecto.semestre && 
+        p.año === proyecto.año
+      );
       const asignados = profActual?.original?.proyectosAsignados ?? 0;
 
       const { error: proyectoError } = await supabase
@@ -257,11 +279,13 @@ function EdicionAsignacionProyectos() {
         .eq("estudiante_id", estudianteId);
       if (estudianteError) throw estudianteError;
 
-      // Restar 1 a asignados en AsignacionesProfesor para el profesor
+      // Restar 1 a asignados en AsignacionesProfesor para el profesor en el semestre/año específico
       const { error: asignacionError } = await supabase
         .from("AsignacionesProfesor")
         .update({ asignados: Math.max(0, asignados - 1) })
-        .eq("idProfesor", profesorId);
+        .eq("idProfesor", profesorId)
+        .eq("semestre", proyecto.semestre)
+        .eq("año", proyecto.año);
       if (asignacionError) throw asignacionError;
 
       setProyectos((prevProyectos) =>
@@ -272,8 +296,8 @@ function EdicionAsignacionProyectos() {
 
       setProfesores((prevProfesores) =>
         prevProfesores.map((prof) =>
-          prof.profesor_id === profesorId
-            ? { ...prof, original: { ...prof.original, proyectosAsignados: Math.max(0, (prof.original.proyectosAsignados ?? 0) - 1) } }
+          prof.profesor_id === profesorId && prof.semestre === proyecto.semestre && prof.año === proyecto.año
+            ? { ...prof, original: { ...prof.original, proyectosAsignados: Math.max(0, (prof.original.proyectosAsignados ?? 0) - 1) }, proyectosAsignados: Math.max(0, (prof.proyectosAsignados ?? 0) - 1) }
             : prof
         )
       );
@@ -632,10 +656,12 @@ function EdicionAsignacionProyectos() {
                               {filteredProfesores
                                 .filter((prof) => {
                                   // Filtrar por semestre y año del proyecto
+                                  // Y verificar que disponibilidad > asignados
                                   return (
                                     prof.año === proyecto.año &&
                                     prof.semestre === proyecto.semestre &&
-                                    prof.profesor_id !== proyecto.profesor_id
+                                    prof.profesor_id !== proyecto.profesor_id &&
+                                    prof.disponibilidad > prof.proyectosAsignados
                                   );
                                 })
                                 .map((prof) => (

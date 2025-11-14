@@ -184,6 +184,7 @@ class Profesor extends Usuario {
 
   /**
    * Obtiene TODOS los profesores con sus datos de disponibilidad y proyectos asignados.
+   * Crea una fila por cada combinación de profesor + semestre + año en AsignacionesProfesor.
    * Ejecuta el SQL equivalente a:
    * SELECT p.profesor_id, ap.disponibilidad, ap.asignados, p.categoria_id, u.id, u.nombre, u.sede, u.correo
    * FROM "Profesor" p
@@ -231,37 +232,37 @@ class Profesor extends Usuario {
         throw errorAsignaciones;
       }
 
-      // Creamos un mapa para búsqueda rápida: idProfesor -> {disponibilidad, asignados, semestre, año}
-      const mapaAsignaciones = new Map();
+      // Creamos un mapa para búsqueda rápida: idProfesor -> datos del profesor
+      const mapaProfesores = new Map();
+      profesores.forEach(profesor => {
+        mapaProfesores.set(profesor.profesor_id, profesor);
+      });
+
+      // Creamos una instancia de Profesor por cada asignación
+      const resultado = [];
       if (asignaciones && asignaciones.length > 0) {
         asignaciones.forEach(asignacion => {
-          mapaAsignaciones.set(asignacion.idProfesor, {
-            disponibilidad: asignacion.disponibilidad,
-            asignados: asignacion.asignados,
-            semestre: asignacion.semestre,
-            año: asignacion.año
-          });
+          const profesor = mapaProfesores.get(asignacion.idProfesor);
+          if (profesor) {
+            const instancia = new Profesor(
+              profesor.profesor_id,
+              profesor.Usuario?.id,
+              profesor.Usuario?.nombre || "",
+              profesor.Usuario?.sede || "",
+              asignacion.disponibilidad,
+              asignacion.asignados,
+              profesor.Categoria?.nombre || null,
+              asignacion.semestre,
+              asignacion.año
+            );
+            // Attach Usuario as a property for filtering (if needed)
+            instancia.Usuario = profesor.Usuario;
+            resultado.push(instancia);
+          }
         });
       }
 
-      // Combinamos los datos: profesores + asignaciones
-      return profesores.map(profesor => {
-        const asignacion = mapaAsignaciones.get(profesor.profesor_id) || { disponibilidad: 0, asignados: 0, semestre: null, año: null };
-        const instancia = new Profesor(
-          profesor.profesor_id,
-          profesor.Usuario?.id,
-          profesor.Usuario?.nombre || "",
-          profesor.Usuario?.sede || "",
-          asignacion.disponibilidad,
-          asignacion.asignados,
-          profesor.Categoria?.nombre || null,
-          asignacion.semestre,
-          asignacion.año
-        );
-        // Attach Usuario as a property for filtering (if needed)
-        instancia.Usuario = profesor.Usuario;
-        return instancia;
-      });
+      return resultado;
     } catch (error) {
       console.error("Error en obtenerTodos:", error);
       throw error;
@@ -274,7 +275,7 @@ class Profesor extends Usuario {
 
   /**
    * Actualiza la disponibilidad en la tabla AsignacionesProfesor
-   * (antes actualizaba cantidad_estudiantes, ahora actualiza disponibilidad)
+   * para el semestre y año específico de esta instancia
    */
   async actualizarCantidadEstudiantes() {
     console.log(this.disponibilidad)
@@ -291,7 +292,9 @@ class Profesor extends Usuario {
       const { error } = await supabase
         .from("AsignacionesProfesor")
         .update({ disponibilidad: this.disponibilidad })
-        .eq("idProfesor", this.profesor_id);
+        .eq("idProfesor", this.profesor_id)
+        .eq("semestre", this.semestre)
+        .eq("año", this.año);
 
       if (error) {
         return Promise.reject(error.message);

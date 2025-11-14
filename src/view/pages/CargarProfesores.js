@@ -78,6 +78,20 @@ const CargarProfesores = () => {
 
       // Con la primera fila como encabezados
       const headers = data[0];
+      
+      // Validar que el archivo tenga las columnas requeridas
+      const columnasRequeridas = ['Nombre', 'Correo', 'Telefono'];
+      const columnasPresentes = columnasRequeridas.every(col => 
+        headers.some(h => h && h.toLowerCase() === col.toLowerCase())
+      );
+      
+      if (!columnasPresentes) {
+        alert(`Error: El archivo Excel debe contener las siguientes columnas:\n${columnasRequeridas.join(', ')}\n\nColumnas encontradas: ${headers.join(', ')}`);
+        setExcelData([]);
+        e.target.value = ''; // Limpiar el input
+        return;
+      }
+      
       const rows = data.slice(1);
       const jsonData = rows.map((row) => {
         const rowData = {};
@@ -94,24 +108,47 @@ const CargarProfesores = () => {
 
   const handleUpload = async () => {
     try {
+      let registrados = 0;
+      let errores = 0;
+      
       // For each row in excelData, register a professor
       for (const row of excelData) {
-        const fullName = row['Nombre'] || '';
-        const carnet = row['Carnet'] || '';
-        const telefono = row['Telefono'] || '';
-        const email = row['Email'] || '';
+        try {
+          const nombre = row['Nombre'] || '';
+          const correo = row['Correo'] || '';
+          const telefono = row['Telefono'] || '';
 
-        // Generate random password
-        const password = generarContraseña();
+          // Validar que los campos requeridos no estén vacíos
+          if (!nombre || !correo || !telefono) {
+            console.warn('Fila omitida por campos vacíos:', row);
+            errores++;
+            continue;
+          }
 
-        // Create the professor in DB
-        await registroProfesor(fullName, carnet, telefono, email, password, 'Cartago');
+          // Generate random password
+          const password = generarContraseña();
 
-        // Send email with the credentials
-        sendMailToNewUser(email, password);
+          // Create the professor in DB
+          await registroProfesor(nombre, correo, password, 'Central Cartago', telefono, 'Cartago', 'Cartago', 'Central');
+
+          // Send email with the credentials
+          sendMailToNewUser(correo, password);
+          
+          registrados++;
+        } catch (error) {
+          console.error('Error al registrar profesor:', row, error);
+          errores++;
+        }
       }
 
-      alert('Profesores registrados correctamente.');
+      if (errores > 0) {
+        alert(`Proceso completado.\nProfesores registrados: ${registrados}\nErrores: ${errores}`);
+      } else {
+        alert(`Profesores registrados correctamente: ${registrados}`);
+      }
+      
+      // Limpiar datos después de la carga
+      setExcelData([]);
     } catch (error) {
       console.error('Error al registrarlos en la BD: ', error);
       alert('Error al registrar los datos: ' + error);
@@ -139,10 +176,10 @@ const CargarProfesores = () => {
                 <p className="font-medium mb-2">El archivo Excel debe contener las siguientes columnas:</p>
                 <ul className="list-disc ml-4 sm:ml-6 space-y-1">
                   <li>Nombre (nombre completo del profesor)</li>
-                  <li>Email (correo electrónico institucional)</li>
+                  <li>Correo (correo electrónico institucional)</li>
                   <li>Telefono (número de teléfono)</li>
-                  <li>Carnet (identificación del profesor)</li>
                 </ul>
+                <p className="mt-3 font-medium text-blue-700">Nota: Las columnas deben tener exactamente estos nombres.</p>
               </div>
             )}
           </div>
