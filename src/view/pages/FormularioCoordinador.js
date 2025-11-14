@@ -286,7 +286,7 @@ const FormularioCoordinador = () => {
         hayProfesorAsignado = true;
         console.log("Profesor asignado:", profesor.nombre, "ID:", profesor.profesor_id);
       } else {
-        console.log("No hay profesores disponibles");
+        console.log("No hay ");
       }
 
       console.log("hayProfesorAsignado:", hayProfesorAsignado);

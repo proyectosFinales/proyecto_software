@@ -137,7 +137,6 @@ function EdicionAsignacionProyectos() {
         setProyectos(proyectosData);
         Profesor.obtenerTodos().then((profesoresData) => {
           setProfesores(profesoresData);
-          console.log("Profesores cargados:", profesoresData);
         }).catch(console.error);
       } catch (error) {
         console.error("Unexpected error:", error);
@@ -154,7 +153,6 @@ function EdicionAsignacionProyectos() {
       // Ya no es necesario filtrar aquí porque el filtrado se hace por proyecto
       // en el render del select
       setFilteredProfesores(profesores);
-      console.log("Profesores disponibles: ", profesores);
     }, [profesores]);
 
   /**

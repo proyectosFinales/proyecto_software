@@ -85,7 +85,6 @@ const CantidadProyectosProfesor = () => {
       return;
     }
     profesores[indice].disponibilidad = Number(evento.target.value);
-    console.log(profesores[indice].disponibilidad);
     setProfesores([...profesores]);
   }, [profesores]);
 
