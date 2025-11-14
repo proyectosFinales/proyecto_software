@@ -284,7 +284,12 @@ const FormularioCoordinador = () => {
         // Seleccionar profesor aleatorio del subconjunto
         profesor = candidatos[Math.floor(Math.random() * candidatos.length)];
         hayProfesorAsignado = true;
+        console.log("Profesor asignado:", profesor.nombre, "ID:", profesor.profesor_id);
+      } else {
+        console.log("No hay profesores disponibles");
       }
+
+      console.log("hayProfesorAsignado:", hayProfesorAsignado);
 
       // Actualizar estado del anteproyecto
       const { data, error } = await supabase
@@ -298,19 +303,42 @@ const FormularioCoordinador = () => {
       if (error) throw error;
 
       // Insertar registro en la tabla Proyecto
+      const estadoProyecto = hayProfesorAsignado ? "Asignado" : "Pendiente";
+      console.log("Estado del proyecto a crear:", estadoProyecto);
+      console.log("Profesor ID:", hayProfesorAsignado ? profesor.profesor_id : null);
+      
       const { data: insertProyecto, error: insertProyectoError } = await supabase
         .from('Proyecto')
         .insert({
           profesor_id: hayProfesorAsignado ? profesor.profesor_id : null,
           estudiante_id: data[0].estudiante_id,
           anteproyecto_id: idAnteproyecto,
-          estado: hayProfesorAsignado ? "Asignado" : "Pendiente",
+          estado: estadoProyecto,
           semestre: semestreAnteproyecto,
           año: anoAnteproyecto,
           fecha_inicio: new Date().toISOString()
         })
         .select('*');
       if (insertProyectoError) throw insertProyectoError;
+      
+      console.log("Proyecto inmediatamente después de crear:", insertProyecto[0]);
+      
+      // Forzar actualización del estado si hay profesor asignado (por si hay un default en la BD)
+      if (hayProfesorAsignado && insertProyecto[0].estado !== "Asignado") {
+        console.log("ADVERTENCIA: El proyecto se creó con estado:", insertProyecto[0].estado, "- Forzando actualización a Asignado");
+        const { error: updateEstadoError } = await supabase
+          .from('Proyecto')
+          .update({ estado: "Asignado" })
+          .eq('id', insertProyecto[0].id);
+        if (updateEstadoError) {
+          console.error("Error al actualizar estado:", updateEstadoError);
+        } else {
+          console.log("Estado actualizado exitosamente a Asignado");
+          insertProyecto[0].estado = "Asignado"; // Actualizar en memoria
+        }
+      }
+      
+      console.log("Proyecto final:", insertProyecto[0]);
 
       // Actualizar campo asesor en la tabla Estudiante solo si hay profesor asignado
       if (hayProfesorAsignado) {
@@ -329,7 +357,7 @@ const FormularioCoordinador = () => {
       }
 
       for (let i = 0; i < 3; i++)
-        await addAvance("Pendiente", insertProyecto[0].id);
+        await addAvance(estadoProyecto, insertProyecto[0].id);
 
       //Para enviar el correo al estudiante de que le aprobaron el anteproyecto
       const mensaje = "Buenas,\n" +

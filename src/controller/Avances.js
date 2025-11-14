@@ -173,24 +173,26 @@ const reprobarEstudiante = async (proyecto_id) => {
     .eq('proyecto_id', proyecto_id);
   if (error) throw error;
 
-  const estados = data.length > 0 ? ['Reprobado', 'reprobado'] : ['Pendiente', 'en progreso'];
+  // Solo actualizar si hay avances reprobados
+  if (data.length > 0) {
+    const { data: proyectoData, error: proyectoError } = await supabase
+      .from('Proyecto')
+      .update({ estado: 'Reprobado' })
+      .eq('id', proyecto_id)
+      .select('estudiante_id');
+    if (proyectoError) throw proyectoError;
 
-  const { data: proyectoData, error: proyectoError } = await supabase
-    .from('Proyecto')
-    .update({ estado: estados[0] })
-    .eq('id', proyecto_id)
-    .select('estudiante_id');
-  if (proyectoError) throw proyectoError;
-
-  fetchSemestreActual().then(async (semestreId) => {
-    const { data: estudianteData, error: estudianteError } = await supabase
-      .from('Estudiante')
-      .update({ estado: estados[1], semestre_id: semestreId })
-      .eq('estudiante_id', proyectoData[0].estudiante_id);
-    if (estudianteError) throw estudianteError;
-  }).catch(err => {
-    throw err;
-  });
+    fetchSemestreActual().then(async (semestreId) => {
+      const { data: estudianteData, error: estudianteError } = await supabase
+        .from('Estudiante')
+        .update({ estado: 'Reprobado', semestre_id: semestreId })
+        .eq('estudiante_id', proyectoData[0].estudiante_id);
+      if (estudianteError) throw estudianteError;
+    }).catch(err => {
+      throw err;
+    });
+  }
+  // Si no hay avances reprobados, no cambiamos el estado del proyecto
 }
 
 export const getDetallesAvancesParaReporte = async () => {
