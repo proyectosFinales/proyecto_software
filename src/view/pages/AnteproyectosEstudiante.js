@@ -138,6 +138,35 @@ const AnteproyectosEstudiante = () => {
     navigate(`/editarFormulario?id=${id}`);
   }
 
+  async function verDetallesProyecto(anteproyectoId) {
+    try {
+      // Buscar si existe un proyecto asociado a este anteproyecto
+      const { data, error } = await supabase
+        .from('Proyecto')
+        .select('id')
+        .eq('anteproyecto_id', anteproyectoId)
+        .single();
+      
+      if (error) {
+        if (error.code === 'PGRST116') {
+          alert('Este anteproyecto aún no tiene un proyecto asociado.');
+        } else {
+          throw error;
+        }
+        return;
+      }
+      
+      if (data && data.id) {
+        navigate(`/verProyectoEstudiante?id=${data.id}`);
+      } else {
+        alert('Este anteproyecto aún no tiene un proyecto asociado.');
+      }
+    } catch (error) {
+      console.error('Error al buscar proyecto:', error);
+      alert('Error al buscar el proyecto asociado: ' + error.message);
+    }
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
       <HeaderEstudiante title="Mis Anteproyectos" />
@@ -178,6 +207,14 @@ const AnteproyectosEstudiante = () => {
                     >
                       Descargar
                     </button>
+                    {anteproyecto.estado === "Aprobado" && (
+                      <button
+                        onClick={() => verDetallesProyecto(anteproyecto.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                      >
+                        Ver Detalles
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
