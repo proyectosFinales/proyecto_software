@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
@@ -26,6 +26,7 @@ const VerProyecto = () => {
   const [loading, setLoading] = useState(true);
   const [profesorAsignado, setProfesorAsignado] = useState(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Utilidad para obtener query param
   const getQueryParam = (param) => {
@@ -123,6 +124,88 @@ const VerProyecto = () => {
     fetchProyecto();
     // eslint-disable-next-line
   }, [location]);
+
+  // Función para eliminar el proyecto y revertirlo a anteproyecto
+  const eliminarProyecto = async () => {
+    const confirmDelete = window.confirm("¿Está seguro de ELIMINAR este proyecto? El anteproyecto volverá a estado Pendiente.");
+    if (!confirmDelete) return;
+
+    try {
+      const proyectoId = proyecto.id;
+      const anteproyectoId = proyecto.anteproyecto_id;
+      const profesorId = proyecto.profesor_id;
+      const estudianteId = proyecto.estudiante_id;
+      const semestreProyecto = anteproyecto.semestre;
+      const añoProyecto = anteproyecto.año;
+
+      // 1. Eliminar los avances asociados al proyecto
+      const { error: deleteAvancesError } = await supabase
+        .from('Avance')
+        .delete()
+        .eq('proyecto_id', proyectoId);
+      
+      if (deleteAvancesError) throw deleteAvancesError;
+      console.log("Avances eliminados");
+
+      // 2. Si hay profesor asignado, restarle 1 a sus proyectos asignados
+      if (profesorId) {
+        // Obtener la información actual del profesor en AsignacionesProfesor
+        const { data: asignacionData, error: asignacionError } = await supabase
+          .from('AsignacionesProfesor')
+          .select('asignados')
+          .eq('idProfesor', profesorId)
+          .eq('semestre', semestreProyecto)
+          .eq('año', añoProyecto)
+          .maybeSingle();
+
+        if (!asignacionError && asignacionData) {
+          const nuevosAsignados = Math.max(0, asignacionData.asignados - 1);
+          const { error: updateAsignadosError } = await supabase
+            .from('AsignacionesProfesor')
+            .update({ asignados: nuevosAsignados })
+            .eq('idProfesor', profesorId)
+            .eq('semestre', semestreProyecto)
+            .eq('año', añoProyecto);
+
+          if (updateAsignadosError) throw updateAsignadosError;
+          console.log("Proyectos asignados del profesor decrementados");
+        }
+
+        // 3. Desasignar asesor del estudiante (poner en null)
+        const { error: updateEstudianteError } = await supabase
+          .from('Estudiante')
+          .update({ asesor: null })
+          .eq('estudiante_id', estudianteId);
+
+        if (updateEstudianteError) throw updateEstudianteError;
+        console.log("Asesor desasignado del estudiante");
+      }
+
+      // 4. Eliminar el proyecto
+      const { error: deleteProyectoError } = await supabase
+        .from('Proyecto')
+        .delete()
+        .eq('id', proyectoId);
+
+      if (deleteProyectoError) throw deleteProyectoError;
+      console.log("Proyecto eliminado");
+
+      // 5. Cambiar el estado del anteproyecto a "Pendiente"
+      const { error: updateAnteproyectoError } = await supabase
+        .from('Anteproyecto')
+        .update({ estado: 'Pendiente' })
+        .eq('id', anteproyectoId);
+
+      if (updateAnteproyectoError) throw updateAnteproyectoError;
+      console.log("Estado del anteproyecto cambiado a Pendiente");
+
+      alert('Proyecto eliminado exitosamente. El anteproyecto ha vuelto a estado Pendiente.');
+      navigate('/asignaciones/manual');
+    } catch (error) {
+      console.error('Error al eliminar proyecto:', error);
+      alert('Error al eliminar el proyecto: ' + error.message);
+    }
+  };
 
   if (loading) return <div className="p-8">Cargando...</div>;
   if (!proyecto || !anteproyecto) return <div className="p-8 text-red-600 font-bold">No se encontró el proyecto.</div>;
@@ -281,6 +364,30 @@ const VerProyecto = () => {
           <div className={styles.formGroup}>
             <label>Observaciones</label>
             <div>{anteproyecto?.comentario || ''}</div>
+          </div>
+
+          {/* Botón para eliminar el proyecto */}
+          <div style={{ marginTop: '2rem', display: 'flex', justifyContent: 'center' }}>
+            <button
+              type="button"
+              onClick={eliminarProyecto}
+              className={`${styles.button}`}
+              style={{ 
+                backgroundColor: '#dc2626', 
+                color: 'white',
+                padding: '0.75rem 2rem',
+                fontSize: '1rem',
+                fontWeight: 'bold',
+                borderRadius: '0.5rem',
+                cursor: 'pointer',
+                border: 'none',
+                transition: 'background-color 0.3s'
+              }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#b91c1c'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#dc2626'}
+            >
+              Eliminar Proyecto
+            </button>
           </div>
         </form>
       </main>

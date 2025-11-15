@@ -396,16 +396,28 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           id,
           nombre,
           AnteproyectoContact:AnteproyectoContacto_rrhh_id_fkey (
-            contacto_id         
+            contacto_id,
+            Anteproyecto:anteproyecto_id (
+              semestre,
+              año
+            )
           )
         `)
         .eq('nombre', nombreContact);
       
       if(error) throw error;
       
-      // Verificar si hay datos y si tiene relaciones
-      if(data && data.length > 0 && data[0].AnteproyectoContact && data[0].AnteproyectoContact.length === 1){
-        return true;
+      // Verificar si hay datos y si tiene relaciones en el MISMO semestre y año
+      if(data && data.length > 0 && data[0].AnteproyectoContact){
+        // Filtrar solo los anteproyectos del mismo semestre y año
+        const relacionesMismoSemestreAño = data[0].AnteproyectoContact.filter(
+          rel => rel.Anteproyecto && 
+                 rel.Anteproyecto.semestre === semestre.value && 
+                 rel.Anteproyecto.año === año.value
+        );
+        
+        // Si solo hay 1 relación (la del anteproyecto actual), se puede eliminar
+        return relacionesMismoSemestreAño.length === 1;
       }
       else{
         return false;
@@ -455,20 +467,50 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           id,
           nombre,
           ContactoEmpresa:contactoempresa_empresa_id_fkey(
-            nombre
+            nombre,
+            AnteproyectoContact:anteproyectocontacto_contacto_id_fkey (
+              contacto_id,
+              Anteproyecto:anteproyecto_id (
+                semestre,
+                año
+              )
+            )
           )
         `)
         .eq('nombre', nombreEmpresa)
         .single();
-      if(data.ContactoEmpresa.length === 0){
+      
+      if(error) throw error;
+      
+      // Verificar si hay contactos asociados a esta empresa
+      if(data.ContactoEmpresa && data.ContactoEmpresa.length > 0){
+        // Revisar cada contacto de la empresa
+        for(const contacto of data.ContactoEmpresa){
+          if(contacto.AnteproyectoContact && contacto.AnteproyectoContact.length > 0){
+            // Filtrar solo los anteproyectos del mismo semestre y año
+            const relacionesMismoSemestreAño = contacto.AnteproyectoContact.filter(
+              rel => rel.Anteproyecto && 
+                     rel.Anteproyecto.semestre === semestre.value && 
+                     rel.Anteproyecto.año === año.value
+            );
+            
+            // Si hay más de 1 relación en el mismo semestre/año, no se puede eliminar la empresa
+            if(relacionesMismoSemestreAño.length > 1){
+              return false;
+            }
+          }
+        }
+        // Si llegamos aquí, solo hay 1 relación (la actual) o ninguna
         return true;
       }
       else{
-        return false;
+        // No hay contactos, se puede eliminar
+        return true;
       }
     } catch(err){
       console.error('Error al buscar empresas', err);
       alert('Error al buscar empresas' + err.message);
+      return false;
     }
   }
 
@@ -510,16 +552,28 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           id,
           nombre,
           AnteproyectoContact:anteproyectocontacto_contacto_id_fkey (
-            contacto_id         
+            contacto_id,
+            Anteproyecto:anteproyecto_id (
+              semestre,
+              año
+            )
           )
         `)
         .eq('nombre', nombreContact);
       
       if(error) throw error;
       
-      // Verificar si hay datos y si tiene relaciones
-      if(data && data.length > 0 && data[0].AnteproyectoContact && data[0].AnteproyectoContact.length === 1){
-        return true;
+      // Verificar si hay datos y si tiene relaciones en el MISMO semestre y año
+      if(data && data.length > 0 && data[0].AnteproyectoContact){
+        // Filtrar solo los anteproyectos del mismo semestre y año
+        const relacionesMismoSemestreAño = data[0].AnteproyectoContact.filter(
+          rel => rel.Anteproyecto && 
+                 rel.Anteproyecto.semestre === semestre.value && 
+                 rel.Anteproyecto.año === año.value
+        );
+        
+        // Si solo hay 1 relación (la del anteproyecto actual), se puede eliminar
+        return relacionesMismoSemestreAño.length === 1;
       }
       else{
         return false;
@@ -1109,7 +1163,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
             {estado === "Correccion" ? "Actualizar" : "Editar"}
           </button>
         )}
-          {proyecto === "empty" && (
+          {(proyecto === "empty" || estado === "Pendiente") && (
           <button
             type="button"
             onClick={eliminarAnteproyecto}

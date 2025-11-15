@@ -149,7 +149,7 @@ const FormularioCoordinador = () => {
                     telefono
                   )
                 ),
-                Proyecto:Proyecto_anteproyecto_id_fkey (
+                Proyecto!left (
                   id
                 ),
                 Categoria: categoria_id (
@@ -183,10 +183,18 @@ const FormularioCoordinador = () => {
       setCategoria(data.Categoria?.nombre || '');
       setObservaciones(data.comentario || '');
       setEstado(data.estado || '');
-      if(data.Proyecto.length === 0){
+      
+      // Log para debug
+      console.log("Anteproyecto ID:", data.id);
+      console.log("Proyecto data:", data.Proyecto);
+      console.log("Proyecto length:", data.Proyecto ? data.Proyecto.length : 'undefined');
+      
+      if(data.Proyecto && data.Proyecto.length === 0){
+        console.log("Estado del proyecto: EMPTY");
         setProyecto("empty");
       }
       else{
+        console.log("Estado del proyecto: ASSIGNED");
         setProyecto("assigned");
       }
       // Rellenar campos de estudiante (read-only)
@@ -599,9 +607,17 @@ const FormularioCoordinador = () => {
 
   async function paraCorregirAnteproyecto(e) {
     e.preventDefault();
+    
+    // Log para debug
+    console.log("=== Intentando mandar a corregir ===");
+    console.log("ID Anteproyecto:", idAnteproyecto);
+    console.log("Estado proyecto:", proyecto);
+    console.log("Estado anteproyecto:", estado);
+    
     const confirmCorregir = window.confirm("¿Está seguro de MANDAR A CORREGIR el anteproyecto?\n\nAsegúrese de incluir la razón en las observaciones");
     if (!confirmCorregir) return;
     if(proyecto === "empty"){
+      console.log("Proyecto es empty, procediendo...");
       try {
         // Actualizar estado del anteproyecto
         const { data, error } = await supabase
@@ -640,10 +656,13 @@ const FormularioCoordinador = () => {
         alert('Anteproyecto actualizado exitosamente (Para corregir).');
         navigate('/anteproyectosCoordinador');
       } catch (error) {
+        console.error("Error al actualizar:", error);
         alert('Error al actualizar anteproyecto: ' + error.message);
       }
     }
     else{
+      console.log("No se puede mandar a corregir - proyecto no está empty");
+      console.log("Valor de proyecto:", proyecto);
       alert("No se puede mandar a corregir el anteproyecto, ya se encuentra asignado a un profesor.");
     }
   }
