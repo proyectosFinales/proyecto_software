@@ -28,6 +28,7 @@ const CantidadProyectosProfesor = () => {
   const [proyectossinProfesor, setProyectossinProfesor] = useState(0);
   const [mostrarAlerta, setMostrarAlerta] = useState(false);
   const [ordenamiento, setOrdenamiento] = useState({ campo: null, direccion: 'asc' });
+  const [searchText, setSearchText] = useState('');
 
   useEffect(() => {
     console.log('CantidadProyectosProfesor: useEffect running');
@@ -58,6 +59,22 @@ const CantidadProyectosProfesor = () => {
       filtrados = filtrados.filter(p => String(p.año) === String(filtroAno));
     }
     
+    // Filtro de búsqueda por texto
+    if (searchText) {
+      const lowerSearchText = searchText.toLowerCase();
+      filtrados = filtrados.filter((prof) => {
+        const nombre = prof.nombre?.toLowerCase() || '';
+        const categoria = prof.categoria?.toLowerCase() || '';
+        const profesorId = String(prof.profesor_id || '').toLowerCase();
+        
+        return (
+          nombre.includes(lowerSearchText) ||
+          categoria.includes(lowerSearchText) ||
+          profesorId.includes(lowerSearchText)
+        );
+      });
+    }
+    
     // Aplicar ordenamiento
     if (ordenamiento.campo) {
       filtrados = [...filtrados].sort((a, b) => {
@@ -77,16 +94,25 @@ const CantidadProyectosProfesor = () => {
     }
     
     setProfesoresFiltrados(filtrados);
-  }, [filtroSemestre, filtroAno, profesores, ordenamiento]);
+  }, [filtroSemestre, filtroAno, profesores, ordenamiento, searchText]);
 
   // Actualiza en tiempo real la propiedad "cantidadEstudiantes"
-  const actualizarCantidad = useCallback((indice, evento) => {
-    if(profesores[indice].proyectosAsignados > Number(evento.target.value)) {
+  const actualizarCantidad = useCallback((profesor, evento) => {
+    if(profesor.proyectosAsignados > Number(evento.target.value)) {
       alert("La disponibilidad no puede ser menor a los proyectos ya asignados.");
       return;
     }
-    profesores[indice].disponibilidad = Number(evento.target.value);
-    setProfesores([...profesores]);
+    // Encontrar el índice del profesor en la lista completa
+    const indice = profesores.findIndex(p => 
+      p.profesor_id === profesor.profesor_id && 
+      p.semestre === profesor.semestre && 
+      p.año === profesor.año
+    );
+    
+    if (indice !== -1) {
+      profesores[indice].disponibilidad = Number(evento.target.value);
+      setProfesores([...profesores]);
+    }
   }, [profesores]);
 
   // Guarda cambios en BD (llama p.actualizarCantidadEstudiantes())
@@ -150,7 +176,7 @@ const CantidadProyectosProfesor = () => {
         .from('AsignacionesProfesor')
         .select('asignados')
         .eq('idProfesor', profesor.profesor_id)
-        
+
         .eq('semestre', profesor.semestre)
         .eq('año', profesor.año)
         .single();
@@ -268,6 +294,17 @@ const CantidadProyectosProfesor = () => {
             <p className="text-sm sm:text-base text-gray-600">
               Ajuste la cantidad máxima de estudiantes que cada profesor puede supervisar.
             </p>
+          </div>
+
+          {/* Barra de búsqueda */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+            <input
+              type="text"
+              className="border border-gray-300 rounded py-2 px-4 w-full sm:w-1/2"
+              placeholder="Buscar profesores por nombre, categoría o ID..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+            />
           </div>
 
           {/* Filtros */}
@@ -464,7 +501,7 @@ const CantidadProyectosProfesor = () => {
                                        focus:outline-none focus:ring-2 focus:ring-blue-500 
                                        text-xs sm:text-sm"
                               value={profesor.disponibilidad}
-                              onChange={e => esEditable && actualizarCantidad(i, e)}
+                              onChange={e => esEditable && actualizarCantidad(profesor, e)}
                               min="0"
                               max="20"
                               disabled={!esEditable}

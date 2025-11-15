@@ -85,6 +85,7 @@ function EdicionAsignacionProyectos() {
   const [filtroSemestre, setFiltroSemestre] = useState(String(semestreActual));
   const [filtroAno, setFiltroAno] = useState(String(anoActual));
   const [filtroEstado, setFiltroEstado] = useState('Todos');
+  const [searchText, setSearchText] = useState('');
 
   // Estado para ordenamiento de columnas
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
@@ -362,6 +363,31 @@ function EdicionAsignacionProyectos() {
       (filtroEstado === 'Todos' || proy.estado === filtroEstado)
   );
 
+  // Filtro de búsqueda por texto
+  if (searchText) {
+    const lowerSearchText = searchText.toLowerCase();
+    proyectosFiltrados = proyectosFiltrados.filter((proy) => {
+      const estudianteNombre = proy.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
+      const carnet = proy.Estudiante?.carnet?.toLowerCase() || '';
+      const empresaNombre = proy.Anteproyecto?.Empresa?.nombre?.toLowerCase() || '';
+      const departamento = proy.Anteproyecto?.departamento?.toLowerCase() || '';
+      const categoria = proy.Anteproyecto?.Categoria?.nombre?.toLowerCase() || '';
+      const estado = proy.estado?.toLowerCase() || '';
+      const profesor = profesores.find(p => p.profesor_id === proy.profesor_id);
+      const profesorNombre = profesor?.nombre?.toLowerCase() || '';
+
+      return (
+        estudianteNombre.includes(lowerSearchText) ||
+        carnet.includes(lowerSearchText) ||
+        empresaNombre.includes(lowerSearchText) ||
+        departamento.includes(lowerSearchText) ||
+        categoria.includes(lowerSearchText) ||
+        estado.includes(lowerSearchText) ||
+        profesorNombre.includes(lowerSearchText)
+      );
+    });
+  }
+
   // Ordenar proyectos según sortConfig
   if (sortConfig.key) {
     proyectosFiltrados = [...proyectosFiltrados].sort((a, b) => {
@@ -431,6 +457,18 @@ function EdicionAsignacionProyectos() {
       <HeaderCoordinador title="Asignación de Proyectos a Profesores" />
       <main className="flex-grow p-4 sm:p-8">
         <h1 className="text-2xl font-semibold mb-4">Lista de Proyectos</h1>
+        
+        {/* Barra de búsqueda */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
+          <input
+            type="text"
+            className="border border-gray-300 rounded py-2 px-4 w-full sm:w-1/2"
+            placeholder="Buscar proyectos por estudiante, carnet, empresa, departamento, categoría, estado o profesor..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+        </div>
+
         {/* Filtros de semestre, año y estado */}
   <div className="flex flex-wrap gap-4 mb-4 items-end">
           <div>
