@@ -8,7 +8,7 @@ import { fetchAvances, updateAvance, addAvance, deleteAvance } from '../../contr
 const Avances = () => { 
   const { proyectoId } = useParams();
   const [avances, setAvances] = useState([]);
-  const [selectedEstado, setSelectedEstado] = useState('Aprobado');
+  const [selectedEstado, setSelectedEstado] = useState('Pasa');
 
   useEffect(() => {
     fetchAvances(proyectoId)
@@ -68,15 +68,21 @@ const Avances = () => {
                   <td className="px-4 py-2 border-b">
                     <button
                       className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2"
-                      onClick={() => handleEstadoChange(avance.id, 'Aprobado')}
+                      onClick={() => handleEstadoChange(avance.id, 'Pasa')}
                     >
-                      Aprobar
+                      Pasa
+                    </button>
+                    <button
+                      className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 mr-2"
+                      onClick={() => handleEstadoChange(avance.id, 'A Mejorar')}
+                    >
+                      A Mejorar
                     </button>
                     <button
                       className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                      onClick={() => handleEstadoChange(avance.id, 'Reprobado')}
+                      onClick={() => handleEstadoChange(avance.id, 'No Pasa')}
                     >
-                      Reprobar
+                      No Pasa
                     </button>
                   </td>
                 </tr>
@@ -93,8 +99,9 @@ const Avances = () => {
               value={selectedEstado}
               onChange={(e) => setSelectedEstado(e.target.value)}
             >
-              <option value="Aprobado">Aprobado</option>
-              <option value="Reprobado">Reprobado</option>
+              <option value="Pasa">Pasa</option>
+              <option value="A Mejorar">A Mejorar</option>
+              <option value="No Pasa">No Pasa</option>
             </select>
           </div>
           <div className="flex gap-4">

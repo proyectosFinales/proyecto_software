@@ -84,6 +84,8 @@ const AnteproyectosEstudiante = () => {
           departamento,
           comentario,
           categoria_id,
+          semestre,
+          año,
           Estudiante:estudiante_id (
             carnet,
             id_usuario,
@@ -183,6 +185,8 @@ const AnteproyectosEstudiante = () => {
             <thead>
               <tr className="bg-gray-200 border-b">
                 <th className="p-3 border-r text-left">Nombre del proyecto</th>
+                <th className="p-3 border-r text-left">Semestre</th>
+                <th className="p-3 border-r text-left">Año</th>
                 <th className="p-3 border-r text-left">Estado</th>
                 <th className="p-3 text-left">Acciones</th>
               </tr>
@@ -191,6 +195,8 @@ const AnteproyectosEstudiante = () => {
               {anteproyectos.map((anteproyecto) => (
                 <tr key={anteproyecto.id} className="border-b hover:bg-gray-50">
                   <td className="p-3 border-r">{anteproyecto.Empresa.nombre}</td>
+                  <td className="p-3 border-r">{anteproyecto.semestre || 'N/A'}</td>
+                  <td className="p-3 border-r">{anteproyecto.año || 'N/A'}</td>
                   <td className="p-3 border-r">{anteproyecto.estado}</td>
                   <td className="p-3 flex space-x-2">
                     <button
