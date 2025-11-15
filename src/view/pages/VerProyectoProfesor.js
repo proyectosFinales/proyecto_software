@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import supabase from '../../model/supabase';
+import Proyecto from '../../controller/Proyecto';
 import Footer from '../components/Footer';
 import HeaderProfesor from '../components/HeaderProfesor';
 import styles from '../styles/FormularioCoordinador.module.css';
@@ -26,11 +27,69 @@ const VerProyectoProfesor = () => {
   const [loading, setLoading] = useState(true);
   const [profesorAsignado, setProfesorAsignado] = useState(null);
   const location = useLocation();
+  const [estadoActual, setEstadoActual] = useState(''); // Estado para el dropdown
+  const [mensaje, setMensaje] = useState(''); // Mensaje de feedback
+  const [isUpdating, setIsUpdating] = useState(false); // Deshabilitar botón al guardar
 
   // Utilidad para obtener query param
   const getQueryParam = (param) => {
     const params = new URLSearchParams(location.search);
     return params.get(param);
+  };
+
+
+  /**
+   * Genera las opciones de estado válidas según el estado actual del proyecto,
+   * basándose en los requisitos REQ-40 a REQ-44.
+   * @param {string} estadoActual - El estado actual del proyecto (ej: "Informe Final")
+   * @returns {Array<{value: string, label: string}>} - Opciones para el <select>
+   */
+  const getOpcionesDeEstado = (estadoActual) => {
+    let opciones = []; // Array para las nuevas transiciones
+
+    const estadosAvance = [
+      'Avance I', 'Avance II', 'Avance III', 'Informe Preliminar',
+      'Pasa', 'A Mejorar', 'No Pasa' // Incluir los mismos estados para poder cambiarlos
+    ];
+    const estadosFinal = ['Informe Final', 'Informe a Coordinación'];
+    const estadoDefensa = ['Defensa'];
+
+    if (estadosAvance.includes(estadoActual)) {
+      opciones = [
+        { value: "Pasa", label: "Pasa (Avance / Preliminar)" },
+        { value: "A Mejorar", label: "A Mejorar (Avance / Preliminar)" },
+        { value: "No Pasa", label: "No Pasa (Avance / Preliminar)" },
+      ];
+    } 
+    else if (estadosFinal.includes(estadoActual)) {
+      opciones = [
+        { value: "Aprobado", label: "Aprobado (Final / Coordinación)" },
+        { value: "Suspendido", label: "Suspendido (Final / Coordinación)" },
+      ];
+    } 
+    else if (estadoDefensa.includes(estadoActual)) {
+      opciones = [
+        { value: "Aprobado", label: "Aprobado (Defensa)" },
+        { value: "Reprobado", label: "Reprobado (Defensa)" },
+      ];
+    }
+
+    // --- Lógica para el <select> ---
+    // 1. Verificamos si el estado actual ya es una de las opciones (ej: 'Pasa')
+    // 2. Si no está incluido (ej: 'Informe Final'), lo agregamos al inicio
+    // 3. Si el estado es terminal (Aprobado, Suspendido, Reprobado), solo se muestra a sí mismo.
+    const estadoYaIncluido = opciones.some(op => op.value === estadoActual);
+
+    if (!estadoYaIncluido) {
+      opciones.unshift({ value: estadoActual, label: `Actual: ${estadoActual}` });
+    }
+
+    const estadosTerminales = ['Aprobado', 'Suspendido', 'Reprobado'];
+    if (estadosTerminales.includes(estadoActual)) {
+      return [{ value: estadoActual, label: `Estado Final: ${estadoActual}` }];
+    }
+
+    return opciones;
   };
 
   useEffect(() => {
@@ -46,6 +105,7 @@ const VerProyectoProfesor = () => {
         .from('Proyecto')
         .select(`
           id,
+          estado,
           anteproyecto_id,
           estudiante_id,
           profesor_id,
@@ -123,6 +183,40 @@ const VerProyectoProfesor = () => {
     fetchProyecto();
     // eslint-disable-next-line
   }, [location]);
+
+  /**
+   * Manejador para actualizar el estado del proyecto
+   */
+  const handleEstadoSubmit = async (e) => {
+    e.preventDefault();
+    setIsUpdating(true);
+    setMensaje('Actualizando estado...');
+
+    if (!proyecto) {
+      setMensaje('Error: No se ha cargado el proyecto.');
+      setIsUpdating(false);
+      return;
+    }
+
+    // Se crea una instancia temporal de Proyecto para usar el método
+    const proj = new Proyecto(
+      proyecto.id, 
+      estadoActual, 
+      proyecto.anteproyecto_id, 
+      proyecto.estudiante_id, 
+      proyecto.profesor_id
+    );
+
+    // Llamar al método del controlador
+    const success = await proj.actualizarEstado(estadoActual);
+
+    if (success) {
+      setMensaje('¡Estado actualizado exitosamente!');
+    } else {
+      setMensaje('Error al actualizar el estado. Intente de nuevo.');
+    }
+    setIsUpdating(false);
+  };
 
   if (loading) return <div className="p-8">Cargando...</div>;
   if (!proyecto || !anteproyecto) return <div className="p-8 text-red-600 font-bold">No se encontró el proyecto.</div>;
@@ -282,6 +376,51 @@ const VerProyectoProfesor = () => {
             <label>Observaciones</label>
             <div>{anteproyecto?.comentario || ''}</div>
           </div>
+
+          {/* Nueva Sección: Gestión de Estado (Editable) */}
+<h3 style={{ fontSize: '1.6rem', fontWeight: 'bold', marginTop: '2.5rem', marginBottom: '0.75rem', borderBottom: '3px solid #1d4ed8', paddingBottom: '0.25rem', color: '#1d3557' }}>Gestión de Estado del Proyecto</h3>
+          
+          <div className={styles.formGroup}>
+            <label htmlFor="estado-proyecto">Actualizar Estado del Proyecto</label>
+            <select 
+              id="estado-proyecto" 
+              value={estadoActual} 
+              onChange={(e) => setEstadoActual(e.target.value)}
+              disabled={isUpdating}
+              style={{ padding: '8px', fontSize: '1rem', border: '1px solid #ccc', borderRadius: '4px' }}
+            >
+              {/* Renderizado dinámico de opciones */}
+              {getOpcionesDeEstado(proyecto?.estado || estadoActual).map(opcion => (
+                <option key={opcion.value} value={opcion.value}>
+                  {opcion.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button 
+            type="submit" 
+            disabled={isUpdating}
+            style={{
+              backgroundColor: isUpdating ? '#ccc' : '#1d4ed8',
+              color: 'white',
+              padding: '10px 20px',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: isUpdating ? 'not-allowed' : 'pointer',
+              fontSize: '1rem',
+              marginTop: '1rem'
+            }}
+          >
+            {isUpdating ? 'Guardando...' : 'Guardar Cambio de Estado'}
+          </button>
+
+          {/* Mensaje de feedback */}
+          {mensaje && (
+            <div style={{ marginTop: '1rem', color: mensaje.includes('Error') ? 'red' : 'green', fontWeight: 'bold' }}>
+              {mensaje}
+            </div>
+          )}
         </form>
       </main>
       <Footer />
