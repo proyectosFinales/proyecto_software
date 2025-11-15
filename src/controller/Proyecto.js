@@ -198,6 +198,32 @@ class Proyecto {
       return false;
     }
   }
+
+  /**
+   * Actualiza el estado del proyecto
+   * @param {string} nuevoEstado
+   * @returns {Promise<boolean>}
+   */
+  async actualizarEstado(nuevoEstado) {
+    // Actualiza el estado en la base de datos
+    try {
+      const { error } = await supabase
+        .from("Proyecto")
+        .update({ estado: nuevoEstado }) // Usa el nuevo estado
+        .eq("id", this.id);
+
+      if (error) {
+        console.error("Error actualizando estado:", error);
+        return false;
+      }
+
+      this.estado = nuevoEstado; // Actualiza el estado en la instancia local
+      return true;
+    } catch (error) {
+      console.error("Error en actualizarEstado:", error);
+      return false;
+    }
+  }
 }
 
 export default Proyecto;
