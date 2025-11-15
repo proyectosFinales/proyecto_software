@@ -66,9 +66,8 @@ const CoordinadorForm = () => {
   const [selectedCategoria, setSelectedCategoria] = useState(null);
   const [categorias, setCategorias] = useState([]);
   
-
-
-  const [semestrePropuesto, setSemestrePropuesto] = useState(null);
+  const [semestre, setSemestre] = useState(null);
+  const [año, setAño] = useState(null);
 
   const [situacionLaboral, setSituacionLaboral] = useState(null);
 
@@ -76,14 +75,30 @@ const CoordinadorForm = () => {
   const [historialReprobacion, setHistorialReprobacion] = useState([]);
 
   const opcionesSemestre = [
-    { value: 'I', label: 'I Semestre' },
-    { value: 'II', label: 'II Semestre' }
+    { value: 1, label: '1' },
+    { value: 2, label: '2' }
   ];
+
+  // Opciones de año: año siguiente, actual y 5 anteriores
+  const currentYear = new Date().getFullYear();
+  const opcionesAño = [];
+  for (let i = 1; i >= -5; i--) {
+    const year = currentYear + i;
+    opcionesAño.push({ value: year, label: year.toString() });
+  }
 
   const opcionesSituacionLaboral = [
     { value: 'Trabaja', label: 'Trabaja' },
     { value: 'Trabaja y estudia', label: 'Trabaja y estudia' },
     { value: 'Solo estudia', label: 'Solo estudia' }
+  ];
+
+  const opcionesSedes = [
+    { value: 'Central Cartago', label: 'Central Cartago' },
+    { value: 'Local San José', label: 'Local San José' },
+    { value: 'Centro Académico de Limón', label: 'Centro Académico de Limón' },
+    { value: 'Centro Académico de Alajuela', label: 'Centro Académico de Alajuela' },
+    { value: 'Centro Académico San Carlos', label: 'Centro Académico San Carlos' }
   ];
 
 
@@ -154,6 +169,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
 
   async function consultarAnteproyecto(id) {
     try {
+      console.log('Consultando anteproyecto con ID:', id);
       // Anteproyecto se relaciona con Estudiante, y Estudiante con Usuario
       const { data, error } = await supabase
         .from('Anteproyecto')
@@ -171,11 +187,12 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           actividad,
           departamento,
           categoria_id,
-          semestre_propuesto,
+          semestre,
+          año,
           Estudiante:estudiante_id (
             carnet,
             id_usuario,
-            situacion_laboral
+            situacion_laboral,
             Usuario:Estudiante_id_usuario_fkey (
               nombre,
               correo,
@@ -206,7 +223,8 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           ),
           Correcciones:correcciones_anteproyecto_id_fkey (
             seccion,
-            contenido
+            contenido,
+            Corregido
           ),
           Proyecto!left (
             id
@@ -217,27 +235,42 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
         `)
         .eq('id', id)
         .single();
+      
+      console.log('Respuesta de Supabase:', { data, error });
+      
       if (error) throw error;
+      
+      if (!data) {
+        throw new Error('No se encontró el anteproyecto');
+      }
+      
+      console.log('Datos del anteproyecto:', data);
+      
       // Llenar estados
       setIdAnteproyecto(data.id);
       setEstado(data.estado);
-      if(data.estado === "Correccion"){
+      
+      // Cargar correcciones pendientes (Corregido = false)
+      if(data.estado === "Correccion" && data.Correcciones && data.Correcciones.length > 0){
         data.Correcciones.forEach(item => {
-          switch(item.seccion) {
-            case "Justificacion":
-              setJustificacionC(item.contenido);
-              break;
-            case "Contexto":
-              setContextoC(item.contenido);
-              break;
-            case "Sintomas":
-              setSintomasC(item.contenido);
-              break;
-            case "Impacto":
-              setImpactoC(item.contenido);
-              break;
-            default:
-              break;
+          // Solo mostrar correcciones que NO han sido corregidas
+          if(item.Corregido === false) {
+            switch(item.seccion) {
+              case "Justificacion":
+                setJustificacionC(item.contenido);
+                break;
+              case "Contexto":
+                setContextoC(item.contenido);
+                break;
+              case "Sintomas":
+                setSintomasC(item.contenido);
+                break;
+              case "Impacto":
+                setImpactoC(item.contenido);
+                break;
+              default:
+                break;
+            }
           }
         });
       }
@@ -270,7 +303,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
       setTipoProyecto(data.tipo || '');
       setObservaciones(data.comentario || '');
 
-      const usuarioData = data.Estudiante.situacion_laboralUsuario;
+      const usuarioData = data.Estudiante.Usuario;
 
       if(data.Proyecto.length === 0){
         setProyecto("empty")
@@ -300,13 +333,17 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
         setSelectedCategoria({value: data.categoria_id, label: data.Categoria.nombre});
       }
 
+      // Cargar semestre y año
+      if (data.semestre) {
+        setSemestre(opcionesSemestre.find(o => o.value === data.semestre) || null);
+      }
+      if (data.año) {
+        setAño(opcionesAño.find(o => o.value === data.año) || null);
+      }
 
-    setSemestrePropuesto(
-      opcionesSemestre.find(o => o.value === data.semestre_propuesto) || null
-    );
-    setSituacionLaboral(
-      opcionesSituacionLaboral.find(o => o.value === data.Estudiante.situacion_laboral) || null
-    );
+      setSituacionLaboral(
+        opcionesSituacionLaboral.find(o => o.value === data.Estudiante.situacion_laboral) || null
+      );
 
     const { data: historial, error: historialError } = await supabase
       .from('HistorialReprobacion')
@@ -324,7 +361,9 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
 
 
     } catch (err) {
+      console.error('Error completo al consultar anteproyecto:', err);
       errorToast('Error al consultar anteproyecto: ' + err.message);
+      alert('Error al cargar el anteproyecto: ' + err.message);
     }
   }
 
@@ -360,17 +399,21 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
             contacto_id         
           )
         `)
-        .eq('nombre', nombreContact)
-        //.single();
-      if(data.AnteproyectoContact.length===1){
+        .eq('nombre', nombreContact);
+      
+      if(error) throw error;
+      
+      // Verificar si hay datos y si tiene relaciones
+      if(data && data.length > 0 && data[0].AnteproyectoContact && data[0].AnteproyectoContact.length === 1){
         return true;
       }
       else{
         return false;
       }
     } catch(err){
-      console.error('Error al buscar contacto: ', err);
-      alert('Error al buscar contacto: ' + err.message);
+      console.error('Error al buscar contacto RRHH: ', err);
+      alert('Error al buscar contacto RRHH: ' + err.message);
+      return false;
     }
   }
 
@@ -470,10 +513,12 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
             contacto_id         
           )
         `)
-        .eq('nombre', nombreContact)
-        //.single();
+        .eq('nombre', nombreContact);
+      
       if(error) throw error;
-      if(data.AnteproyectoContact.length===1){
+      
+      // Verificar si hay datos y si tiene relaciones
+      if(data && data.length > 0 && data[0].AnteproyectoContact && data[0].AnteproyectoContact.length === 1){
         return true;
       }
       else{
@@ -482,6 +527,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
     } catch(err){
       console.error('Error al buscar contacto: ', err);
       alert('Error al buscar contacto: ' + err.message);
+      return false;
     }
   }
   
@@ -494,26 +540,48 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
       return;
     }
     try {
-      // Actualizar el Anteproyecto (campos de la empresa, etc.)
-      const estado = "Corregido"
+      // Actualizar el Anteproyecto con todos los campos editables
       const { error: antError } = await supabase
         .from('Anteproyecto')
         .update({
-          estado: estado,
+          estado: "Corregido",
           contexto: contexto,
           justificacion: justificacion,
           sintomas: sintomas,
           impacto: impacto,
           categoria_id: selectedCategoria.value,
-          semestre_propuesto: semestrePropuesto.value
+          semestre: semestre.value,
+          año: año.value,
+          departamento: nombreDepartamento,
+          comentario: observaciones
         })
         .eq('id', idAnteproyecto);
-        const {error: correctionError} = await supabase
-          .from('Correcciones')
-          .delete()
-          .eq('anteproyecto_id',idAnteproyecto);
-      if (correctionError) throw correctionError;
       if (antError) throw antError;
+
+      // Actualizar Usuario (solo sede que es editable)
+      const { error: usuarioError } = await supabase
+        .from('Usuario')
+        .update({
+          sede: sede
+        })
+        .eq('usuario_id', userId);
+      if (usuarioError) throw usuarioError;
+
+      // Actualizar Estudiante (situacion_laboral)
+      const { error: estudianteError } = await supabase
+        .from('Estudiante')
+        .update({
+          situacion_laboral: situacionLaboral.value
+        })
+        .eq('estudiante_id', estudianteId);
+      if (estudianteError) throw estudianteError;
+
+      // Eliminar correcciones
+      const {error: correctionError} = await supabase
+        .from('Correcciones')
+        .delete()
+        .eq('anteproyecto_id',idAnteproyecto);
+      if (correctionError) throw correctionError;
 
       //Notificacion al mismo estudiante de que se ha actualizado su anteproyecto
       const mensajeEstudiante = `Buenas, para informarle que se ha actualizado el anteproyecto del estudiante ${nombre} el ${new Date().toLocaleString()}.\n` +
@@ -621,7 +689,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
               type="text"
               value={nombre}
               readOnly
-              className="w-full p-2 border rounded-md bg-gray-100"
+              className="w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed"
             />
           </div>
 
@@ -631,7 +699,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
               type="text"
               value={carnet}
               readOnly
-              className="w-full p-2 border rounded-md bg-gray-100"
+              className="w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed"
             />
           </div>
 
@@ -651,17 +719,18 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
               type="email"
               value={correo}
               readOnly
-              className="w-full p-2 border rounded-md bg-gray-100"
+              className="w-full p-2 border rounded-md bg-gray-100 cursor-not-allowed"
             />
           </div>
 
           <div className="space-y-2">
             <label className="block font-semibold">5. Sede:</label>
-            <input
-              type="text"
-              value={sede}
-              readOnly
-              className="w-full p-2 border rounded-md bg-gray-100"
+            <Select
+              value={opcionesSedes.find(s => s.value === sede)}
+              onChange={(selected) => setSede(selected.value)}
+              options={opcionesSedes}
+              placeholder="Seleccione la sede"
+              className="mt-2"
             />
           </div>
         </div>
@@ -960,12 +1029,25 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
 
           
           <div className="space-y-2">
-            <label className="block font-semibold">Semestre propuesto:</label>
+            <label className="block font-semibold">Semestre:</label>
             <Select
-              value={semestrePropuesto}
-              onChange={setSemestrePropuesto}
+              value={semestre}
+              onChange={setSemestre}
               options={opcionesSemestre}
               placeholder="Seleccione el semestre"
+              className="mt-2"
+              // Solo editable si el estado es "Correccion"
+              isDisabled={estado !== "Correccion"}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <label className="block font-semibold">Año:</label>
+            <Select
+              value={año}
+              onChange={setAño}
+              options={opcionesAño}
+              placeholder="Seleccione el año"
               className="mt-2"
               // Solo editable si el estado es "Correccion"
               isDisabled={estado !== "Correccion"}

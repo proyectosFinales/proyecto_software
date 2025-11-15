@@ -561,38 +561,31 @@ const FormularioCoordinador = () => {
     if (!confirmReprobar) return;
     if(proyecto === "empty"){
       try {
+        // Actualizar estado del anteproyecto a Reprobado
+        const { error } = await supabase
+          .from('Anteproyecto')
+          .update({
+            comentario: observaciones,
+            estado: "Reprobado"
+          })
+          .eq('id', idAnteproyecto);
+        
+        if (error) throw error;
+
+        // Enviar correo al estudiante
         const mensaje = "Buenas,\n" +
         "Le informamos por este medio que, tras la revisión de su anteproyecto, este ha sido rechazado por las siguientes razones:\n" +
+        `${observaciones}\n\n`+
         "Le invitamos a revisar las observaciones y, si así lo desea, presentar una nueva propuesta.\n" +
-        `${observaciones}`+
-        "En caso de requerir orientación o aclaraciones sobre los puntos señalados, puede ponerse en contacto contacto con el coordinador de carrera.\n" +
+        "En caso de requerir orientación o aclaraciones sobre los puntos señalados, puede ponerse en contacto con el coordinador de carrera.\n" +
         "\nInstituto Tecnológico de Costar Rica,\n" +
         "Escuela de Producción Industrial.";
         sendMail(correo, "Anteproyecto Reprobado", mensaje);
-        
-        const contactoCount = await consultarContactos(nombreAsesor);
-        const rhCount = await consultarHR(nombreHR);
-        await eliminarAnteContact();
-        await eliminarAnteproyecto();
-        if(contactoCount===true){
-          await eliminarContacto(nombreAsesor);
-        }
-        if(rhCount===true){
-          await eliminarContacto(nombreHR);
-        }
-        const empresaCount = await consultarEmpresas();
-        if(empresaCount === true){
-          const { error } = await supabase
-          .from('Empresa')
-          .delete()
-          .eq('nombre', nombreEmpresa);
-          if (error) throw error;
-        }
 
-        alert('Anteproyecto actualizado exitosamente (Reprobado).');
+        alert('Anteproyecto reprobado exitosamente.');
         navigate('/anteproyectosCoordinador');
       } catch (error) {
-        alert('Error al actualizar anteproyecto: ' + error.message);
+        alert('Error al reprobar anteproyecto: ' + error.message);
       }
     }
     else{
@@ -620,6 +613,20 @@ const FormularioCoordinador = () => {
           .eq('id', idAnteproyecto)
           .select();
         if (error) throw error;
+
+        // Insertar correcciones específicas de cada campo
+        if(correccionC !== ''){
+          await insertarCorreccion("Contexto", correccionC);
+        }
+        if(correccionE !== ''){
+          await insertarCorreccion("Impacto", correccionE);
+        }
+        if(correccionS !== ''){
+          await insertarCorreccion("Sintomas", correccionS);
+        }
+        if(correccionJ !== ''){
+          await insertarCorreccion("Justificacion", correccionJ);
+        }
 
         const mensaje = "Buenas,\n" +
         "Le informamos por este medio que, tras la revisión de su anteproyecto, se le solicita que lo corrija por las siguientes razones:\n" +
