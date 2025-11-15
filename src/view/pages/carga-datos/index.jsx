@@ -1,7 +1,7 @@
 /**
  * InicioCargaDatos.jsx
  * Menú para registrar profesores, modificar cantidad de proyectos,
- * y reiniciar (limpiar) datos de un semestre anterior.
+ * y cargar profesores disponibles para el próximo semestre.
  */
 import { Link } from "react-router-dom";
 import Header from "../../components/HeaderCoordinador";
@@ -9,10 +9,10 @@ import Footer from "../../components/Footer";
 import Modal from '../../components/Modal';
 import React, { useState } from 'react';
 // Ajusta la importación a tu propia instancia supabase
-import { supabase } from '../../../model/Cliente';
+import supabase from '../../../model/supabase';
 
 /**
- * Menú de carga de datos, con opción de "Reiniciar Base de Datos".
+ * Menú de carga de datos, con opción de "Cargar Próximo Semestre".
  */
 const InicioCargaDatos = () => {
   const [modal, setModal] = useState(false);
@@ -32,174 +32,144 @@ const InicioCargaDatos = () => {
   // Cada eliminación de registros se realiza de manera secuencial para garantizar la consistencia de los datos y la resolución de las dependencias entre tablas.
   // Si ocurre un error en cualquier paso, el proceso se detiene y se lanza un error con el mensaje correspondiente.
 
-  const ReiniciarBaseDatos = async () => {
-  if (!window.confirm('¿Está seguro(a) de que desea eliminar los registros?')) return;
+  const cargarProfesoresProxSemestre = async () => {
+    if (!window.confirm('¿Está seguro(a) de que desea poner a los profesores actuales como disponibles para el próximo semestre?')) return;
+    
+    try {
+      // Verificar que supabase esté disponible
+      if (!supabase) {
+        throw new Error('Cliente de Supabase no está inicializado');
+      }
 
-  try {
-    // Borrar dependencias de AnteproyectoContacto primero
-    const { data: anteproyectoContactoData, error: anteproyectoContactoError } = await supabase
-      .from('AnteproyectoContacto')
-      .select('id');  
-    if (anteproyectoContactoError) throw anteproyectoContactoError;
-    for (const item of anteproyectoContactoData) {
-      const { error } = await supabase
-        .from('AnteproyectoContacto')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
+      console.log('Iniciando carga de profesores para próximo semestre...');
+
+      // Calcular el próximo semestre
+      const fecha = new Date();
+      const añoActual = fecha.getFullYear();
+      const mesActual = fecha.getMonth() + 1;
+      const semestreActual = mesActual <= 7 ? 1 : 2;
+
+      let semestreSiguiente, añoSiguiente;
+      if (semestreActual === 1) {
+        semestreSiguiente = 2;
+        añoSiguiente = añoActual;
+      } else {
+        semestreSiguiente = 1;
+        añoSiguiente = añoActual + 1;
+      }
+
+      console.log(`Próximo semestre: S${semestreSiguiente} ${añoSiguiente}`);
+
+      // Obtener todos los profesores con timeout
+      console.log('Obteniendo lista de profesores...');
+      const { data: profesores, error: errorProfesores } = await Promise.race([
+        supabase.from('Profesor').select('profesor_id'),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout al obtener profesores')), 10000)
+        )
+      ]);
+
+      if (errorProfesores) {
+        console.error('Error al obtener profesores:', errorProfesores);
+        throw new Error(`No se pudo conectar con la base de datos. Verifique su conexión a internet.`);
+      }
+
+      if (!profesores || profesores.length === 0) {
+        alert('No se encontraron profesores registrados.');
+        setModal(false);
+        return;
+      }
+
+      console.log(`Profesores encontrados: ${profesores.length}`);
+
+      // Obtener todas las asignaciones existentes para el próximo semestre de una sola vez
+      console.log('Verificando asignaciones existentes...');
+      const { data: asignacionesExistentes, error: errorAsignaciones } = await Promise.race([
+        supabase
+          .from('AsignacionesProfesor')
+          .select('idProfesor')
+          .eq('semestre', semestreSiguiente)
+          .eq('año', añoSiguiente),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout al obtener asignaciones')), 10000)
+        )
+      ]);
+
+      if (errorAsignaciones) {
+        console.error('Error al obtener asignaciones:', errorAsignaciones);
+        throw new Error(`Error al verificar asignaciones existentes.`);
+      }
+
+      // Crear un Set con los IDs de profesores que ya tienen asignación
+      const profesoresConAsignacion = new Set(
+        (asignacionesExistentes || []).map(a => a.idProfesor)
+      );
+
+      // Filtrar profesores que necesitan nueva asignación
+      const profesoresSinAsignacion = profesores.filter(
+        p => !profesoresConAsignacion.has(p.profesor_id)
+      );
+
+      console.log(`Profesores que ya tienen asignación: ${profesoresConAsignacion.size}`);
+      console.log(`Profesores sin asignación: ${profesoresSinAsignacion.length}`);
+
+      if (profesoresSinAsignacion.length === 0) {
+        alert('Todos los profesores ya tienen asignación para el próximo semestre.');
+        setModal(false);
+        return;
+      }
+
+      // Crear las nuevas asignaciones en un solo insert
+      const nuevasAsignaciones = profesoresSinAsignacion.map(profesor => ({
+        idProfesor: profesor.profesor_id,
+        semestre: semestreSiguiente,
+        año: añoSiguiente,
+        disponibilidad: 0,
+        asignados: 0
+      }));
+
+      console.log('Insertando nuevas asignaciones...');
+      const { error: errorInsertar } = await Promise.race([
+        supabase
+          .from('AsignacionesProfesor')
+          .insert(nuevasAsignaciones),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Timeout al insertar asignaciones')), 10000)
+        )
+      ]);
+
+      if (errorInsertar) {
+        console.error('Error al insertar asignaciones:', errorInsertar);
+        throw new Error(`Error al crear las asignaciones: ${errorInsertar.message}`);
+      }
+
+      console.log(`Asignaciones creadas exitosamente: ${nuevasAsignaciones.length}`);
+
+      alert(
+        `Carga completada:\n` +
+        `- Profesores con nueva asignación: ${nuevasAsignaciones.length}\n` +
+        `- Profesores que ya tenían asignación: ${profesoresConAsignacion.size}\n` +
+        `- Total procesados: ${profesores.length}`
+      );
+
+    } catch (error) {
+      console.error('Error completo:', error);
+      
+      // Mensaje más específico según el tipo de error
+      let mensaje = 'Error al cargar profesores: ';
+      if (error.message.includes('Timeout')) {
+        mensaje += 'La operación tardó demasiado. Verifique su conexión a internet e intente nuevamente.';
+      } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+        mensaje += 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
+      } else {
+        mensaje += error.message || 'Error desconocido';
+      }
+      
+      alert(mensaje);
     }
 
-    // Borrar dependencias de Correcciones
-    const { data: correccionesData, error: correccionesError } = await supabase
-      .from('Correcciones')
-      .select('id');  
-    if (correccionesError) throw correccionesError;
-    for (const item of correccionesData) {
-      const { error } = await supabase
-        .from('Correcciones')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Anteproyecto
-    const { data: anteproyectoData, error: anteproyectoError } = await supabase
-      .from('Anteproyecto')
-      .select('id');  
-    if (anteproyectoError) throw anteproyectoError;
-    for (const item of anteproyectoData) {
-      const { error } = await supabase
-        .from('Anteproyecto')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Entrada
-    const { data: entradaData, error: entradaError } = await supabase
-      .from('Entrada')
-      .select('id');  
-    if (entradaError) throw entradaError;
-    for (const item of entradaData) {
-      const { error } = await supabase
-        .from('Entrada')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Bitacora
-    const { data: bitacoraData, error: bitacoraError } = await supabase
-      .from('Bitacora')
-      .select('id');  
-    if (bitacoraError) throw bitacoraError;
-    for (const item of bitacoraData) {
-      const { error } = await supabase
-        .from('Bitacora')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Avance
-    const { data: avanceData, error: avanceError } = await supabase
-      .from('Avance')
-      .select('id');  
-    if (avanceError) throw avanceError;
-    for (const item of avanceData) {
-      const { error } = await supabase
-        .from('Avance')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de SolicitudCarta
-    const { data: solicitudCartaData, error: solicitudCartaError } = await supabase
-      .from('SolicitudCarta')
-      .select('id_solicitud');  
-    if (solicitudCartaError) throw solicitudCartaError;
-    for (const item of solicitudCartaData) {
-      const { error } = await supabase
-        .from('SolicitudCarta')
-        .delete()
-        .eq('id_solicitud', item.id_solicitud); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Calificacion
-    const { data: calificacionData, error: calificacionError } = await supabase
-      .from('Calificacion')
-      .select('id');  
-    if (calificacionError) throw calificacionError;
-    for (const item of calificacionData) {
-      const { error } = await supabase
-        .from('Calificacion')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Cita
-    const { data: citaData, error: citaError } = await supabase
-      .from('Cita')
-      .select('cita_id');  
-    if (citaError) throw citaError;
-    for (const item of citaData) {
-      const { error } = await supabase
-        .from('Cita')
-        .delete()
-        .eq('cita_id', item.cita_id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Proyecto
-    const { data: proyectoData, error: proyectoError } = await supabase
-      .from('Proyecto')
-      .select('id');  
-    if (proyectoError) throw proyectoError;
-    for (const item of proyectoData) {
-      const { error } = await supabase
-        .from('Proyecto')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    // Borrar dependencias de Calendario
-    const { data: calendarioData, error: calendarioError } = await supabase
-      .from('Calendario')
-      .select('calendario_id');  
-    if (calendarioError) throw calendarioError;
-    for (const item of calendarioData) {
-      const { error } = await supabase
-        .from('Calendario')
-        .delete()
-        .eq('calendario_id', item.calendario_id); 
-      if (error) throw error;
-    }
-
-    // Borrar disponibilidad de profesores
-    const { data: disponibilidadData, error: disponibilidadError } = await supabase
-      .from('disponibilidad')
-      .select('id');  
-    if (disponibilidadError) throw disponibilidadError;
-    for (const item of disponibilidadData) {
-      const { error } = await supabase
-        .from('disponibilidad')
-        .delete()
-        .eq('id', item.id); 
-      if (error) throw error;
-    }
-
-    alert('Borrado completado correctamente');
-  } catch (error) {
-    console.error('Error durante el borrado:', error.message);
-    alert('Error durante el borrado: ' + error.message);
-  }
-  setModal(false);
-};
-  
+    setModal(false);
+  };
 
   return (
     <>
@@ -245,14 +215,14 @@ const InicioCargaDatos = () => {
                 className="w-full h-full p-6 text-left hover:bg-gray-50 transition-colors duration-200"
               >
                 <div className="flex flex-col items-center">
-                  <div className="bg-red-100 p-4 rounded-full mb-4">
-                    <i className="fas fa-database text-3xl text-red-600"></i>
+                  <div className="bg-green-100 p-4 rounded-full mb-4">
+                    <i className="fas fa-calendar-plus text-3xl text-green-600"></i>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    Reiniciar Base de Datos
+                    Cargar Próximo Semestre
                   </h3>
                   <p className="text-gray-600 text-center">
-                    Limpiar datos del semestre anterior
+                    Profesores disponibles para el próximo semestre
                   </p>
                 </div>
               </button>
@@ -293,10 +263,10 @@ const InicioCargaDatos = () => {
         <Modal show={modal} onClose={() => setModal(false)}>
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Confirmar Reinicio
+              Confirmar Carga
             </h2>
             <p className="text-gray-600 mb-6">
-              ¿Está seguro que desea reiniciar la base de datos? Esta acción no se puede deshacer.
+              ¿Está seguro que desea poner a los profesores actuales como disponibles para el próximo semestre?
             </p>
             <div className="flex justify-end space-x-4">
               <button
@@ -306,10 +276,10 @@ const InicioCargaDatos = () => {
                 Cancelar
               </button>
               <button
-                onClick={ReiniciarBaseDatos}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors duration-200"
+                onClick={cargarProfesoresProxSemestre}
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
               >
-                Confirmar Reinicio
+                Confirmar Carga
               </button>
             </div>
           </div>
