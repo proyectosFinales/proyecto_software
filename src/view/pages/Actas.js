@@ -8,6 +8,9 @@ import Defensa from '../PDFblueprints/Defensa';
 import CosntanciaPDF from '../PDFblueprints/ConstanciaPDF';
 import Entrega from '../PDFblueprints/Entrega';
 
+import { generateInformePreliminarPDF } from '../PDFblueprints/InformePreliminarPDF';
+import { generateCriterioTecnicoPDF } from '../PDFblueprints/CriterioTecnicoPDF';
+
 const Actas = () => {
   const [actas, setActas] = useState([]);
   const navigate = useNavigate();
@@ -165,6 +168,29 @@ const Actas = () => {
                           </button> )}
                           </PDFDownloadLink>
                           )}
+                          
+                          {(acta.machote === "InformePreliminar") && (
+                        <PDFDownloadLink 
+                          document={<button onClick={() => generateInformePreliminarPDF(acta.datos)} />} // Usamos la función del blueprint
+                          fileName={`Carta_Informe_Preliminar_${acta.Estudiante.Usuario.nombre}.pdf`}
+                        >
+                          {({loading}) => (loading ? <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Cargando Documento...</button> : <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+                            Descargar (Preliminar)
+                          </button> )}
+                        </PDFDownloadLink>
+                        )}
+
+                        {(acta.machote === "CriterioTecnico") && (
+                        <PDFDownloadLink 
+                          document={<button onClick={() => generateCriterioTecnicoPDF(acta.datos)} />} // Usamos la función del blueprint
+                          fileName={`Carta_Criterio_Tecnico_${acta.Estudiante.Usuario.nombre}.pdf`}
+                        >
+                          {({loading}) => (loading ? <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">Cargando Documento...</button> : <button className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded">
+                            Descargar (C. Técnico)
+                          </button> )}
+                        </PDFDownloadLink>
+                      )}
+
                           <button
                             onClick={() =>
                               eliminarActa(acta.id)
