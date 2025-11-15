@@ -316,6 +316,151 @@ const AnteproyectosCoordinador = () => {
   }
 };
 
+  // Funciones auxiliares para eliminación de anteproyecto
+  const consultarContactos = async (nombreContact) => {
+    try {
+      const { data, error } = await supabase
+        .from('ContactoEmpresa')
+        .select(`
+          id,
+          nombre,
+          AnteproyectoContact:anteproyectocontacto_contacto_id_fkey (
+            contacto_id         
+          )
+        `)
+        .eq('nombre', nombreContact);
+      
+      if(error) throw error;
+      
+      if(data && data.length > 0 && data[0].AnteproyectoContact && data[0].AnteproyectoContact.length === 1){
+        return true;
+      }
+      return false;
+    } catch(err) {
+      console.error('Error al buscar contacto: ', err);
+      return false;
+    }
+  };
+
+  const consultarHR = async (nombreContact) => {
+    try {
+      const { data, error } = await supabase
+        .from('ContactoEmpresa')
+        .select(`
+          id,
+          nombre,
+          AnteproyectoContact:AnteproyectoContacto_rrhh_id_fkey (
+            contacto_id         
+          )
+        `)
+        .eq('nombre', nombreContact);
+      
+      if(error) throw error;
+      
+      if(data && data.length > 0 && data[0].AnteproyectoContact && data[0].AnteproyectoContact.length === 1){
+        return true;
+      }
+      return false;
+    } catch(err) {
+      console.error('Error al buscar contacto RRHH: ', err);
+      return false;
+    }
+  };
+
+  const consultarEmpresas = async (nombreEmpresa) => {
+    try {
+      const { data, error } = await supabase
+        .from('Empresa')
+        .select(`
+          id,
+          nombre,
+          ContactoEmpresa:contactoempresa_empresa_id_fkey(
+            nombre
+          )
+        `)
+        .eq('nombre', nombreEmpresa)
+        .single();
+      
+      if(error) throw error;
+      
+      if(data && data.ContactoEmpresa && data.ContactoEmpresa.length === 0){
+        return true;
+      }
+      return false;
+    } catch(err) {
+      console.error('Error al buscar empresas', err);
+      return false;
+    }
+  };
+
+  const eliminarAnteproyecto = async (anteproyecto) => {
+    const confirmDelete = window.confirm("¿Está seguro de que quiere borrar el anteproyecto?");
+    if (!confirmDelete) return;
+
+    try {
+      const nombreAsesor = anteproyecto.AnteproyectoContacto?.[0]?.ContactoEmpresa?.nombre || '';
+      const nombreHR = anteproyecto.AnteproyectoContacto?.[0]?.RRHH?.nombre || '';
+      const nombreEmpresa = anteproyecto.Empresa?.nombre || '';
+
+      // Verificar contactos
+      const contactoCount = await consultarContactos(nombreAsesor);
+      const rhCount = await consultarHR(nombreHR);
+      
+      // Eliminar correcciones
+      await supabase
+        .from('Correcciones')
+        .delete()
+        .eq('anteproyecto_id', anteproyecto.id);
+      
+      // Eliminar relación AnteproyectoContacto
+      await supabase
+        .from('AnteproyectoContacto')
+        .delete()
+        .eq('anteproyecto_id', anteproyecto.id);
+      
+      // Eliminar el anteproyecto
+      const { error: deleteError } = await supabase
+        .from('Anteproyecto')
+        .delete()
+        .eq('id', anteproyecto.id);
+      
+      if (deleteError) throw deleteError;
+
+      // Eliminar contactos si solo estaban relacionados con este anteproyecto
+      if(contactoCount === true && nombreAsesor){
+        await supabase
+          .from('ContactoEmpresa')
+          .delete()
+          .eq('nombre', nombreAsesor);
+      }
+      
+      if(rhCount === true && nombreHR){
+        await supabase
+          .from('ContactoEmpresa')
+          .delete()
+          .eq('nombre', nombreHR);
+      }
+      
+      // Eliminar empresa si no tiene más contactos
+      const empresaCount = await consultarEmpresas(nombreEmpresa);
+      if(empresaCount === true && nombreEmpresa){
+        await supabase
+          .from('Empresa')
+          .delete()
+          .eq('nombre', nombreEmpresa);
+      }
+
+      // Actualizar lista de anteproyectos
+      setAnteproyectos(prev => prev.filter(a => a.id !== anteproyecto.id));
+      
+      alert('Anteproyecto eliminado exitosamente.');
+    } catch (error) {
+      console.error('Error al eliminar anteproyecto:', error);
+      alert('Error al eliminar anteproyecto: ' + error.message);
+    }
+  };
+
+
 
   // (Eliminado: filtrado duplicado de filteredAnteproyectos)
   
@@ -506,6 +651,14 @@ const AnteproyectosCoordinador = () => {
                           className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                         >
                           Pendiente
+                        </button>
+                      )}
+                      {anteproyecto.estado === "Reprobado" && (
+                        <button
+                          onClick={() => eliminarAnteproyecto(anteproyecto)}
+                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                        >
+                          Eliminar
                         </button>
                       )}
                     </div>
