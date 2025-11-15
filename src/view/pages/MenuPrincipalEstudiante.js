@@ -9,7 +9,27 @@ const MenuEstudiante = () => {
   const [isAllowedToRate, setIsAllowedToRate] = useState(false);
   const [hasCalificado, setHasCalificado] = useState(false);
   const [isMenuOpenSettings, setIsMenuOpenSettings] = useState(false);
+  const [nombreUsuario, setNombreUsuario] = useState('');
   const usuarioId = sessionStorage.getItem('token');
+
+  useEffect(() => {
+    const fetchNombreUsuario = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('Usuario')
+          .select('nombre')
+          .eq('id', usuarioId)
+          .single();
+        if (error) throw error;
+        if (data) {
+          setNombreUsuario(data.nombre);
+        }
+      } catch (error) {
+        console.error('Error al obtener nombre de usuario:', error);
+      }
+    };
+    fetchNombreUsuario();
+  }, [usuarioId]);
 
   useEffect(() => {
     const checkUserState = async () => {
@@ -105,7 +125,10 @@ const MenuEstudiante = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <header className="h-20 bg-white flex items-center justify-center relative px-4 border-b-2 border-black shadow-sm">
-        <div className="flex items-center absolute left-5 gap-3">
+        <div className="flex flex-col items-start absolute left-5 gap-1">
+          <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
+            {nombreUsuario || 'Cargando...'}
+          </span>
           <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
             Estudiante
           </span>

@@ -1,11 +1,33 @@
 /*HeaderProfesor.js*/
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SidebarProfesor from './SidebarProfesor';
 import SettingsProfesor from './SettingsProfesor';
+import supabase from '../../model/supabase';
 
 const HeaderProfesor = ({title}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuOpenSettings, setIsMenuOpenSettings] = useState(false);
+  const [nombreUsuario, setNombreUsuario] = useState('');
+
+  useEffect(() => {
+    const fetchNombreUsuario = async () => {
+      try {
+        const userToken = sessionStorage.getItem('token');
+        const { data, error } = await supabase
+          .from('Usuario')
+          .select('nombre')
+          .eq('id', userToken)
+          .single();
+        if (error) throw error;
+        if (data) {
+          setNombreUsuario(data.nombre);
+        }
+      } catch (error) {
+        console.error('Error al obtener nombre de usuario:', error);
+      }
+    };
+    fetchNombreUsuario();
+  }, []);
 
   return (
     <div>
@@ -17,10 +39,14 @@ const HeaderProfesor = ({title}) => {
           >
             &#9776;
           </button>
-          {/* Tipo de usuario */}
-          <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
-            Profesor
-          </span>
+          <div className="flex flex-col gap-1">
+            <span className="bg-blue-100 text-blue-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
+              {nombreUsuario || 'Cargando...'}
+            </span>
+            <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
+              Profesor
+            </span>
+          </div>
         </div>
         <h1 className="text-lg md:text-2xl font-bold">{title}</h1>
         <div className="flex items-center absolute right-5 gap-3">
