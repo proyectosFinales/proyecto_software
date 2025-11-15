@@ -150,6 +150,7 @@ const CantidadProyectosProfesor = () => {
         .from('AsignacionesProfesor')
         .select('asignados')
         .eq('idProfesor', profesor.profesor_id)
+        
         .eq('semestre', profesor.semestre)
         .eq('año', profesor.año)
         .single();
