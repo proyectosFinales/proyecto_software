@@ -104,14 +104,30 @@ const MenuEstudiante = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
-      <header className="h-20 bg-white flex justify-between items-center px-4 border-b-2 border-black shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-800">Inicio</h1>
-        <button
-          onClick={() => setIsMenuOpenSettings(!isMenuOpenSettings)}
-          className="text-xl"
-        >
-          <i className="fas fa-cog"></i>
-        </button>
+      <header className="h-20 bg-white flex items-center justify-center relative px-4 border-b-2 border-black shadow-sm">
+        <div className="flex items-center absolute left-5 gap-3">
+          <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
+            Estudiante
+          </span>
+        </div>
+        <h1 className="text-lg md:text-2xl font-bold text-gray-800">Inicio</h1>
+        <div className="flex items-center absolute right-5 gap-3">
+          <span className="bg-gray-200 text-gray-700 rounded px-2 py-0.5 text-xs font-semibold shadow-sm select-none">
+            {(() => {
+              const fecha = new Date();
+              const anoActual = fecha.getFullYear();
+              const mes = fecha.getMonth() + 1;
+              const semestreActual = mes <= 7 ? 1 : 2;
+              return `Semestre ${semestreActual} - ${anoActual}`;
+            })()}
+          </span>
+          <button
+            onClick={() => setIsMenuOpenSettings(!isMenuOpenSettings)}
+            className="text-xl"
+          >
+            <i className="fas fa-cog"></i>
+          </button>
+        </div>
       </header>
 
       <SettingsEstudiante show={isMenuOpenSettings} setShow={setIsMenuOpenSettings} />
