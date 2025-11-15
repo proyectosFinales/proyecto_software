@@ -10,6 +10,7 @@ import Proyecto from "../../../controller/Proyecto";
 import { loadToast } from "../../components/toast";
 import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
+import supabase from "../../../model/supabase";
 
 const CantidadProyectosProfesor = () => {
   const [profesorExpandido, setProfesorExpandido] = useState(null); // profesor_id
@@ -134,6 +135,66 @@ const CantidadProyectosProfesor = () => {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
       </svg>
     );
+  };
+
+  // Función para eliminar asignación de profesor en un semestre específico
+  const eliminarAsignacionProfesor = async (profesor) => {
+    try {
+      // Primera confirmación
+      if (!window.confirm(`¿Está seguro que desea eliminar la asignación del profesor "${profesor.nombre}" para el semestre ${profesor.semestre}/${profesor.año}?`)) {
+        return;
+      }
+
+      // Verificar si tiene proyectos asignados en ESTE semestre/año específico
+      const { data: asignacion, error: errorAsignacion } = await supabase
+        .from('AsignacionesProfesor')
+        .select('asignados')
+        .eq('idProfesor', profesor.profesor_id)
+        .eq('semestre', profesor.semestre)
+        .eq('año', profesor.año)
+        .single();
+
+      if (errorAsignacion) {
+        throw new Error(`Error al verificar asignación: ${errorAsignacion.message}`);
+      }
+
+      if (asignacion && asignacion.asignados > 0) {
+        alert(`No se puede eliminar la asignación porque el profesor tiene ${asignacion.asignados} proyecto(s) asignado(s) en este semestre.`);
+        return;
+      }
+
+      // Segunda confirmación
+      if (!window.confirm(`CONFIRMACIÓN FINAL: ¿Realmente desea eliminar la asignación del profesor "${profesor.nombre}" para el semestre ${profesor.semestre}/${profesor.año}?`)) {
+        return;
+      }
+
+      console.log(`Eliminando asignación del profesor ${profesor.profesor_id} para semestre ${profesor.semestre}/${profesor.año}...`);
+
+      // Eliminar la asignación específica
+      const { error: errorEliminar } = await supabase
+        .from('AsignacionesProfesor')
+        .delete()
+        .eq('idProfesor', profesor.profesor_id)
+        .eq('semestre', profesor.semestre)
+        .eq('año', profesor.año);
+
+      if (errorEliminar) {
+        throw new Error(`Error al eliminar asignación: ${errorEliminar.message}`);
+      }
+
+      console.log('Asignación eliminada exitosamente');
+
+      alert(`Asignación del profesor "${profesor.nombre}" para el semestre ${profesor.semestre}/${profesor.año} eliminada exitosamente.`);
+
+      // Recargar la lista de profesores
+      const data = await Profesor.obtenerTodos();
+      setProfesores(data);
+      setProfesoresFiltrados(data);
+
+    } catch (error) {
+      console.error('Error al eliminar asignación:', error);
+      alert(`Error al eliminar asignación: ${error.message}`);
+    }
   };
 
   if (isLoading) {
@@ -382,7 +443,18 @@ const CantidadProyectosProfesor = () => {
                           className="hover:bg-gray-50 transition-colors duration-150"
                         >
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm font-medium text-gray-900">
-                            {profesor.nombre}
+                            <div className="flex items-center space-x-2">
+                              <span>{profesor.nombre}</span>
+                              <button
+                                onClick={() => eliminarAsignacionProfesor(profesor)}
+                                className="text-red-600 hover:text-red-800 hover:bg-red-50 rounded-full p-1 transition-colors duration-200"
+                                title={`Eliminar asignación del semestre ${profesor.semestre}/${profesor.año}`}
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              </button>
+                            </div>
                           </td>
                           <td className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-center">
                             <input
