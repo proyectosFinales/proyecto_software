@@ -14,6 +14,16 @@ import supabase from "../../../model/supabase";
 const ProyectosAsignadosProfesor = () => {
   const navigate = useNavigate();
   const [proyectos, setProyectos] = useState([]);
+  const [proyectosFiltrados, setProyectosFiltrados] = useState([]);
+  
+  // Obtener año y semestre actual
+  const añoActual = new Date().getFullYear();
+  const mesActual = new Date().getMonth() + 1; // 0-11, por eso +1
+  const semestreActual = mesActual <= 6 ? 1 : 2;
+  
+  const [filtroAño, setFiltroAño] = useState(añoActual.toString());
+  const [filtroSemestre, setFiltroSemestre] = useState(semestreActual.toString());
+  const [añosDisponibles, setAñosDisponibles] = useState([]);
   const userId = sessionStorage.getItem("token"); // Or however you get the professor
 
   useEffect(() => {
@@ -104,7 +114,24 @@ const ProyectosAsignadosProfesor = () => {
         if (proyectosError) 
           throw new Error('Error fetching Proyectos:', proyectosError);
 
-        setProyectos(proyectosData);
+        // Ordenar proyectos por año descendente, luego por semestre descendente
+        const proyectosOrdenados = proyectosData.sort((a, b) => {
+          // Primero ordenar por año (descendente)
+          if (b.Anteproyecto?.año !== a.Anteproyecto?.año) {
+            return b.Anteproyecto?.año - a.Anteproyecto?.año;
+          }
+          // Si el año es igual, ordenar por semestre (descendente)
+          return b.Anteproyecto?.semestre - a.Anteproyecto?.semestre;
+        });
+
+        setProyectos(proyectosOrdenados);
+        
+        // Generar años disponibles: año siguiente, presente y 5 anteriores
+        const años = [];
+        for (let i = añoActual + 1; i >= añoActual - 5; i--) {
+          años.push(i);
+        }
+        setAñosDisponibles(años);
       } catch (error) {
         console.error('Error:', error);
       }
@@ -112,6 +139,21 @@ const ProyectosAsignadosProfesor = () => {
 
     fetchProyectos();
   }, [userId]);
+
+  // Efecto para aplicar filtros
+  useEffect(() => {
+    let resultado = [...proyectos];
+
+    if (filtroAño && filtroAño !== '') {
+      resultado = resultado.filter(p => p.Anteproyecto?.año === parseInt(filtroAño));
+    }
+
+    if (filtroSemestre && filtroSemestre !== '') {
+      resultado = resultado.filter(p => p.Anteproyecto?.semestre === parseInt(filtroSemestre));
+    }
+
+    setProyectosFiltrados(resultado);
+  }, [filtroAño, filtroSemestre, proyectos]);
 
   const handleCambiarEstadoProyecto = async (proyectoId, nuevoEstado) => {
     const confirmacion = window.confirm(`¿Está seguro de cambiar el estado del proyecto a "${nuevoEstado}"?`);
@@ -143,11 +185,61 @@ const ProyectosAsignadosProfesor = () => {
       Sidebar={SidebarProfesor}
       Settings={SettingsProfesor}
     >
+      {/* Filtros */}
+      <div className="m-4 p-4 bg-white border-2 border-slate-800 rounded shadow-sm">
+        <h3 className="font-bold mb-3">Filtros</h3>
+        <div className="flex gap-4 flex-wrap">
+          <div className="flex flex-col">
+            <label className="font-semibold mb-1">Año:</label>
+            <select 
+              className="border border-gray-300 rounded px-3 py-2"
+              value={filtroAño}
+              onChange={(e) => setFiltroAño(e.target.value)}
+            >
+              <option value="">Todos</option>
+              {añosDisponibles.map(año => (
+                <option key={año} value={año}>{año}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="flex flex-col">
+            <label className="font-semibold mb-1">Semestre:</label>
+            <select 
+              className="border border-gray-300 rounded px-3 py-2"
+              value={filtroSemestre}
+              onChange={(e) => setFiltroSemestre(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="1">1</option>
+              <option value="2">2</option>
+            </select>
+          </div>
+
+          {(filtroAño || filtroSemestre) && (
+            <div className="flex items-end">
+              <button 
+                className="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+                onClick={() => {
+                  setFiltroAño('');
+                  setFiltroSemestre('');
+                }}
+              >
+                Limpiar Filtros
+              </button>
+            </div>
+          )}
+        </div>
+        <p className="mt-2 text-sm text-gray-600">
+          Mostrando {proyectosFiltrados.length} de {proyectos.length} proyecto(s)
+        </p>
+      </div>
+
       <ul className="list-none border-2 border-slate-800 m-4 p-0 rounded shadow-sm">
         <li className="bg-slate-200 font-bold border-b-2 border-slate-800 px-4 py-2">
           Proyectos asignados
         </li>
-        {proyectos.map((proyecto) => (
+        {proyectosFiltrados.map((proyecto) => (
           <li key={proyecto.id} className="px-4 py-4 border-b border-slate-300">
             <p className="mt-2"><span className="font-semibold">Empresa:</span> {proyecto.Anteproyecto?.Empresa?.nombre || 'N/A'}</p>
             <p><span className="font-semibold">Estudiante:</span> {proyecto.Estudiante?.Usuario?.nombre}</p>

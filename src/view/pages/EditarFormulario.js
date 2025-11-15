@@ -618,7 +618,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
         .update({
           sede: sede
         })
-        .eq('usuario_id', userId);
+        .eq('id', userId);
       if (usuarioError) throw usuarioError;
 
       // Actualizar Estudiante (situacion_laboral)
@@ -650,7 +650,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
       sendMail(correo, 'Actualización de Anteproyecto', mensajeEstudiante);
 
       // Notificación a los coordinadores de los estudiantes que han actualizado su anteproyecto
-      correosCoordinadores.map((coordinador) => {
+      correosCoordinadores.forEach((coordinador) => {
         const mensajeCoordinador = `Buenas, para informarle que el estudiante con la siguiente información:\n` +
           `Nombre: ${nombre}\n` +
           `Carnet: ${carnet}\n` +
@@ -660,14 +660,18 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           "\nHa actualizado la información del anteproyecto.\n" +
           "\nInstituto Tecnológico de Costar Rica,\n" +
           "Escuela de Producción Industrial.";
-        sendMail(coordinador.correo, 'Estudiante actualizó su Anteproyecto', mensajeCoordinador)
+        sendMail(coordinador.correo, 'Estudiante actualizó su Anteproyecto', mensajeCoordinador);
       });
 
       successToast('Modificaciones realizadas exitosamente');
-      // Redirigir a donde gustes
-      navigate('/anteproyectosEstudiante');
+      
+      // Redirigir a la página de anteproyectos del estudiante
+      setTimeout(() => {
+        navigate('/anteproyectosEstudiante');
+      }, 500);
     } catch (error) {
       errorToast('Error al actualizar anteproyecto: ' + error.message);
+      console.error('Error completo:', error);
     }
   }
 
