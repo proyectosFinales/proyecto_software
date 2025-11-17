@@ -585,27 +585,30 @@ export function descargarEmpresas(dataEmpresas) {
  * Genera y descarga el PDF con el reporte de los eventos existentes en el calendario.
  * @param {*} dataCalendario la coleccion con la info de los eventos.
  */
-export const generarPDFCalendario = (dataCalendario) => {
-  const doc = new jsPDF();
+export const generarExcelCalendario = (dataCalendario) => {
+  if (dataCalendario.length === 0) {
+    alert('No hay empresas para mostrar.');
+    return;
+  }
 
-  generarHeaderFooterPDF(doc, 'Eventos del Calendario');
-
-  // Columnas para la tabla del PDF
-  const columnas = ["Nombre", "Fecha Inicio", "Fecha Fin"];
-
-  const toUTF8 = (str) => {
-  if (!str) return "";
-    return String(str).normalize("NFC");
-  };
-
-  // Mapear los datos del grafico
-  const filas = dataCalendario.map(item => [toUTF8(item.nombre), toUTF8(item.fechaInicio), toUTF8(item.fechaFin)]);
-
-  autoTable(doc, {
-    startY: 50,
-    head: [columnas],
-    body: filas,
+  const dataToExport = dataCalendario.map((c, index) => ({
+    '': index + 1,
+    'Nombre evento': c.nombre,
+    'Fecha de inicio': c.fechaInicio,
+    'Fecha de fin': c.fechaFin,
+  })); 
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //Ajustar ancho de columnas
+  const columnWidths = Object.keys(dataToExport[0]).map(key => {
+    const maxLength = Math.max(
+      key.length,
+      ...dataToExport.map(row => (row[key] ? row[key].toString().length : 0))
+    );
+    return { wch: maxLength + 2 };
   });
-
-  doc.save(`Reporte_Calendario.pdf`);
+  worksheet['!cols'] = columnWidths;
+  //Datos restantes
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Calendario');
+  XLSX.writeFile(workbook, 'Reporte_Calendario.xlsx');
 };
