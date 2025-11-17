@@ -29,7 +29,10 @@ const FormularioCoordinador = () => {
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
   const [sede, setSede] = useState('');
-
+  const [provinciaEst, setProvinciaEst] = useState('');
+  const [cantonEst, setCantonEst] = useState('');
+  const [distritoEst, setdistritoEst] = useState('');
+  
   // Datos de la empresa y del anteproyecto (read-only, excepto observaciones)
   const [nombreEmpresa, setNombreEmpresa] = useState('');
   const [actividadEmpresa, setActividadEmpresa] = useState('');
@@ -59,7 +62,7 @@ const FormularioCoordinador = () => {
   const [proyecto, setProyecto] = useState('');
   const [estado, setEstado] = useState('');
   const [categoria, setCategoria] = useState('');
-  const [cantonEstudiante, setCantonEstudiante] = useState('');
+  //const [cantonEstudiante, setCantonEstudiante] = useState('');
 
 
   const [semestre, setSemestre] = useState('');
@@ -125,7 +128,10 @@ const FormularioCoordinador = () => {
                     nombre,
                     correo,
                     telefono,
-                    sede
+                    sede,
+                    provincia,
+                    canton,
+                    distrito
                   )
                 ),
                 Empresa:empresa_id (
@@ -204,7 +210,9 @@ const FormularioCoordinador = () => {
       setCorreo(data.Estudiante.Usuario.correo || '');
       setTelefono(data.Estudiante.Usuario.telefono || '');
       setSede(data.Estudiante.Usuario.sede || '');
-      setCantonEstudiante(data.Estudiante.Usuario.canton || '');
+      setProvinciaEst(data.Estudiante.Usuario.provincia || '');
+      setCantonEst(data.Estudiante.Usuario.canton || '');
+      setdistritoEst(data.Estudiante.Usuario.distrito || '');
       }
 
       // (nuevo)
@@ -278,9 +286,9 @@ const FormularioCoordinador = () => {
           // Usar el estado cantonEstudiante guardado al consultar el anteproyecto
           candidatos = profesoresDisponibles.filter(p => {
             // El cantón del profesor está en p.Usuario.canton
-            console.log("Filtrando por cantón:", cantonEstudiante);
+            console.log("Filtrando por cantón:", cantonEst);
             console.log("Profesor:", p.Usuario ? p.Usuario.canton : "Sin usuario"); 
-            return p.Usuario && p.Usuario.canton && p.Usuario.canton === cantonEstudiante;
+            return p.Usuario && p.Usuario.canton && p.Usuario.canton === cantonEst;
           });
         }
 
@@ -709,16 +717,7 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>3. Teléfono: *</label>
-          <input
-            type="text"
-            value={telefono}
-            readOnly
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>4. Correo electrónico: *</label>
+          <label>3. Correo electrónico: *</label>
           <input
             type="email"
             value={correo}
@@ -726,6 +725,15 @@ const FormularioCoordinador = () => {
           />
         </div>
 
+        <div className={styles.formGroup}>
+          <label>4. Teléfono: *</label>
+          <input
+            type="text"
+            value={telefono}
+            readOnly
+          />
+        </div>
+        
         <div className={styles.formGroup}>
           <label>5. Sede: *</label>
           <input
@@ -735,9 +743,23 @@ const FormularioCoordinador = () => {
           />
         </div>
 
+        <div className={styles.formGroup}>
+          <label>6. Canton: *</label>
+          <input
+            type="text"
+            value={cantonEst}
+            readOnly
+          />
+        </div>
+
         <h2>Datos de la empresa</h2>
         <div className={styles.formGroup}>
-          <label>6. Tipo de Empresa:</label>
+          <label>6. Nombre de la empresa:</label>
+          <input type="text" value={nombreEmpresa} readOnly />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>7. Tipo de Empresa:</label>
           <input
             type="text"
             value={tipoEmpresa}
@@ -746,27 +768,7 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>7. Nombre de la empresa:</label>
-          <input type="text" value={nombreEmpresa} readOnly />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>8. Actividad de la empresa:</label>
-          <input type="text" value={actividadEmpresa} readOnly />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>9. Ubicación (Distrito):</label>
-          <input type="text" value={distritoEmpresa} readOnly />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>10. Ubicación (Cantón):</label>
-          <input type="text" value={cantonEmpresa} readOnly />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>11. Provincia:</label>
+          <label>8. Ubicación (Provincia):</label>
           <input
             type="text"
             value={provinciaEmpresa}
@@ -775,41 +777,58 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
+          <label>9. Ubicación (Cantón):</label>
+          <input type="text" value={cantonEmpresa} readOnly />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>10. Ubicación (Distrito):</label>
+          <input type="text" value={distritoEmpresa} readOnly />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>11. Actividad de la empresa:</label>
+          <input type="text" value={actividadEmpresa} readOnly />
+        </div>
+
+        <h2>Contacto Empresa</h2>
+        <div className={styles.formGroup}>
           <label>12. Nombre del asesor industrial:</label>
           <input type="text" value={nombreAsesor} readOnly />
         </div>
 
         <div className={styles.formGroup}>
-          <label>13. Puesto del asesor:</label>
+          <label>13. Puesto que desempeña el asesor industrial:</label>
           <input type="text" value={puestoAsesor} readOnly />
         </div>
 
         <div className={styles.formGroup}>
-          <label>14. Teléfono del contacto:</label>
+          <label>14. Teléfono del asesor industrial:</label>
           <input type="text" value={telefonoContacto} readOnly />
         </div>
 
         <div className={styles.formGroup}>
-          <label>15. Correo del contacto:</label>
+          <label>15. Correo del asesor industrial:</label>
           <input type="email" value={correoContacto} readOnly />
         </div>
 
+        <h2>Recursos Humanos</h2>
         <div className={styles.formGroup}>
-          <label>16. Nombre del contacto de RRHH:</label>
+          <label>16. Nombre del contacto de Recursos Humanos:</label>
           <input type="text" value={nombreHR} readOnly />
         </div>
 
         <div className={styles.formGroup}>
-          <label>17. Teléfono de RRHH:</label>
+          <label>17. Teléfono del contacto de Recursos Humanos:</label>
           <input type="text" value={telefonoHR} readOnly />
         </div>
 
         <div className={styles.formGroup}>
-          <label>18. Correo de RRHH:</label>
+          <label>18. Correo del contacto de Recursos Humanos:</label>
           <input type="email" value={correoHR} readOnly />
         </div>
 
-        <h2>Datos del proyecto</h2>
+        <h2>Datos del anteproyecto</h2>
         <h3 className={styles.aviso}>
           (Si hay mucha información, puede arrastrar la esquina del campo.)
         </h3>
@@ -924,7 +943,7 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>23. Nombre del departamento:</label>
+          <label>23. Departamento donde realizará el proyecto:</label>
           <input type="text" value={nombreDepartamento} readOnly />
         </div>
 
@@ -939,7 +958,7 @@ const FormularioCoordinador = () => {
 
         <div className={styles.formGroup}>
           <label>
-            25. Categoría
+            25. Categoría del proyecto
           </label>
             <input
               type="text"
