@@ -6,6 +6,7 @@
  */
 
 import jsPDF from 'jspdf';
+import * as XLSX from 'xlsx';
 
 import autoTable from "jspdf-autotable";
 import logoTec from '../view/PDFblueprints/logoTec.jpg';
@@ -381,120 +382,88 @@ export function descargarBitacoras(bitacorasYentradas, isProfe) {
 }
 
 /**
- * Crea un PDF con la informacion de los perfiles de profesores y estudiantes.
- * @param {*} dataProfes 
- * @param {*} dataEstudiantes 
- * @returns 
+ * Crea un excel con la informacion de todos los perfiles en la base de datos.
+ * @param {*} dataEstudiantes todos los perfiles de los estudiantes.
+ * @returns NA.
  */
-export function descargarPerfiles(dataProfes, dataEstudiantes) {
-  const doc = new jsPDF();
-
-  // Obtener fecha actual
-  const fechaActual = new Date();
-  const dia = fechaActual.getDate();
-  const mes = fechaActual.getMonth() + 1;
-  const anio = fechaActual.getFullYear();
-  const fechaFormateada = `${dia}/${mes}/${anio}`;
-
-  // Título
-  doc.setFontSize(18);
-  doc.text('Perfiles', 20, 20);
-
-  // Posición inicial del texto
-  let yPosition = 40;
-  const lineSpacing = 10;
-
-  // Ancho de la página y espacio disponible
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const textWidth = pageWidth - 40; // Margen de 20px a cada lado
-  const pageHeight = doc.internal.pageSize.getHeight();
-
-  // Fecha en la esquina superior derecha
-  doc.setFontSize(10);
-  doc.text(`${fechaFormateada}`, textWidth, 10);
-
-  /**
-   * Añade texto dinámicamente, con salto de página si se supera el límite.
-   * @param {string} label Etiqueta del campo
-   * @param {string} value Contenido a imprimir
-   */
-  function addText(label, value) {
-    if (value === undefined || value === null) {
-      value = "No especificado";
-    }
-    
-    const labelText = `${label} `;
-    const textDividido = doc.splitTextToSize(value.toString() || "", textWidth);
-    let requiredHeight = textDividido.length * lineSpacing;
-
-    // Ajustar la altura para texto en varias líneas
-    if (textDividido.length > 1) {
-      requiredHeight = (textDividido.length * 5) + 5; 
-    }
-
-    // Verificar si hay espacio en la página actual
-    if (yPosition + requiredHeight > pageHeight - 20) {
-      doc.addPage();
-      yPosition = 20;
-    }
-
-    // Etiqueta en negrita
-    doc.setFont("Helvetica", "bold");
-    doc.text(labelText, 20, yPosition);
-
-    // Contenido en texto normal
-    doc.setFont("Helvetica", "normal");
-    doc.text(textDividido, 20, yPosition + 7);
-    yPosition += requiredHeight + 10;
-  }
-
-  // Sección de datos del estudiante (si existe)
-  doc.setFontSize(12);
-
-  if (dataProfes.length === 0) {
-    alert('No hay perfiles de profesores para generar el reporte');
-    return;
-  }
-
+export function descargarPerfilesEstudiantes(dataEstudiantes) {
   if (dataEstudiantes.length === 0) {
-    alert('No hay perfiles de estudiantes para generar el reporte');
+    alert('No hay perfiles de estudiantes para mostrar.');
     return;
   }
 
-  //Agrega la informacion de todos los profesores
-  addText(`Datos de profesores.`,' ');
-  for (let i = 0; i < dataProfes.length; i++) {
-    addText(`${i + 1}. Profesor`, dataProfes[i].Usuario.nombre);
-    addText('Correo', dataProfes[i].Usuario.correo);
-    addText('Teléfono', dataProfes[i].Usuario.telefono);
-    addText('Sede', dataProfes[i].Usuario.sede);
-    addText('Cantidad de estudiantes', dataProfes[i].cantidad_estudiantes);
-    addText('Cantidad de estudiantes libres', dataProfes[i].estudiantes_libres);
-    addText(' ', ' ');
+  const dataToExport = dataEstudiantes.map((e, index) => ({
+    '': index + 1,
+    'Nombre estudiante': e.Usuario.nombre,
+    'Carnet': e.carnet,
+    'Correo': e.Usuario.correo,
+    'Teléfono': e.Usuario.telefono,
+    'Sede': e.Usuario.sede,
+    'Provincia': e.Usuario?.provincia || 'No actualizada',
+    'Cantón': e.Usuario?.canton || 'No actualizado',
+    'Distrito': e.Usuario?.distrito || 'No actualizado',
+    'Estado del estudiante': e.estado,
+    'Situación laboral': e?.situacion_laboral || 'No actualizado',
+    'Año ingreso': e?.anio_ingreso || 'No actualizado',
+    'Profesor asesor': e.Profesor?.Usuario.nombre || 'No asignado',
+    'Semestre': e.Semestre.nombre,
+    'Fecha inicio': e.Semestre.fecha_inicio,
+    'Fecha finalización': e.Semestre.fecha_fin,
+  })); 
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //Ajustar ancho de columnas
+  const columnWidths = Object.keys(dataToExport[0]).map(key => {
+    const maxLength = Math.max(
+      key.length,
+      ...dataToExport.map(row => (row[key] ? row[key].toString().length : 0))
+    );
+    return { wch: maxLength + 2 };
+  });
+  worksheet['!cols'] = columnWidths;
+  //Datos restantes
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Estudiantes');
+  XLSX.writeFile(workbook, 'Reporte_Estudiantes.xlsx');
+};
+
+/**
+ * Crea un excel con la informacion de todos los perfiles en la base de datos.
+ * @param {*} dataProfesores todos los perfiles de los profesores.
+ * @returns NA.
+ */
+export function descargarPerfilesProfesores(dataProfesores) {
+  if (dataProfesores.length === 0) {
+    alert('No hay perfiles de profesores para mostrar.');
+    return;
   }
 
-  //Agrega la informacion de todos los estudiantes
-  addText(`Datos de estudiantes.`,' ');
-  for (let i = 0; i < dataEstudiantes.length; i++) {
-    addText(`${i + 1}. Estudiante`, dataEstudiantes[i].Usuario.nombre);
-    addText('Correo', dataEstudiantes[i].Usuario.correo);
-    addText('Teléfono', dataEstudiantes[i].Usuario.telefono);
-    addText('Sede', dataEstudiantes[i].Usuario.sede);
-    addText('Carnet', dataEstudiantes[i].carnet);
-    addText('Asesor', dataEstudiantes[i]?.Profesor?.Usuario.nombre || 'Sin asesor asignado');
-    addText('Situacion Laboral', dataEstudiantes[i]?.situacion_laboral || 'No especificado');
-    addText('Año de ingreso', dataEstudiantes[i]?.anio_ingreso || 'No especificado');
-    addText('Semestre', dataEstudiantes[i].Semestre.nombre);
-    addText('Fecha de Inicio', dataEstudiantes[i].Semestre.fecha_inicio);
-    addText('Fecha de Fin', dataEstudiantes[i].Semestre.fecha_fin);
-    addText(' ', ' ');
-  }
-
-  // Descargar PDF (Nombre sugerido)
-  doc.save(`Reporte_de_Perfiles.pdf`);
-  
-}
-
+  const dataToExport = dataProfesores.map((p, index) => ({
+    '': index + 1,
+    'Nombre profesor': p.Usuario.nombre,
+    'Correo': p.Usuario.correo,
+    'Teléfono': p.Usuario.telefono,
+    'Sede': p.Usuario.sede,
+    'Provincia': p.Usuario?.provincia || 'No actualizada',
+    'Cantón': p.Usuario?.canton || 'No actualizado',
+    'Distrito': p.Usuario?.distrito || 'No actualizado',
+    'Estudiantes a asignar': p.cantidad_estudiantes,
+    'Faltan de asignar': p.estudiantes_libres,
+  })); 
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //Ajustar ancho de columnas
+  const columnWidths = Object.keys(dataToExport[0]).map(key => {
+    const maxLength = Math.max(
+      key.length,
+      ...dataToExport.map(row => (row[key] ? row[key].toString().length : 0))
+    );
+    return { wch: maxLength + 2 };
+  });
+  worksheet['!cols'] = columnWidths;
+  //Datos restantes
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Profesores');
+  XLSX.writeFile(workbook, 'Reporte_Profesores.xlsx');
+};
 
 // Función auxiliar para generar header y footer en los PDFs
 const generarHeaderFooterPDF = (doc, titulo) => {
