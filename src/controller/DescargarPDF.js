@@ -551,96 +551,35 @@ export const generarPDFDashboardCalificaciones = (datosGrafico, tituloReporte) =
   doc.save(`Reporte_Calificaciones_Profesores.pdf`);
 };
 
-
 /**
  * Mete toda la informacion de las empresas enun pdf.
  * @param {*} dataEmpresas informacion recibida de la BD con info de la empresa.
  * @returns No retorna nada, solo descarga el pdf con la informacion de las empresas.
  */
 export function descargarEmpresas(dataEmpresas) {
-  const doc = new jsPDF();
-
-  // Obtener fecha actual
-  const fechaActual = new Date();
-  const dia = fechaActual.getDate();
-  const mes = fechaActual.getMonth() + 1;
-  const anio = fechaActual.getFullYear();
-  const fechaFormateada = `${dia}/${mes}/${anio}`;
-
-  // Título
-  doc.setFontSize(18);
-  doc.text('Empresas', 20, 20);
-
-  // Posición inicial del texto
-  let yPosition = 40;
-  const lineSpacing = 10;
-
-  // Ancho de la página y espacio disponible
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const textWidth = pageWidth - 40; // Margen de 20px a cada lado
-  const pageHeight = doc.internal.pageSize.getHeight();
-
-  // Fecha en la esquina superior derecha
-  doc.setFontSize(10);
-  doc.text(`${fechaFormateada}`, textWidth, 10);
-
-  /**
-   * Añade texto dinámicamente, con salto de página si se supera el límite.
-   * @param {string} label Etiqueta del campo
-   * @param {string} value Contenido a imprimir
-   */
-  function addText(label, value) {
-    if (value === undefined || value === null) {
-      value = "No especificado";
-    }
-    
-    const labelText = `${label} `;
-    const textDividido = doc.splitTextToSize(value.toString() || "", textWidth);
-    let requiredHeight = textDividido.length * lineSpacing;
-
-    // Ajustar la altura para texto en varias líneas
-    if (textDividido.length > 1) {
-      requiredHeight = (textDividido.length * 5) + 5; 
-    }
-
-    // Verificar si hay espacio en la página actual
-    if (yPosition + requiredHeight > pageHeight - 20) {
-      doc.addPage();
-      yPosition = 20;
-    }
-
-    // Etiqueta en negrita
-    doc.setFont("Helvetica", "bold");
-    doc.text(labelText, 20, yPosition);
-
-    // Contenido en texto normal
-    doc.setFont("Helvetica", "normal");
-    doc.text(textDividido, 20, yPosition + 7);
-    yPosition += requiredHeight + 10;
-  }
-
-  // Sección de datos del estudiante (si existe)
-  doc.setFontSize(12);
-
   if (dataEmpresas.length === 0) {
-    alert('No hay empresas para generar el reporte');
+    alert('No hay empresas para mostrar.');
     return;
   }
 
-  //Añade la info de las empresas al pdf
-  for (let i = 0; i < dataEmpresas.length; i++) {
-    addText(`${i + 1}. Empresas`, dataEmpresas[i].nombre);
-    addText('Tipo', dataEmpresas[i].tipo);
-    addText('Provincia', dataEmpresas[i].provincia);
-    addText('Cantón', dataEmpresas[i].canton);
-    addText('Distrito', dataEmpresas[i].distrito);
-    addText('Actividad', dataEmpresas[i].actividad);
-    addText('Cantidad de Contactos', dataEmpresas[i].ContactoEmpresa.length);
-  }
-
-  // Descargar PDF (Nombre sugerido)
-  doc.save(`Reporte_de_Empresas.pdf`);
-}
+  const dataToExport = dataEmpresas.map((e, index) => ({
+    '': index + 1,
+    'Empresa': e.nombre,
+    'Tipo': e.tipo,
+    'Actividad': e.actividad,
+    'Provincia': e.provincia,
+    'Cantón': e.canton,
+    'Distrito': e.distrito,
+    'Cantidad de contactos': e.ContactoEmpresa.length,
+  })); 
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  //Si hay texto muy grande, al tratar de ajustar las columnas el padding es muy grande tambien
+  //por eso en este caso no se hace.
+  //Datos restantes
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Empresas');
+  XLSX.writeFile(workbook, 'Reporte_Empresas.xlsx');
+};
 
 /**
  * Genera y descarga el PDF con el reporte de los eventos existentes en el calendario.
