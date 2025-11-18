@@ -27,6 +27,8 @@ const VerProyecto = () => {
   const [profesorAsignado, setProfesorAsignado] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
+  const [haPerdido, setHaPerdido] = useState(false);
+  const [historialReprobacion, setHistorialReprobacion] = useState([]);
 
   // Utilidad para obtener query param
   const getQueryParam = (param) => {
@@ -70,6 +72,7 @@ const VerProyecto = () => {
             Estudiante:estudiante_id (
               carnet,
               id_usuario,
+              situacion_laboral,
               Usuario:id_usuario (
                 nombre,
                 correo,
@@ -120,6 +123,21 @@ const VerProyecto = () => {
         setProfesorAsignado(null);
       }
       setLoading(false);
+
+      //Solicitar info sobre el historial de reprobacion
+      const { data: historial, error: historialError } = await supabase
+        .from('HistorialReprobacion')
+        .select('*')
+        .eq('estudiante_id', proyectoData.estudiante_id); // Usamos el ID de estudiante cargado
+
+      if (historialError) {
+        console.error("Error cargando historial:", historialError);
+      }
+
+      if (historial && historial.length > 0) {
+        setHaPerdido(true);
+        setHistorialReprobacion(historial); 
+      }
     };
     fetchProyecto();
     // eslint-disable-next-line
@@ -349,6 +367,42 @@ const VerProyecto = () => {
             <label>Categoría del proyecto</label>
             <div>{anteproyecto?.Categoria?.nombre || ''}</div>
           </div>
+          <div className={styles.formGroup}>
+            <label>Situación Laboral</label>
+            <div>{anteproyecto?.Estudiante?.situacion_laboral || 'No especificada'}</div>
+          </div>
+          
+          <div className={`${styles.formGroup} ${haPerdido ? styles.historialBox : ''}`}>
+            <label style={{ fontWeight: 'bold' }}>Historial de Reprobación</label>
+            
+            {haPerdido ? (
+              /* Si haPerdido es true, muestra la tabla */
+              <table className={styles.historialTable}>
+                <thead>
+                  <tr>
+                    <th>Causa</th>
+                    <th>Semestre</th>
+                    <th>Año</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historialReprobacion.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.causa}</td>
+                      <td>{item.semestre ?? item.semestre_id ?? ''}</td>
+                      <td>{item.año ?? item.anio ?? ''}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              /* Si haPerdido es false, muestra el aviso */
+              <p>
+                El estudiante no reporta reprobar previamente.
+              </p>
+            )}
+          </div>
+
           <div className={styles.formGroup}>
             <label>Semestre</label>
             <div>{anteproyecto?.semestre || ''}</div>

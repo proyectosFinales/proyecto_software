@@ -430,7 +430,6 @@ function EdicionAsignacionProyectos() {
 
   const enviarCorreo = async (estID, estado) => {
     const estudiante = await obtenerEstudiante(estID);
-    console.log("El estudiante:", estudiante);
     //Mensajes a enviar por correo segun si se aprueba o no un proyecto
     const mensajeAprobado = `Buenas,\n` +
       `Se le comunica que el proyecto final de graduación presentado por ${estudiante[0].Usuario.nombre}, carnet ${estudiante[0].carnet}, ` +

@@ -4,7 +4,7 @@ import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
 import { getEventos, addEvento, deleteEvento, updateEvento, getTipoEventos, addTipoEvento } from '../../controller/Calendario';
-import { generarPDFCalendario } from '../../controller/DescargarPDF';
+import { generarExcelCalendario } from '../../controller/DescargarPDF';
 
 const Calendario = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -142,7 +142,7 @@ const Calendario = () => {
   };
 
   const handleReporteCalendario = () => {
-    generarPDFCalendario(events);
+    generarExcelCalendario(events);
   }
 
   return (

@@ -17,7 +17,10 @@ export async function fetchProfesores() {
                 nombre,
                 correo,
                 sede,
-                telefono
+                telefono,
+                provincia,
+                canton,
+                distrito
             )
         `);
         return {data, error}
@@ -48,7 +51,10 @@ export async function fetchEstudiantes() {
                 nombre,
                 correo,
                 sede,
-                telefono
+                telefono,
+                provincia,
+                canton,
+                distrito
             ),
             Profesor:asesor (
                 Usuario:id_usuario(
