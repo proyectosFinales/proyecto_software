@@ -256,6 +256,62 @@ export function descargarProyecto(proyecto) {
   doc.save(`Proyecto_${proyecto.nombreEmpresa || 'SinNombre'}.pdf`);
 }
 
+export function descargarAnteproyectos(anteproyectos) {
+  if (anteproyectos.length === 0) {
+    alert('No hay anteproyectos para generar el reporte');
+    return;
+  }
+
+  const dataToExport = anteproyectos.map((p) => ({
+    // El orden nuevo solicitado
+    ID: p.id,
+    'Estatus del proyecto': p.estado,
+    'Sede': p.Estudiante.Usuario.sede,
+    'Nombre del estudiante': p.Estudiante?.Usuario?.nombre || 'N/A',
+    'Carnet': p.Estudiante.carnet,
+    'Teléfono del estudiante': p.Estudiante.Usuario.telefono,
+    'Correo del estudiante': p.Estudiante.Usuario.correo,
+    'Nombre de la empresa': p.Empresa.nombre,
+    'Tipo de empresa': p.Empresa.tipo,
+    'Actividad de la empresa': p.Empresa.actividad,
+    'Ubicación de la empresa (provincia)': p.Empresa.provincia,
+    'Ubicación de la empresa (cantón)': p.Empresa.canton,
+    'Ubicación de la empresa (distrito)': p.Empresa.distrito,
+    'Nombre del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.nombre,
+    'Puesto que desempeña el asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.departamento,
+    'Teléfono del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.telefono,
+    'Correo del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.correo,
+    'Nombre del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.nombre,
+    'Teléfono del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.telefono,
+    'Correo del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.correo,
+    'Contexto': p.contexto,
+    'Justificación': p.justificacion,
+    'Síntomas': p.sintomas,
+    'Efectos o impactos': p.impacto,
+    'Departamento donde realizará el proyecto': p.departamento,
+    'Tipo de proyecto': p.tipo,
+    'Categoría del proyecto': p.Categoria.nombre,
+    'Observaciones': p.observaciones,
+  })); 
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+// Ajustar ancho de columnas con límite máximo
+  const MAX_WIDTH = 50; // Ancho máximo en caracteres
+  const MIN_WIDTH = 10; // Ancho mínimo en caracteres
+  
+  const columnWidths = Object.keys(dataToExport[0]).map(key => {
+    const maxLength = Math.max(
+      key.length,
+      ...dataToExport.map(row => (row[key] ? row[key].toString().length : 0))
+    );
+    const width = Math.min(Math.max(maxLength + 2, MIN_WIDTH), MAX_WIDTH);
+    return { wch: width };
+  });
+  worksheet['!cols'] = columnWidths;
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Anteproyectos');
+  XLSX.writeFile(workbook, 'Reporte_Anteproyectos.xlsx');
+}
+
 /**
  * Genera un PDF con la información de las bitácoras.
  * @param {Object} bitacorasYentradas Objeto con la información necesaria.

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
-import { descargarAnteproyecto } from '../../controller/DescargarPDF';
+import { descargarAnteproyectos, descargarAnteproyecto } from '../../controller/DescargarPDF';
 import { errorToast } from '../components/toast';
 
 
@@ -63,83 +63,7 @@ const AnteproyectosCoordinador = () => {
   };
 
   const handleGenerateReport = () => {
-    if (sortedAnteproyectos.length === 0) {
-      alert('No hay anteproyectos para generar el reporte');
-      return;
-    }
-    const encabezados = [
-      'ID',
-      'Estatus del proyecto',
-      'Sede',
-      'Nombre del estudiante',
-      'Carnet',
-      'Teléfono del estudiante',
-      'Correo del estudiante',
-      'Nombre de la empresa',
-      'Tipo de empresa',
-      'Actividad de la empresa',
-      'Ubicación de la empresa (provincia)',
-      'Ubicación de la empresa (cantón)',
-      'Ubicación de la empresa (distrito)',
-      'Nombre del asesor industrial',
-      'Puesto que desempeña el asesor industrial',
-      'Teléfono del asesor industrial',
-      'Correo del asesor industrial',
-      'Nombre del contacto de recursos humanos',
-      'Teléfono del contacto de recursos humanos',
-      'Correo del contacto de recursos humanos',
-      'Contexto',
-      'Justificación',
-      'Síntomas',
-      'Efectos o impactos',
-      'Departamento donde realizará el proyecto',
-      'Tipo de proyecto',
-      'Categoría del proyecto',
-      'Observaciones',
-    ];
-    const filas = sortedAnteproyectos.map((p) => [
-      p.id,
-      p.estado,
-      p.Estudiante?.Usuario?.sede || '',
-      p.Estudiante?.Usuario?.nombre || '',
-      p.Estudiante?.carnet || '',
-      p.Estudiante?.Usuario?.telefono || '',
-      p.Estudiante?.Usuario?.correo || '',
-      p.Empresa?.nombre || '',
-      p.Empresa?.tipo || '',
-      p.Empresa?.actividad || '',
-      p.Empresa?.provincia || '',
-      p.Empresa?.canton || '',
-      p.Empresa?.distrito || '',
-      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.nombre || '',
-      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.departamento || '',
-      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.telefono || '',
-      p.AnteproyectoContacto?.[0]?.ContactoEmpresa?.correo || '',
-      p.AnteproyectoContacto?.[0]?.RRHH?.nombre || '',
-      p.AnteproyectoContacto?.[0]?.RRHH?.telefono || '',
-      p.AnteproyectoContacto?.[0]?.RRHH?.correo || '',
-      p.contexto || '',
-      p.justificacion || '',
-      p.sintomas || '',
-      p.impacto || '',
-      p.departamento || '',
-      p.tipo || '',
-      p.Categoria?.nombre || '',
-      p.observaciones || '',
-    ]);
-    const csvContent = [
-      encabezados.join(','),
-      ...filas.map(fila => fila.map(valor => `"${String(valor).replace(/"/g, '""')}` + '"').join(','))
-    ].join('\r\n');
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', 'Reporte_Anteproyectos.csv');
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    descargarAnteproyectos(anteproyectosFiltrados);
   };
 
   useEffect(() => {
@@ -562,7 +486,7 @@ const AnteproyectosCoordinador = () => {
               className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
               style={{height: '48px'}}
             >
-              Descargar reporte CSV
+              Descargar reporte
             </button>
           </div>
         </div>
