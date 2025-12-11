@@ -79,6 +79,7 @@ const CartasEstudiante = () => {
           cedula,
           idioma,
           semestre,
+          annio,
           Estudiante:SolicitudCarta_estudiante_id_fkey1 (
             carnet,
             id_usuario,

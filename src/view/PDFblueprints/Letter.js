@@ -73,6 +73,7 @@ const Letter = (solicitud) => {
     const [estudiante, setEstudiante] = useState('');
     const [suffix, setSuffix] = useState('');
     const [semestre, setSemestre] = useState('');
+    const [annioProyecto, setAnnioProyecto] = useState('');
 
     useEffect(() => {
         setData();
@@ -91,6 +92,7 @@ const Letter = (solicitud) => {
         setEstudiante(solicitud.solicitud.Estudiante.Usuario.nombre);
         setGeneroE1("the");
         setGeneroE2("activa");
+        setAnnioProyecto(solicitud.solicitud.annio);
         if(solicitud.solicitud.genero_receptor == "Señor"){
             setGeneroR("Mr");
         }
@@ -133,7 +135,7 @@ const Letter = (solicitud) => {
           <Text style={styles.text}>
             This time, we highly appreciate your support for {estudiante}, ID {solicitud.solicitud.cedula}, who is 
             currently a student at our school, and is requiring developing the capstone project during the {semestre} semester 
-            of {year}. The start date can be modified based on the company´s requirements for orientation or other related 
+            of {annioProyecto}. The start date can be modified based on the company´s requirements for orientation or other related 
             activities. Nonetheless, the student will be role modeling the code of conduct required by our school and the 
             company. 
           </Text>

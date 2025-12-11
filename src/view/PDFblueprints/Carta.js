@@ -49,6 +49,7 @@ const Carta = (solicitud) => {
     const [carnet, setCarnet] = useState('');
     const [estudiante, setEstudiante] = useState('');
     const [provincia, setProvincia] = useState('');
+    const [annioProyecto, setAnnioProyecto] = useState('');
 
     useEffect(() => {
         setData();
@@ -61,6 +62,7 @@ const Carta = (solicitud) => {
         setYear(today.getFullYear());
         setCarnet(solicitud.solicitud.Estudiante.carnet);
         setEstudiante(solicitud.solicitud.Estudiante.Usuario.nombre);
+        setAnnioProyecto(solicitud.solicitud.annio);
         if(solicitud.solicitud.genero_emisor == "Masculino" || solicitud.solicitud.genero_emisor == "Neutral"){
             setGeneroE1("el");
             setGeneroE2("activo");
@@ -88,7 +90,6 @@ const Carta = (solicitud) => {
             setProvincia("Alajuela");
         }
     }
-
     return(
     <Document>
         <Page style={styles.body}>
@@ -118,7 +119,7 @@ const Carta = (solicitud) => {
         </Text>
         <Text style={styles.text}>
             En esta oportunidad agradeceremos se sirva acoger la solicitud de {estudiante}, carnet: {carnet}, cédula: {solicitud.solicitud.cedula}, estudiante {generoE2} de nuestro Programa de Licenciatura, quien requiere 
-            realizar el Proyecto Final de Graduación a partir del {solicitud.solicitud.semestre} semestre {year} salvo acuerdo entre ambas partes 
+            realizar el Proyecto Final de Graduación a partir del {solicitud.solicitud.semestre} semestre {annioProyecto} salvo acuerdo entre ambas partes 
             (empresa y estudiante) para iniciar antes de dicha fecha como parte del proceso de inducción y otras 
             necesidades identificadas por la empresa. Está de más indicar que a partir de ese momento, {generoE1} estudiante deberá 
             ajustarse a los principios y exigencias éticas y de conducta de su empresa. 

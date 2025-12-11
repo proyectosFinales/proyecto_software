@@ -4,6 +4,7 @@ import styles from '../styles/FormularioEstudiante.module.css';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import { errorToast, successToast } from '../components/toast';
+import Select from 'react-select';
 
 const EstudianteForm = () => {
   const [nombre, setNombre] = useState('');
@@ -17,6 +18,15 @@ const EstudianteForm = () => {
   const [puestoR, setPuestoR] = useState('');
   const [nombreR, setNombreR] = useState('');
   const [semestre, setSemestre] = useState('');
+  const [annio, setAnnio] = useState(null);
+  const currentYear = new Date().getFullYear();
+  const opcionesAnio = [
+    { value: currentYear.toString() , label: currentYear.toString() },
+    { value: (currentYear + 1).toString(), label: (currentYear + 1).toString() },
+    { value: (currentYear + 2).toString(), label: (currentYear + 2).toString() },
+    { value: (currentYear + 3).toString(), label: (currentYear + 3).toString() },
+    { value: (currentYear + 4).toString(), label: (currentYear + 4).toString() }
+  ];
   const [apellidosR, setApellidosR] = useState('');
   const [idioma, setIdioma] = useState('');
 
@@ -91,7 +101,8 @@ const EstudianteForm = () => {
           apellidos_receptor: apellidosR,
           cedula: cedula,
           idioma: idioma,
-          semestre: semestre
+          semestre: semestre,
+          annio: annio
         })
         .select();
 
@@ -215,17 +226,30 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>5. Sede:</label>
+          <label>5. Año:</label>
+            <Select
+              value={opcionesAnio.find(op => op.value === annio)}
+              onChange={(e) => setAnnio(e.value)}
+              placeholder="Seleccione el año"
+              options={opcionesAnio}
+              required
+              className="mt-2"
+            />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>6. Sede:</label>
           <input
             type="text"
             value={sede}
             readOnly
+            disabled
           />
         </div>
 
         <h2>Datos del receptor</h2>
         <div className={styles.formGroup}>
-          <label>6. Nombre:</label>
+          <label>7. Nombre:</label>
           <input
             type="text"
             value={nombreR}
@@ -234,7 +258,7 @@ const EstudianteForm = () => {
           />
         </div>
         <div className={styles.formGroup}>
-          <label>7. Apellidos:</label>
+          <label>8. Apellidos:</label>
           <input
             type="text"
             value={apellidosR}
@@ -270,7 +294,7 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>8. Nombre de la empresa:</label>
+          <label>9. Nombre de la empresa:</label>
           <input
             type="text"
             value={nombreEmpresa}
@@ -280,7 +304,7 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>9. Puesto:</label>
+          <label>10. Puesto:</label>
           <input
             type="text"
             value={puestoR}
@@ -290,7 +314,7 @@ const EstudianteForm = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>10. Idioma:</label>
+          <label>11. Idioma:</label>
           <div>
             <label>
               <input
