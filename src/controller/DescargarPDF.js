@@ -629,8 +629,19 @@ export function descargarEmpresas(dataEmpresas) {
     'Cantidad de contactos': e.ContactoEmpresa.length,
   })); 
   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-  //Si hay texto muy grande, al tratar de ajustar las columnas el padding es muy grande tambien
-  //por eso en este caso no se hace.
+  // Ajustar ancho de columnas con límite máximo
+  const MAX_WIDTH = 50; // Ancho máximo en caracteres
+  const MIN_WIDTH = 10; // Ancho mínimo en caracteres
+  
+  const columnWidths = Object.keys(dataToExport[0]).map(key => {
+    const maxLength = Math.max(
+      key.length,
+      ...dataToExport.map(row => (row[key] ? row[key].toString().length : 0))
+    );
+    const width = Math.min(Math.max(maxLength + 2, MIN_WIDTH), MAX_WIDTH);
+    return { wch: width };
+  });
+  worksheet['!cols'] = columnWidths;
   //Datos restantes
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Empresas');
