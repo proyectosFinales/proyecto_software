@@ -668,3 +668,48 @@ export const generarExcelCalendario = (dataCalendario) => {
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Calendario');
   XLSX.writeFile(workbook, 'Reporte_Calendario.xlsx');
 };
+
+/**
+ * Crea un excel con la informacion de los proyectos en la BD.
+ * @param {*} dataProyectos los proyectos filtrados recibidos.
+ * @param {*} dataProfesores los profesores existentes en la BD.
+ * @returns 
+ */
+export function descargarReporteProyectos(dataProyectos, dataProfesores) {
+  if (dataProyectos.length === 0) {
+    alert('No hay proyectos para mostrar.');
+    return;
+  }
+
+  const dataToExport = dataProyectos.map((p, index) => ({
+    '': index + 1,
+    'Estudiante': p.Estudiante.Usuario.nombre,
+    'Carnet': p.Estudiante.carnet,
+    'Empresa': p.Anteproyecto.Empresa.nombre,
+    'Departamento': p.Anteproyecto.departamento,
+    'Categoría de anteproyecto': p.Anteproyecto.Categoria.nombre,
+    'Semestre': p.semestre,
+    'Año': p?.año || 'No actualizado',
+    'Estatus del proyecto': p.estado,
+    'Profesor': dataProfesores.find((prof) => prof.profesor_id === p.profesor_id)?.nombre || 'Sin profesor asignado',
+    'Categoría de profesor': dataProfesores.find((prof) => prof.profesor_id === p.profesor_id)?.categoria || 'Profesor sin categoria',
+  })); 
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  // Ajustar ancho de columnas con límite máximo
+  const MAX_WIDTH = 50; // Ancho máximo en caracteres
+  const MIN_WIDTH = 10; // Ancho mínimo en caracteres
+  
+  const columnWidths = Object.keys(dataToExport[0]).map(key => {
+    const maxLength = Math.max(
+      key.length,
+      ...dataToExport.map(row => (row[key] ? row[key].toString().length : 0))
+    );
+    const width = Math.min(Math.max(maxLength + 2, MIN_WIDTH), MAX_WIDTH);
+    return { wch: width };
+  });
+  worksheet['!cols'] = columnWidths;
+  //Datos restantes
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Proyectos');
+  XLSX.writeFile(workbook, 'Reporte_Proyectos.xlsx');
+};
