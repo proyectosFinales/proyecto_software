@@ -4,7 +4,7 @@
  */
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from "react";
-import { descargarAnteproyecto } from "../../../controller/DescargarPDF";
+import { descargarProyecto } from "../../../controller/DescargarPDF";
 import Profesor from "../../../controller/profesor";
 import Layout from "../../components/layout";
 import SidebarProfesor from "../../components/SidebarProfesor";
@@ -259,7 +259,7 @@ const ProyectosAsignadosProfesor = () => {
               <div className="flex gap-2 flex-grow">
                 <button
                   className="btn btn-primary"
-                  onClick={() => descargarAnteproyecto({ ...proyecto.Anteproyecto, estudiantes: proyecto.Estudiante })}
+                  onClick={() => descargarProyecto( proyecto )}
                 >
                   Descargar
                 </button>

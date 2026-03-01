@@ -171,8 +171,7 @@ export function descargarAnteproyecto(anteproyecto) {
 /**
  * Genera un PDF con la información de un "proyecto".
  * Dependiendo de tu estructura, podría ser muy similar a 'descargarAnteproyecto'.
- * @param {Object} proyecto Objeto con información de Proyecto 
- *                          (puede ser igual o similar a anteproyecto).
+ * @param {Object} proyecto Objeto con información de Proyecto, viene a como se hace la consulta en la BD.
  */
 export function descargarProyecto(proyecto) {
   const doc = new jsPDF();
@@ -230,30 +229,34 @@ export function descargarProyecto(proyecto) {
     addText("Sede:", proyecto.estudiante.sede);
   }
 
-  // Datos de la empresa (si existe)
-  addText("Nombre de la Empresa:", proyecto.nombreEmpresa);
-  addText("Tipo de Empresa:", proyecto.tipoEmpresa);
-  addText("Actividad de la empresa:", proyecto.actividadEmpresa);
-  addText("Ubicación de la empresa (distrito):", proyecto.distritoEmpresa);
-  addText("Ubicación de la empresa (cantón):", proyecto.cantonEmpresa);
-  addText("Ubicación de la empresa (provincia):", proyecto.provinciaEmpresa);
+  // Datos de la empresa (manejo seguro de nulos)
+  const empresa = proyecto?.Anteproyecto?.Empresa || {};
+  addText("Nombre de la Empresa:", empresa.nombre || "Sin nombre");
+  addText("Tipo de Empresa:", empresa.tipo || "Sin tipo");
+  addText("Actividad de la empresa:", empresa.actividad || "Sin actividad");
+  addText("Ubicación de la empresa (distrito):", empresa.distrito || "Sin distrito");
+  addText("Ubicación de la empresa (cantón):", empresa.canton || "Sin cantón");
+  addText("Ubicación de la empresa (provincia):", empresa.provincia || "Sin provincia");
 
-  // Datos de contactos
-  addText("Nombre del asesor industrial:", proyecto.nombreAsesor);
-  addText("Puesto que desempeña el asesor industrial:", proyecto.puestoAsesor);
-  addText("Teléfono del contacto:", proyecto.telefonoContacto);
-  addText("Correo del contacto:", proyecto.correoContacto);
+  // Datos de contactos (primera entrada si es arreglo)
+  const primerContacto = proyecto?.Anteproyecto?.AnteproyectoContacto?.[0] || {};
+  const contactoEmpresa = primerContacto.ContactoEmpresa || {};
+  addText("Nombre del asesor industrial:", contactoEmpresa.nombre || "Sin nombre");
+  addText("Puesto que desempeña el asesor industrial:", contactoEmpresa.departamento || "Sin puesto");
+  addText("Teléfono del asesor industrial:", contactoEmpresa.telefono || "Sin telefono");
+  addText("Correo del asesor industrial:", contactoEmpresa.correo || "Sin correo");
 
-  // Datos específicos del proyecto
-  addText("Contexto:", proyecto.contexto);
-  addText("Justificación:", proyecto.justificacion);
-  addText("Síntomas principales:", proyecto.sintomas);
-  addText("Impacto:", proyecto.impacto);
-  addText("Departamento:", proyecto.nombreDepartamento);
-  addText("Tipo de proyecto:", proyecto.tipoProyecto);
-  addText("Estado actual:", proyecto.estado);
+  // Datos específicos del proyecto (manejo seguro)
+  const ante = proyecto?.Anteproyecto || {};
+  addText("Contexto:", ante.contexto || "No especificado");
+  addText("Justificación:", ante.justificacion || "No especificado");
+  addText("Síntomas principales:", ante.sintomas || "No especificado");
+  addText("Impacto:", ante.impacto || "No especificado");
+  addText("Departamento:", ante.departamento || "No especificado");
+  addText("Tipo de proyecto:", ante.tipo || "No especificado");
+  addText("Estado actual:", ante.estado || "No especificado");
 
-  doc.save(`Proyecto_${proyecto.nombreEmpresa || 'SinNombre'}.pdf`);
+  doc.save(`Proyecto_${empresa.nombre || 'SinNombreEncontrado'}.pdf`);
 }
 
 export function descargarAnteproyectos(anteproyectos) {
