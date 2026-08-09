@@ -7,7 +7,8 @@ import React, { useCallback, useEffect, useState } from "react";
 import { obtenerProyectosDetalladosProfesor } from '../../../controller/obtenerProyectosDetalladosProfesor';
 import Profesor from "../../../controller/profesor";
 import Proyecto from "../../../controller/Proyecto";
-import { loadToast } from "../../components/toast";
+import { asignarProyectosPorDisponibilidad } from "../../../controller/asignarProyectosPorDisponibilidad";
+import ToastContainer, { errorToast, loadToast, successToast } from "../../components/toast";
 import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 import supabase from "../../../model/supabase";
@@ -115,24 +116,63 @@ const CantidadProyectosProfesor = () => {
     }
   }, [profesores]);
 
-  // Guarda cambios en BD (llama p.actualizarCantidadEstudiantes())
-  const guardarCambios = useCallback(() => {
-    const guardado = Promise.allSettled(
-      profesores.map((p) => p.actualizarCantidadEstudiantes())
+  // Guarda disponibilidad y autoasigna proyectos a profes con cupo nuevo
+  const guardarCambios = useCallback(async () => {
+    const conCambio = profesores.filter(
+      (p) => Number(p.original?.disponibilidad) !== Number(p.disponibilidad)
     );
+
+    const proceso = (async () => {
+      const resultados = await Promise.allSettled(
+        profesores.map((p) => p.actualizarCantidadEstudiantes())
+      );
+
+      const fallidos = resultados.filter((r) => r.status === "rejected").length;
+      if (fallidos > 0) {
+        throw new Error(`No se pudieron guardar ${fallidos} cambio(s) de disponibilidad.`);
+      }
+
+      const conCupoNuevo = conCambio.filter(
+        (p) => Number(p.disponibilidad) > Number(p.proyectosAsignados ?? 0)
+      );
+
+      let resumenAsignacion = null;
+      if (conCupoNuevo.length > 0) {
+        resumenAsignacion = await asignarProyectosPorDisponibilidad(conCupoNuevo);
+      }
+
+      const data = await Profesor.obtenerTodos();
+      setProfesores(data);
+
+      const cantProyectos = await Proyecto.obtenerCantidadProyectossinProfesor();
+      setProyectossinProfesor(cantProyectos);
+
+      return resumenAsignacion;
+    })();
+
     loadToast(
-      guardado,
-      "Guardando cambios...",
+      proceso,
+      "Guardando y asignando proyectos...",
       "Cambios guardados.",
-      "Error en guardado de cambios"
+      "Error al guardar o asignar"
     );
-    
-    // Mostrar alerta visual
-    setMostrarAlerta(true);
-    // Ocultar alerta después de 5 segundos
-    setTimeout(() => {
-      setMostrarAlerta(false);
-    }, 5000);
+
+    try {
+      const resumen = await proceso;
+      if (resumen && resumen.asignados > 0) {
+        successToast(
+          `Asignados ${resumen.asignados} proyecto(s): ${resumen.porMatch} por match, ${resumen.porFallback} sin match.`
+        );
+      } else if (conCambio.length > 0) {
+        successToast("Disponibilidad guardada. No hubo proyectos nuevos para asignar.");
+      }
+
+      setMostrarAlerta(true);
+      setTimeout(() => setMostrarAlerta(false), 5000);
+    } catch (err) {
+      console.error("guardarCambios:", err);
+      errorToast(err.message || "Error al guardar o asignar");
+    }
   }, [profesores]);
 
   // Manejar ordenamiento de columnas
@@ -255,6 +295,7 @@ const CantidadProyectosProfesor = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
+      <ToastContainer />
       {/* Alerta de guardado */}
       {mostrarAlerta && (
         <div className="fixed inset-0 z-50 flex items-start justify-center pt-24 animate-in slide-in-from-top-2 duration-300 pointer-events-none">

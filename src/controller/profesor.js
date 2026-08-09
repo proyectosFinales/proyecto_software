@@ -206,7 +206,9 @@ class Profesor extends Usuario {
             nombre,
             sede,
             correo,
-            canton
+            provincia,
+            canton,
+            distrito
           ),
           Categoria:categoria_id (
             nombre
@@ -255,8 +257,8 @@ class Profesor extends Usuario {
               asignacion.semestre,
               asignacion.año
             );
-            // Attach Usuario as a property for filtering (if needed)
             instancia.Usuario = profesor.Usuario;
+            instancia.categoria_id = profesor.categoria_id ?? null;
             resultado.push(instancia);
           }
         });

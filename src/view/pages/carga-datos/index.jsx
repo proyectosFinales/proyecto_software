@@ -1,174 +1,169 @@
 /**
  * InicioCargaDatos.jsx
  * Menú para registrar profesores, modificar cantidad de proyectos,
- * y cargar profesores disponibles para el próximo semestre.
+ * y completar filas de AsignacionesProfesor por semestre.
  */
 import { Link } from "react-router-dom";
 import Header from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
 import Modal from '../../components/Modal';
 import React, { useState } from 'react';
-// Ajusta la importación a tu propia instancia supabase
 import supabase from '../../../model/supabase';
 
+const getSemestresReferencia = () => {
+  const fecha = new Date();
+  const añoActual = fecha.getFullYear();
+  const mesActual = fecha.getMonth() + 1;
+  const semestreActual = mesActual <= 7 ? 1 : 2;
+
+  let semestreSiguiente, añoSiguiente;
+  if (semestreActual === 1) {
+    semestreSiguiente = 2;
+    añoSiguiente = añoActual;
+  } else {
+    semestreSiguiente = 1;
+    añoSiguiente = añoActual + 1;
+  }
+
+  return {
+    actual: { semestre: semestreActual, año: añoActual },
+    siguiente: { semestre: semestreSiguiente, año: añoSiguiente },
+  };
+};
+
 /**
- * Menú de carga de datos, con opción de "Cargar Próximo Semestre".
+ * Inserta en AsignacionesProfesor solo los profesores que aún no tienen
+ * fila para el semestre/año indicado (disponibilidad=0, asignados=0).
+ * No borra ni actualiza filas existentes.
  */
+const cargarProfesoresParaSemestre = async (semestre, año) => {
+  if (!supabase) {
+    throw new Error('Cliente de Supabase no está inicializado');
+  }
+
+  const { data: profesores, error: errorProfesores } = await Promise.race([
+    supabase.from('Profesor').select('profesor_id'),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout al obtener profesores')), 10000)
+    ),
+  ]);
+
+  if (errorProfesores) {
+    throw new Error('No se pudo conectar con la base de datos. Verifique su conexión a internet.');
+  }
+
+  if (!profesores || profesores.length === 0) {
+    return { nuevas: 0, yaExistian: 0, total: 0, vacio: true };
+  }
+
+  const { data: asignacionesExistentes, error: errorAsignaciones } = await Promise.race([
+    supabase
+      .from('AsignacionesProfesor')
+      .select('idProfesor')
+      .eq('semestre', semestre)
+      .eq('año', año),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout al obtener asignaciones')), 10000)
+    ),
+  ]);
+
+  if (errorAsignaciones) {
+    throw new Error('Error al verificar asignaciones existentes.');
+  }
+
+  const profesoresConAsignacion = new Set(
+    (asignacionesExistentes || []).map((a) => a.idProfesor)
+  );
+
+  const profesoresSinAsignacion = profesores.filter(
+    (p) => !profesoresConAsignacion.has(p.profesor_id)
+  );
+
+  if (profesoresSinAsignacion.length === 0) {
+    return {
+      nuevas: 0,
+      yaExistian: profesoresConAsignacion.size,
+      total: profesores.length,
+      vacio: false,
+    };
+  }
+
+  const nuevasAsignaciones = profesoresSinAsignacion.map((profesor) => ({
+    idProfesor: profesor.profesor_id,
+    semestre,
+    año,
+    disponibilidad: 0,
+    asignados: 0,
+  }));
+
+  const { error: errorInsertar } = await Promise.race([
+    supabase.from('AsignacionesProfesor').insert(nuevasAsignaciones),
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Timeout al insertar asignaciones')), 10000)
+    ),
+  ]);
+
+  if (errorInsertar) {
+    throw new Error(`Error al crear las asignaciones: ${errorInsertar.message}`);
+  }
+
+  return {
+    nuevas: nuevasAsignaciones.length,
+    yaExistian: profesoresConAsignacion.size,
+    total: profesores.length,
+    vacio: false,
+  };
+};
+
 const InicioCargaDatos = () => {
   const [modal, setModal] = useState(false);
+  const [cargando, setCargando] = useState(false);
+  const { actual, siguiente } = getSemestresReferencia();
 
-  // Función para realizar un borrado en cascada en las tablas relacionadas en la base de datos.
-  // Se elimina **todos** los registros de las tablas que no deben mantenerse, 
-  // asegurando que las relaciones de claves foráneas se resuelvan correctamente.
-  //
-  // Tablas que **se borran**:
-  // - 'anteproyecto', 'bitacora', 'entrada', 'anteproyectocontacto', 'avance', 
-  // - 'proyecto', 'semestre', 'contactoempresa' 
-  // - además de los registros de 'acta', 'usuario', 'profesor', 'estudiante'.
-  //
-  // Las tablas que **se mantienen** (no se borran):
-  // - 'Categoria', 'Machote', 'Acta', 'ContactosEmpresa', 'Empresa', 'Calificaciones'
-  //
-  // Cada eliminación de registros se realiza de manera secuencial para garantizar la consistencia de los datos y la resolución de las dependencias entre tablas.
-  // Si ocurre un error en cualquier paso, el proceso se detiene y se lanza un error con el mensaje correspondiente.
+  const ejecutarCarga = async (semestre, año, etiqueta) => {
+    if (
+      !window.confirm(
+        `¿Está seguro(a) de completar las asignaciones faltantes de profesores para ${etiqueta} (S${semestre} ${año})?`
+      )
+    ) {
+      return;
+    }
 
-  const cargarProfesoresProxSemestre = async () => {
-    if (!window.confirm('¿Está seguro(a) de que desea poner a los profesores actuales como disponibles para el próximo semestre?')) return;
-    
+    setCargando(true);
     try {
-      // Verificar que supabase esté disponible
-      if (!supabase) {
-        throw new Error('Cliente de Supabase no está inicializado');
-      }
+      const resultado = await cargarProfesoresParaSemestre(semestre, año);
 
-      console.log('Iniciando carga de profesores para próximo semestre...');
-
-      // Calcular el próximo semestre
-      const fecha = new Date();
-      const añoActual = fecha.getFullYear();
-      const mesActual = fecha.getMonth() + 1;
-      const semestreActual = mesActual <= 7 ? 1 : 2;
-
-      let semestreSiguiente, añoSiguiente;
-      if (semestreActual === 1) {
-        semestreSiguiente = 2;
-        añoSiguiente = añoActual;
-      } else {
-        semestreSiguiente = 1;
-        añoSiguiente = añoActual + 1;
-      }
-
-      console.log(`Próximo semestre: S${semestreSiguiente} ${añoSiguiente}`);
-
-      // Obtener todos los profesores con timeout
-      console.log('Obteniendo lista de profesores...');
-      const { data: profesores, error: errorProfesores } = await Promise.race([
-        supabase.from('Profesor').select('profesor_id'),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout al obtener profesores')), 10000)
-        )
-      ]);
-
-      if (errorProfesores) {
-        console.error('Error al obtener profesores:', errorProfesores);
-        throw new Error(`No se pudo conectar con la base de datos. Verifique su conexión a internet.`);
-      }
-
-      if (!profesores || profesores.length === 0) {
+      if (resultado.vacio) {
         alert('No se encontraron profesores registrados.');
-        setModal(false);
-        return;
+      } else if (resultado.nuevas === 0) {
+        alert(`Todos los profesores ya tienen asignación para ${etiqueta} (S${semestre} ${año}).`);
+      } else {
+        alert(
+          `Carga completada (${etiqueta} S${semestre} ${año}):\n` +
+            `- Profesores con nueva asignación: ${resultado.nuevas}\n` +
+            `- Profesores que ya tenían asignación: ${resultado.yaExistian}\n` +
+            `- Total procesados: ${resultado.total}`
+        );
       }
-
-      console.log(`Profesores encontrados: ${profesores.length}`);
-
-      // Obtener todas las asignaciones existentes para el próximo semestre de una sola vez
-      console.log('Verificando asignaciones existentes...');
-      const { data: asignacionesExistentes, error: errorAsignaciones } = await Promise.race([
-        supabase
-          .from('AsignacionesProfesor')
-          .select('idProfesor')
-          .eq('semestre', semestreSiguiente)
-          .eq('año', añoSiguiente),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout al obtener asignaciones')), 10000)
-        )
-      ]);
-
-      if (errorAsignaciones) {
-        console.error('Error al obtener asignaciones:', errorAsignaciones);
-        throw new Error(`Error al verificar asignaciones existentes.`);
-      }
-
-      // Crear un Set con los IDs de profesores que ya tienen asignación
-      const profesoresConAsignacion = new Set(
-        (asignacionesExistentes || []).map(a => a.idProfesor)
-      );
-
-      // Filtrar profesores que necesitan nueva asignación
-      const profesoresSinAsignacion = profesores.filter(
-        p => !profesoresConAsignacion.has(p.profesor_id)
-      );
-
-      console.log(`Profesores que ya tienen asignación: ${profesoresConAsignacion.size}`);
-      console.log(`Profesores sin asignación: ${profesoresSinAsignacion.length}`);
-
-      if (profesoresSinAsignacion.length === 0) {
-        alert('Todos los profesores ya tienen asignación para el próximo semestre.');
-        setModal(false);
-        return;
-      }
-
-      // Crear las nuevas asignaciones en un solo insert
-      const nuevasAsignaciones = profesoresSinAsignacion.map(profesor => ({
-        idProfesor: profesor.profesor_id,
-        semestre: semestreSiguiente,
-        año: añoSiguiente,
-        disponibilidad: 0,
-        asignados: 0
-      }));
-
-      console.log('Insertando nuevas asignaciones...');
-      const { error: errorInsertar } = await Promise.race([
-        supabase
-          .from('AsignacionesProfesor')
-          .insert(nuevasAsignaciones),
-        new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Timeout al insertar asignaciones')), 10000)
-        )
-      ]);
-
-      if (errorInsertar) {
-        console.error('Error al insertar asignaciones:', errorInsertar);
-        throw new Error(`Error al crear las asignaciones: ${errorInsertar.message}`);
-      }
-
-      console.log(`Asignaciones creadas exitosamente: ${nuevasAsignaciones.length}`);
-
-      alert(
-        `Carga completada:\n` +
-        `- Profesores con nueva asignación: ${nuevasAsignaciones.length}\n` +
-        `- Profesores que ya tenían asignación: ${profesoresConAsignacion.size}\n` +
-        `- Total procesados: ${profesores.length}`
-      );
-
     } catch (error) {
       console.error('Error completo:', error);
-      
-      // Mensaje más específico según el tipo de error
       let mensaje = 'Error al cargar profesores: ';
-      if (error.message.includes('Timeout')) {
-        mensaje += 'La operación tardó demasiado. Verifique su conexión a internet e intente nuevamente.';
-      } else if (error.message.includes('NetworkError') || error.message.includes('fetch')) {
+      if (error.message?.includes('Timeout')) {
+        mensaje +=
+          'La operación tardó demasiado. Verifique su conexión a internet e intente nuevamente.';
+      } else if (
+        error.message?.includes('NetworkError') ||
+        error.message?.includes('fetch')
+      ) {
         mensaje += 'No se pudo conectar con el servidor. Verifique su conexión a internet.';
       } else {
         mensaje += error.message || 'Error desconocido';
       }
-      
       alert(mensaje);
+    } finally {
+      setCargando(false);
+      setModal(false);
     }
-
-    setModal(false);
   };
 
   return (
@@ -208,21 +203,22 @@ const InicioCargaDatos = () => {
               </div>
             </Link>
             
-            {/* Reset Database Card */}
+            {/* Completar asignaciones por semestre */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
               <button
                 onClick={() => setModal(true)}
-                className="w-full h-full p-6 text-left hover:bg-gray-50 transition-colors duration-200"
+                disabled={cargando}
+                className="w-full h-full p-6 text-left hover:bg-gray-50 transition-colors duration-200 disabled:opacity-60"
               >
                 <div className="flex flex-col items-center">
                   <div className="bg-green-100 p-4 rounded-full mb-4">
                     <i className="fas fa-calendar-plus text-3xl text-green-600"></i>
                   </div>
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                    Cargar Próximo Semestre
+                    Completar Asignaciones de Semestre
                   </h3>
                   <p className="text-gray-600 text-center">
-                    Profesores disponibles para el próximo semestre
+                    Inserta profesores faltantes en AsignacionesProfesor (actual o siguiente)
                   </p>
                 </div>
               </button>
@@ -260,26 +256,42 @@ const InicioCargaDatos = () => {
         </div>
 
         {/* Modal */}
-        <Modal show={modal} onClose={() => setModal(false)}>
+        <Modal show={modal} onClose={() => !cargando && setModal(false)}>
           <div className="p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Confirmar Carga
+              Completar asignaciones
             </h2>
             <p className="text-gray-600 mb-6">
-              ¿Está seguro que desea poner a los profesores actuales como disponibles para el próximo semestre?
+              Solo inserta filas faltantes en AsignacionesProfesor (disponibilidad 0, asignados 0).
+              No borra ni modifica filas existentes.
             </p>
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col gap-3 mb-4">
               <button
-                onClick={() => setModal(false)}
-                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200"
+                disabled={cargando}
+                onClick={() =>
+                  ejecutarCarga(actual.semestre, actual.año, 'semestre actual')
+                }
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-60"
               >
-                Cancelar
+                Completar semestre actual (S{actual.semestre} {actual.año})
               </button>
               <button
-                onClick={cargarProfesoresProxSemestre}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                disabled={cargando}
+                onClick={() =>
+                  ejecutarCarga(siguiente.semestre, siguiente.año, 'próximo semestre')
+                }
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 disabled:opacity-60"
               >
-                Confirmar Carga
+                Completar próximo semestre (S{siguiente.semestre} {siguiente.año})
+              </button>
+            </div>
+            <div className="flex justify-end">
+              <button
+                disabled={cargando}
+                onClick={() => setModal(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors duration-200 disabled:opacity-60"
+              >
+                Cancelar
               </button>
             </div>
           </div>
