@@ -33,14 +33,14 @@ export async function sendRecovery(email) {
 
     const resetLink = `${window.location.origin}/cambiar-contraseña/${token}`;
     const mensaje = "Buenas,\n" +
-"Se ha realizado una solicitud para restablecer tu contraseña, puede hacerlo ingresando al siguiente enlace." +
+"Se ha realizado una solicitud para restablecer tu contraseña, puede hacerlo ingresando al siguiente enlace.\n" +
 "Por favor no comparta el enlace con ningún otro usuario.\n\n" +
 "Si no ha realizado ninguna solicitud reciente, puede ignorar este mensaje.\n" +
 resetLink +
 "\nInstituto Tecnológico de Costar Rica,\n" +
 "Escuela de Producción Industrial.";
 
-    sendMail(email, "Recuperación de contraseña", mensaje);
+    await sendMail(email, "Recuperación de contraseña", mensaje);
 
     return resetLink;
 };
@@ -49,13 +49,17 @@ export async function validarToken(token) {
 
     const { data, error } = await supabase
         .from("Usuario")
-        .select("id")
+        .select("id, exp_recuperacion")
         .eq("recovery_token", token)
         .single()
 
 
     if (error) {
         throw new Error("No se encontró ningun usuario con la solicitud de recuperación de contraseña.")
+    }
+
+    if (data.exp_recuperacion && new Date(data.exp_recuperacion) < new Date()) {
+        throw new Error("El enlace de recuperación ha expirado. Por favor, solicite uno nuevo.")
     }
 
     return data;
@@ -67,7 +71,9 @@ export async function cambiarContraseña(id, nuevaContraseña) {
     const { error } = await supabase
         .from("Usuario")
         .update({
-            contrasena: nuevaContraseña
+            contrasena: nuevaContraseña,
+            recovery_token: null,
+            exp_recuperacion: null
         })
         .eq("id", id)
 

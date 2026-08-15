@@ -14,24 +14,34 @@
 const sendMail = (destino, asunto, mensaje) => {
   console.log("sendMail: preparing to send email to", destino);
 
-  fetch('/.netlify/functions/sendMail', {
+  return fetch('/.netlify/functions/sendMail', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ destino, asunto, mensaje }),
   })
-  .then(response => {
+  .then(async (response) => {
     if (!response.ok) {
-      throw new Error(`Error HTTP: ${response.status}`);
+      let detalle = "Error desconocido";
+      try {
+        const errBody = await response.json();
+        detalle = errBody?.error || detalle;
+      } catch (e) {
+        detalle = `HTTP ${response.status}`;
+      }
+      console.error("sendMail: fallo del servidor:", detalle);
+      throw new Error("No pudimos enviar el correo de recuperación. Por favor, inténtalo de nuevo más tarde.");
     }
     return response.json();
   })
   .then(data => {
     console.log("sendMail: email response received:", data);
+    return data;
   })
   .catch(error => {
     console.error("sendMail: error sending email:", error);
+    throw error;
   });
 };
 

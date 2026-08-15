@@ -42,5 +42,7 @@ cypress/
 .netlify
 .vscode/c_cpp_properties.json
 
-# Agents
-AGENTS.md
+# Markdown extras
+*.md
+!README.md
+!**/README.md
