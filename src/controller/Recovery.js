@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import supabase from "../model/supabase";
+import bcrypt from "bcryptjs";
 import sendMail from "../controller/Email";
 
 export async function sendRecovery(email) {
@@ -71,7 +72,7 @@ export async function cambiarContraseña(id, nuevaContraseña) {
     const { error } = await supabase
         .from("Usuario")
         .update({
-            contrasena: nuevaContraseña,
+            contrasena: await bcrypt.hash(nuevaContraseña, 10),
             recovery_token: null,
             exp_recuperacion: null
         })

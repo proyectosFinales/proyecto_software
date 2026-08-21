@@ -1,11 +1,11 @@
 import supabase from "../model/supabase";
+import bcrypt from "bcryptjs";
 
 export async function signIn(email, password) {
   const { data, error } = await supabase
     .from('Usuario')
     .select('*')
     .eq('correo', email)
-    .eq('contrasena', password)
     .single();
 
   if (error) {
@@ -13,6 +13,12 @@ export async function signIn(email, password) {
   }
 
   if (!data) {
+    throw new Error('Credenciales inválidas.');
+  }
+
+  const coincide = await bcrypt.compare(password, data.contrasena).catch(() => false);
+
+  if (!coincide) {
     throw new Error('Credenciales inválidas.');
   }
 

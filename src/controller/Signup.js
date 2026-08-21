@@ -1,4 +1,5 @@
 import supabase from "../model/supabase";
+import bcrypt from "bcryptjs";
 import validateInfo, { validarContraseñaDetallada, validarCorreo, validarCorreoExistente } from "./validarEntradas";
 import sendMail from "../controller/Email";
 import { fetchSemestreActual } from "../controller/Semestre";
@@ -19,7 +20,7 @@ export async function signUpNewUser(fullName, carnet, tel, email, password, sede
         {
           nombre: fullName,
           correo: email,
-          contrasena: password,
+          contrasena: await bcrypt.hash(password, 10),
           rol: 3, // Estudiante
           sede: sede,
           telefono: tel,
@@ -169,7 +170,7 @@ export async function registroProfesor(nombre, correo, contrasena, sede, telefon
         {
           nombre,
           correo,
-          contrasena,
+          contrasena: await bcrypt.hash(contrasena, 10),
           rol: 2, // Profesor
           sede,
           telefono,
