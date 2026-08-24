@@ -661,7 +661,7 @@ const FormularioCoordinador = () => {
         "Escuela de Producción Industrial.";
         sendMail(correo, "Anteproyecto Para Corregir", mensaje);
         
-        alert('Anteproyecto actualizado exitosamente (Para corregir).');
+        alert('Anteproyecto actualizado a "Para corregir" exitosamente.');
         navigate('/anteproyectosCoordinador');
       } catch (error) {
         console.error("Error al actualizar:", error);

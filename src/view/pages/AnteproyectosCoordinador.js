@@ -137,109 +137,6 @@ const AnteproyectosCoordinador = () => {
     fetchAnteproyectos();
   }, []);
 
-  const cambiarEstado = async (anteproyecto) => {
-  try {
-    // 1. Buscar el proyecto asociado al anteproyecto
-    const { data: proyectos, error: fetchError } = await supabase
-      .from('Proyecto')
-      .select('id, estudiante_id, profesor_id')
-      .eq('anteproyecto_id', anteproyecto.id);
-
-    if (fetchError) throw fetchError;
-
-    if (proyectos.length > 0) {
-      const proyecto = proyectos[0];
-
-      const {data: bitacoras, error: bitacoraFetchError} = await supabase
-        .from('Bitacora')
-        .select('id')
-        .eq('proyecto_id', proyecto.id);
-      if (bitacoraFetchError) throw bitacoraFetchError;
-
-      if(bitacoras.length > 0){
-        const bitacora = bitacoras[0];
-
-        const { error: deteleEntrada} = await supabase
-          .from('Entrada')
-          .delete()
-          .eq('bitacora_id', bitacora.id);
-        if (deteleEntrada) throw deteleEntrada;
-
-        const { error: bitacoraError } = await supabase
-          .from('Bitacora')
-          .delete()
-          .eq('proyecto_id', proyecto.id);
-        if (bitacoraError) throw bitacoraError;    
-      }
-
-      const {error: deleteAvance} = await supabase
-        .from('Avance')
-        .delete()
-        .eq('proyecto_id', proyecto.id);
-      if (deleteAvance) throw deleteAvance;
-
-      const { error: deleteCitaError } = await supabase
-        .from('Cita')
-        .delete()
-        .eq('proyecto_id', proyecto.id);
-      if (deleteCitaError) throw deleteCitaError;
-
-      // 2. Eliminar el proyecto encontrado
-      const { error: deleteProyectoError } = await supabase
-        .from('Proyecto')
-        .delete()
-        .eq('id', proyecto.id);
-      if (deleteProyectoError) throw deleteProyectoError;
-
-      // 3. Actualizar el estudiante para quitar la relación con el asesor
-      const { error: updateEstudianteError } = await supabase
-        .from('Estudiante')
-        .update({ asesor: null })
-        .eq('estudiante_id', proyecto.estudiante_id);
-      if (updateEstudianteError) throw updateEstudianteError;
-
-      // 4. Aumentar en 1 el número de estudiantes libres del profesor
-      const { data, error: fetchError } = await supabase
-        .from('Profesor')
-        .select('estudiantes_libres')
-        .eq('profesor_id', proyecto.profesor_id)
-        .single();
-
-      if (fetchError) throw fetchError;
-
-      const nuevoValor = data.estudiantes_libres + 1;
-
-      const { error: updateError } = await supabase
-        .from('Profesor')
-        .update({ estudiantes_libres: nuevoValor })
-        .eq('profesor_id', proyecto.profesor_id);
-
-      if (updateError) throw updateError;
-    }
-
-    // 5. Actualizar el estado del anteproyecto a "Pendiente"
-    const { error: updateAnteproyectoError } = await supabase
-      .from('Anteproyecto')
-      .update({ estado: 'Pendiente' })
-      .eq('id', anteproyecto.id);
-    if (updateAnteproyectoError) throw updateAnteproyectoError;
-
-    // 6. Actualizar el estado en el estado de React
-    setAnteproyectos((prev) =>
-      prev.map((item) =>
-        item.id === anteproyecto.id
-          ? { ...item, estado: 'Pendiente' }
-          : item
-      )
-    );
-
-    alert('Estado del anteproyecto cambiado exitosamente y se eliminó el proyecto asociado.');
-  } catch (err) {
-    console.error('Error cambiando el estado:', err);
-    alert('Ocurrió un error al intentar cambiar el estado: ' + err.message);
-  }
-};
-
   // Funciones auxiliares para eliminación de anteproyecto
   const consultarContactos = async (nombreContact) => {
     try {
@@ -569,15 +466,7 @@ const AnteproyectosCoordinador = () => {
                       >
                         Descargar
                       </button>
-                      {false && (anteproyecto.estado !== "Pendiente" && anteproyecto.estado !== "Correccion") && (
-                        <button
-                          onClick={() => cambiarEstado(anteproyecto)}
-                          className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                        >
-                          Pendiente
-                        </button>
-                      )}
-                      {anteproyecto.estado === "Reprobado" && (
+                      {((anteproyecto.estado === "Reprobado") || (anteproyecto.estado === "Correccion")) && (
                         <button
                           onClick={() => eliminarAnteproyecto(anteproyecto)}
                           className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
