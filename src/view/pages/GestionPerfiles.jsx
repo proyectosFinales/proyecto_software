@@ -7,7 +7,7 @@ import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { getAllUsers, gestionUserInfo, delUser, editUserGestion } from "../../controller/userInfo";
 import Modal from "../components/Modal";
-import { fetchEstudiantes, fetchProfesores } from "../../controller/GestionPerfilesController";
+import { fetchEstudiantes, fetchProfesores, fetchHistorialProfesores } from "../../controller/GestionPerfilesController";
 import { descargarPerfilesEstudiantes, descargarPerfilesProfesores } from "../../controller/DescargarPDF";
 
 /**
@@ -160,7 +160,8 @@ const GestionPerfiles = () => {
   const handleGenerarReporteProf = async () => {
     //Pedimos la info a la BD
     const { data: profesoresData, error: profesoresError } = await fetchProfesores();
-    descargarPerfilesProfesores(profesoresData);
+    const { data: historialProfesores, error: historialError } = await fetchHistorialProfesores();
+    descargarPerfilesProfesores(profesoresData, historialProfesores);
   }
 
   /**

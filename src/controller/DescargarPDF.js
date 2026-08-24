@@ -490,24 +490,63 @@ export function descargarPerfilesEstudiantes(dataEstudiantes) {
  * @param {*} dataProfesores todos los perfiles de los profesores.
  * @returns NA.
  */
-export function descargarPerfilesProfesores(dataProfesores) {
+export function descargarPerfilesProfesores(dataProfesores, historialProfesores) {
   if (dataProfesores.length === 0) {
     alert('No hay perfiles de profesores para mostrar.');
     return;
   }
 
-  const dataToExport = dataProfesores.map((p, index) => ({
-    '': index + 1,
-    'Nombre profesor': p.Usuario.nombre,
-    'Correo': p.Usuario.correo,
-    'Teléfono': p.Usuario.telefono,
-    'Sede': p.Usuario.sede,
-    'Provincia': p.Usuario?.provincia || 'No actualizada',
-    'Cantón': p.Usuario?.canton || 'No actualizado',
-    'Distrito': p.Usuario?.distrito || 'No actualizado',
-    'Estudiantes a asignar': p.cantidad_estudiantes,
-    'Faltan de asignar': p.estudiantes_libres,
-  })); 
+  // PREPROCESAMIENTO de periodos únicos (semestre/año) presentes en el histórico, ordenados ascendentemente
+  const periodosMap = new Map();
+  (historialProfesores || []).forEach((a) => {
+    const semestre = Number(a.semestre);
+    const anio = Number(a.año);
+    if (!semestre || !anio) return;
+    const clave = `${semestre}-${anio}`;
+    if (!periodosMap.has(clave)) {
+      periodosMap.set(clave, {
+        clave,
+        etiqueta: `Disp. ${semestre}S ${anio}`,
+      });
+    }
+  });
+  const periodos = [...periodosMap.values()].sort((x, y) => {
+    const [sx, ax] = x.clave.split('-').map(Number);
+    const [sy, ay] = y.clave.split('-').map(Number);
+    return ax !== ay ? ax - ay : sx - sy;
+  });
+
+  // Índice: profesor_id|semestre-año -> registro de AsignacionesProfesor
+  const historialIndex = new Map();
+  (historialProfesores || []).forEach((a) => {
+    const semestre = Number(a.semestre);
+    const anio = Number(a.año);
+    if (!semestre || !anio) return;
+    historialIndex.set(`${a.idProfesor}|${semestre}-${anio}`, a);
+  });
+
+  const dataToExport = dataProfesores.map((p, index) => {
+    const fila = {
+      '': index + 1,
+      'Nombre profesor': p.Usuario.nombre,
+      'Correo': p.Usuario.correo,
+      'Teléfono': p.Usuario.telefono,
+      'Sede': p.Usuario.sede,
+      'Provincia': p.Usuario?.provincia || 'No actualizada',
+      'Cantón': p.Usuario?.canton || 'No actualizado',
+      'Distrito': p.Usuario?.distrito || 'No actualizado',
+    };
+    // Columnas dinámicas por periodo (al final, ascendentes)
+    periodos.forEach((per) => {
+      const reg = historialIndex.get(`${p.profesor_id}|${per.clave}`);
+      const disp = reg ? Number(reg.disponibilidad) : 0;
+      const asig = reg ? Number(reg.asignados) : 0;
+      fila[per.etiqueta] = disp;
+      fila[`Asig. ${per.clave.replace('-', 'S ')}`] = asig;
+      fila[`Falta Asignar ${per.clave.replace('-', 'S ')}`] = Math.max(0, disp - asig);
+    });
+    return fila;
+  });
   const worksheet = XLSX.utils.json_to_sheet(dataToExport);
   //Ajustar ancho de columnas
   const columnWidths = Object.keys(dataToExport[0]).map(key => {

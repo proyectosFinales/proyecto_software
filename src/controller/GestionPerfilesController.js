@@ -3,6 +3,7 @@ import supabase from '../model/supabase';
 
 /**
  * Funcion que pide la informacion de los profesores a la BD.
+ * Los profesores deberian tambien estar en la tabla AsignacionesProfesor.
  * @returns La info de los profesores, de la tabla Profesor y la tabla Usuario.
  */
 export async function fetchProfesores() {
@@ -10,6 +11,7 @@ export async function fetchProfesores() {
         const { data, error } = await supabase
         .from('Profesor')
         .select(`
+            profesor_id,
             id_usuario,
             cantidad_estudiantes,
             estudiantes_libres,
@@ -29,6 +31,28 @@ export async function fetchProfesores() {
         console.log("Error al pedir la info de los profesores: ", error );
     }
 };
+
+/**
+ * Solicita el historial de las asignaciones de los profesores.
+ * @returns Toda la info que haya en la tabla AsignacionesProfesor.
+ */
+export async function fetchHistorialProfesores() {
+    try {
+        const { data, error } = await supabase
+        .from('AsignacionesProfesor')
+        .select(`
+            idProfesor,
+            semestre,
+            año,
+            disponibilidad,
+            asignados
+        `);
+        return {data, error}
+    } catch (error) {
+        alert("Error al pedir la info de las asignaciones de los profesores: ", error)
+        console.log("Error al pedir la info de los profesores: ", error );
+    }
+}
 
 /**
  * Funcion que pide la informacion de los estudiantes a la BD.
