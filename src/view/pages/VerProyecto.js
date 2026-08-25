@@ -247,7 +247,7 @@ const VerProyecto = () => {
             <div>{anteproyecto?.Estudiante?.carnet || ''}</div>
           </div>
           <div className={styles.formGroup}>
-            <label>Correo</label>
+            <label>Correo e-oficial TEC</label>
             <div>{anteproyecto?.Estudiante?.Usuario?.correo || ''}</div>
           </div>
           <div className={styles.formGroup}>

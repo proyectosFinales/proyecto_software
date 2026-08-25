@@ -772,7 +772,7 @@ const [correosCoordinadores, setCorreosCoordinadores] = useState([]);
           </div>
 
           <div className="space-y-2">
-            <label className="block font-semibold">4. Correo electrónico:</label>
+            <label className="block font-semibold">4. Correo e-oficial TEC:</label>
             <input
               type="email"
               value={correo}

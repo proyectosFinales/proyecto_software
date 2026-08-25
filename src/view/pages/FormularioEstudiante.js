@@ -26,6 +26,7 @@ const EstudianteForm = () => {
   const [carnet, setCarnet] = useState('');
   const [telefono, setTelefono] = useState('');
   const [correo, setCorreo] = useState('');
+  const [correoParticular, setCorreoParticular] = useState('');
   const [sede, setSede] = useState('');
 
   // Datos académicos del estudiante
@@ -491,10 +492,19 @@ const opcionesCausasPerdida = [
         </div>
 
         <div className={styles.formGroup}>
-          <label>4. Correo electrónico: *</label>
+          <label>4. Correo e-oficial TEC: *</label>
           <input
             type="email"
             value={correo}
+            readOnly
+          />
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>5. Correo electrónico particular :</label>
+          <input
+            type="email"
+            value={correoParticular}
             readOnly
           />
         </div>

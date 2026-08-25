@@ -717,7 +717,7 @@ const FormularioCoordinador = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>3. Correo electrónico: *</label>
+          <label>3. Correo e-oficial TEC: *</label>
           <input
             type="email"
             value={correo}

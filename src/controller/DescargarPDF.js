@@ -259,6 +259,37 @@ export function descargarProyecto(proyecto) {
   doc.save(`Proyecto_${empresa.nombre || 'SinNombreEncontrado'}.pdf`);
 }
 
+/**
+ * Genera un reporte Excel (.xlsx) con la información de los anteproyectos.
+ *
+ * @param {Array<Object>} anteproyectos - Lista de anteproyectos a exportar.
+ *   Corresponde a la variable `anteproyectosFiltrados` de AnteproyectosCoordinador.js,
+ *   es decir, el resultado del `SELECT` sobre la tabla `Anteproyecto` (con sus joins),
+ *   filtrado por semestre y año.
+ * @example
+ * // Forma resumida de un elemento de `anteproyectosFiltrados`:
+ * [
+ *   {
+ *     id: "uuid",
+ *     contexto: "...", justificacion: "...", sintomas: "...", impacto: "...",
+ *     tipo: "...", departamento: "...", comentario: "...", estado: "Pendiente",
+ *     semestre: 1, año: 2026,
+ *     Estudiante: {
+ *       carnet: "202100000",
+ *       Usuario: { nombre: "Juan Pérez", correo: "jperez@tec.ac.cr", telefono: "8888", sede: "Cartago" }
+ *     },
+ *     Empresa: { nombre: "Empresa S.A.", tipo: "Privada", actividad: "...",
+ *                provincia: "Cartago", canton: "Cartago", distrito: "Dulce Nombre" },
+ *     Categoria: { nombre: "Categoría X" },
+ *     AnteproyectoContacto: [
+ *       {
+ *         ContactoEmpresa: { nombre: "Asesor", departamento: "Puesto", telefono: "7777", correo: "a@emp.com" },
+ *         RRHH: { nombre: "RRHH", telefono: "6666", correo: "r@emp.com" }
+ *       }
+ *     ]
+ *   }
+ * ]
+ */
 export function descargarAnteproyectos(anteproyectos) {
   if (anteproyectos.length === 0) {
     alert('No hay anteproyectos para generar el reporte');
@@ -266,20 +297,19 @@ export function descargarAnteproyectos(anteproyectos) {
   }
 
   const dataToExport = anteproyectos.map((p) => ({
-    // El orden nuevo solicitado
-    ID: p.id,
-    'Estatus del proyecto': p.estado,
-    'Sede': p.Estudiante.Usuario.sede,
     'Nombre del estudiante': p.Estudiante?.Usuario?.nombre || 'N/A',
     'Carnet': p.Estudiante.carnet,
-    'Teléfono del estudiante': p.Estudiante.Usuario.telefono,
-    'Correo del estudiante': p.Estudiante.Usuario.correo,
+    'Correo e-oficial TEC': p.Estudiante.Usuario.correo,
+    // 'Correo particular (Opcional)': p.Estudiante.Usuario.correo_particular || 'N/A',
+    'Teléfono': p.Estudiante.Usuario.telefono,
+    'Sede': p.Estudiante.Usuario.sede,
+    'Cantón': p.Estudiante.Usuario.canton,
     'Nombre de la empresa': p.Empresa.nombre,
     'Tipo de empresa': p.Empresa.tipo,
+    'Ubicación (provincia)': p.Empresa.provincia,
+    'Ubicación (cantón)': p.Empresa.canton,
+    'Ubicación (distrito)': p.Empresa.distrito,
     'Actividad de la empresa': p.Empresa.actividad,
-    'Ubicación de la empresa (provincia)': p.Empresa.provincia,
-    'Ubicación de la empresa (cantón)': p.Empresa.canton,
-    'Ubicación de la empresa (distrito)': p.Empresa.distrito,
     'Nombre del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.nombre,
     'Puesto que desempeña el asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.departamento,
     'Teléfono del asesor industrial': p.AnteproyectoContacto[0].ContactoEmpresa.telefono,
@@ -288,12 +318,16 @@ export function descargarAnteproyectos(anteproyectos) {
     'Teléfono del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.telefono,
     'Correo del contacto de recursos humanos': p.AnteproyectoContacto[0].RRHH.correo,
     'Contexto': p.contexto,
+    'Síntomas principales': p.sintomas,
+    'Efectos o impactos para la empresa': p.impacto,
     'Justificación': p.justificacion,
-    'Síntomas': p.sintomas,
-    'Efectos o impactos': p.impacto,
     'Departamento donde realizará el proyecto': p.departamento,
     'Tipo de proyecto': p.tipo,
     'Categoría del proyecto': p.Categoria.nombre,
+    'Situación laboral': p.Estudiante.situacion_laboral || "No reportado",
+    'Historial de Reprobación': p.HistorialReprobacion.map(hr => `Semestre: ${hr.semestre}, Año: ${hr.anio}, Causa: ${hr.causa}`).join('; ') || "No reportado",
+    'Semestre': p.semestre,
+    'Año': p.año,
     'Observaciones': p.observaciones,
   })); 
   const worksheet = XLSX.utils.json_to_sheet(dataToExport);

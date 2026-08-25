@@ -83,7 +83,6 @@ const AnteproyectosCoordinador = () => {
           estudiante_id,
           actividad,
           departamento,
-          comentario,
           categoria_id,
           semestre,
           año,
@@ -93,11 +92,13 @@ const AnteproyectosCoordinador = () => {
           Estudiante:estudiante_id (
             carnet,
             id_usuario,
+            situacion_laboral,
             Usuario:id_usuario (
               nombre,
               correo,
               telefono,
-              sede
+              sede,
+              canton
             )
           ),
           Correcciones:correcciones_anteproyecto_id_fkey (
@@ -132,9 +133,27 @@ const AnteproyectosCoordinador = () => {
         errorToast('No se pudieron obtener los anteproyectos');
         return;
       }
+
+      //Hacer la consulta del historial de reprobacion por aparte, ya que da error si se hace anidado por temas de como apunta las FK.
+      const { data: historial, error: errorHist } = await supabase
+        .from('HistorialReprobacion')
+        .select('estudiante_id, causa, semestre, anio');
+
+      if (!errorHist) {
+        const porEstudiante = new Map();
+        (historial || []).forEach(h => {
+          if (!porEstudiante.has(h.estudiante_id)) porEstudiante.set(h.estudiante_id, []);
+          porEstudiante.get(h.estudiante_id).push(h);
+        });
+        data.forEach(a => {
+          a.HistorialReprobacion = porEstudiante.get(a.estudiante_id) || [];
+        });
+      }
+
       setAnteproyectos(data || []);
     };
     fetchAnteproyectos();
+    
   }, []);
 
   // Funciones auxiliares para eliminación de anteproyecto
