@@ -1,5 +1,7 @@
--- WARNING: This schema is for context only and is not meant to be run.
--- Table order and constraints may not be valid for execution.
+-- Supabase migration: schema inicial del proyecto.
+-- Esta migración ES ejecutable (a diferencia del antiguo basedatos.sql de contexto).
+-- Orden de creación respetado para cumplir FKs.
+-- Para regenerar desde la nube: `supabase db pull` o `pg_dump` del proyecto remoto.
 
 CREATE TABLE public.Acta (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -293,6 +295,7 @@ CREATE TABLE public.Usuario (
   provincia text,
   canton text,
   distrito text,
+  correo_opt character varying UNIQUE,
   CONSTRAINT Usuario_pkey PRIMARY KEY (id)
 );
 CREATE TABLE public.disponibilidad (

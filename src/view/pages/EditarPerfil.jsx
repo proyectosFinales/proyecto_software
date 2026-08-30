@@ -1,15 +1,6 @@
 import { React, useState, useEffect } from "react";
 import Select from "react-select";
-import { 
-  FaUser, 
-  FaIdCard, 
-  FaPhone, 
-  FaEnvelope, 
-  FaLock, 
-  FaMapMarked, 
-  FaUsers,
-  FaShieldAlt
-} from 'react-icons/fa';
+import { FaAt,FaUser, FaIdCard, FaPhone, FaEnvelope, FaMapMarked, FaUsers, FaShieldAlt } from 'react-icons/fa';
 import Footer from "../components/Footer";
 import { getUserInfo, updateUserInfo } from "../../controller/userInfo";
 import { useNavigate } from "react-router-dom";
@@ -18,6 +9,33 @@ import HeaderProfesor from "../components/HeaderProfesor";
 import HeaderEstudiante from "../components/HeaderEstudiante";
 import { fetchCategorias } from "../../controller/Categoria";
 import supabase from "../../model/supabase";
+
+const InputField = ({ icon: Icon, label, name, type = "text", value, onChange, readOnly = false }) => (
+  <div className="mb-6">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      {label}
+    </label>
+    <div className="relative rounded-md shadow-sm">
+      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <Icon className="h-5 w-5 text-azul" />
+      </div>
+      <input
+        type={type}
+        name={name}
+        value={value || ""}
+        onChange={onChange}
+        readOnly={readOnly}
+        className={`
+          w-full pl-10 pr-4 py-2.5
+          border border-gray-300 rounded-lg
+          focus:outline-none focus:ring-2 focus:ring-azul focus:border-transparent
+          ${readOnly ? 'bg-gray-50 cursor-not-allowed' : 'bg-white hover:border-azul'}
+          transition-all duration-200
+        `}
+      />
+    </div>
+  </div>
+);
 
 const EditarPerfil = () => {
   const [userData, setUserData] = useState({});
@@ -67,10 +85,10 @@ const EditarPerfil = () => {
           id: data.id,
           rol: data.rol?.toString(),
           correo: data.correo,
-          contrasena: data.contrasena,
           sede: data.sede,
           telefono: data.telefono,
-          nombre: data.nombre
+          nombre: data.nombre,
+          correo_opt: data.correo_opt
         };
 
         if (data.rol == 2 && data.Profesor && data.Profesor.length > 0) {
@@ -117,33 +135,6 @@ const EditarPerfil = () => {
       default: return "Desconocido";
     }
   };
-
-  const InputField = ({ icon: Icon, label, name, type = "text", value, onChange, readOnly = false }) => (
-    <div className="mb-6">
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        {label}
-      </label>
-      <div className="relative rounded-md shadow-sm">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-          <Icon className="h-5 w-5 text-azul" />
-        </div>
-        <input
-          type={type}
-          name={name}
-          value={value || ""}
-          onChange={onChange}
-          readOnly={readOnly}
-          className={`
-            w-full pl-10 pr-4 py-2.5
-            border border-gray-300 rounded-lg
-            focus:outline-none focus:ring-2 focus:ring-azul focus:border-transparent
-            ${readOnly ? 'bg-gray-50 cursor-not-allowed' : 'bg-white hover:border-azul'}
-            transition-all duration-200
-          `}
-        />
-      </div>
-    </div>
-  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -210,15 +201,15 @@ const EditarPerfil = () => {
                   />
                 </div>
 
-                {/* Security Information */}
+                {/* Correo y Sede */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* Contraseña */}
+                  {/* Email opcional */}
                   <InputField
-                    icon={FaLock}
-                    label="Contraseña"
-                    name="contrasena"
-                    type="password"
-                    value={userData.contrasena}
+                    icon={FaAt}
+                    label="Correo Electrónico Opcional"
+                    name="correo_opt"
+                    type="email"
+                    value={userData.correo_opt}
                     onChange={handleChange}
                   />
 

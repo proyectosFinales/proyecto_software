@@ -46,6 +46,7 @@ cypress/
 *.md
 !README.md
 !**/README.md
+!test/**/*.md
 
 # Backup.git
 /backup.git

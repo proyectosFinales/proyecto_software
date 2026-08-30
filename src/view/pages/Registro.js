@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked, FaMapPin } from 'react-icons/fa';
+import { FaAt, FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaMapMarked, FaMapPin } from 'react-icons/fa';
+import { AiOutlineInfoCircle } from 'react-icons/ai';
 import { signUpNewUser } from '../../controller/Signup';
 import { useNavigate } from 'react-router-dom';
+import styles from '../styles/FormularioEstudiante.module.css';
 
 /**
  * Registro.jsx
@@ -15,6 +17,7 @@ const Registro = () => {
   const [carnet, setCarnet] = useState('');
   const [number, setNumber] = useState('');  // teléfono
   const [email, setEmail] = useState('');
+  const [emailOpt, setEmailOpt] = useState('');
   const [password, setPassword] = useState('');
   const [sede, setSede] = useState('');
   const [provincia, setProvincia] = useState('');
@@ -30,7 +33,7 @@ const Registro = () => {
       // signUpNewUser(fullName, carnet, "", number, email, password, sede)
       // si tu DB la requiere. 
       // De momento, asumimos la firma actual: signUpNewUser(fullName, carnet, number, email, password, sede)
-      await signUpNewUser(fullName, carnet, number, email, password, sede, provincia, canton, distrito);
+      await signUpNewUser(fullName, carnet, number, email, password, emailOpt, sede, provincia, canton, distrito);
 
       alert('Usuario registrado con éxito.');
       navigate('/');
@@ -97,6 +100,21 @@ const Registro = () => {
             placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center border-b border-gray-300 py-2 mb-4">
+          <FaAt className="text-gray-500 mx-2" />
+          <input
+            type="email"
+            className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
+            placeholder="Correo opcional"
+            value={emailOpt}
+            onChange={(e) => setEmailOpt(e.target.value)}
+          />
+          <AiOutlineInfoCircle
+            className={styles.infoIcon}
+            title="Se usará para enviar ofertas de trabajo."
           />
         </div>
 

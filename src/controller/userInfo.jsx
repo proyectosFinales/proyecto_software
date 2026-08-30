@@ -1,9 +1,10 @@
 import supabase from "../model/supabase";
 import validateInfo, {
   validarCorreo,
-  validarContraseñaDetallada,  // Revisa tu validacion detallada
   validarCorreoEstudiante,
-  validarCorreoExistente
+  validarCorreoExistente,
+  validarCorreoPersonal,
+  validarCorreoOptExistente
 } from "./validarEntradas";
 
 export async function getUserInfo(id) {
@@ -14,10 +15,10 @@ export async function getUserInfo(id) {
       id,
       nombre,
       correo,
-      contrasena,
       rol,
       sede,
-      telefono
+      telefono,
+      correo_opt
     `)
     .eq("id", id)
     .single();
@@ -75,8 +76,6 @@ export async function getUserInfo(id) {
       userData.Profesor = [profesorData]; // Keep the same structure as before
     }
   }
-
-  console.log("Raw data from getUserInfo:", userData); // For debugging
   return userData;
 }
 
@@ -191,16 +190,24 @@ export async function updateUserInfo(userData) {
       throw new Error("El correo no cumple con un formato válido.");
     }
 
-    // 3) Validar contraseña a detalle
-    const passError = validarContraseñaDetallada(userData.contrasena);
-    if (passError) {
-      throw new Error(passError);
-    }
-
     // 4) Verificar duplicado de correo
     const result = await validarCorreoExistente(userData.correo, userData.id);
     if (!result) {
       throw new Error("El correo ingresado ya se encuentra registrado.");
+    }
+
+    // 4b) Validar y verificar duplicado del correo opcional (si se ingresó)
+    const correoOpt = userData.correo_opt?.trim();
+    if (correoOpt) {
+      if (!validarCorreoPersonal(correoOpt)) {
+        throw new Error(
+          "El correo opcional no cumple con un formato válido (gmail, yahoo, hotmail u outlook)."
+        );
+      }
+      const resultOpt = await validarCorreoOptExistente(correoOpt, userData.id);
+      if (!resultOpt) {
+        throw new Error("El correo opcional ingresado ya se encuentra registrado.");
+      }
     }
 
     // 5) Validar sede
@@ -208,25 +215,7 @@ export async function updateUserInfo(userData) {
       throw new Error("Debes seleccionar una sede.");
     }
 
-    // 6) Actualizar la tabla Usuario,
-    //    forzando el rol que ya tenía en la BD (realRol).
-    const { error } = await supabase
-      .from("Usuario")
-      .update({
-        nombre: userData.nombre,
-        correo: userData.correo,
-        contrasena: userData.contrasena,
-        sede: userData.sede,
-        telefono: userData.telefono,
-        rol: realRol           // <-- obligamos a usar el rol que había antes
-      })
-      .eq("id", userData.id);
-
-    if (error) {
-      throw new Error("Error al actualizar el usuario: " + error.message);
-    }
-
-    // 7) Dependiendo del rol (ver oldData.rol o realRol, no userData.rol):
+    // 6) Dependiendo del rol (ver oldData.rol o realRol, no userData.rol):
     if (realRol === 2) {
       // Si es profesor, actualiza la tabla "Profesor" 
       // sin cambiar "cantidad_estudiantes" (ni rol).
@@ -250,6 +239,7 @@ export async function updateUserInfo(userData) {
         userData.telefono,
         userData.correo,
         "", // sin re-check de password
+        userData.correo_opt,
         false
       );
       validarCorreoEstudiante(userData.correo);
@@ -257,15 +247,37 @@ export async function updateUserInfo(userData) {
       const { error: errorEst } = await supabase
         .from("Estudiante")
         .update({
-          carnet: userData.carnet,
-          asesor: userData.asesor,
-          estado: userData.estado
+          carnet: userData.carnet
         })
         .eq("id_usuario", userData.id);
 
       if (errorEst) {
         throw new Error("Error al actualizar el estudiante: " + errorEst.message);
       }
+    }
+
+    // 7) Actualizar la tabla Usuario,
+    //    forzando el rol que ya tenía en la BD (realRol).
+    const updatePayload = {
+      nombre: userData.nombre,
+      correo: userData.correo,
+      sede: userData.sede,
+      telefono: userData.telefono,
+      rol: realRol           // <-- obligamos a usar el rol que había antes
+    };
+    // Solo actualizamos el correo opcional si se ingresó uno (evita error si la
+    // columna no existe y evita sobrescribir con null un valor previo).
+    if (correoOpt) {
+      updatePayload.correo_opt = correoOpt;
+    }
+
+    const { error } = await supabase
+      .from("Usuario")
+      .update(updatePayload)
+      .eq("id", userData.id);
+
+    if (error) {
+      throw new Error("Error al actualizar el usuario: " + error.message);
     }
     
     // Si realRol === 1 (Coordinador), no hay tabla aparte.
@@ -380,7 +392,7 @@ export async function editUserGestion(user) {
       }
     } 
     else if (user.rol == 3) {
-      if (!validateInfo(user.carnet, user.telefono, user.correo, "", false)) {
+      if (!validateInfo(user.carnet, user.telefono, user.correo, user.correo_opt, "", false)) {
         throw new Error("Datos no válidos para el estudiante.");
       }
       const { error: errorEst } = await supabase

@@ -1,17 +1,21 @@
 import supabase from "../model/supabase";
 import bcrypt from "bcryptjs";
-import validateInfo, { validarContraseñaDetallada, validarCorreo, validarCorreoExistente } from "./validarEntradas";
+import validateInfo, { validarCorreoExistente, validarCorreoOptExistente } from "./validarEntradas";
 import sendMail from "../controller/Email";
 import { fetchSemestreActual } from "../controller/Semestre";
 
-export async function signUpNewUser(fullName, carnet, tel, email, password, sede, provincia, canton, distrito) {
+export async function signUpNewUser(fullName, carnet, tel, email, password, emailOpt, sede, provincia, canton, distrito) {
   try {
     const result = await validarCorreoExistente(email, "");
+    const resultOpt = await validarCorreoOptExistente(emailOpt, "");
     if (!result) {
       throw new Error("El correo ingresado ya se encuentra registrado.");
     }
+    if (!resultOpt) {
+      throw new Error("El correo opcional ingresado ya se encuentra registrado.");
+    }
 
-    validateInfo(carnet, tel, email, password);
+    validateInfo(carnet, tel, email, password, emailOpt);
 
     // Insertar primero en "Usuario"
     const { data: userData, error: userError } = await supabase
@@ -26,7 +30,8 @@ export async function signUpNewUser(fullName, carnet, tel, email, password, sede
           telefono: tel,
           provincia: provincia,
           canton: canton,
-          distrito: distrito
+          distrito: distrito,
+          correo_opt: emailOpt
         }
       ])
       .select();

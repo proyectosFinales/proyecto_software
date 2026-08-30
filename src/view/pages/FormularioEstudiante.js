@@ -501,15 +501,6 @@ const opcionesCausasPerdida = [
         </div>
 
         <div className={styles.formGroup}>
-          <label>5. Correo electrónico particular :</label>
-          <input
-            type="email"
-            value={correoParticular}
-            readOnly
-          />
-        </div>
-
-        <div className={styles.formGroup}>
           <label>5. Sede: *</label>
           <input
             type="text"

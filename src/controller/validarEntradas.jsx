@@ -18,9 +18,10 @@ import supabase from "../model/supabase";
  * @param {string} tel - Teléfono (ej. "+50688888888" o "88888888")
  * @param {string} email - Correo (ej. "nombre@estudiantec.cr")
  * @param {string} password - Contraseña a validar
+ * @param {string} emailOpt - Correo de opción (personal)
  * @param {boolean} checkPass - true para validar la contraseña, false para omitir
  */
-export function validateInfo(carnet, tel, email, password, checkPass = true) {
+export function validateInfo(carnet, tel, email, password, emailOpt, checkPass = true) {
   const carnetRegex = /^[0-9]{10}$/;
   const telRegex = /^(\+?506\s?)?[2-9]\d{7}$/;
 
@@ -39,6 +40,11 @@ export function validateInfo(carnet, tel, email, password, checkPass = true) {
       "El correo no cumple con un formato válido, asegúrate de que sea @estudiantec.cr o @itcr.ac.cr."
     );
   } 
+  else if (emailOpt && !validarCorreoPersonal(emailOpt)) {
+    throw new Error(
+      "El correo no cumple con un formato válido, asegúrate de que sea un correo personal (gmail, yahoo, hotmail, outlook)."
+    );
+  }
   else if (checkPass) {
     // Usamos la nueva función con checks parciales
     const errorPass = validarContraseñaDetallada(password);
@@ -86,6 +92,22 @@ export function validarCorreo(correo) {
 }
 
 /**
+ * Valida que un correo corresponda a un proveedor de correo personal
+ * (no institucional), como gmail, yahoo o hotmail, y que sea único en
+ * la tabla "Usuario".
+ * Dominios permitidos:
+ *   - gmail.com
+ *   - yahoo.com / yahoo.es
+ *   - hotmail.com / hotmail.es / outlook.com
+ * @param {string} correo - Correo personal a validar
+ * @returns {boolean} true si cumple el formato, false en caso contrario.
+ */
+export function validarCorreoPersonal(correo) {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@(gmail\.com|yahoo\.(com|es)|hotmail\.(com|es)|outlook\.com)$/;
+  return emailRegex.test(correo);
+}
+
+/**
  * Valida específicamente que el correo sea de estudiante, es decir, "estudiantec.cr".
  */
 export function validarCorreoEstudiante(correo) {
@@ -123,6 +145,30 @@ export async function validarCorreoExistente(correo, id) {
 
   // Si data.id === id, es el mismo usuario → no es duplicado
   return true;
+}
+
+/**
+ * Verifica si un correo opcional (personal) ya existe en la tabla "Usuario",
+ * ya sea en la columna "correo" (principal) o en "correo_opt" (opcional).
+ * @param {string} correoOpt - Correo opcional a verificar
+ * @param {string} id - ID del usuario actual (para editar) o "" (para crear)
+ * @returns {boolean} true si NO está duplicado (se puede usar), false si hay duplicado.
+ */
+export async function validarCorreoOptExistente(correoOpt, id) {
+  if (!correoOpt) return true; // El correo opcional vacío es válido
+
+  const { data, error } = await supabase
+    .from("Usuario")
+    .select("id")
+    .or(`correo.eq.${correoOpt},correo_opt.eq.${correoOpt}`);
+
+  if (error || !data || data.length === 0) {
+    return true;
+  }
+
+  // Si todas las coincidencias son del propio usuario (edición), no es duplicado
+  const esDuplicado = data.some((row) => row.id !== (id || ""));
+  return !esDuplicado;
 }
 
 /**
