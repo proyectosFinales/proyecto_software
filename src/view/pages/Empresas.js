@@ -116,10 +116,10 @@ const Empresas = () => {
               <tr>
                 <th className="px-4 py-2 font-medium">Nombre</th>
                 <th className="px-4 py-2 font-medium">Tipo</th>
+                <th className="px-4 py-2 font-medium">Actividad</th>
                 <th className="px-4 py-2 font-medium">Provincia</th>
                 <th className="px-4 py-2 font-medium">Cantón</th>
                 <th className="px-4 py-2 font-medium">Distrito</th>
-                <th className="px-4 py-2 font-medium">Actividad</th>
                 <th className="px-4 py-2 font-medium">Cantidad de contactos</th>
                 <th className="px-4 py-2 font-medium"></th>
               </tr>
@@ -129,10 +129,10 @@ const Empresas = () => {
                 <tr key={empresa.id} className="border-b hover:bg-gray-50">
                   <td className="px-4 py-2">{empresa.nombre}</td>
                   <td className="px-4 py-2">{empresa.tipo}</td>
+                  <td className="px-4 py-2">{empresa.actividad}</td>
                   <td className="px-4 py-2">{empresa.provincia}</td>
                   <td className="px-4 py-2">{empresa.canton}</td>
                   <td className="px-4 py-2">{empresa.distrito}</td>
-                  <td className="px-4 py-2">{empresa.actividad}</td>
                   <td className="px-4 py-2">{empresa.ContactoEmpresa.length}</td>
                   <td className="px-4 py-2">
                     <div className="flex gap-2">
