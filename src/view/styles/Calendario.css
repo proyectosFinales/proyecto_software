@@ -13,22 +13,25 @@
   font-family: Arial, sans-serif;
 }
 
-.calendario-table th, .calendario-table td {
+.calendario-table th, .calendario-table td,
+.calendario-table-modal th, .calendario-table-modal td {
   border: 1px solid #ddd;
   padding: 8px;
 }
 
-.calendario-table th {
+.calendario-table th, .calendario-table-modal th {
   background-color: #f2f2f2;
   color: var(--azul);
   text-align: left;
 }
 
-.calendario-table tr:nth-child(even) {
+.calendario-table tr:nth-child(even),
+.calendario-table-modal tr:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-.calendario-table tr:hover {
+.calendario-table tr:hover,
+.calendario-table-modal tr:hover {
   background-color: #ddd;
 }
 
@@ -61,7 +64,7 @@
 }
 
 .input-field-text {
-  width: 100%;
+  width: 85%;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -69,7 +72,7 @@
 
 .input-row {
   display: flex;
-  gap: 20px;
+  gap: 10px;
   align-items: end;
 }
 
@@ -83,6 +86,7 @@
 
 .input-container-gestion {
   flex: 1;
+  display: flex;
 }
 
 .input-field-gestion {
@@ -168,4 +172,55 @@
 
 .btn-save-event:hover {
   background-color: darkgreen;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.event-modal{
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  min-width: 200px;
+}
+
+.event-modal-header{
+  display: flex;
+  justify-content: space-between;
+}
+
+.btn-close-modal{
+  margin-right: 0;
+  height: 0;
+}
+
+.event-modal-content {
+  display: flex;
+  flex-direction: column;   
+  max-height: 60vh;
+  overflow-y: auto;
+  gap: 10px;
+}
+
+.event-modal-content-table {
+  height: 100%;
+  width: 100%;
+}
+
+.calendario-table-modal {
+  width: 100%;
+  margin: 0 auto;
+  border-collapse: collapse;
+  font-family: Arial, sans-serif;
 }

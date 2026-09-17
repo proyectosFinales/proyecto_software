@@ -95,7 +95,7 @@ const getNombreSemestre = (fechaInicio) => {
 export const getTipoEventos = async () => {
   const { data, error } = await supabase
     .from('TipoEvento')
-    .select('nombre');
+    .select('id, nombre');
   if (error) {
     throw new Error(error.message);
   }
@@ -112,10 +112,21 @@ export const addTipoEvento = async (evento) => {
   const { data, error } = await supabase
     .from('TipoEvento')
     .insert([evento])
-    .select('nombre');
+    .select('id, nombre');
   if (error) {
     throw error;
   }
 
   return data;
 };
+
+export const deleteTipoEvento = async (id) => {
+  const { error } = await supabase
+    .from('TipoEvento')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    throw error;
+  }
+}

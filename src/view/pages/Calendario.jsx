@@ -1,9 +1,10 @@
 import "../styles/Calendario.css";
 import {useState, useEffect} from "react";
+import { FaPlus, FaTimes } from "react-icons/fa";
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
-import { getEventos, addEvento, deleteEvento, updateEvento, getTipoEventos, addTipoEvento } from '../../controller/Calendario';
+import { getEventos, addEvento, deleteEvento, updateEvento, getTipoEventos, addTipoEvento, deleteTipoEvento } from '../../controller/Calendario';
 import { generarExcelCalendario } from '../../controller/DescargarPDF';
 
 const Calendario = () => {
@@ -13,6 +14,7 @@ const Calendario = () => {
   const [newEvent, setNewEvent] = useState({ nombre: '', fechaInicio: '', fechaFin: '' });
   const [eventOptions2, setEventOptions2] = useState([]);
   const [createEvent, setCreateEvent] = useState({ nombre: '' });
+  const [modalIsOpen, setModalIsOpen] = useState(false);
 
   useEffect(() => {
     const fetchEventos = async () => {
@@ -29,10 +31,11 @@ const Calendario = () => {
       }
     };
 
-    //Llenamos los tipos de eventos para el combobo
+    //Llenamos los tipos de eventos para el combobox
     const pedirEventos = async () => {
       const tipos = await getTipoEventos();
       setEventOptions2(tipos.map(event => ({
+        id: event.id,
         value: event.nombre,
         label: event.nombre
       })));
@@ -101,6 +104,17 @@ const Calendario = () => {
     }
   };
 
+  const handleDeleteTipoEvento = async (event) => {
+    if (!window.confirm(`¿Está seguro que desea eliminar el tipo de evento ${event.value}?`)) return;
+    try {
+      await deleteTipoEvento(event.id);
+      setEventOptions2(eventOptions2.filter(e => event.id !== e.id));
+      alert('Tipo de evento eliminado con éxito.');
+    } catch (error) {
+      alert(`Error al eliminar tipo de evento: ${error.message}`);
+    }
+  };
+
   const handleAddEvent = async () => {
     try {
       const data = await addEvento({
@@ -124,6 +138,10 @@ const Calendario = () => {
     try {
       if(createEvent.nombre === '' || createEvent.nombre === ' ') {
         alert("El nombre no puede estar vacio.");
+        return;
+      }
+      if(eventOptions2.map(event => (event.value.toLowerCase() === createEvent.nombre.toLowerCase())).includes(true)){
+        alert("El evento que está tratando de ingresar ya existe.");
         return;
       }
       const data = await addTipoEvento({ nombre:createEvent.nombre });
@@ -152,20 +170,66 @@ const Calendario = () => {
       <div className="content-container">
 
         <div className="form-container">
-          <h3>Crear Evento</h3>
-          <div className="input-row">
-            <div>
-              <label htmlFor="nombreNuevoEvento">Nombre del evento</label>
-              <input
-                name="nombreNuevoEvento"
-                type="text"
-                className="input-field-text"
-                placeholder="Digite el nuevo evento"
-                onChange={(e) => handleCreateEventChange('nombreNuevoEvento', e.target.value)}
-              />
+          {/* ------------------------------------------------
+          Modal para agregar los tipos de eventos a la BD
+          ------------------------------------------------ */}
+          {modalIsOpen && (
+            <div className="modal-overlay" onClick={() => setModalIsOpen(false)} >
+              <div className="event-modal" onClick={(e) => e.stopPropagation()}>
+
+                {/* Contenedor que contiene el titulo y boton de salida */}
+                <div className="event-modal-header" >
+                  <h2>Gestionar Tipos de Eventos</h2>
+                  <button className="btn-close-modal" onClick={() => setModalIsOpen(false)}>
+                    <FaTimes/>
+                  </button>
+                </div>
+                
+                {/* Contenedor que contiene la tabla con los tipos de eventos. */}
+                <div className="event-modal-content">
+                  <div className="input-row">
+                    <div>
+                      <label htmlFor="nombreNuevoEvento">Nombre del evento</label>
+                      <input name="nombreNuevoEvento" type="text" className="input-field-text"
+                        placeholder="Digite el nuevo evento"
+                        onChange={(e) => handleCreateEventChange('nombreNuevoEvento', e.target.value)}
+                      />
+                    </div>
+                    <button className="btn-create-event" onClick={handleCreateEvent}>Crear evento</button>
+                  </div>
+
+                  <div className="event-modal-content-table">
+                    <table className="calendario-table-modal">
+                      <thead>
+                        <tr>
+                          <th>Tipo de evento</th>
+                          <th>Acción</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {eventOptions2.map(event => (
+                          <tr key={event.id}>
+                            <td>
+                                {event.value}
+                            </td>
+                            <td>
+                              <button className="btn-delete-event" onClick={() => handleDeleteTipoEvento(event)}>
+                                <i className="fas fa-trash"></i> Borrar
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>           
             </div>
-            <button className="btn-create-event" onClick={handleCreateEvent}>Crear evento</button>
-          </div>
+          )}
+
+          {/* --------------------------------------------------------------
+          Seccion donde agrega los eventos al calendario, usando las fechas.
+          ------------------------------------------------------------------ */}
           <h3>Agregar Nuevo Evento</h3>
           <div className="input-container-gestion">
             <select
@@ -176,9 +240,13 @@ const Calendario = () => {
             >
               <option value="">Seleccione un evento</option>
               {eventOptions2.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
+                <option key={option.id} value={option.value}>{option.label}</option>
               ))}
             </select>
+            {/* Para gestionar los tipos de eventos, click aqui */}
+            <button onClick={() => setModalIsOpen(true)}>
+              <FaPlus style={{ marginLeft: "8px", marginRight: "8px" }} />
+            </button>
           </div>
           <div className="input-row">
             <div>
@@ -282,7 +350,6 @@ const Calendario = () => {
             </tbody>
           </table>
         </div>
-        
 
       </div>
       <Footer />
