@@ -1,11 +1,15 @@
 import "../styles/Calendario.css";
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef } from "react";
 import { FaPlus, FaTimes } from "react-icons/fa";
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
 import { getEventos, addEvento, deleteEvento, updateEvento, getTipoEventos, addTipoEvento, deleteTipoEvento } from '../../controller/Calendario';
 import { generarExcelCalendario } from '../../controller/DescargarPDF';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Modal from "../components/modal.jsx";
+{/* Modal para usarlo como confirmacion, y no usar el window.confirm que se ve feo */}
 
 const Calendario = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -15,8 +19,19 @@ const Calendario = () => {
   const [eventOptions2, setEventOptions2] = useState([]);
   const [createEvent, setCreateEvent] = useState({ nombre: '' });
   const [modalIsOpen, setModalIsOpen] = useState(false);
+  // Constantes para trabajar con los modales
+  const [selectedTypeEvent, setSelectedTypeEvent] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const modalTipoEvento = useRef({});
+  const modalEvento = useRef({});
 
   useEffect(() => {
+    // Para mostrar los toast guardados, cuando se hace a la par de un window.reload
+    if (localStorage.getItem("showToast")) {
+      toast.success("Evento creado con exito.");
+      localStorage.removeItem("showToast");
+    }
+
     const fetchEventos = async () => {
       try {
         const data = await getEventos();
@@ -27,22 +42,26 @@ const Calendario = () => {
           fechaFin: event.fecha_fin
         })));
       } catch (error) {
-        console.error('Error fetching events:', error.message);
+        toast.error(`Error al obtener los eventos del calendario: ${error.message}`);
       }
     };
 
     //Llenamos los tipos de eventos para el combobox
-    const pedirEventos = async () => {
-      const tipos = await getTipoEventos();
-      setEventOptions2(tipos.map(event => ({
-        id: event.id,
-        value: event.nombre,
-        label: event.nombre
-      })));
+    const pedirTiposEventos = async () => {
+      try {
+        const tipos = await getTipoEventos();
+        setEventOptions2(tipos.map(event => ({
+          id: event.id,
+          value: event.nombre,
+          label: event.nombre
+        })));
+      } catch (error) {
+        toast.error(`Error al obtener los tipos de eventos: ${error.message}`);
+      }
     }
 
     fetchEventos();
-    pedirEventos();
+    pedirTiposEventos();
   }, []);
   
   const handleInputChange = (field, value) => {
@@ -90,28 +109,29 @@ const Calendario = () => {
       setEvents(events.map(event => (event.id === id ? editableEvent : event)));
       setEditableEvent(null);
     } catch (error) {
-      alert(`Error al actualizar evento: ${error.message}`);
+      toast.error(`Error al actualizar evento: ${error.message}`);
     }
   };
 
   const handleDelete = async (event) => {
-    if (!window.confirm(`¿Está seguro que desea eliminar el evento ${event.nombre}?`)) return;
     try {
       await deleteEvento(event.id);
       setEvents(events.filter(e => event.id !== e.id));
+      toast.success(`Evento "${event.nombre}" eliminado con éxito.`);
+      modalEvento.close();
     } catch (error) {
-      alert(`Error al eliminar evento: ${error.message}`);
+      toast.error(`Error al eliminar evento: ${error.message}`);
     }
   };
 
   const handleDeleteTipoEvento = async (event) => {
-    if (!window.confirm(`¿Está seguro que desea eliminar el tipo de evento ${event.value}?`)) return;
     try {
       await deleteTipoEvento(event.id);
       setEventOptions2(eventOptions2.filter(e => event.id !== e.id));
-      alert('Tipo de evento eliminado con éxito.');
+      toast.success(`Tipo de evento "${event.value}" eliminado con éxito.`);
+      modalTipoEvento.close();
     } catch (error) {
-      alert(`Error al eliminar tipo de evento: ${error.message}`);
+      toast.error(`Error al eliminar tipo de evento: ${error.message}`);
     }
   };
 
@@ -130,32 +150,31 @@ const Calendario = () => {
       }]);
       setNewEvent({ nombre: '', fechaInicio: '', fechaFin: '' });
     } catch (error) {
-      alert(`Error al agregar evento: ${error.message}`);
+      toast.error(`Error al agregar evento: ${error.message}`);
     }
   };
 
   const handleCreateEvent = async () => {
     try {
       if(createEvent.nombre === '' || createEvent.nombre === ' ') {
-        alert("El nombre no puede estar vacio.");
+        toast.error("El nombre no puede estar vacio.");
         return;
       }
       if(eventOptions2.map(event => (event.value.toLowerCase() === createEvent.nombre.toLowerCase())).includes(true)){
-        alert("El evento que está tratando de ingresar ya existe.");
+        toast.error("El evento que está tratando de ingresar ya existe.");
         return;
       }
       const data = await addTipoEvento({ nombre:createEvent.nombre });
-      alert("Evento creado con exito.");
+      localStorage.setItem("showToast", "true");
       window.location.reload();
     } catch (error) {
-      alert(`Error al crear tipo de evento: ${error.message}`);
+      toast.error(`Error al crear tipo de evento: ${error.message}`);
     }
   };
 
   const handleCreateEventChange = (field, value) => {
     if(field === 'nombreNuevoEvento'){
       setCreateEvent({ nombre: value});
-      console.log("Cambio el input: ", value);
     }
   };
 
@@ -170,6 +189,10 @@ const Calendario = () => {
       <div className="content-container">
 
         <div className="form-container">
+          {/* Un unico modal, especifico para los tipos de elementos */}
+          <Modal modalRef={modalTipoEvento} title={<h5>Eliminar un Tipo de Evento</h5>} onAccept={() => handleDeleteTipoEvento(selectedTypeEvent)}>
+            <p>¿Está seguro que desea eliminar el tipo de evento "{selectedTypeEvent?.value}"?</p>
+          </Modal>
           {/* ------------------------------------------------
           Modal para agregar los tipos de eventos a la BD
           ------------------------------------------------ */}
@@ -213,7 +236,7 @@ const Calendario = () => {
                                 {event.value}
                             </td>
                             <td>
-                              <button className="btn-delete-event" onClick={() => handleDeleteTipoEvento(event)}>
+                              <button className="btn-delete-event" onClick={() => {setSelectedTypeEvent(event); modalTipoEvento.open();}}>
                                 <i className="fas fa-trash"></i> Borrar
                               </button>
                             </td>
@@ -223,7 +246,7 @@ const Calendario = () => {
                     </table>
                   </div>
                 </div>
-              </div>           
+              </div>            
             </div>
           )}
 
@@ -280,8 +303,11 @@ const Calendario = () => {
           </div>
         </div>
 
-
         <div className="table-container">
+          {/* Modal especifico para eventos del calendario */}
+          <Modal modalRef={modalEvento} title={<h5>Eliminar Eventos</h5>} onAccept={() => handleDelete(selectedEvent)}>
+            <p>¿Está seguro que desea eliminar el evento "{selectedEvent?.nombre}"?</p>
+          </Modal>
           <table className="calendario-table">
             <thead>
               <tr>
@@ -341,9 +367,9 @@ const Calendario = () => {
                         <i className="fas fa-edit"></i> Editar
                         </button>
                     )}
-                    <button className="btn-delete-event" onClick={() => handleDelete(event)}>
+                    <button className="btn-delete-event" onClick={() => {setSelectedEvent(event); modalEvento.open();}}>
                       <i className="fas fa-trash"></i> Borrar
-                      </button>
+                    </button>
                   </td>
                 </tr>
               ))}

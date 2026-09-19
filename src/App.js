@@ -69,6 +69,8 @@ import PermisosVerCalificaciones from './view/pages/calificaciones/permisosVerCa
 import Machotes from './view/pages/Machotes.js';
 import CalificacionAsesor from './view/pages/calificaciones/calificacionAsesor';
 import AsignacionDefensas from './view/pages/AsignacionDefensas';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
@@ -364,6 +366,7 @@ function App() {
           }
         />
       </Routes>
+      <ToastContainer />
     </Router>
   );
 }

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Button from "./button";
 import styles from "../styles/modal.module.css";
 
-const Modal = ({ modalRef = {}, title, footer, children }) => {
+const Modal = ({ modalRef = {}, title, footer, children, onAccept }) => {
     const [isOpen, setIsOpen] = useState(false);
     
     const open = () => {
@@ -23,18 +23,19 @@ const Modal = ({ modalRef = {}, title, footer, children }) => {
 
     if(!isOpen) return <></>;
     return (
-        <div className={styles.modal}>
+        <div className={styles.modal} >
             <section className={styles.dialog}>
                 <header>
                     {title || <p></p>}
-                    <button onClick={close}>&times;</button>
+                    <button className={styles.closeButton} onClick={close}>&times;</button>
                 </header>
                 <main>
                     {children}
                 </main>
                 <footer>
                     {footer}
-                    <Button type="light" onClick={close}>Cerrar</Button>
+                    <Button type="light" onClick={onAccept}>Aceptar</Button>
+                    <Button type="light" onClick={close}>Cancelar</Button>
                 </footer>
             </section>
         </div>
