@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from '../../styles/FormularioEstudiante.module.css';
 import supabase from '../../../model/supabase';
 import Footer from '../../components/Footer';
 import Header from '../../components/HeaderProfesor';
-import { errorToast, successToast } from '../../components/toast';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Modal from "../../components/modal.jsx";
 
 const ActaDefensa = () => {
   const [aprobacion, setAprobacion] = useState('');
@@ -18,7 +20,7 @@ const ActaDefensa = () => {
   const [estudiante, setEstudiante] = useState('');
   const [semestre, setSemestre] = useState('');
   const [dias, setDias] = useState('');
-
+  const modalConf = useRef({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,8 +50,7 @@ const ActaDefensa = () => {
         if (error) throw error;
         setEstudiantes(data);
       } catch (err) {
-        console.error('Error al consultar estudiante o usuario', err);
-        errorToast('Error al consultar estudiante o usuario: ' + err.message);
+        toast.error(`Error al consultar estudiante o usuario: ${err.message}`)
       }
     }
   }
@@ -73,30 +74,22 @@ const ActaDefensa = () => {
         .single();
       if (error) throw error;
       if (!data) {
-        errorToast('No se encontró la información del usuario/profesor.');
+        toast.error(`No se encontró la información del usuario/profesor.`);
         return;
       }
       if (data.Profesor) {
         setProfesor(data.Profesor[0].profesor_id);
       } else {
-        errorToast('Este usuario no está registrado como profesor.');
+        toast.error(`Este usuario no está registrado como profesor.`);
       }
     } catch (err) {
-      console.error('Error al consultar estudiante o usuario', err);
-      errorToast('Error al consultar estudiante o usuario: ' + err.message);
+      toast.error(`Error al consultar estudiante o usuario: ${err.message}`);
     }
   }
 
-  async function solicitarCarta(e) {
-    e.preventDefault();
-    const confirmarEnvio = window.confirm(
-      "¿Está seguro que desea solicitar el acta con la información actual?"
-    );
-    if (!confirmarEnvio) {
-      return;
-    }
+  async function solicitarCarta() {
     if (!estudiante) {
-      errorToast("No se encontró un 'estudiante_id' válido. No se puede insertar.");
+      toast.error(`No se encontró un 'estudiante_id' válido. No se puede insertar.`);
       return;
     }
 
@@ -117,12 +110,16 @@ const ActaDefensa = () => {
       if (error){ 
         throw error;
       }
-      successToast('Acta solicitada exitosamente');
+      toast.success('Acta solicitada exitosamente');
       navigate('/actas');
     } catch (err) {
-      console.error('Error al insertar acta:', err);
-      errorToast('Error al insertar acta: ' + err.message);
+      toast.error(`Error al insertar acta: ${err.message}`)
     }
+  }
+
+  async function handleModal(e){
+    e.preventDefault();
+    modalConf.open();
   }
 
   const handleChange = (e) => {
@@ -140,7 +137,11 @@ const ActaDefensa = () => {
     <div>
       <Header title={"Solicitar acta de defensa"}></Header>
 
-      <form className={styles.form} onSubmit={solicitarCarta}>
+      <Modal modalRef={modalConf} title={<h5>Solicitar Acta</h5>} onAccept={() => solicitarCarta()}>
+        <p>¿Está seguro que desea solicitar el acta con la información actual?</p>
+      </Modal>
+
+      <form className={styles.form} onSubmit={handleModal}>
         <h2>Datos del acta</h2>
 
         <div className={styles.formGroup}>

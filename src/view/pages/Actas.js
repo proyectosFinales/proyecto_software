@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
@@ -10,10 +10,15 @@ import Entrega from '../PDFblueprints/Entrega';
 
 import { generateInformePreliminarPDF } from '../PDFblueprints/InformePreliminarPDF';
 import { generateCriterioTecnicoPDF } from '../PDFblueprints/CriterioTecnicoPDF';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Modal from "../components/modal.jsx";
 
 const Actas = () => {
   const [actas, setActas] = useState([]);
   const navigate = useNavigate();
+  const modalConfirmacion = useRef({});
+  const [selectedActa, setSelectedActa] = useState(null);
 
   useEffect(() => {
     consultarActas();
@@ -37,18 +42,18 @@ const Actas = () => {
       }
       return data.Profesor[0].profesor_id;
     } catch (error) {
-      alert('Error al buscar estudiante' + error);
+      toast.error(`Error al buscar estudiante: ${error.message}`);
     }
   }
 
   async function crearCarta() {
     try {
       if(actas.length > 0) 
-        alert('Ya ha solicitado una carta de acta, para solicitar otra debe eliminar la actual.');
+        toast.info(`Ya ha solicitado una carta de acta, para solicitar otra debe eliminar la actual.`);
       else
         navigate('/machotes');
     } catch (error) {
-      alert('Error al consultar cartas: ' + error);
+      toast.error(`Error al consultar cartas: ${error.message}`);
     }
   }
 
@@ -89,39 +94,39 @@ const Actas = () => {
         `)
         .eq('profesor_id', profesorID);
       if (error) {
-        alert('No se pudieron obtener las actas. ' + error.message);
+        toast.error(`No se pudieron obtener las actas: ${error.message}`);
         return;
       }
       setActas(data || []);
     } catch (error) {
-      alert('Error al consultar actas: ' + error);
+      toast.error(`Error al consultar actas: ${error.message}`);
     }
   }
 
   async function eliminarActa(id) {
-    const confirmarEnvio = window.confirm(
-      "¿Está seguro que desea eliminar esta acta?"
-    );
-    if (!confirmarEnvio) return;
-
     try {
       const { error } = await supabase
         .from('Acta')
         .delete()
         .eq('id', id);
       if (error) {
-        alert('Error al eliminar acta: ' + error.message);
+        toast.error(`Error al eliminar acta: ${error.message}`);
         return;
       }
 
       setActas((prev) => prev.filter((ap) => ap.id !== id));
+      modalConfirmacion.close();
+      toast.success("Se ha eliminado el acta con éxito.");
     } catch (error) {
-      alert('Error al eliminar acta:' + error);
+      toast.error(`Error al eliminar acta: ${error.message}`);
     }
   }
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-50">
+      <Modal modalRef={modalConfirmacion} title={<h5>Eliminar Acta</h5>} onAccept={() => eliminarActa(selectedActa.id) }>
+        <p>¿Está seguro que desea eliminar esta acta?</p>
+      </Modal>
       <HeaderProfesor title="Solicitud de acta de defensa"/>
         <main className="flex-grow p-6">
           <div className="max-w-7xl mx-auto bg-white p-4 rounded shadow">
@@ -193,7 +198,8 @@ const Actas = () => {
 
                           <button
                             onClick={() =>
-                              eliminarActa(acta.id)
+                              //eliminarActa(acta.id)
+                              {modalConfirmacion.open(); setSelectedActa(acta);}
                             }
                             className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded"
                           >

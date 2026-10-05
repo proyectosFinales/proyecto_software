@@ -10,6 +10,8 @@ import * as XLSX from 'xlsx';
 
 import autoTable from "jspdf-autotable";
 import logoTec from '../view/PDFblueprints/logoTec.jpg';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 /**
  * Genera un PDF con la información de un anteproyecto.
@@ -799,4 +801,119 @@ export function descargarReporteProyectos(dataProyectos, dataProfesores) {
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, 'Proyectos');
   XLSX.writeFile(workbook, 'Reporte_Proyectos.xlsx');
+};
+
+/**
+ * Crea un Excel con el detalle de los avances filtrados en el dashboard
+ * de avances (/dashboard-avances).
+ * @param {Array<Object>} avances Lista de avances filtrados, corresponde a la variable
+ * `searchedAvances` de DashboardAvances.jsx, es decir, el resultado de
+ * `fetchAvancesSinProyecto` ya filtrado por estudiante, profesor, número de avance,
+ * año, semestre y búsqueda de texto.
+ * Ejemplo de un elemento:
+ * { id: 'uuid', num_avance: 1, estado: 'Pasa', fecha_avance: '2026-03-01',
+ *   Proyecto: {
+ *     semestre: 1, año: 2026,
+ *     Estudiante: { carnet: '202100000', Usuario: { nombre: 'Juan Pérez' } },
+ *     Profesor: { Usuario: { nombre: 'María López' } }
+ *   } }
+ */
+export function descargarExcelDetalleAvances(avances) {
+  if (!avances || avances.length === 0) {
+    toast.error('No hay avances para generar el reporte');
+    return;
+  }
+
+  const ETIQUETAS_AVANCE = {
+    1: 'Primer Avance',
+    2: 'Segundo Avance',
+    3: 'Tercer Avance',
+  };
+
+  const dataToExport = avances.map((avance, index) => ({
+    '': index + 1,
+    'Número': avance.num_avance ?? 'N/A',
+    'Tipo de avance': avance.num_avance <= 3
+      ? ETIQUETAS_AVANCE[avance.num_avance]
+      : 'Otros avances',
+    'Estudiante': avance.Proyecto?.Estudiante?.Usuario?.nombre || 'N/A',
+    'Carnet': avance.Proyecto?.Estudiante?.carnet || 'N/A',
+    'Profesor': avance.Proyecto?.Profesor?.Usuario?.nombre || 'N/A',
+    'Estado': avance.estado || 'Pendiente',
+    'Fecha': avance.fecha_avance ? new Date(avance.fecha_avance).toLocaleDateString() : 'Sin fecha',
+    'Semestre': avance.Proyecto?.semestre ?? 'No actualizado',
+    'Año': avance.Proyecto?.año || 'No actualizado',
+  }));
+
+  const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+  // Ajustar ancho de columnas con límite máximo
+  const MAX_WIDTH = 50; // Ancho máximo en caracteres
+  const MIN_WIDTH = 10; // Ancho mínimo en caracteres
+
+  const columnWidths = Object.keys(dataToExport[0]).map(key => {
+    const maxLength = Math.max(
+      key.length,
+      ...dataToExport.map(row => (row[key] ? row[key].toString().length : 0))
+    );
+    const width = Math.min(Math.max(maxLength + 2, MIN_WIDTH), MAX_WIDTH);
+    return { wch: width };
+  });
+  worksheet['!cols'] = columnWidths;
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Detalle Avances');
+  XLSX.writeFile(workbook, 'Reporte_Detalle_Avances.xlsx');
+}
+
+/**
+ * Genera y descarga el PDF con el reporte de los avances de un proyecto.
+ * El nombre del archivo usa el nombre del usuario logueado (sessionStorage).
+ * @param {Array<Object>} avances Lista de avances, corresponde a la variable
+ * `avances` de Avances.jsx (resultado de fetchAvances).
+ * Ejemplo de un elemento de `avances`:
+ * { id: 'uuid', proyecto_id: 'uuid', num_avance: 1, estado: 'Pasa', fecha_avance: '2026-03-01' }
+ */
+export function descargarReporteAvances(avances) {
+  if (!avances || avances.length === 0) {
+    toast.error('No hay avances para generar el reporte');
+    return;
+  }
+
+  // Nombre del usuario en sesion, usado en el nombre del archivo
+  const estudiante = sessionStorage.getItem('estudiante' || 'Estudiante no encontrado');
+  const empresa = sessionStorage.getItem('empresa' || 'Empresa no encontrada');
+
+  // Mismos colores usados en la pagina para cada estado
+  const COLORES_ESTADO = {
+    'Pasa': [34, 197, 94],
+    'A Mejorar': [245, 158, 11],
+    'No Pasa': [239, 68, 68],
+    'Reprobado': [239, 68, 68],
+    'Atrasado': [100, 116, 139],
+    'Pendiente': [148, 163, 184],
+  };
+
+  const doc = new jsPDF();
+  generarHeaderFooterPDF(doc, 'Avances del Proyecto');
+
+  const columnas = ['Número', 'Avance', 'Estado', 'Fecha'];
+  const filas = avances.map((avance, index) => [
+    index + 1,
+    `Avance ${avance.num_avance}`,
+    avance.estado || 'Pendiente',
+    avance.fecha_avance ? new Date(avance.fecha_avance).toLocaleDateString() : 'Sin fecha',
+  ]);
+
+  autoTable(doc, {
+    startY: 50,
+    head: [columnas],
+    body: filas,
+    didParseCell: (data) => {
+      if (data.section === 'body' && data.column.index === 2) {
+        const estado = filas[data.row.index][2];
+        doc.setTextColor(...(COLORES_ESTADO[estado] || [0, 0, 0]));
+      }
+    },
+  });
+
+  doc.save(`ReporteAvances_${empresa}_${estudiante}.pdf`);
 };

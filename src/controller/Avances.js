@@ -52,6 +52,8 @@ export const fetchAvancesSinProyecto = async () => {
       Proyecto:proyecto_id (
         estudiante_id, 
         profesor_id,
+        semestre,
+        año,
         Estudiante:estudiante_id (
           id_usuario,
           carnet,

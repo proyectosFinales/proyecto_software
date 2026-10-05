@@ -22,6 +22,7 @@ const HeaderProfesor = ({title}) => {
         if (data) {
           setNombreUsuario(data.nombre);
         }
+        sessionStorage.setItem("nombreUsuario", nombreUsuario);
       } catch (error) {
         console.error('Error al obtener nombre de usuario:', error);
       }

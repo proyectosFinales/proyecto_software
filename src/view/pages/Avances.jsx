@@ -4,6 +4,9 @@ import Header from '../components/HeaderProfesor';
 import Footer from '../components/Footer';
 import '../styles/Calendario.css';
 import { fetchAvances, updateAvance, addAvance, deleteAvance } from '../../controller/Avances';
+import { descargarReporteAvances } from '../../controller/DescargarPDF';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Avances = () => { 
   const { proyectoId } = useParams();
@@ -19,20 +22,18 @@ const Avances = () => {
   const handleEstadoChange = async (avanceId, nuevoEstado) => {
     updateAvance(avanceId, nuevoEstado, proyectoId).then(() => {
       setAvances(avances.map(avance => avance.id === avanceId ? { ...avance, estado: nuevoEstado } : avance));
-      alert('Avance actualizado correctamente');
+      toast.success('Avance actualizado correctamente');
     }).catch(err => {
-      console.error(err);
-      alert('Ocurrió un error al actualizar el avance');
+      toast.error(`Ocurrió un error al actualizar el avance: ${err.message}`);
     });
   };
 
   const handleAgregarAvance = async () => {
     addAvance(selectedEstado, proyectoId).then(nuevoAvance => {
       setAvances([...avances, nuevoAvance]);
-      alert('Avance agregado correctamente');
+      toast.success('Avance agregado correctamente');
     }).catch(err => {
-      console.error(err);
-      alert('Ocurrió un error al agregar el avance');
+      toast.error(`Ocurrió un error al agregar el avance: ${err.message}`);
     });
   };
 
@@ -40,10 +41,9 @@ const Avances = () => {
     const ultimoAvance = avances[avances.length - 1];
     deleteAvance(ultimoAvance.id, proyectoId).then(() => {
       setAvances(avances.slice(0, -1));
-      alert('Avance eliminado correctamente');
+      toast.success('Avance eliminado correctamente');
     }).catch(err => {
-      console.error(err);
-      alert('Error al borrar el avance');
+      toast.error(`Ocurrió un error al eliminar el avance: ${err.message}`);
     });
   };
 
@@ -52,6 +52,15 @@ const Avances = () => {
       <Header title="Avances de Estudiantes" />
       <div className="flex-grow container mx-auto p-4">
         <div className="overflow-x-auto">
+          <div className="flex justify-end mb-2">
+            <button
+              onClick={() => descargarReporteAvances(avances)}
+              style={{ backgroundColor: '#4F46E5' }}
+              className="px-4 py-2 text-white rounded hover:opacity-90"
+            >
+              Reporte
+            </button>
+          </div>
           <table className="min-w-full bg-white border border-gray-200">
             <thead>
               <tr>
@@ -67,19 +76,22 @@ const Avances = () => {
                   <td className="px-4 py-2 border-b">{avance.estado}</td>
                   <td className="px-4 py-2 border-b">
                     <button
-                      className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2"
+                      disabled={avance.estado === 'Pasa'}
+                      className="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 mr-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-green-500"
                       onClick={() => handleEstadoChange(avance.id, 'Pasa')}
                     >
                       Pasa
                     </button>
                     <button
-                      className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 mr-2"
+                      disabled={avance.estado === 'A Mejorar'}
+                      className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600 mr-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-yellow-500"
                       onClick={() => handleEstadoChange(avance.id, 'A Mejorar')}
                     >
                       A Mejorar
                     </button>
                     <button
-                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                      disabled={avance.estado === 'No Pasa'}
+                      className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-500"
                       onClick={() => handleEstadoChange(avance.id, 'No Pasa')}
                     >
                       No Pasa

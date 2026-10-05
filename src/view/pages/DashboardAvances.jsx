@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'; // Chale
+import { useState, useEffect, useRef, useMemo } from 'react'; // Chale
 import {
   ResponsiveContainer,
   BarChart, Bar,
@@ -18,17 +18,30 @@ import {
   Award
 } from 'lucide-react';
 import { fetchAvancesSinProyecto } from '../../controller/Avances';
-import jsPDF from 'jspdf';
 import Header from '../components/HeaderCoordinador';
 import Footer from '../components/Footer';
 import SettingsCoordinador from '../components/SettingsCoordinador';
-import autoTable from 'jspdf-autotable';
-import * as XLSX from 'xlsx';
 import Profesor from '../../controller/profesor';
 import Estudiante from '../../controller/estudiante';
 
-import {getDetallesAvancesParaReporte } from '../../controller/Avances';
-import { generarPDFDashboardAvances } from '../../controller/DescargarPDF';
+import {
+  generarPDFDashboardAvances,
+  descargarExcelDetalleAvances
+} from '../../controller/DescargarPDF';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+const ESTADOS_AVANCE = {
+  Pasa: { hex: '#22c55e', badge: 'bg-green-100 text-green-800' },
+  'A Mejorar': { hex: '#f59e0b', badge: 'bg-amber-100 text-amber-800' },
+  'No Pasa': { hex: '#ef4444', badge: 'bg-red-100 text-red-800' },
+  Atrasado: { hex: '#64748b', badge: 'bg-slate-100 text-slate-700' },
+  Otros: { hex: '#8884d8', badge: 'bg-gray-100 text-gray-700' }
+};
+
+const FECHA_ACTUAL = new Date();
+const ANIO_ACTUAL = FECHA_ACTUAL.getFullYear();
+const SEMESTRE_ACTUAL = FECHA_ACTUAL.getMonth() + 1 <= 7 ? 1 : 2;
 
 const DashboardAvances = () => {
   const [avances, setAvances] = useState([]);
@@ -43,7 +56,27 @@ const DashboardAvances = () => {
   const [stats, setStats] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [avanceSeleccionado, setAvanceSeleccionado] = useState(0);
+  const [selectedAnio, setSelectedAnio] = useState(String(ANIO_ACTUAL));
+  const [selectedSemestreNum, setSelectedSemestreNum] = useState(String(SEMESTRE_ACTUAL));
   const itemsPerPage = 10;
+
+  const ETIQUETAS_AVANCE = {
+    1: 'Primer Avance',
+    2: 'Segundo Avance',
+    3: 'Tercer Avance',
+    4: 'Otros avances'
+  };
+  const handleCiclarAvance = () => setAvanceSeleccionado(prev => (prev >= 4 ? 0 : prev + 1));
+
+  const aniosDisponibles = useMemo(() => {
+    const set = new Set([ANIO_ACTUAL]);
+    avances.forEach(avance => {
+      const anio = avance.Proyecto?.año;
+      if (anio) set.add(Number(anio));
+    });
+    return Array.from(set).sort((a, b) => b - a);
+  }, [avances]);
 
   const barChartRef = useRef(null);
   const pieChartRef = useRef(null);
@@ -78,10 +111,16 @@ const DashboardAvances = () => {
     const fetchProfesores = async () => {
       try {
         const data = await Profesor.obtenerTodos();
-        setProfesores([{ value: '', label: 'Todos los profesores' }, ...data.map(prof => ({
-          value: prof.profesor_id,
-          label: prof.nombre
-        }))]);
+        const unicosPorId = new Map();
+        data.forEach(prof => {
+          if (!unicosPorId.has(prof.profesor_id)) {
+            unicosPorId.set(prof.profesor_id, {
+              value: prof.profesor_id,
+              label: prof.nombre
+            });
+          }
+        });
+        setProfesores([{ value: '', label: 'Todos los profesores' }, ...unicosPorId.values()]);
       } catch (error) {
         console.error('Error fetching profesores:', error.message);
       }
@@ -111,35 +150,50 @@ const DashboardAvances = () => {
     const filteredAvances = avances.filter(avance => {
       const matchesEstudiante = selectedEstudiante ? avance.Proyecto?.estudiante_id === selectedEstudiante : true;
       const matchesProfesor = selectedProfesor ? avance.Proyecto?.profesor_id === selectedProfesor : true;
-      return matchesEstudiante && matchesProfesor;
+      const matchesAvance = avanceSeleccionado === 0
+        ? true
+        : avanceSeleccionado === 4
+          ? ![1, 2, 3].includes(Number(avance.num_avance))
+          : Number(avance.num_avance) === avanceSeleccionado;
+      const matchesAnio = selectedAnio ? Number(avance.Proyecto?.año) === Number(selectedAnio) : true;
+      const matchesSemestreNum = selectedSemestreNum
+        ? Number(avance.Proyecto?.semestre) === Number(selectedSemestreNum) : true;
+      return matchesEstudiante && matchesProfesor && matchesAvance && matchesAnio && matchesSemestreNum;
     });
 
+    setCurrentPage(1);
+
     const totalAvances = filteredAvances.length;
-    const aprobados = filteredAvances.filter(a => a.estado === 'Aprobado').length;
-    const pendientes = filteredAvances.filter(a => a.estado === 'Pendiente').length;
-    const reprobados = filteredAvances.filter(a => a.estado === 'Reprobado').length;
-    const atrasados = filteredAvances.filter(a => a.estado === 'Atrasado').length;
+    const contar = (valor) => filteredAvances.filter(a => a.estado === valor).length;
+    const pasa = contar('Pasa');
+    const aMejorar = contar('A Mejorar');
+    const noPasa = contar('No Pasa');
+    const atrasados = contar('Atrasado');
+    const otros = totalAvances - pasa - aMejorar - noPasa - atrasados;
 
     setStats({
       totalAvances,
-      aprobados,
-      pendientes,
-      reprobados,
+      pasa,
+      aMejorar,
+      noPasa,
       atrasados,
-      tasaAprobacion: totalAvances ? (aprobados / totalAvances * 100).toFixed(1) : 0,
-      tasaPendientes: totalAvances ? (pendientes / totalAvances * 100).toFixed(1) : 0,
-      tasaReprobados: totalAvances ? (reprobados / totalAvances * 100).toFixed(1) : 0,
+      otros,
+      tasaAprobacion: totalAvances ? (pasa / totalAvances * 100).toFixed(1) : 0,
+      tasaReprobados: totalAvances ? (noPasa / totalAvances * 100).toFixed(1) : 0,
+      tasaAMejorar: totalAvances ? (aMejorar / totalAvances * 100).toFixed(1) : 0,
       tasaAtrasados: totalAvances ? (atrasados / totalAvances * 100).toFixed(1) : 0
     });
 
     setFilteredAvances(filteredAvances);
-  }, [avances, selectedEstudiante, selectedProfesor]);
+  }, [avances, selectedEstudiante, selectedProfesor, avanceSeleccionado, selectedAnio, selectedSemestreNum]);
 
   useEffect(() => {
+    const term = searchTerm.toLowerCase();
     const results = filteredAvances.filter(avance => {
-      return avance.Proyecto?.Estudiante?.Usuario?.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        avance.Proyecto?.Estudiante?.carnet.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        avance.Proyecto?.Profesor?.Usuario?.nombre.toLowerCase().includes(searchTerm.toLowerCase());
+      const nombre = avance.Proyecto?.Estudiante?.Usuario?.nombre?.toLowerCase() || '';
+      const carnet = avance.Proyecto?.Estudiante?.carnet?.toLowerCase() || '';
+      const profesor = avance.Proyecto?.Profesor?.Usuario?.nombre?.toLowerCase() || '';
+      return nombre.includes(term) || carnet.includes(term) || profesor.includes(term);
     });
 
     setSearchedAvances(results);
@@ -150,72 +204,40 @@ const DashboardAvances = () => {
       (currentPage - 1) * itemsPerPage,
       currentPage * itemsPerPage
     ));
+    console.log(paginatedAvances);
   }, [searchedAvances, currentPage]);
+
+  const datosEstado = [
+    { estado: 'Pasa', value: stats?.pasa || 0 },
+    { estado: 'A Mejorar', value: stats?.aMejorar || 0 },
+    { estado: 'No Pasa', value: stats?.noPasa || 0 },
+    { estado: 'Atrasado', value: stats?.atrasados || 0 },
+    { estado: 'Otros', value: stats?.otros || 0 }
+  ]
+    .filter(d => d.estado !== 'Otros' || d.value > 0)
+    .map(d => ({
+      name: d.estado,
+      value: d.value,
+      color: ESTADOS_AVANCE[d.estado].hex
+    }));
 
 const handleDownloadPDF = () => {
     // REQ-30: Esta funcion ahora imprime los graficos/stats
     if (!stats) {
-      alert("No hay estadísticas para generar el PDF.");
+      toast.error("No hay estadísticas para generar el PDF.");
       return;
     }
 
-    // Convertir el objeto stats a los datos que espera el grafico
-    const datosGrafico = [
-      { name: 'Aprobados', value: stats.aprobados || 0 },
-      { name: 'Pendientes', value: stats.pendientes || 0 },
-      { name: 'Reprobados', value: stats.reprobados || 0 },
-      { name: 'Atrasados', value: stats.atrasados || 0 }
-    ];
-
-    // Llamar a la funcion del controlador que genera el PDF
-    generarPDFDashboardAvances(datosGrafico, "Resumen de Avances de Proyectos");
+    generarPDFDashboardAvances(datosEstado, "Resumen de Avances de Proyectos");
   };
 
 
-const handleDownloadExcel = async () => {
-    try {
-      const data = await getDetallesAvancesParaReporte();
-      
-      if (!data || data.length === 0) {
-        alert("No hay datos detallados para exportar.");
-        return;
-      }
-
-      // Mapear los datos al formato deseado (coincide con el backend)
-      const formattedData = data.map(avance => ({
-        Estudiante: avance.estudiante,
-        Profesor: avance.profesor,
-        "Tipo de Avance": avance.titulo,
-        Semestre: avance.semestre,
-        Fecha: avance.fecha,
-        Estado: avance.estado
-      }));
-
-      // Usar XLSX para crear el archivo Excel
-      const worksheet = XLSX.utils.json_to_sheet(formattedData);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Detalle Avances');
-      
-      // Escribir y descargar el archivo
-      XLSX.writeFile(workbook, 'Reporte_Detalle_Avances.xlsx');
-
-    } catch (error) {
-      console.error("Error al generar el reporte de Excel:", error.message);
-      alert("Error al generar el reporte.");
-    }
+  const handleDownloadExcel = () => {
+    // Se exportan los avances que ya están filtrados en el dashboard
+    descargarExcelDetalleAvances(searchedAvances);
   };
 
   
-  const getColorForEstado = (estado) => {
-    switch (estado) {
-      case 'Aprobado': return '#22c55e';
-      case 'Pendiente': return '#f59e0b';
-      case 'Reprobado': return '#ef4444';
-      case 'Atrasado': return '#f87171';
-      default: return '#3b82f6';
-    }
-  };
-
   const renderStatsCard = (title, value, icon, trend = null) => (
     <div className="hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 bg-white rounded-lg p-6">
       <div className="flex items-start justify-between">
@@ -243,39 +265,72 @@ const handleDownloadExcel = async () => {
       <SettingsCoordinador show={isMenuOpen} />
       <main className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto space-y-6">
         {/* Filtros y Controles */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <select
-              value={selectedEstudiante}
-              onChange={(e) => setSelectedEstudiante(e.target.value)}
-              className="px-4 py-2 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {estudiantes.map(est => (
-                <option key={est.value} value={est.value}>{est.label}</option>
-              ))}
-            </select>
+        <div className="flex flex-col sm:flex-row gap-4 justify-between items-start">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+              <select
+                value={selectedEstudiante}
+                onChange={(e) => setSelectedEstudiante(e.target.value)}
+                className="h-12 px-4 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {estudiantes.map(est => (
+                  <option key={est.value} value={est.value}>{est.label}</option>
+                ))}
+              </select>
 
-            <select
-              value={selectedProfesor}
-              onChange={(e) => setSelectedProfesor(e.target.value)}
-              className="px-4 py-2 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {profesores.map(prof => (
-                <option key={prof.value} value={prof.value}>{prof.label}</option>
-              ))}
-            </select>
+              <select
+                value={selectedProfesor}
+                onChange={(e) => setSelectedProfesor(e.target.value)}
+                className="h-12 px-4 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {profesores.map(prof => (
+                  <option key={prof.value} value={prof.value}>{prof.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+              <select
+                value={selectedAnio}
+                onChange={(e) => setSelectedAnio(e.target.value)}
+                className="h-12 px-4 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Todos los años</option>
+                {aniosDisponibles.map(anio => (
+                  <option key={anio} value={anio}>{anio}</option>
+                ))}
+              </select>
+
+              <select
+                value={selectedSemestreNum}
+                onChange={(e) => setSelectedSemestreNum(e.target.value)}
+                className="h-12 px-4 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="">Seleccione un semestre</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+
+              <button
+                onClick={handleCiclarAvance}
+                className="h-12 max-h-12 px-4 bg-azul text-white rounded-lg hover:bg-blue-800 flex items-center gap-2"
+              >
+                <TrendingUp className="w-5 h-5" />
+                {avanceSeleccionado ? ETIQUETAS_AVANCE[avanceSeleccionado] : 'Todos los avances'}
+              </button>
+            </div>
           </div>
 
           <div className="flex gap-4">
             <button
               onClick={handleDownloadPDF}
-              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2"
+              className="h-12 max-h-12 px-4 bg-red-500 text-white rounded-lg hover:bg-red-600 flex items-center gap-2"
             >
               <Download className="w-5 h-5" /> Resumen (PDF)
             </button>
             <button
               onClick={handleDownloadExcel}
-              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
+              className="h-12 max-h-12 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 flex items-center gap-2"
             >
               <Download className="w-5 h-5" /> Excel
             </button>
@@ -296,8 +351,8 @@ const handleDownloadExcel = async () => {
               <CheckCircle className="w-6 h-6 text-green-500" />,
             )}
             {renderStatsCard(
-              "Avances Pendientes",
-              stats.pendientes,
+              "Avances Atrasados",
+              stats.atrasados,
               <Clock className="w-6 h-6 text-amber-500" />
             )}
             {renderStatsCard(
@@ -319,22 +374,15 @@ const handleDownloadExcel = async () => {
               </button>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={[
-                  { name: 'Aprobados', value: stats?.aprobados || 0 },
-                  { name: 'Pendientes', value: stats?.pendientes || 0 },
-                  { name: 'Reprobados', value: stats?.reprobados || 0 },
-                  { name: 'Atrasados', value: stats?.atrasados || 0 }
-                ]}>
+                <BarChart data={datosEstado}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
-                  <YAxis />
+                  <YAxis allowDecimals={false} />
                   <Tooltip />
                   <Bar dataKey="value" fill="#8884d8">
-                    {[
-                      <Cell key="apr" fill="#22c55e" />,
-                      <Cell key="pen" fill="#f59e0b" />,
-                      <Cell key="rep" fill="#ef4444" />
-                    ]}
+                    {datosEstado.map(d => (
+                      <Cell key={d.estado} fill={d.color} />
+                    ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -353,12 +401,7 @@ const handleDownloadExcel = async () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie
-                    data={[
-                      { name: 'Aprobados', value: stats?.aprobados || 0 },
-                      { name: 'Pendientes', value: stats?.pendientes || 0 },
-                      { name: 'Reprobados', value: stats?.reprobados || 0 },
-                      { name: 'Atrasados', value: stats?.atrasados || 0 }
-                    ]}
+                    data={datosEstado}
                     cx="50%"
                     cy="50%"
                     outerRadius={80}
@@ -366,9 +409,9 @@ const handleDownloadExcel = async () => {
                     dataKey="value"
                     label
                   >
-                    <Cell fill="#22c55e" />
-                    <Cell fill="#f59e0b" />
-                    <Cell fill="#ef4444" />
+                    {datosEstado.map(d => (
+                      <Cell key={d.estado} fill={d.color} />
+                    ))}
                   </Pie>
                   <Tooltip />
                   <Legend />
@@ -406,8 +449,8 @@ const handleDownloadExcel = async () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {paginatedAvances.map((avance, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
+                {paginatedAvances.map(avance => (
+                  <tr key={avance.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {avance.num_avance || 'N/A'}
                     </td>
@@ -422,9 +465,7 @@ const handleDownloadExcel = async () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium
-                        ${avance.estado === 'Aprobado' ? 'bg-green-100 text-green-800' :
-                          avance.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800' :
-                          'bg-red-100 text-red-800'}`}>
+                        ${ESTADOS_AVANCE[avance.estado]?.badge || ESTADOS_AVANCE.Otros.badge}`}>
                         {avance.estado}
                       </span>
                     </td>
@@ -444,7 +485,7 @@ const handleDownloadExcel = async () => {
             >
               Anterior
             </button>
-            <span>Página {currentPage}</span>
+            <span>Página {currentPage} de {Math.max(1, Math.ceil(searchedAvances.length / itemsPerPage))} — {searchedAvances.length} avances</span>
             <button
               onClick={() => setCurrentPage(currentPage + 1)}
               disabled={currentPage * itemsPerPage >= searchedAvances.length}

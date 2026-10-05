@@ -10,6 +10,8 @@ import Layout from "../../components/layout";
 import SidebarProfesor from "../../components/SidebarProfesor";
 import SettingsProfesor from "../../components/SettingsProfesor";
 import supabase from "../../../model/supabase";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProyectosAsignadosProfesor = () => {
   const navigate = useNavigate();
@@ -114,6 +116,9 @@ const ProyectosAsignadosProfesor = () => {
         if (proyectosError) 
           throw new Error('Error fetching Proyectos:', proyectosError);
 
+        // sessionStorage.setItem("estudiante", proyectosData.Anteproyecto?.Estudiante?.Usuario?.nombre);
+        // sessionStorage.setItem("empresa", proyectosData.Anteproyecto?.Empresa?.nombre);
+
         // Ordenar proyectos por año descendente, luego por semestre descendente
         const proyectosOrdenados = proyectosData.sort((a, b) => {
           // Primero ordenar por año (descendente)
@@ -133,6 +138,7 @@ const ProyectosAsignadosProfesor = () => {
         }
         setAñosDisponibles(años);
       } catch (error) {
+        toast.error('Error al cargar los proyectos');
         console.error('Error:', error);
       }
     };
@@ -172,10 +178,10 @@ const ProyectosAsignadosProfesor = () => {
         p.id === proyectoId ? { ...p, estado: nuevoEstado } : p
       ));
       
-      alert(`Proyecto ${nuevoEstado.toLowerCase()} exitosamente`);
+      toast.success(`Proyecto ${nuevoEstado.toLowerCase()} exitosamente`);
     } catch (error) {
       console.error('Error al cambiar estado del proyecto:', error);
-      alert('Error al cambiar el estado del proyecto');
+      toast.error('Error al cambiar el estado del proyecto');
     }
   };
 
@@ -271,7 +277,11 @@ const ProyectosAsignadosProfesor = () => {
                 </button>
                 <button 
                   className="btn btn-primary" 
-                  onClick={() => navigate(`/avances/${proyecto.id}`)}
+                  onClick={() => {
+                    sessionStorage.setItem("empresa", proyecto.Anteproyecto?.Empresa?.nombre || "Empresa no encontrada");
+                    sessionStorage.setItem("estudiante", proyecto.Estudiante?.Usuario?.nombre || "Estudiante no encontrado");
+                    navigate(`/avances/${proyecto.id}`);
+                  }}
                 >
                   Avances
                 </button>
