@@ -3,10 +3,9 @@ import { Link } from 'react-router-dom';
 import Footer from '../components/Footer';
 import SettingsEstudiante from '../components/SettingsEstudiante';
 import supabase from '../../model/supabase';
-import { successToast, errorToast } from '../components/toast';
+import { successToast } from '../components/toast';
 
 const MenuEstudiante = () => {
-  const [isAllowedToRate, setIsAllowedToRate] = useState(false);
   const [hasCalificado, setHasCalificado] = useState(false);
   const [isMenuOpenSettings, setIsMenuOpenSettings] = useState(false);
   const [nombreUsuario, setNombreUsuario] = useState('');
@@ -32,70 +31,29 @@ const MenuEstudiante = () => {
   }, [usuarioId]);
 
   useEffect(() => {
-    const checkUserState = async () => {
+    const checkIfAlreadyRated = async () => {
       try {
-        console.log("[MenuEstudiante] 1) Buscar Estudiante por userId:", usuarioId);
         const { data: estudianteRow, error: estError } = await supabase
           .from('Estudiante')
-          .select('estudiante_id, estado')
+          .select('estudiante_id')
           .eq('id_usuario', usuarioId)
           .single();
 
         if (estError) throw estError;
         if (!estudianteRow) {
           console.log("[MenuEstudiante] No se encontró Estudiante para este usuario");
-          setIsAllowedToRate(false);
+          setHasCalificado(false);
           return;
         }
 
         const estudianteID = estudianteRow.estudiante_id;
-        const estadoEst = (estudianteRow.estado || "").toLowerCase();
-        console.log("[MenuEstudiante] Estudiante:", estudianteID, "estado:", estadoEst);
-
-        // 2) Buscar Proyectos que tengan este estudiante_id
-        console.log("[MenuEstudiante] 2) Buscar Proyectos para estudiante:", estudianteID);
-        const { data: proyectos, error: prError } = await supabase
-          .from('Proyecto')
-          .select('id, estado')
-          .eq('estudiante_id', estudianteID);
-
-        if (prError) throw prError;
-        console.log("[MenuEstudiante] Proyectos del estudiante:", proyectos);
-
-        // Revisa si alguno de esos proyectos está "aprobado" o "reprobado"
-        const anyProyectoOk = proyectos.some(proy => {
-          const state = (proy.estado || "").toLowerCase();
-          return (state === "aprobado" || state === "reprobado");
-        });
-
-        const isEstudianteOk = (estadoEst === 'aprobado' || estadoEst === 'reprobado');
-        console.log("[MenuEstudiante] isEstudianteOk?", isEstudianteOk, "anyProyectoOk?", anyProyectoOk);
-
-        if (isEstudianteOk && anyProyectoOk) {
-          console.log("[MenuEstudiante] Estudiante y al menos un Proyecto apto => Allowed to Rate");
-          setIsAllowedToRate(true);
-        } else {
-          console.log("[MenuEstudiante] Estudiante/Proyecto no apto => setIsAllowedToRate(false)");
-          setIsAllowedToRate(false);
-        }
-      } catch (err) {
-        console.error("[MenuEstudiante] Error checking Estudiante:", err);
-        setIsAllowedToRate(false);
-      }
-    };
-    checkUserState();
-  }, [usuarioId]);
-
-  useEffect(() => {
-    const checkIfAlreadyRated = async () => {
-      try {
         const activeSemesterId = 1;
         console.log("[MenuEstudiante] Verificando si estudiante ya calificó al prof en el semestre:", activeSemesterId);
 
         const { data: califs, error } = await supabase
           .from('Calificacion')
           .select('*')
-          .eq('estudiante_id', usuarioId)
+          .eq('estudiante_id', estudianteID)
           .eq('semestre_id', activeSemesterId);
 
         if (error) throw error;

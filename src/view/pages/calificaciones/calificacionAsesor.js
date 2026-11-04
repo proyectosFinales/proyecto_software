@@ -1,9 +1,8 @@
 // src/view/pages/calificaciones/calificacionAsesor.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Star,
-  ThumbsUp,
   MessageSquare,
   Send,
   HelpCircle,
@@ -14,16 +13,19 @@ import {
   CheckCircle2,
   BookOpen,
   BrainCircuit,
-  ArrowLeft,
   Loader
 } from 'lucide-react';
 import HeaderEstudiante from '../../components/HeaderEstudiante';
 import Footer from '../../components/Footer';
+import Modal from '../../components/modal.jsx';
 import { calificarProfesor } from '../../../controller/calificacionesController';
-import { successToast, errorToast } from '../../components/toast';
 import supabase from '../../../model/supabase'; // Para verificar si ya calificó
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const ProfessorEvaluationForm = () => {
+  const modalConf = useRef({});
+
   /**
    * 1) El ID del usuario guardado en la sesión (rol=3 => Estudiante).
    */
@@ -37,6 +39,12 @@ const ProfessorEvaluationForm = () => {
   const [alreadyRated, setAlreadyRated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCheckingPermissions, setIsCheckingPermissions] = useState(true);
+
+  /**
+   * Estado para el aviso de "proyecto sin profesor asignado".
+   * Se usa con el componente Modal (referencia imperativa) y toast.error.
+   */
+  const [sinProfesorAsignado, setSinProfesorAsignado] = useState(false);
 
   /**
    * 3) Datos del formulario (criterios + recomendación + rating + comentarios).
@@ -109,8 +117,9 @@ const ProfessorEvaluationForm = () => {
   /**
    * 7) useEffect para: 
    *    - encontrar Estudiante
-   *    - revisar estado
-   *    - encontrar Proyecto en este semestre => estado
+   *    - encontrar el Proyecto MÁS RECIENTE del estudiante
+   *      (año mayor, y a igual año semestre 2 antes que semestre 1)
+   *    - verificar que el Proyecto tenga profesor asesor asignado
    *    - ver si ya existe Calificacion => no permitir
    */
   useEffect(() => {
@@ -137,16 +146,13 @@ const ProfessorEvaluationForm = () => {
           return;
         }
         console.log("[CalificacionAsesor] Estudiante data:", estRow);
-        const { estudiante_id, estado } = estRow;
-        const estadoEstudiante = (estado || "").toLowerCase();
-        const isEstudianteOk = (estadoEstudiante === "aprobado" || estadoEstudiante === "reprobado");
-        console.log("[CalificacionAsesor] estadoEstudiante:", estadoEstudiante, " isEstudianteOk:", isEstudianteOk);
+        const { estudiante_id } = estRow;
 
-        // 2) Buscar TODOS los proyectos (sin filtrar semestre_id, same as MenuPrincipalEstudiante)
+        // 2) Buscar TODOS los proyectos del estudiante
         console.log("[CalificacionAsesor] Buscando proyectos con .eq('estudiante_id', estudiante_id):", estudiante_id);
         const { data: proyectos, error: pError } = await supabase
           .from("Proyecto")
-          .select("id, estado, profesor_id, semestre_id")
+          .select("id, estado, profesor_id, semestre_id, semestre, año")
           .eq("estudiante_id", estudiante_id);
 
         if (pError) {
@@ -160,14 +166,43 @@ const ProfessorEvaluationForm = () => {
           return;
         }
 
-        // Buscar si al menos 1 proyecto está "aprobado" o "reprobado"
-        const proyectoApto = proyectos.find((p) => {
-          const st = (p.estado || "").toLowerCase();
-          return st === "aprobado" || st === "reprobado";
-        });
+        /**
+         * Selección del proyecto a calificar: el MÁS RECIENTE.
+         * Criterios, en este orden:
+         *   1) año mayor (año más reciente)
+         *   2) semestre mayor (semestre 2 es más reciente que semestre 1)
+         * Si falta año o semestre, ese proyecto se considera menos reciente.
+         */
+        const claveRecencia = (p) => {
+          const anio = Number(p?.año);
+          const semestre = Number(p?.semestre);
+          return {
+            anio: Number.isFinite(anio) ? anio : -Infinity,
+            semestre: Number.isFinite(semestre) ? semestre : -Infinity
+          };
+        };
 
-        if (!isEstudianteOk || !proyectoApto) {
-          console.log("[CalificacionAsesor] Estudiante/proyecto no apto => isAllowed=false");
+        const proyectoApto = [...proyectos].sort((a, b) => {
+          const ra = claveRecencia(a);
+          const rb = claveRecencia(b);
+          if (rb.anio !== ra.anio) return rb.anio - ra.anio;       // año más reciente primero
+          return rb.semestre - ra.semestre;                        // semestre 2 antes que semestre 1
+        })[0];
+
+        console.log("[CalificacionAsesor] Proyecto más reciente seleccionado:", proyectoApto);
+
+        if (!proyectoApto) {
+          console.log("[CalificacionAsesor] Sin proyecto válido => isAllowed=false");
+          setIsAllowed(false);
+          return;
+        }
+
+        // 2.5) Validación: el proyecto debe tener profesor asesor asignado.
+        //      Calificacion.profesor_id es NOT NULL, por lo que sin asesor el insert falla.
+        if (!proyectoApto.profesor_id) {
+          console.log("[CalificacionAsesor] Proyecto sin profesor asignado => avisar al estudiante");
+          toast.error("Aún no tienes un profesor asesor asignado. No es posible calificar.");
+          setSinProfesorAsignado(true);
           setIsAllowed(false);
           return;
         }
@@ -211,25 +246,17 @@ const ProfessorEvaluationForm = () => {
    * 8) handleSubmit => llama a calificarProfesor(...) si isAllowed, 
    *    luego ya no podrá calificar => forcibly set isAllowed(false).
    */
-  const confirmSubmit = () => {
-    return window.confirm(
-      "¿Está seguro que desea enviar esta calificación?\n\n" +
-      "Una vez enviada, no podrá modificarla."
-    );
-  };
-
-  const handleSubmit = async (e) => {
+  async function handleModal(e){
     e.preventDefault();
+    modalConf.open();
+  }
+
+  const handleSubmit = async () => {
     console.log("[CalificacionAsesor] handleSubmit => isAllowed?", isAllowed);
     
     if (!isAllowed) {
       console.warn("[CalificacionAsesor] No está permitido calificar. Exiting...");
-      errorToast("No está permitido calificar en este momento.");
-      return;
-    }
-
-    // Show confirmation dialog
-    if (!confirmSubmit()) {
+      toast.error("No está permitido calificar en este momento.");
       return;
     }
 
@@ -238,12 +265,13 @@ const ProfessorEvaluationForm = () => {
       console.log("[CalificacionAsesor] Enviando calificación con formData:", formData);
       
       // Show "uploading" toast
-      successToast("Subiendo su calificación...", { autoClose: false });
+      toast.info("Subiendo su calificación...");
       
+
       await calificarProfesor(formData, usuarioId);
       
       // Success! Show completion toast
-      successToast("¡Calificación enviada con éxito!", { autoClose: 3000 });
+      toast.success("¡Calificación enviada con éxito!");
       
       console.log("[CalificacionAsesor] Calificación insertada => setIsAllowed(false), go to /menuEstudiante.");
       setIsAllowed(false);
@@ -251,15 +279,18 @@ const ProfessorEvaluationForm = () => {
       navigate("/menuEstudiante");
     } catch (error) {
       console.error("[CalificacionAsesor] Error al calificarProfesor:", error);
-      errorToast(error.message || "Error enviando la calificación.");
+      toast.error("Error enviando la calificación.");
+      modalConf.close();
     } finally {
       setIsSubmitting(false); // Stop loading
     }
   };
 
   /**
-   * 9) Si el usuario NO está permitido => mostramos mensaje,
-   *    Si es por "alreadyRated", mensaje distinto.
+   * 9) Si el usuario NO está permitido => mostramos mensaje según la causa:
+   *    "alreadyRated" (ya calificó), "sinProfesorAsignado" (proyecto sin asesor)
+   *    o falta de proyecto/estudiante. En el caso de "sin asesor" además se
+   *    monta el Modal y se muestra el toast de error.
    */
   if (isCheckingPermissions) {
     return (
@@ -287,6 +318,7 @@ const ProfessorEvaluationForm = () => {
     return (
       <div className="min-h-screen bg-gray-50">
         <HeaderEstudiante title="Calificar Profesor Asesor" />
+
         <div className="max-w-4xl mx-auto p-6">
           <div className="bg-white rounded-lg shadow-md p-4 text-center">
             {alreadyRated ? (
@@ -298,15 +330,24 @@ const ProfessorEvaluationForm = () => {
                   Solo se permite una calificación por Proyecto.
                 </p>
               </>
+            ) : sinProfesorAsignado ? (
+              <>
+                <h2 className="text-red-600 font-semibold text-xl mb-2">
+                  Aún no tienes un profesor asesor asignado.
+                </h2>
+                <p className="text-gray-700">
+                  No es posible calificar hasta que la coordinación te asigne un
+                  profesor asesor para tu proyecto.
+                </p>
+              </>
             ) : (
               <>
                 <h2 className="text-red-600 font-semibold text-xl mb-2">
                   Lo sentimos, no cumples los requisitos para calificar.
                 </h2>
                 <p className="text-gray-700">
-                  Debes tener un proyecto con estado "Aprobado" o "Reprobado" y 
-                  tu estado de Estudiante debe ser "Aprobado" o "Reprobado" 
-                  para poder calificar.
+                  Debes tener un proyecto asociado para poder calificar a tu
+                  profesor asesor.
                 </p>
               </>
             )}
@@ -331,8 +372,13 @@ const ProfessorEvaluationForm = () => {
     <div className="min-h-screen bg-gray-50">
       <HeaderEstudiante title="Calificar Profesor Asesor" />
 
+      <Modal modalRef={modalConf} title={<h5>Calificar Profesor Asesor</h5>} onAccept={() => handleSubmit()}>
+        <p>¿Está seguro que desea enviar esta calificación?</p>
+        <p>Una vez enviada, no podrá modificarla.</p>
+      </Modal>
+
       <div className="max-w-4xl mx-auto p-4 sm:p-6 lg:p-8">
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6">
+        <form onSubmit={handleModal} className="bg-white rounded-lg shadow-md p-6">
           {/* Service Ratings Section */}
           <div className="space-y-6 mb-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">

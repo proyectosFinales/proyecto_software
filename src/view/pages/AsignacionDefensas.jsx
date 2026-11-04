@@ -6,14 +6,15 @@ import { es } from "date-fns/locale";
 
 import Header from "../components/HeaderCoordinador";
 import Footer from "../components/Footer";
-import { successToast, errorToast } from "../components/toast";
 import supabase from "../../model/supabase"; 
+import "../styles/AsignacionDefensas.css";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Our advanced/auto assignment controller
 import {
   assignAllDefensas,
   listAllCitas,
-  updateCita,
   generateReports,
   generateAvailability,
   availabilityReports
@@ -53,6 +54,9 @@ const AsignacionDefensas = () => {
   const [editLector1, setEditLector1] = useState("");
   const [editLector2, setEditLector2] = useState("");
 
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [selectedSemester, setSelectedSemester] = useState(new Date().getMonth() >= 6 ? "2" : "1"); 
+
   // For new Cita -> which project
   const [selectedProject, setSelectedProject] = useState("");
 
@@ -60,18 +64,6 @@ const AsignacionDefensas = () => {
   const [allProfesores, setAllProfesores] = useState([]);
 
   const [allAvailabilities, setAllAvailabilities] = useState([]);
-  
-
-  // We define 6 daily time slots
-  // Nota 11/11/2025: ... Por favor no usar esto :)
-  const TIME_SLOTS = [
-    { start: "07:30:00", end: "09:30:00" },
-    { start: "09:30:00", end: "11:30:00" },
-    { start: "11:30:00", end: "13:30:00" },
-    { start: "13:30:00", end: "15:30:00" },
-    { start: "15:30:00", end: "17:30:00" },
-    { start: "17:30:00", end: "19:30:00" },
-  ];
 
   // We'll store an array of "slot info" for the day
   const [dailySlots, setDailySlots] = useState([]); 
@@ -158,15 +150,17 @@ const AsignacionDefensas = () => {
       setAllCitas(citasData);
     } catch (err) {
       console.error("Error fetching all Citas:", err);
+      toast.error("Ocurrió un error al buscar las defensas.");
     }
   }
 
   async function fetchAllAvailabilites() {
     try {
-      const availabilityData = await availabilityReports();
+      const availabilityData = await availabilityReports(selectedYear, selectedSemester);
       setAllAvailabilities(availabilityData);
     } catch (err) {
       console.error("Error fetching all availabilites:", err);
+      toast.error("Ocurrió un error al buscar las disponibilidades.");
     }
   }
 
@@ -185,6 +179,7 @@ const AsignacionDefensas = () => {
       setAllProfesores(profs || []);
     } catch (err) {
       console.error("Error fetching profesores:", err);
+      toast.error("Ocurrió un error al buscar los profesores.");
     }
   }
 
@@ -201,9 +196,9 @@ const AsignacionDefensas = () => {
       setUnassignedReasons(result.unassigned || []);
 
       if (result.assigned > 0) {
-        successToast(`¡Asignadas ${result.assigned} defensa(s) exitosamente!`);
+        toast.success(`¡Asignadas ${result.assigned} defensa(s) exitosamente!`);
       } else {
-        successToast("No se asignaron defensas (sin disponibilidad).");
+        toast.success("No se asignaron defensas (sin disponibilidad).");
       }
 
       // Refresh
@@ -212,7 +207,7 @@ const AsignacionDefensas = () => {
       setStatusMessage("Proceso de asignación finalizado.");
     } catch (err) {
       console.error("Error assigning defensas:", err);
-      errorToast("Ocurrió un error asignando las defensas: " + err.message);
+      toast.error("Ocurrió un error asignando las defensas.");
     } finally {
       setAssigningInProgress(false);
     }
@@ -288,6 +283,7 @@ async function computeDailySlots() {
 
   if (citasErr) {
     console.error("Error fetching citas for day:", citasErr);
+    toast.error("Ocurrió un error al buscar las defensas del día.");
     setDailySlots([]);
     return;
   }
@@ -405,11 +401,11 @@ async function computeDailySlots() {
         .delete()
         .eq("cita_id", citaId);
       if (error) throw error;
-      successToast("Defensa eliminada.");
+      toast.success("Defensa eliminada con éxito.");
       await fetchAllCitas();
     } catch (err) {
       console.error("Error deleting cita:", err);
-      errorToast("Error al eliminar la defensa: " + err.message);
+      toast.error("Error al eliminar la defensa.");
     }
   }
 
@@ -417,19 +413,19 @@ async function computeDailySlots() {
   async function handleCreateCita(e) {
     e.preventDefault();
     if (!selectedProject) {
-      errorToast("Seleccione un proyecto");
+      toast.info("Seleccione un proyecto");
       return;
     }
     if (!selectedSlot) {
-      errorToast("Seleccione un horario");
+      toast.info("Seleccione un horario");
       return;
     }
     if (!editLector1 || !editLector2) {
-      errorToast("Seleccione ambos lectores");
+      toast.info("Seleccione ambos lectores");
       return;
     }
     if (editLector1 === editLector2) {
-      errorToast("lector1 y lector2 no pueden ser el mismo.");
+      toast.info("lector1 y lector2 no pueden ser el mismo");
       return;
     }
 
@@ -438,7 +434,7 @@ async function computeDailySlots() {
       (s) => s.start === selectedSlot.start && s.end === selectedSlot.end
     );
     if (conflictSlot?.conflict) {
-      errorToast("Este horario está en conflicto con otro profesor. No puede asignar.");
+      toast.info("Este horario está en conflicto con otro profesor. No puede asignar.");
       return;
     }
 
@@ -452,7 +448,7 @@ async function computeDailySlots() {
       
       if (projErr) throw projErr;
       if (!proj) {
-        errorToast("Proyecto no encontrado.");
+        toast.error("Proyecto no encontrado.");
         return;
       }
 
@@ -506,14 +502,14 @@ async function computeDailySlots() {
 
       if (citaErr) throw citaErr;
 
-      successToast("Defensa creada exitosamente");
+      toast.success("Defensa creada exitosamente");
         await fetchAllCitas();
       await fetchPendingDefensas();
       handleCancel();
 
     } catch (err) {
       console.error("Error creating cita manually:", err);
-      errorToast("Error al crear la defensa: " + err.message);
+      toast.error("Error al crear la defensa");
     }
   }
 
@@ -530,17 +526,17 @@ async function computeDailySlots() {
     e.preventDefault();
     
     if (!editCitaId) {
-      errorToast('No hay cita seleccionada para editar');
+      toast.error('No hay cita seleccionada para editar');
       return;
     }
 
     if (!selectedSlot) {
-      errorToast('Por favor seleccione un horario');
+      toast.info('Por favor seleccione un horario');
       return;
     }
 
     if (!editLector1 || !editLector2) {
-      errorToast('Por favor seleccione ambos lectores');
+      toast.info('Por favor seleccione ambos lectores');
       return;
     }
 
@@ -613,13 +609,13 @@ async function computeDailySlots() {
 
       if (updateErr) throw updateErr;
 
-      successToast('Defensa actualizada exitosamente');
+      toast.success('Defensa actualizada exitosamente');
       await fetchAllCitas();
       handleCancel();
 
     } catch (err) {
       console.error("Error updating cita:", err);
-      errorToast(err.message || 'Error al actualizar la defensa');
+      toast.error('Error al actualizar la cita');
     }
   }
 
@@ -630,54 +626,23 @@ async function computeDailySlots() {
     <div className="min-h-screen bg-gray-50">
       <Header title="Asignación de Defensas" />
       <main className="container mx-auto px-4 py-8">
-        {/* Pending projects */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold mb-4">Proyectos Pendientes de Defensa</h2>
-          <p className="text-gray-600 mb-4">{statusMessage}</p>
 
-        {pendingProjects.length > 0 && (
-          <div className="mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pendingProjects.map((proj) => (
-                  <div
-                    key={proj.id}
-                    className="bg-gray-50 p-4 rounded-lg border border-gray-200"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <i className="fas fa-user-graduate text-blue-500"></i>
-                      <span className="font-medium">
-                        {proj.Estudiante?.Usuario?.nombre}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <i className="fas fa-chalkboard-teacher text-green-500"></i>
-                      <span>{proj.Profesor?.Usuario?.nombre}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Titulo y reportes */}
+        <div id="titulo-reportes">
+          <div id="trtitulo">
+            <h2 className="text-2xl font-bold mb-4">Proyectos Pendientes de Defensa</h2>
           </div>
-        )}
-
-        <button
-          onClick={handleAssignDefensas}
-          disabled={assigningInProgress || pendingProjects.length === 0}
-            className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg
-                     hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed
-                     transition duration-200 w-full md:w-auto"
-          >
-            {assigningInProgress ? (
-              <>
-                <i className="fas fa-spinner fa-spin mr-2"></i>
-                Asignando...
-              </>
-            ) : (
-              <>
-                <i className="fas fa-magic mr-2"></i>
-                Asignar Defensas Automáticamente
-              </>
-            )}
-          </button>
+          <div id="trbotones">
+            
+            <button onClick={() => handleGeneration()}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              Descargar Asignaciones
+            </button>
+            <button onClick={() => handleAvailability()}
+              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700">
+              Descargar Disponibilidades
+            </button>
+          </div>
         </div>
 
         {/* Calendar & Manual Creation */}
@@ -750,17 +715,6 @@ async function computeDailySlots() {
               </div>
             </div>
           </div>
-          <div className="flex items-start justify-center text-white">
-            <button onClick={() => handleGeneration()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
-              Descargar Asignaciones
-            </button>
-            <button onClick={() => handleAvailability()}
-              className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 m-4">
-              Descargar Disponibilidades
-            </button>
-          </div>
-
 
           {/* RIGHT: Create / Edit form */}
           {(isCreatingNew || editCitaId) && (
@@ -859,7 +813,7 @@ async function computeDailySlots() {
                             type="button"
                             onClick={() => {
                               if (slot.conflict) {
-                                errorToast("Este horario está en conflicto: " + slot.conflictMsg);
+                                toast.info("Este horario está en conflicto: " + slot.conflictMsg);
                                 return;
                               }
                               setSelectedSlot({
@@ -1071,6 +1025,57 @@ async function computeDailySlots() {
             </div>
           )}
         </div>
+
+        {/* Pending projects */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <p className="text-gray-600 mb-4">{statusMessage}</p>
+
+        {pendingProjects.length > 0 && (
+          <div className="mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pendingProjects.map((proj) => (
+                  <div
+                    key={proj.id}
+                    className="bg-gray-50 p-4 rounded-lg border border-gray-200"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <i className="fas fa-user-graduate text-blue-500"></i>
+                      <span className="font-medium">
+                        {proj.Estudiante?.Usuario?.nombre}
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-2">
+                      <i className="fas fa-chalkboard-teacher text-green-500"></i>
+                      <span>{proj.Profesor?.Usuario?.nombre}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+          </div>
+        )}
+
+        <button
+          onClick={handleAssignDefensas}
+          disabled={assigningInProgress || pendingProjects.length === 0}
+            className="flex items-center justify-center px-6 py-3 bg-blue-600 text-white rounded-lg
+                     hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed
+                     transition duration-200 w-full md:w-auto"
+          >
+            {assigningInProgress ? (
+              <>
+                <i className="fas fa-spinner fa-spin mr-2"></i>
+                Asignando...
+              </>
+            ) : (
+              <>
+                <i className="fas fa-magic mr-2"></i>
+                Asignar Defensas Automáticamente
+              </>
+            )}
+          </button>
+        </div>
+
+        
 
         {/* Show assignment results if any */}
         {(assignedCount > 0 || unassignedReasons.length > 0) && (

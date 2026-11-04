@@ -1,0 +1,12 @@
+/* Título y reportes */
+#titulo-reportes {
+  display: flex;
+  justify-content: space-between; /* Título a la izquierda, botones al final */
+  align-items: center; /* Alineación vertical */
+  width: 100%;
+}
+
+#trbotones {
+  display: flex;
+  gap: 1rem; /* Espacio entre botones */
+}

@@ -658,26 +658,59 @@ export function generateReports (data) {
     saveAs(blob, "Asignaciones de defensas");
 }
 
-export async function availabilityReports() {
+export async function availabilityReports(year = null, semester = null) {
+  console.log("--- availabilityReports: Fetching available slots. ---");
+  
+  let query = supabase.from("disponibilidad").select(`
+    id,
+    profesor_id,
+    hora_inicio,
+    hora_fin,
+    dia,
+    profesor:Disponibilidad_profesor_id_fkey (
+      profesor_id,
+      id_usuario,
+      usuario:Profesor_id_usuario_fkey (
+        nombre
+      )
+    )
+  `);
+
+  // 1. Definir el rango de fechas basado en Año y Semestre
+  let startDate = null;
+  let endDate = null;
+
+  if (year && semester) {
+    const yearNum = parseInt(year);
+    const sem = parseInt(semester);
+
+    if (isNaN(yearNum) || (sem !== 1 && sem !== 2)) {
+      console.warn("⚠️ Parámetros de año o semestre inválidos. Devolviendo todas las disponibilidades.");
+      // Si los filtros son inválidos, no se añade filtro de fecha.
+    } else {
+      // Lógica de fechas basada en el criterio académico (Año/Semestre)
+      if (sem === 1) { // Semestre 1: Enero 1 al Junio 30
+        startDate = `${yearNum}-01-01`;
+        endDate = `${yearNum}-06-30`;
+      } else { // Semestre 2: Julio 1 al Diciembre 31
+        startDate = `${yearNum}-07-01`;
+        endDate = `${yearNum}-12-31`;
+      }
+      
+      // 2. Aplicar filtros de fecha a la consulta
+      query = query.gte("dia", startDate).lte("dia", endDate);
+    }
+  } else if (year) {
+    console.warn("⚠️ Filtro de semestre no proporcionado. Devolviendo disponibilidad para todo el año.");
+    // Se podría añadir un filtro solo por año si fuese necesario, pero por ahora se respeta la lógica de falta de filtro.
+  }
+
   try {
-    const { data: availabilities, error } = await supabase
-      .from("disponibilidad")
-      .select(`
-        id,
-        profesor_id,
-        hora_inicio,
-        hora_fin,
-        dia,
-        profesor:Disponibilidad_profesor_id_fkey (
-          profesor_id,
-          id_usuario,
-          usuario:Profesor_id_usuario_fkey (
-            nombre
-          )
-        )
-      `);
+    const { data: availabilities, error } = await query;
 
     if (error) throw error;
+
+    // Mapeo final de datos
     return availabilities.map((a) => ({
       start: a.hora_inicio,
       end: a.hora_fin,
@@ -685,7 +718,7 @@ export async function availabilityReports() {
       nombre: a.profesor?.usuario?.nombre,
     }));
   } catch (err) {
-    console.error("❌ Error in listAllCitas:", err);
+    console.error("❌ Error al obtener disponibilidades:", err);
     throw err;
   }
 }
