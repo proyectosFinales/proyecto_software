@@ -25,20 +25,25 @@ export async function obtenerEstudiantePorUsuario(usuarioId) {
 }
 
 /**
- * Obtiene el primer "Proyecto" asociado a un Estudiante.
+ * Obtiene el "Proyecto" mas reciente asociado a un Estudiante.
  */
 export async function obtenerProyectoEstudiante(estudiante_id) {
   const { data: proyectos, error } = await supabase
     .from("Proyecto")
-    .select("id, profesor_id, estado, semestre_id")
-    .eq("estudiante_id", estudiante_id);
+    .select("id, profesor_id, estado, semestre, año")
+    .eq("estudiante_id", estudiante_id)
+    .order("año", { ascending: false })
+    .order("semestre", { ascending: false })
+    .limit(1);
 
   if (error) {
     throw new Error(`Error buscando Proyecto: ${error.message}`);
   }
+
   if (!proyectos || proyectos.length === 0) {
     throw new Error("No se encontró Proyecto para este estudiante.");
   }
+
   return proyectos[0];
 }
 
@@ -74,18 +79,20 @@ export async function calificarProfesor(formData, usuarioId) {
   // 1) Buscar el Estudiante
   const { estudiante_id } = await obtenerEstudiantePorUsuario(usuarioId);
 
-  // 2) Buscar el primer Proyecto asociado
+  // 2) Buscar el Proyecto mas reciente asociado
   const proyecto = await obtenerProyectoEstudiante(estudiante_id);
 
   // 3) Obtener semestre activo
-  const semestre_id = await obtenerSemestreActivo();
+  //const semestre_id = await obtenerSemestreActivo();
 
   // 4) Construir payload con criterios y recomendación
+  // El semestre_id se asigna asi, ya que la tabla Semestre está mal gestionada y no hay ningún semestre activo de ninguna forma,
+    // por lo que la validacion siempre dara error, ademas hay otras tablas como la de Estudiante, usando el id de semestres viejos.
   const payload = {
     proyecto_id: proyecto.id,
     profesor_id: proyecto.profesor_id,
     estudiante_id,
-    semestre_id,
+    semestre_id: null,
     score_agilidad:          formData.serviceRatings.agilidad,
     score_empatia:           formData.serviceRatings.empatia,
     score_respeto:           formData.serviceRatings.respeto,
@@ -97,7 +104,8 @@ export async function calificarProfesor(formData, usuarioId) {
     score_retroalimentacion: formData.serviceRatings.retroalimentacion,
     recomendacion: formData.recommendationScore, // e.g., 1..5
     star_rating: formData.starRating,           // e.g., 1..5
-    comentarios: formData.additionalComments
+    comentarios: formData.additionalComments,
+    fecha_calificacion: new Date().toLocaleString('sv-SE').replace(' ', 'T')
   };
 
   // 5) Insertar
@@ -106,7 +114,9 @@ export async function calificarProfesor(formData, usuarioId) {
     .insert([ payload ]);
 
   if (error) {
-    throw new Error(`Error al insertar la Calificacion: ${error.message}`);
+    const customError = new Error(error.message);
+    customError.code = error.code;
+    throw customError;
   }
   return data;
 }

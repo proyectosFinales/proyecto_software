@@ -29,12 +29,14 @@ const ProfessorEvaluationForm = () => {
   /**
    * 1) El ID del usuario guardado en la sesión (rol=3 => Estudiante).
    */
-  const usuarioId = sessionStorage.getItem('token');
+  const user = JSON.parse(sessionStorage.getItem('USER'));
+  const est = JSON.parse(sessionStorage.getItem('STUDENT'));
   const navigate = useNavigate();
 
   /**
    * 2) Estados para habilitar/deshabilitar calificación
    */
+  const calificacion = sessionStorage.getItem('hasCalificado');
   const [isAllowed, setIsAllowed] = useState(null);
   const [alreadyRated, setAlreadyRated] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -114,133 +116,32 @@ const ProfessorEvaluationForm = () => {
     </div>
   );
 
-  /**
-   * 7) useEffect para: 
-   *    - encontrar Estudiante
-   *    - encontrar el Proyecto MÁS RECIENTE del estudiante
-   *      (año mayor, y a igual año semestre 2 antes que semestre 1)
-   *    - verificar que el Proyecto tenga profesor asesor asignado
-   *    - ver si ya existe Calificacion => no permitir
-   */
   useEffect(() => {
     const verificarPermisos = async () => {
       setIsCheckingPermissions(true);
-      console.log("[CalificacionAsesor] --> Iniciando verificarPermisos()");
-      console.log("[CalificacionAsesor] usuarioId:", usuarioId);
+      console.log("[CalificacionAsesor] Iniciando verificacion de permisos");
+
       try {
-        // 1) Buscar Estudiante
-        console.log("[CalificacionAsesor] Step 1) Buscar Estudiante por id_usuario");
-        const { data: estRow, error: eError } = await supabase
-          .from("Estudiante")
-          .select("estudiante_id, estado")
-          .eq("id_usuario", usuarioId)
-          .single();
-
-        if (eError) {
-          console.error("[CalificacionAsesor] Error fetching Estudiante:", eError);
-          throw eError;
-        }
-        if (!estRow) {
-          console.log("[CalificacionAsesor] No se encontró Estudiante => isAllowed=false");
-          setIsAllowed(false);
-          return;
-        }
-        console.log("[CalificacionAsesor] Estudiante data:", estRow);
-        const { estudiante_id } = estRow;
-
-        // 2) Buscar TODOS los proyectos del estudiante
-        console.log("[CalificacionAsesor] Buscando proyectos con .eq('estudiante_id', estudiante_id):", estudiante_id);
-        const { data: proyectos, error: pError } = await supabase
-          .from("Proyecto")
-          .select("id, estado, profesor_id, semestre_id, semestre, año")
-          .eq("estudiante_id", estudiante_id);
-
-        if (pError) {
-          console.error("[CalificacionAsesor] Error fetching Proyectos:", pError);
-          throw pError;
-        }
-        console.log("[CalificacionAsesor] Proyectos encontrados:", proyectos);
-        if (!proyectos || proyectos.length === 0) {
-          console.log("[CalificacionAsesor] No hay proyectos => isAllowed=false");
-          setIsAllowed(false);
-          return;
-        }
-
-        /**
-         * Selección del proyecto a calificar: el MÁS RECIENTE.
-         * Criterios, en este orden:
-         *   1) año mayor (año más reciente)
-         *   2) semestre mayor (semestre 2 es más reciente que semestre 1)
-         * Si falta año o semestre, ese proyecto se considera menos reciente.
-         */
-        const claveRecencia = (p) => {
-          const anio = Number(p?.año);
-          const semestre = Number(p?.semestre);
-          return {
-            anio: Number.isFinite(anio) ? anio : -Infinity,
-            semestre: Number.isFinite(semestre) ? semestre : -Infinity
-          };
-        };
-
-        const proyectoApto = [...proyectos].sort((a, b) => {
-          const ra = claveRecencia(a);
-          const rb = claveRecencia(b);
-          if (rb.anio !== ra.anio) return rb.anio - ra.anio;       // año más reciente primero
-          return rb.semestre - ra.semestre;                        // semestre 2 antes que semestre 1
-        })[0];
-
-        console.log("[CalificacionAsesor] Proyecto más reciente seleccionado:", proyectoApto);
-
-        if (!proyectoApto) {
-          console.log("[CalificacionAsesor] Sin proyecto válido => isAllowed=false");
-          setIsAllowed(false);
-          return;
-        }
-
-        // 2.5) Validación: el proyecto debe tener profesor asesor asignado.
-        //      Calificacion.profesor_id es NOT NULL, por lo que sin asesor el insert falla.
-        if (!proyectoApto.profesor_id) {
-          console.log("[CalificacionAsesor] Proyecto sin profesor asignado => avisar al estudiante");
-          toast.error("Aún no tienes un profesor asesor asignado. No es posible calificar.");
-          setSinProfesorAsignado(true);
-          setIsAllowed(false);
-          return;
-        }
-
-        // 3) Ver si ya hay calificacion
-        console.log("[CalificacionAsesor] Revisar Calificacion => proyecto:", proyectoApto.id, "estudiante:", estudiante_id);
-        const { data: califRow, error: cError } = await supabase
-          .from("Calificacion")
-          .select("id")
-          .eq("proyecto_id", proyectoApto.id)
-          .eq("estudiante_id", estudiante_id)
-          .maybeSingle();
-
-        if (cError) {
-          console.error("[CalificacionAsesor] Error buscando Calificacion:", cError);
-          throw cError;
-        }
-
-        console.log("[CalificacionAsesor] Calificacion encontrada?:", califRow);
-        if (califRow) {
+        if (calificacion === "true") {
           console.log("[CalificacionAsesor] Estudiante ya calificó => set isAllowed(false), setAlreadyRated(true)");
           setIsAllowed(false);
           setAlreadyRated(true);
           return;
         }
-
-        console.log("[CalificacionAsesor] Todo OK => setIsAllowed(true).");
+        console.log("[CalificacionAsesor] Estudiante no ha calificado => setIsAllowed(true).");
         setIsAllowed(true);
+
       } catch (err) {
         console.error("[CalificacionAsesor] Error en verificarPermisos:", err);
         setIsAllowed(false);
+
       } finally {
         setIsCheckingPermissions(false);
       }
     };
 
     verificarPermisos();
-  }, [usuarioId]);
+  }, [user.id]);
 
   /**
    * 8) handleSubmit => llama a calificarProfesor(...) si isAllowed, 
@@ -267,8 +168,7 @@ const ProfessorEvaluationForm = () => {
       // Show "uploading" toast
       toast.info("Subiendo su calificación...");
       
-
-      await calificarProfesor(formData, usuarioId);
+      await calificarProfesor(formData, user.id);
       
       // Success! Show completion toast
       toast.success("¡Calificación enviada con éxito!");
@@ -277,10 +177,16 @@ const ProfessorEvaluationForm = () => {
       setIsAllowed(false);
       setAlreadyRated(true);
       navigate("/menuEstudiante");
+
     } catch (error) {
-      console.error("[CalificacionAsesor] Error al calificarProfesor:", error);
-      toast.error("Error enviando la calificación.");
+      console.error(`[CalificacionAsesor] Error al calificarProfesor: ${error.message}`);
+      if (error.code=== '23514'){
+        toast.info("Debe llenar todo el formulario.");
+      }else{
+        toast.error("Error enviando la calificación.");
+      }
       modalConf.close();
+
     } finally {
       setIsSubmitting(false); // Stop loading
     }
@@ -441,7 +347,7 @@ const ProfessorEvaluationForm = () => {
           {/* Additional Comments */}
           <div className="mb-8">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Comentarios Adicionales
+              Comentarios Adicionales (Opcional)
             </h2>
             <textarea
               value={formData.additionalComments}

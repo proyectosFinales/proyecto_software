@@ -8,6 +8,8 @@ import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import HeaderEstudiante from '../components/HeaderEstudiante';
 import { descargarAnteproyecto } from '../../controller/DescargarPDF';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const AnteproyectosEstudiante = () => {
   const [anteproyectos, setAnteproyectos] = useState([]);
@@ -36,7 +38,8 @@ const AnteproyectosEstudiante = () => {
       }
       return data.Estudiante[0].estudiante_id;
     } catch (error) {
-      alert('Error al buscar estudiante' + error);
+      console.log('Error al buscar estudiante' + error);
+      toast.error("No se pudo encontrar la info del estudiante.");
     }
   }
 
@@ -485,7 +488,7 @@ const AnteproyectosEstudiante = () => {
       <main className="flex-grow p-6">
         <div className="max-w-7xl mx-auto bg-white p-4 rounded shadow">
           <button
-            onClick={() => navigate('/formularioEstudiantes')}
+            onClick={() => {toast.info("Recuerde que no puede crear más de un anteproyecto por semestre."); navigate('/formularioEstudiantes')}}
             className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded mb-4"
           >
             Crear Anteproyecto

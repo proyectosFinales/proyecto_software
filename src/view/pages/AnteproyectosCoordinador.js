@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import Header from '../components/HeaderCoordinador';
 import { descargarAnteproyectos, descargarAnteproyecto } from '../../controller/DescargarPDF';
-import { errorToast } from '../components/toast';
-
-
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Modal from "../components/modal.jsx";
 
 const AnteproyectosCoordinador = () => {
+  const modalConf = useRef({});
+  const [anteproyectoSeleccionado, setAnteproyectoSeleccionado] = useState(null);
   const [anteproyectos, setAnteproyectos] = useState([]);
   const [searchText, setSearchText] = useState('');
   const [filtroSemestre, setFiltroSemestre] = useState(() => {
@@ -129,8 +131,8 @@ const AnteproyectosCoordinador = () => {
         `);
 
       if (error) {
-        alert('No se pudieron obtener los anteproyectos. ' + error.message);
-        errorToast('No se pudieron obtener los anteproyectos');
+        console.error('No se pudieron obtener los anteproyectos. ' + error.message);
+        toast.error('No se pudieron obtener los anteproyectos');
         return;
       }
 
@@ -233,10 +235,13 @@ const AnteproyectosCoordinador = () => {
     }
   };
 
-  const eliminarAnteproyecto = async (anteproyecto) => {
-    const confirmDelete = window.confirm("¿Está seguro de que quiere borrar el anteproyecto?");
-    if (!confirmDelete) return;
+  async function handleModal(e, anteproyecto){
+    e.preventDefault();
+    setAnteproyectoSeleccionado(anteproyecto);
+    modalConf.open();
+  }
 
+  const eliminarAnteproyecto = async (anteproyecto) => {
     try {
       const nombreAsesor = anteproyecto.AnteproyectoContacto?.[0]?.ContactoEmpresa?.nombre || '';
       const nombreHR = anteproyecto.AnteproyectoContacto?.[0]?.RRHH?.nombre || '';
@@ -292,11 +297,11 @@ const AnteproyectosCoordinador = () => {
 
       // Actualizar lista de anteproyectos
       setAnteproyectos(prev => prev.filter(a => a.id !== anteproyecto.id));
-      
-      alert('Anteproyecto eliminado exitosamente.');
+      modalConf.close();
+      toast.success('Anteproyecto eliminado exitosamente.');
     } catch (error) {
       console.error('Error al eliminar anteproyecto:', error);
-      alert('Error al eliminar anteproyecto: ' + error.message);
+      toast.error('Error al eliminar anteproyecto: ' + error.message);
     }
   };
 
@@ -342,6 +347,10 @@ const AnteproyectosCoordinador = () => {
       <Header title="Anteproyectos" />
 
       <main className="flex-grow w-full max-w-7xl mx-auto px-4 py-6">
+
+        <Modal modalRef={modalConf} title={<h5>Eliminar Anteproyecto</h5>} onAccept={() => eliminarAnteproyecto(anteproyectoSeleccionado)}>
+          <p>¿Está seguro que desea eliminar el anteproyecto?</p>
+        </Modal>
 
         {/* Search */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-2">
@@ -487,7 +496,7 @@ const AnteproyectosCoordinador = () => {
                       </button>
                       {((anteproyecto.estado === "Reprobado") || (anteproyecto.estado === "Correccion")) && (
                         <button
-                          onClick={() => eliminarAnteproyecto(anteproyecto)}
+                          onClick={(e) => handleModal(e, anteproyecto)}
                           className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                         >
                           Eliminar

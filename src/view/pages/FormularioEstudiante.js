@@ -8,6 +8,8 @@ import { AiOutlineInfoCircle } from 'react-icons/ai';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
 import { errorToast, successToast } from '../components/toast';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 /**
  * EstudianteForm.jsx
@@ -284,6 +286,18 @@ const opcionesCausasPerdida = [
     }
   }
 
+  async function existenAnteproyectos(){
+    const { data, error } = await supabase
+      .from('Anteproyecto')
+      .select('id')
+      .eq('semestre', semestrePropuesto.value)
+      .eq('año', anioPropuesto.value)
+      .limit(1);
+
+    if (error) throw error;
+    return data.length > 0;
+  }
+
   async function insertarAnteproyecto(e) {
     e.preventDefault();
     const confirmarEnvio = window.confirm(
@@ -314,6 +328,10 @@ const opcionesCausasPerdida = [
     }
     if ((nombreDepartamento || '').length > 40) {
       alert("El nombre del departamento no puede exceder 40 caracteres.");
+      return;
+    }
+    if (await existenAnteproyectos()) {
+      toast.info("No puede ingresar más de un anteproyecto para el mismo semestre.");
       return;
     }
     setSending(true)

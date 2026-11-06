@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock } from "react-icons/fa";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import Footer from '../components/Footer';
-import { signIn } from '../../controller/Signin';
+import { signIn, getStudent } from '../../controller/Signin';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -15,18 +17,38 @@ const Login = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      const data = await signIn(email, password);
-      const uToken = data.id;
-      sessionStorage.setItem("token", uToken);
-      if (data.rol === '1') {
+      //Seteamos la info del user
+      const user = await signIn(email, password);
+      const infoUser = {
+        id: user.id,
+        nombre: user.nombre,
+        email: user.correo,
+        estado: user.estado,
+        rol: user.rol
+      };
+      sessionStorage.setItem("USER", JSON.stringify(infoUser)); //se agrega, para reducir consultas en las paginas
+      sessionStorage.setItem("token", user.id); //se conserva ya que se usa en varios lugares, quitar hasta que se extraiga el stringify en todas las paginas
+
+      if (infoUser.rol === 1) {
         navigate('/MenuCoordinador');
-      } else if (data.rol === '2') {
+
+      } else if (infoUser.rol === 2) {
         navigate('/MenuProfesor');
+
       } else {
+        // Setear la info del estudiante
+        const est = await getStudent(user.id);
+        sessionStorage.setItem("STUDENT", JSON.stringify(est));
         navigate('/MenuEstudiante');
       }
     } catch (error) {
-      alert('Las credenciales no coinciden con ningún usuario. \nPor favor inténtelo de nuevo.');
+      if (error.code === 'PGRST116') {
+        console.log("[MenuEstudiante] No se encontró Estudiante: ", error.message);
+        toast.error('No se encontró un estudiante asociado a este usuario.');
+      }else{
+        console.log("Error: ", error.message);
+        toast.error('Las credenciales no coinciden con ningún usuario.\nPor favor inténtelo de nuevo.');
+      }
     }
   };
 

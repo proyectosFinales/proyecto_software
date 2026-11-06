@@ -332,7 +332,7 @@ const FormularioCoordinador = () => {
           estado: estadoProyecto,
           semestre: semestreAnteproyecto,
           año: anoAnteproyecto,
-          fecha_inicio: new Date().toISOString()
+          fecha_inicio: new Date().toISOString(), // Decidir si dejar este atributo, ya que enrreda con la logica del negocio, ya que no necesariamente al momento de crear el proyecto en la BD sera el inicio.
         })
         .select('*');
       if (insertProyectoError) throw insertProyectoError;
