@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaUser, FaLock } from "react-icons/fa";
 import { IoEyeOutline, IoEyeOffOutline } from "react-icons/io5";
 import Footer from '../components/Footer';
-import { signIn, getStudent } from '../../controller/Signin';
+import { signIn, getStudent, getProfessor } from '../../controller/Signin';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -33,6 +33,8 @@ const Login = () => {
         navigate('/MenuCoordinador');
 
       } else if (infoUser.rol === 2) {
+        const prof = await getProfessor(user.id);
+        sessionStorage.setItem("PROFESSOR", JSON.stringify(prof));
         navigate('/MenuProfesor');
 
       } else {

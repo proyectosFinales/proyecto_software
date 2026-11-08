@@ -9,10 +9,9 @@ import "react-toastify/dist/ReactToastify.css";
 import Modal from "../../components/modal.jsx";
 
 const ActaDefensa = () => {
-  const [lugar, setLugar] = useState('');
+  const [aprobacion, setAprobacion] = useState('');
   const [titulo, setTitulo] = useState('');
-  const [persona1, setP1] = useState('');
-  const [persona2, setP2] = useState('');
+  const [nombreProfesor, setNombreProfesor] = useState('');
   const [estudiantes, setEstudiantes] = useState([]);
   const [profesor, setProfesor] = useState('');
   const [estudiante, setEstudiante] = useState('');
@@ -20,13 +19,17 @@ const ActaDefensa = () => {
 
   const navigate = useNavigate();
   const modalConf = useRef({});
+  const user = JSON.parse(sessionStorage.getItem('USER'));
+  const prof = JSON.parse(sessionStorage.getItem('PROFESSOR'));
 
   useEffect(() => {
-    consultarProfesor();
+    setProfesor(prof.profesor_id);
   }, []);
 
   useEffect(() => {
-    consultarEstudiante();
+    if(profesor){
+      consultarEstudiante();
+    }
   }, [profesor]);
 
   async function consultarEstudiante() {
@@ -48,51 +51,20 @@ const ActaDefensa = () => {
         if (error) throw error;
         setEstudiantes(data);
       } catch (err) {
-        toast.error(`Error al consultar estudiante o usuario:  ${err.message}`);
+        console.log(`Error al consultar estudiante o usuario:  ${err.message}`);
+        toast.error("Error al consultar información en la base de datos.");
       }
-    }
-  }
-
-  async function consultarProfesor() {
-    try {
-      const userToken = sessionStorage.getItem('token');
-      const { data, error } = await supabase
-        .from('Usuario')
-        .select(`
-          id,
-          sede,
-          correo,
-          telefono,
-          nombre,
-          Profesor:Profesor!Profesor_id_usuario_fkey (
-            profesor_id
-          )
-        `)
-        .eq('id', userToken)
-        .single();
-      if (error) throw error;
-      if (!data) {
-        toast.error('No se encontró la información del usuario/profesor.');
-        return;
-      }
-      if (data.Profesor) {
-        setProfesor(data.Profesor[0].profesor_id);
-      } else {
-        toast.error('Este usuario no está registrado como profesor.');
-      }
-    } catch (err) {
-      toast.error(`Error al consultar estudiante o usuario:  ${err.message}`);
     }
   }
 
   async function solicitarCarta() {
     if (!estudiante) {
-      toast.error("No se encontró un 'estudiante_id' válido. No se puede insertar.");
+      toast.error("No se encontró un identificador de estudiante válido. No se puede insertar.");
       return;
     }
 
     try {
-      const datos = {persona1: persona1, persona2: persona2, lugar: lugar}
+      const datos = {titulo: titulo, profesor: user.nombre, aprobacion: aprobacion}
       const { data, error } = await supabase
         .from('Acta')
         .insert({
@@ -165,31 +137,12 @@ const ActaDefensa = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label>Lugar donde se realizó la defensa:</label>
+          <label>Nombre del Profesor:</label>
           <input
             type="text"
-            value={lugar}
-            onChange={(e) => setLugar(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Coordinador(a) Programa Vinculación Empresarial:</label>
-          <input
-            type="text"
-            value={persona1}
-            onChange={(e) => setP1(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className={styles.formGroup}>
-          <label>Director(a) Escuela de Ingeniería en Producción Industrial:</label>
-          <input
-            type="text"
-            value={persona2}
-            onChange={(e) => setP2(e.target.value)}
+            disabled
+            readOnly
+            value={user.nombre}
             required
           />
         </div>
@@ -220,6 +173,15 @@ const ActaDefensa = () => {
               II
             </label>
           </div>
+        </div>
+
+        <div className={styles.formGroup}>
+          <label>Aprueba o reprueba la entrega del proyecto para defensa:</label>
+          <select value={aprobacion} onChange={(e) => setAprobacion(e.target.value)} required>
+            <option value="" disabled>-- Seleccione una opción --</option>
+            <option value={"Aprobado"}>Aprueba</option>
+            <option value={"Reprobado"}>Reprueba</option>
+          </select>
         </div>
 
         <div className={styles.contenedorBotonesFormEstudiante}>

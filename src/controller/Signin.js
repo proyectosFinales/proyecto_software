@@ -28,7 +28,7 @@ export async function signIn(email, password) {
 /**
  * 
  * @param {*} userID id del usuario logueado en la plataforma.
- * @returns algunos de los atributos existentes en la BD.
+ * @returns algunos de los atributos existentes en la BD para el estudiante encontrado.
  * @example data = {
  *   estudiante_id: string,
  *   estado: string,
@@ -44,6 +44,34 @@ export async function getStudent(userID){
       estado,
       carnet,
       asesor
+    `)
+    .eq('id_usuario', userID)
+    .single();
+
+  if (error) {
+    const customError = new Error(error.message);
+    customError.code = error.code;
+    throw customError;
+  }
+  return data;
+}
+/**
+ * 
+ * @param {*} userID id del usuario logueado en la plataforma.
+ * @returns algunos de los atributos existentes en la BD para el profesor encontrado.
+ * @example data = {
+ *   profesor_id: string,
+ *   cantidad_estudiantes: string,
+ *   categoria_id: string
+ * }
+ */
+export async function getProfessor(userID){
+  const { data, error } = await supabase
+    .from('Profesor')
+    .select(`
+      profesor_id,
+      cantidad_estudiantes,
+      categoria_id
     `)
     .eq('id_usuario', userID)
     .single();
