@@ -24,7 +24,9 @@ const Login = () => {
         nombre: user.nombre,
         email: user.correo,
         estado: user.estado,
-        rol: user.rol
+        rol: user.rol,
+        sede: user.sede,
+        telefono: user.telefono
       };
       sessionStorage.setItem("USER", JSON.stringify(infoUser)); //se agrega, para reducir consultas en las paginas
       sessionStorage.setItem("token", user.id); //se conserva ya que se usa en varios lugares, quitar hasta que se extraiga el stringify en todas las paginas

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Select from 'react-select';
 import { fetchCategorias } from '../../controller/Categoria';
 import { fetchTiposProyectos } from '../../controller/TipoProyecto';
@@ -7,23 +7,14 @@ import styles from '../styles/FormularioEstudiante.module.css';
 import { AiOutlineInfoCircle } from 'react-icons/ai';
 import supabase from '../../model/supabase';
 import Footer from '../components/Footer';
-import { errorToast, successToast } from '../components/toast';
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-/**
- * EstudianteForm.jsx
- * 
- * Permite a un estudiante crear un nuevo anteproyecto.
- * 
- * Se asume la BD:
- *  - Usuario(id, nombre, correo, telefono, sede, rol, ...)
- *  - Estudiante(estudiante_id, id_usuario (FK), carnet, ...)
- *  - Anteproyecto(id, estudiante_id (FK), estado, tipoEmpresa, ...)
- */
+import Modal from "../components/modal.jsx";
 
 const EstudianteForm = () => {
-  // Datos del estudiante (vienen de la relación con Usuario + Estudiante)
+  // Datos del estudiante
+  const user = JSON.parse(sessionStorage.getItem('USER'));
+  const est = JSON.parse(sessionStorage.getItem('STUDENT'));
   const [nombre, setNombre] = useState('');
   const [carnet, setCarnet] = useState('');
   const [telefono, setTelefono] = useState('');
@@ -76,8 +67,10 @@ const EstudianteForm = () => {
   // Guardar el ID del estudiante (estudiante_id) que necesitamos para insertar en Anteproyecto
   const [estudianteId, setEstudianteId] = useState(null);
 
+  const modalConf = useRef({});
+
   useEffect(() => {
-    consultarEstudiante();
+    llenarEstudiante();
     fetchCategorias().then(data => {
       const options = data.map(categoria => ({
         value: categoria.categoria_id,
@@ -129,54 +122,14 @@ const opcionesCausasPerdida = [
   { value: 'Situaciones de salud certificada', label: 'Situaciones de salud certificada' }
 ];
 
-
-  /**
-   * Consulta datos del Usuario y Estudiante asociados al token.
-   *  - En la nueva BD: "Usuario" en singular, "Estudiante" en singular.
-   */
-  async function consultarEstudiante() {
-    try {
-      const userToken = sessionStorage.getItem('token');
-      // Obtenemos la relación: Usuario -> Estudiante
-      // Ajusta el naming "!Estudiante_id_usuario_fkey" según tu constraint
-      const { data, error } = await supabase
-        .from('Usuario')
-        .select(`
-          id,
-          sede,
-          correo,
-          telefono,
-          nombre,
-          Estudiante:Estudiante!Estudiante_id_usuario_fkey (
-            estudiante_id,
-            carnet
-          )
-        `)
-        .eq('id', userToken)
-        .single();
-      if (error) throw error;
-      if (!data) {
-        errorToast('No se encontró la información del usuario/estudiante.');
-        return;
-      }
-
+  async function llenarEstudiante() {
       // Llenar datos
-      setCorreo(data.correo || '');
-      setSede(data.sede || '');
-
-      if (data.Estudiante) {
-        setEstudianteId(data.Estudiante[0].estudiante_id);
-        setNombre(data.nombre || '');
-        setCarnet(data.Estudiante[0].carnet || '');
-        setTelefono(data.telefono || '');
-      } else {
-        // Caso: no existe Estudiante vinculado
-        errorToast('Este usuario no está registrado como estudiante.');
-      }
-    } catch (err) {
-      console.error('Error al consultar estudiante o usuario', err);
-      errorToast('Error al consultar estudiante o usuario: ' + err.message);
-    }
+      setCorreo(user.email || 'Correo no encontrado');
+      setSede(user.sede || 'Sede no encontrada');
+      setEstudianteId(est.id);
+      setNombre(user.nombre);
+      setCarnet(est.carnet);
+      setTelefono(user.telefono);
   }
 
   /**
@@ -201,7 +154,7 @@ const opcionesCausasPerdida = [
         }
     } catch(err){
       console.error('Error con los datos de empresa', err);
-      errorToast('Error con los datos de empresa' + err.message);
+      toast.error('Error al agregar la empresa');
     }
   }
 
@@ -222,7 +175,7 @@ const opcionesCausasPerdida = [
         }
     } catch(err){
       console.error('Error con los datos de contacto', err);
-      errorToast('Error con los datos de contacto' + err.message);
+      toast.error('Error al agregar los datos del contacto');
     }
   }
 
@@ -240,7 +193,7 @@ const opcionesCausasPerdida = [
         }
     } catch(err){
       console.error('Error con datos de anteproyecto', err);
-      errorToast('Error con datos de anteproyecto' + err.message);
+      toast.error('Error al agregar los datos del anteproyecto');
     }
   }
 
@@ -261,7 +214,7 @@ const opcionesCausasPerdida = [
       }
     } catch(err){
       console.error('Error al buscar empresas', err);
-      errorToast('Error al buscar empresas' + err.message);
+      toast.error('Error al consultar la empresa');
     }
   }
 
@@ -282,7 +235,7 @@ const opcionesCausasPerdida = [
       }
     } catch(err){
       console.error('Error al buscar contacto', err);
-      errorToast('Error al buscar contacto' + err.message);
+      toast.error('Error al buscar el contacto');
     }
   }
 
@@ -290,6 +243,7 @@ const opcionesCausasPerdida = [
     const { data, error } = await supabase
       .from('Anteproyecto')
       .select('id')
+      .eq('estudiante_id', est.estudiante_id)
       .eq('semestre', semestrePropuesto.value)
       .eq('año', anioPropuesto.value)
       .limit(1);
@@ -298,36 +252,30 @@ const opcionesCausasPerdida = [
     return data.length > 0;
   }
 
-  async function insertarAnteproyecto(e) {
+  async function handleModal (e) {
     e.preventDefault();
-    const confirmarEnvio = window.confirm(
-      "¿Está seguro que desea enviar el anteproyecto?"
-    );
-    if (!confirmarEnvio) {
-      return;
-    }
+    modalConf.open();
+  }
+
+  async function insertarAnteproyecto() {
     if(actividadEmpresa === "Otras" && (activity === '' || activity === 'Otras')){
-      alert("Debe ingresar la actividad de la empresa");
+      toast.info("Debe ingresar la actividad de la empresa");
       return;
     }
     if (!telRegex.test(telefonoContacto)) {
-      alert(
+      toast.info(
         "El número de teléfono del asesor industrial no cumple con un formato válido. Debe ser 8 dígitos, con o sin prefijo +506."
       );
       return;
     } 
     if (!telRegex.test(telefonoHR)) {
-      alert(
+      toast.info(
         "El número de teléfono del contacto RRHH no cumple con un formato válido. Debe ser 8 dígitos, con o sin prefijo +506."
       );
       return;
-    } 
-    if (!estudianteId) {
-      errorToast("No se encontró un 'estudiante_id' válido. No se puede insertar.");
-      return;
     }
     if ((nombreDepartamento || '').length > 40) {
-      alert("El nombre del departamento no puede exceder 40 caracteres.");
+      toast.info("El nombre del departamento no puede exceder 40 caracteres.");
       return;
     }
     if (await existenAnteproyectos()) {
@@ -411,16 +359,17 @@ const opcionesCausasPerdida = [
           // No lanzamos error para no revertir el anteproyecto, 
           // pero sí notificamos
           console.error("Error insertando historial:", historialError);
-          errorToast(`El anteproyecto se guardó, pero hubo un error guardando el historial: ${historialError.message}`);
+          toast.error(`El anteproyecto se guardó, pero hubo un error guardando el historial de reprobación`);
         }
       }
 
-      successToast('Anteproyecto insertado exitosamente');
+      toast.success('Anteproyecto guardado exitosamente');
       setSending(false)
+      modalConf.close();
       navigate('/anteproyectosEstudiante');
     } catch (err) {
       console.error('Error al insertar anteproyecto:', err);
-      errorToast('Error al insertar anteproyecto: ' + err.message);
+      toast.error('Error al insertar anteproyecto');
     }
     setSending(false)
   }
@@ -430,7 +379,7 @@ const opcionesCausasPerdida = [
    */
   const handleAgregarHistorial = () => {
     if (!causaPerdida || !semestrePerdida || !anioPerdida) {
-      errorToast("Debe seleccionar causa, semestre y año para agregar un historial.");
+      toast.error("Debe seleccionar causa, semestre y año para agregar un historial.");
       return;
     }
     
@@ -479,7 +428,12 @@ const opcionesCausasPerdida = [
         <h1>Crear anteproyecto</h1>
       </header>
 
-      <form className={styles.form} onSubmit={insertarAnteproyecto}>
+      <Modal modalRef={modalConf} title={<h5>Crear Anteproyecto</h5>} onAccept={() => {insertarAnteproyecto(); modalConf.close()} }>
+        <p>¿Está seguro que desea enviar el anteproyecto?</p>
+      </Modal>
+
+      {/* <form className={styles.form} onSubmit={insertarAnteproyecto}> */}
+      <form className={styles.form} onSubmit={handleModal}>
         <h2>Datos del estudiante</h2>
 
         <div className={styles.formGroup}>
@@ -1050,7 +1004,7 @@ const opcionesCausasPerdida = [
           </label>
         </div>
 
-        <div>
+        <div className={styles.formGroup}>
             <label>
               27. Semestre propuesto: *
               <Select
@@ -1064,7 +1018,7 @@ const opcionesCausasPerdida = [
             </label>
         </div>
 
-        <div>
+        <div className={styles.formGroup}>
             <label>
               28. Año propuesto: *
               <Select

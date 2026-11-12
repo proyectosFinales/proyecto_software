@@ -9,7 +9,6 @@ import Anteproyecto from "../../../controller/anteproyecto";
 import Button from "../../components/button";
 import Modal from "../../components/modal.jsx";
 import { FloatInput } from "../../components/input.jsx";
-import { errorToast, successToast } from "../../components/toast";
 import supabase from "../../../model/supabase";
 import HeaderCoordinador from "../../components/HeaderCoordinador";
 import Footer from "../../components/Footer";
@@ -18,6 +17,8 @@ import { fetchSemestreActual } from "../../../controller/Semestre";
 import sendMail from "../../../controller/Email";
 import { obtenerEstudiante } from "../../../controller/edicionController.js";
 import { descargarReporteProyectos } from '../../../controller/DescargarPDF';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 /**
  * EdicionAsignacionProyectos
@@ -132,14 +133,14 @@ function EdicionAsignacionProyectos() {
       );
       
       if (!profActual) {
-        errorToast("El profesor no tiene asignación para este semestre/año.");
+        toast.error("El profesor no tiene asignación para este semestre/año.");
         return;
       }
       
       const asignados = profActual?.original?.proyectosAsignados ?? 0;
       const disponibilidad = profActual?.original?.disponibilidad ?? 0;
       if (asignados + 1 > disponibilidad) {
-        errorToast("No se puede asignar: el profesor ya alcanzó su disponibilidad máxima.");
+        toast.error("No se puede asignar: el profesor ya alcanzó su disponibilidad máxima.");
         return;
       }
 
@@ -200,10 +201,10 @@ function EdicionAsignacionProyectos() {
         })
       );
 
-      alert("Proyecto asignado exitosamente");
+      toast.success("Proyecto asignado exitosamente");
     } catch (err) {
       console.error("handleAssign error:", err);
-      errorToast("Error al asignar el proyecto");
+      toast.error("Error al asignar el proyecto");
     }
   };
 
@@ -258,13 +259,14 @@ function EdicionAsignacionProyectos() {
         )
       );
 
-      alert("Proyecto desasignado exitosamente");
+      toast.success("Proyecto desasignado exitosamente");
     } catch (err) {
       console.error("handleUnassign error:", err);
-      alert("Error al desasignar el proyecto");
+      toast.error("Error al desasignar el proyecto");
     }
   };
 
+  //Recibe el id del estudiante, el id del proyecto y el nuevo estado.
   const handleEstadoChange = async (proyectoId, nuevoEstado, estudianteId) => {
     try{
       const { proyectoError } = await supabase
@@ -292,11 +294,11 @@ function EdicionAsignacionProyectos() {
       );
       //Enviar correo de comprobación al estudiante
       await enviarCorreo(estudianteId, nuevoEstado);
-      alert("Estado actualizado exitosamente");
+      toast.success("Estado actualizado exitosamente");
 
     } catch (err) {
       console.error("handleEstadoChange error:", err);
-      alert("Error al actualizar el estado del proyecto");
+      toast.error("Error al actualizar el estado del proyecto");
     }
   };
 
@@ -486,6 +488,9 @@ function EdicionAsignacionProyectos() {
               <thead className="bg-gray-200 text-gray-700">
                 <tr>
                   <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('Estudiante.Usuario.nombre')}>
+                    #&nbsp;
+                  </th>
+                  <th className="p-3 text-left cursor-pointer" onClick={() => handleSort('Estudiante.Usuario.nombre')}>
                     Estudiante&nbsp;
                     <span style={{fontSize: '0.9em'}}>
                       <span style={{color: sortConfig.key === 'Estudiante.Usuario.nombre' && sortConfig.direction === 'asc' ? '#1d4ed8' : '#bbb', fontWeight: sortConfig.key === 'Estudiante.Usuario.nombre' && sortConfig.direction === 'asc' ? 'bold' : 'normal'}}>▲</span>
@@ -559,12 +564,15 @@ function EdicionAsignacionProyectos() {
                 </tr>
               </thead>
               <tbody>
-                {proyectosFiltrados.map((proyecto) => {
+                {proyectosFiltrados.map((proyecto, index) => {
                   const assignedProf = profesores.find(
                     (prof) => prof.profesor_id === proyecto.profesor_id
                   );
                   return (
                     <tr key={proyecto.id} className="border-b">
+                      <td className="p-3 text-sm text-gray-700">
+                        {index+1}
+                      </td>
                       <td className="p-3 text-sm text-gray-700">
                         {proyecto.Estudiante.Usuario.nombre}
                       </td>
@@ -706,7 +714,7 @@ const AdicionAnteproyectoProfesor = ({ profesor, onAdicion }) => {
 
   const agregar = async () => {
     if(!seleccionado) {
-      errorToast("Selecciona un proyecto a asignar");
+      toast.info("Selecciona un proyecto a asignar");
       return;
     }
     /** @type {Anteproyecto} */
@@ -714,7 +722,7 @@ const AdicionAnteproyectoProfesor = ({ profesor, onAdicion }) => {
     anteproyectoSeleccionado.encargado = profesor;
     await anteproyectoSeleccionado.guardarAsignacion();
     onAdicion();
-    successToast("Proyecto agregado");
+    toast.success("Proyecto agregado exitosamente");
     setSeleccionado("");
     modalRef.current.close();
   };

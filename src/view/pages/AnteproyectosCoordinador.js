@@ -420,6 +420,8 @@ const AnteproyectosCoordinador = () => {
           <table className="table-auto w-full border border-gray-300">
             <thead className="bg-gray-100">
               <tr>
+                <th className="px-3 py-2 text-left border-b border-gray-300">
+                  # &nbsp;</th>
                 <th className="px-3 py-2 text-left border-b border-gray-300"
                     onClick={() => handleSort('nombre')}>
                       Nombre &nbsp;
@@ -465,8 +467,11 @@ const AnteproyectosCoordinador = () => {
               </tr>
             </thead>
             <tbody>
-              {sortedAnteproyectos.map((anteproyecto) => (
+              {sortedAnteproyectos.map((anteproyecto, index) => (
                 <tr key={anteproyecto.id} className="border-b border-gray-200">
+                  <td className="px-3 py-2">
+                    {index+1}
+                  </td>
                   <td className="px-3 py-2">
                     {anteproyecto.Estudiante?.Usuario?.nombre || "Sin nombre"}
                   </td>
